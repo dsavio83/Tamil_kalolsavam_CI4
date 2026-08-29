@@ -1,0 +1,29 @@
+# Add any directories, files, or patterns you don't want to be tracked by version control
+application/config/config.php
+application/config/database.php
+application/helpers/connection_helper.php
+nbproject
+composer.lock
+user_guide
+
+# IDE Files
+#-------------------------
+/nbproject/
+.idea/*
+
+.DS_Store
+application/cache/*
+!application/cache/index.html
+
+application/logs/*
+!application/logs/index.html
+
+!application/*/.htaccess
+
+/uploads
+/dbBackup
+
+/index.php
+/photos
+/uploads/*
+

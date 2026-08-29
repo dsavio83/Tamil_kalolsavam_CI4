@@ -1,0 +1,1669 @@
+CRITICAL - 2026-08-28 04:28:47 --> ErrorException: fwrite(): Write of 7 bytes failed with errno=22 Invalid argument
+[Method: CLI, Route: /]
+in SYSTEMPATH\CLI\InputOutput.php on line 78.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->errorHandler(8, 'fwrite(): Write of 7 bytes failed with errno=22 Invalid argument', 'C:\\xampp\\htdocs\\tk25\\vendor\\codeigniter4\\framework\\system\\CLI\\InputOutput.php', 78)
+ 2 SYSTEMPATH\CLI\InputOutput.php(78): fwrite(resource (stream), 'Cache
+')
+ 3 SYSTEMPATH\CLI\CLI.php(1139): CodeIgniter\CLI\InputOutput->fwrite(resource (stream), 'Cache
+')
+ 4 SYSTEMPATH\CLI\CLI.php(471): CodeIgniter\CLI\CLI::fwrite(resource (stream), 'Cache
+')
+ 5 SYSTEMPATH\Commands\ListCommands.php(112): CodeIgniter\CLI\CLI::write('Cache', 'yellow')
+ 6 SYSTEMPATH\Commands\ListCommands.php(85): CodeIgniter\Commands\ListCommands->listFull([...])
+ 7 SYSTEMPATH\CLI\Commands.php(72): CodeIgniter\Commands\ListCommands->run([])
+ 8 SYSTEMPATH\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('list', [])
+ 9 SYSTEMPATH\Boot.php(444): CodeIgniter\CLI\Console->run()
+10 SYSTEMPATH\Boot.php(166): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+11 FCPATH\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+CRITICAL - 2026-08-28 04:28:48 --> ErrorException: Uncaught ErrorException: fwrite(): Write of 18 bytes failed with errno=22 Invalid argument in C:\xampp\htdocs\tk25\vendor\codeigniter4\framework\system\CLI\InputOutput.php:78
+Stack trace:
+#0 [internal function]: CodeIgniter\Debug\Exceptions->errorHandler(8, 'fwrite(): Write...', 'C:\\xampp\\htdocs...', 78)
+#1 C:\xampp\htdocs\tk25\vendor\codeigniter4\framework\system\CLI\InputOutput.php(78): fwrite(Resource id #2, '[ErrorException...')
+#2 C:\xampp\htdocs\tk25\vendor\codeigniter4\framework\system\CLI\CLI.php(1139): CodeIgniter\CLI\InputOutput->fwrite(Resource id #2, '[ErrorException...')
+#3 C:\xampp\htdocs\tk25\vendor\codeigniter4\framework\system\CLI\CLI.php(471): CodeIgniter\CLI\CLI::fwrite(Resource id #2, '[ErrorException...')
+#4 C:\xampp\htdocs\tk25\app\Views\errors\cli\error_exception.php(6): CodeIgniter\CLI\CLI::write('[ErrorException...', 'light_gray', 'red')
+#5 C:\xampp\htdocs\tk25\app\Views\errors\cli\production.php(5): include('C:\\xampp\\htdocs...')
+#6 C:\xampp\htdocs\tk25\vendor\codeigniter4\framework\system\Debug\BaseExceptionHandler.php(270): include('C:\\xampp\\htdocs...')
+#7 C:\xampp\htdocs\tk25\vendor\codeigniter4\framework\system\Debug\BaseExceptionHandler.php(273): CodeIgniter\Debug\BaseExceptionHandler->{closure:CodeIgniter\Debug\BaseExceptionHandler::render():264}()
+#8 C:\xampp\htdocs\tk25\vendor\codeigniter4\framework\system\Debug\ExceptionHandler.php(126): CodeIgniter\Debug\BaseExceptionHandler->render(Object(ErrorException), 500, 'C:\\xampp\\htdocs...')
+#9 C:\xampp\htdocs\tk25\vendor\codeigniter4\framework\system\Debug\Exceptions.php(151): CodeIgniter\Debug\ExceptionHandler->handle(Object(ErrorException), Object(CodeIgniter\HTTP\CLIRequest), Object(CodeIgniter\HTTP\Response), 500, 1)
+#10 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(ErrorException))
+#11 {main}
+  thrown
+【Previous Exception】
+ErrorException
+fwrite(): Write of 7 bytes failed with errno=22 Invalid argument
+#0 [internal function]: CodeIgniter\Debug\Exceptions->errorHandler(8, 'fwrite(): Write...', 'C:\\xampp\\htdocs...', 78)
+#1 C:\xampp\htdocs\tk25\vendor\codeigniter4\framework\system\CLI\InputOutput.php(78): fwrite(Resource id #2, 'Cache\r\n')
+#2 C:\xampp\htdocs\tk25\vendor\codeigniter4\framework\system\CLI\CLI.php(1139): CodeIgniter\CLI\InputOutput->fwrite(Resource id #2, 'Cache\r\n')
+#3 C:\xampp\htdocs\tk25\vendor\codeigniter4\framework\system\CLI\CLI.php(471): CodeIgniter\CLI\CLI::fwrite(Resource id #2, 'Cache\r\n')
+#4 C:\xampp\htdocs\tk25\vendor\codeigniter4\framework\system\Commands\ListCommands.php(112): CodeIgniter\CLI\CLI::write('Cache', 'yellow')
+#5 C:\xampp\htdocs\tk25\vendor\codeigniter4\framework\system\Commands\ListCommands.php(85): CodeIgniter\Commands\ListCommands->listFull(Array)
+#6 C:\xampp\htdocs\tk25\vendor\codeigniter4\framework\system\CLI\Commands.php(72): CodeIgniter\Commands\ListCommands->run(Array)
+#7 C:\xampp\htdocs\tk25\vendor\codeigniter4\framework\system\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('list', Array)
+#8 C:\xampp\htdocs\tk25\vendor\codeigniter4\framework\system\Boot.php(444): CodeIgniter\CLI\Console->run()
+#9 C:\xampp\htdocs\tk25\vendor\codeigniter4\framework\system\Boot.php(166): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+#10 C:\xampp\htdocs\tk25\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+#11 {main}
+[Method: CLI, Route: /]
+in SYSTEMPATH\CLI\InputOutput.php on line 78.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+CRITICAL - 2026-08-28 05:18:36 --> Error: Cannot throw objects that do not implement Throwable
+[Method: GET, Route: /]
+in SYSTEMPATH\Common.php on line 904.
+ 1 APPPATH\Models\Session_Model.php(32): redirect('http://localhost/tk25/login')
+ 2 APPPATH\Controllers\Welcome.php(26): App\Models\Session_Model->is_user_logged(true)
+ 3 SYSTEMPATH\CodeIgniter.php(944): App\Controllers\Welcome->__construct()
+ 4 SYSTEMPATH\CodeIgniter.php(511): CodeIgniter\CodeIgniter->createController()
+ 5 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 6 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 7 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 8 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 9 FCPATH\dev_router.php(28): require('C:\\xampp\\htdocs\\tk25\\index.php')
+CRITICAL - 2026-08-28 05:18:40 --> Error: Cannot throw objects that do not implement Throwable
+[Method: GET, Route: /]
+in SYSTEMPATH\Common.php on line 904.
+ 1 APPPATH\Models\Session_Model.php(32): redirect('http://localhost/tk25/login')
+ 2 APPPATH\Controllers\Welcome.php(26): App\Models\Session_Model->is_user_logged(true)
+ 3 SYSTEMPATH\CodeIgniter.php(944): App\Controllers\Welcome->__construct()
+ 4 SYSTEMPATH\CodeIgniter.php(511): CodeIgniter\CodeIgniter->createController()
+ 5 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 6 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 7 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 8 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 9 FCPATH\dev_router.php(28): require('C:\\xampp\\htdocs\\tk25\\index.php')
+CRITICAL - 2026-08-28 05:28:56 --> Error: Class "HTTP\Exceptions\RedirectException" not found
+[Method: GET, Route: /]
+in SYSTEMPATH\Common.php on line 905.
+ 1 APPPATH\Models\Session_Model.php(32): redirect('http://localhost/tk25/login')
+ 2 APPPATH\Controllers\Welcome.php(26): App\Models\Session_Model->is_user_logged(true)
+ 3 SYSTEMPATH\CodeIgniter.php(944): App\Controllers\Welcome->__construct()
+ 4 SYSTEMPATH\CodeIgniter.php(511): CodeIgniter\CodeIgniter->createController()
+ 5 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 6 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 7 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 8 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 9 FCPATH\dev_router.php(28): require('C:\\xampp\\htdocs\\tk25\\index.php')
+CRITICAL - 2026-08-28 10:30:38 --> TypeError: CodeIgniter\HTTP\SiteURI::stringifyRelativePath(): Return value must be of type string, false returned
+[Method: GET, Route: login]
+in SYSTEMPATH\HTTP\SiteURI.php on line 419.
+ 1 SYSTEMPATH\HTTP\SiteURI.php(393): CodeIgniter\HTTP\SiteURI->stringifyRelativePath(false)
+ 2 SYSTEMPATH\Helpers\url_helper.php(60): CodeIgniter\HTTP\SiteURI->baseUrl(false, null)
+ 3 APPPATH\Views\login\user_login.php(198): base_url(false)
+ 4 SYSTEMPATH\View\View.php(240): include('C:\\xampp\\htdocs\\tk25\\app\\Views\\login\\user_login.php')
+ 5 SYSTEMPATH\View\View.php(243): CodeIgniter\View\View->{closure:CodeIgniter\View\View::render():237}()
+ 6 SYSTEMPATH\Common.php(1268): CodeIgniter\View\View->render('login/user_login', [], true)
+ 7 APPPATH\Libraries\Template.php(132): view('login/user_login', [], [])
+ 8 APPPATH\Controllers\Login.php(68): App\Libraries\Template->write_view('content', 'login/user_login', [])
+ 9 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Login->index()
+10 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Login))
+11 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 10:35:54 --> TypeError: form_input(): Argument #2 ($value) must be of type string, null given, called in C:\xampp\htdocs\tk25\app\Views\login\user_login.php on line 234
+[Method: GET, Route: login]
+in SYSTEMPATH\Helpers\form_helper.php on line 146.
+ 1 APPPATH\Views\login\user_login.php(234): form_input('txtUserName', null, 'class="form-control" placeholder="Enter your username" required')
+ 2 SYSTEMPATH\View\View.php(240): include('C:\\xampp\\htdocs\\tk25\\app\\Views\\login\\user_login.php')
+ 3 SYSTEMPATH\View\View.php(243): CodeIgniter\View\View->{closure:CodeIgniter\View\View::render():237}()
+ 4 SYSTEMPATH\Common.php(1268): CodeIgniter\View\View->render('login/user_login', [], true)
+ 5 APPPATH\Libraries\Template.php(132): view('login/user_login', [], [])
+ 6 APPPATH\Controllers\Login.php(68): App\Libraries\Template->write_view('content', 'login/user_login', [])
+ 7 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Login->index()
+ 8 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Login))
+ 9 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 16:05:43 --> TypeError: form_input(): Argument #2 ($value) must be of type string, null given, called in C:\xampp\htdocs\tk25\app\Views\login\user_login.php on line 234
+[Method: GET, Route: login]
+in SYSTEMPATH\Helpers\form_helper.php on line 146.
+ 1 APPPATH\Views\login\user_login.php(234): form_input('txtUserName', null, 'class="form-control" placeholder="Enter your username" required')
+ 2 SYSTEMPATH\View\View.php(240): include('C:\\xampp\\htdocs\\tk25\\app\\Views\\login\\user_login.php')
+ 3 SYSTEMPATH\View\View.php(243): CodeIgniter\View\View->{closure:CodeIgniter\View\View::render():237}()
+ 4 SYSTEMPATH\Common.php(1268): CodeIgniter\View\View->render('login/user_login', [], true)
+ 5 APPPATH\Libraries\Template.php(132): view('login/user_login', [], [])
+ 6 APPPATH\Controllers\Login.php(68): App\Libraries\Template->write_view('content', 'login/user_login', [])
+ 7 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Login->index()
+ 8 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Login))
+ 9 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 16:06:10 --> TypeError: form_input(): Argument #2 ($value) must be of type string, null given, called in C:\xampp\htdocs\tk25\app\Views\login\user_login.php on line 234
+[Method: GET, Route: login]
+in SYSTEMPATH\Helpers\form_helper.php on line 146.
+ 1 APPPATH\Views\login\user_login.php(234): form_input('txtUserName', null, 'class="form-control" placeholder="Enter your username" required')
+ 2 SYSTEMPATH\View\View.php(240): include('C:\\xampp\\htdocs\\tk25\\app\\Views\\login\\user_login.php')
+ 3 SYSTEMPATH\View\View.php(243): CodeIgniter\View\View->{closure:CodeIgniter\View\View::render():237}()
+ 4 SYSTEMPATH\Common.php(1268): CodeIgniter\View\View->render('login/user_login', [], true)
+ 5 APPPATH\Libraries\Template.php(132): view('login/user_login', [], [])
+ 6 APPPATH\Controllers\Login.php(68): App\Libraries\Template->write_view('content', 'login/user_login', [])
+ 7 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Login->index()
+ 8 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Login))
+ 9 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 16:08:04 --> TypeError: CodeIgniter\HTTP\SiteURI::stringifyRelativePath(): Return value must be of type string, false returned
+[Method: GET, Route: login]
+in SYSTEMPATH\HTTP\SiteURI.php on line 419.
+ 1 SYSTEMPATH\HTTP\SiteURI.php(393): CodeIgniter\HTTP\SiteURI->stringifyRelativePath(false)
+ 2 SYSTEMPATH\Helpers\url_helper.php(60): CodeIgniter\HTTP\SiteURI->baseUrl(false, null)
+ 3 APPPATH\Views\template.php(13): base_url(false)
+ 4 SYSTEMPATH\View\View.php(240): include('C:\\xampp\\htdocs\\tk25\\app\\Views\\template.php')
+ 5 SYSTEMPATH\View\View.php(243): CodeIgniter\View\View->{closure:CodeIgniter\View\View::render():237}()
+ 6 SYSTEMPATH\Common.php(1268): CodeIgniter\View\View->render('template', [], true)
+ 7 APPPATH\Libraries\Template.php(211): view('template', [...], [])
+ 8 APPPATH\Controllers\Login.php(69): App\Libraries\Template->render()
+ 9 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Login->index()
+10 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Login))
+11 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 16:09:12 --> TypeError: CodeIgniter\HTTP\SiteURI::stringifyRelativePath(): Return value must be of type string, false returned
+[Method: GET, Route: login]
+in SYSTEMPATH\HTTP\SiteURI.php on line 419.
+ 1 SYSTEMPATH\HTTP\SiteURI.php(393): CodeIgniter\HTTP\SiteURI->stringifyRelativePath(false)
+ 2 SYSTEMPATH\Helpers\url_helper.php(60): CodeIgniter\HTTP\SiteURI->baseUrl(false, null)
+ 3 APPPATH\Views\template.php(14): base_url(false)
+ 4 SYSTEMPATH\View\View.php(240): include('C:\\xampp\\htdocs\\tk25\\app\\Views\\template.php')
+ 5 SYSTEMPATH\View\View.php(243): CodeIgniter\View\View->{closure:CodeIgniter\View\View::render():237}()
+ 6 SYSTEMPATH\Common.php(1268): CodeIgniter\View\View->render('template', [], true)
+ 7 APPPATH\Libraries\Template.php(211): view('template', [...], [])
+ 8 APPPATH\Controllers\Login.php(69): App\Libraries\Template->render()
+ 9 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Login->index()
+10 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Login))
+11 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 16:10:39 --> Error: Call to undefined function image_url()
+[Method: GET, Route: login]
+in APPPATH\Views\template.php on line 72.
+ 1 SYSTEMPATH\View\View.php(240): include()
+ 2 SYSTEMPATH\View\View.php(243): CodeIgniter\View\View->{closure:CodeIgniter\View\View::render():237}()
+ 3 SYSTEMPATH\Common.php(1268): CodeIgniter\View\View->render('template', [], true)
+ 4 APPPATH\Libraries\Template.php(211): view('template', [...], [])
+ 5 APPPATH\Controllers\Login.php(69): App\Libraries\Template->render()
+ 6 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Login->index()
+ 7 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Login))
+ 8 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 17:57:29 --> Error: Class "App\Controllers\CI_Model" not found
+[Method: CLI, Route: routes]
+in APPPATH\Controllers\Afterresult_model.php on line 6.
+ 1 FCPATH\vendor\composer\ClassLoader.php(576): include()
+ 2 FCPATH\vendor\composer\ClassLoader.php(427): {closure:Composer\Autoload\ClassLoader::initializeIncludeClosure():575}('C:\\xampp\\htdocs\\tk25\\vendor\\composer/../../app\\Controllers\\Afterresult_model.php')
+ 3 [internal function]: Composer\Autoload\ClassLoader->loadClass('App\\Controllers\\Afterresult_model')
+ 4 SYSTEMPATH\Commands\Utilities\Routes\AutoRouterImproved\ControllerMethodReader.php(52): ReflectionClass->__construct('App\\Controllers\\Afterresult_model')
+ 5 SYSTEMPATH\Commands\Utilities\Routes\AutoRouterImproved\AutoRouteCollector.php(59): CodeIgniter\Commands\Utilities\Routes\AutoRouterImproved\ControllerMethodReader->read('App\\Controllers\\Afterresult_model', 'Welcome', 'index')
+ 6 SYSTEMPATH\Commands\Utilities\Routes.php(146): CodeIgniter\Commands\Utilities\Routes\AutoRouterImproved\AutoRouteCollector->get()
+ 7 SYSTEMPATH\CLI\Commands.php(72): CodeIgniter\Commands\Utilities\Routes->run([])
+ 8 SYSTEMPATH\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('routes', [])
+ 9 SYSTEMPATH\Boot.php(444): CodeIgniter\CLI\Console->run()
+10 SYSTEMPATH\Boot.php(166): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+11 FCPATH\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+CRITICAL - 2026-08-28 17:58:14 --> Error: Class "App\Controllers\CI_Model" not found
+[Method: CLI, Route: routes]
+in APPPATH\Controllers\Afterresult_model.php on line 6.
+ 1 FCPATH\vendor\composer\ClassLoader.php(576): include()
+ 2 FCPATH\vendor\composer\ClassLoader.php(427): {closure:Composer\Autoload\ClassLoader::initializeIncludeClosure():575}('C:\\xampp\\htdocs\\tk25\\vendor\\composer/../../app\\Controllers\\Afterresult_model.php')
+ 3 [internal function]: Composer\Autoload\ClassLoader->loadClass('App\\Controllers\\Afterresult_model')
+ 4 SYSTEMPATH\Commands\Utilities\Routes\AutoRouterImproved\ControllerMethodReader.php(52): ReflectionClass->__construct('App\\Controllers\\Afterresult_model')
+ 5 SYSTEMPATH\Commands\Utilities\Routes\AutoRouterImproved\AutoRouteCollector.php(59): CodeIgniter\Commands\Utilities\Routes\AutoRouterImproved\ControllerMethodReader->read('App\\Controllers\\Afterresult_model', 'Welcome', 'index')
+ 6 SYSTEMPATH\Commands\Utilities\Routes.php(146): CodeIgniter\Commands\Utilities\Routes\AutoRouterImproved\AutoRouteCollector->get()
+ 7 SYSTEMPATH\CLI\Commands.php(72): CodeIgniter\Commands\Utilities\Routes->run([])
+ 8 SYSTEMPATH\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('routes', [])
+ 9 SYSTEMPATH\Boot.php(444): CodeIgniter\CLI\Console->run()
+10 SYSTEMPATH\Boot.php(166): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+11 FCPATH\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+CRITICAL - 2026-08-28 17:58:20 --> ErrorException: imagecreatefrompng(/path/to/source.png): Failed to open stream: No such file or directory
+[Method: GET, Route: test]
+in APPPATH\Libraries\fpdf.php on line 1657.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->errorHandler(2, 'imagecreatefrompng(/path/to/source.png): Failed to open stream: No such file or directory', 'C:\\xampp\\htdocs\\tk25\\app\\Libraries\\fpdf.php', 1657)
+ 2 APPPATH\Libraries\fpdf.php(1657): imagecreatefrompng('/path/to/source.png')
+ 3 APPPATH\Libraries\fpdf.php(1682): removePngAlphaChannel('/path/to/source.png', '/path/to/destination.jpg')
+ 4 FCPATH\vendor\composer\ClassLoader.php(576): include('C:\\xampp\\htdocs\\tk25\\app\\Libraries\\fpdf.php')
+ 5 FCPATH\vendor\composer\ClassLoader.php(427): {closure:Composer\Autoload\ClassLoader::initializeIncludeClosure():575}('C:\\xampp\\htdocs\\tk25\\vendor\\composer/../../app\\Libraries\\Fpdf.php')
+ 6 [internal function]: Composer\Autoload\ClassLoader->loadClass('App\\Libraries\\Fpdf')
+ 7 APPPATH\Libraries\CiLoader.php(133): class_exists('App\\Libraries\\Fpdf')
+ 8 APPPATH\Controllers\Test.php(22): App\Libraries\CiLoader->library('_fpdf/fpdf')
+ 9 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Test->index()
+10 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Test))
+11 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 17:58:38 --> ErrorException: imagecreatefrompng(/path/to/source.png): Failed to open stream: No such file or directory
+[Method: GET, Route: test/nodata]
+in APPPATH\Libraries\fpdf.php on line 1657.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->errorHandler(2, 'imagecreatefrompng(/path/to/source.png): Failed to open stream: No such file or directory', 'C:\\xampp\\htdocs\\tk25\\app\\Libraries\\fpdf.php', 1657)
+ 2 APPPATH\Libraries\fpdf.php(1657): imagecreatefrompng('/path/to/source.png')
+ 3 APPPATH\Libraries\fpdf.php(1682): removePngAlphaChannel('/path/to/source.png', '/path/to/destination.jpg')
+ 4 FCPATH\vendor\composer\ClassLoader.php(576): include('C:\\xampp\\htdocs\\tk25\\app\\Libraries\\fpdf.php')
+ 5 FCPATH\vendor\composer\ClassLoader.php(427): {closure:Composer\Autoload\ClassLoader::initializeIncludeClosure():575}('C:\\xampp\\htdocs\\tk25\\vendor\\composer/../../app\\Libraries\\Fpdf.php')
+ 6 [internal function]: Composer\Autoload\ClassLoader->loadClass('App\\Libraries\\Fpdf')
+ 7 APPPATH\Libraries\CiLoader.php(133): class_exists('App\\Libraries\\Fpdf')
+ 8 APPPATH\Controllers\Test.php(51): App\Libraries\CiLoader->library('_fpdf/fpdf')
+ 9 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Test->nodata()
+10 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Test))
+11 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 18:05:01 --> Error: Call to undefined method CodeIgniter\Database\MySQLi\Connection::where()
+[Method: POST, Route: login]
+in APPPATH\Models\login\Login_Model.php on line 15.
+ 1 APPPATH\Controllers\Login.php(32): App\Models\Login\Login_Model->logincheck('stateadmin', 'itadmin')
+ 2 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Login->index()
+ 3 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Login))
+ 4 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+WARNING - 2026-08-28 18:08:12 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(7): CodeIgniter\Router\RouteCollection->match([...], 'welcome', 'Welcome::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\ci4_db_check6.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:08:12 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(7): CodeIgniter\Router\RouteCollection->match([...], 'welcome', 'Welcome::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\ci4_db_check6.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:08:12 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(9): CodeIgniter\Router\RouteCollection->match([...], 'login', 'Login::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\ci4_db_check6.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:08:12 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(9): CodeIgniter\Router\RouteCollection->match([...], 'login', 'Login::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\ci4_db_check6.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:08:12 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(12): CodeIgniter\Router\RouteCollection->match([...], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\ci4_db_check6.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:08:12 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(12): CodeIgniter\Router\RouteCollection->match([...], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\ci4_db_check6.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:08:12 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(13): CodeIgniter\Router\RouteCollection->match([...], 'report/masterreport/item_code_pdf', 'Report\\Masterreport::item_code_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\ci4_db_check6.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:08:12 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(13): CodeIgniter\Router\RouteCollection->match([...], 'report/masterreport/item_code_pdf', 'Report\\Masterreport::item_code_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\ci4_db_check6.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:08:12 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(14): CodeIgniter\Router\RouteCollection->match([...], 'report/prereportpdf/participant_regno_photo', 'Report\\Prereportpdf::participant_regno_photo')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\ci4_db_check6.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:08:12 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(14): CodeIgniter\Router\RouteCollection->match([...], 'report/prereportpdf/participant_regno_photo', 'Report\\Prereportpdf::participant_regno_photo')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\ci4_db_check6.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:09:54 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(7): CodeIgniter\Router\RouteCollection->match([...], 'welcome', 'Welcome::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\inspect_ci4_api.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:09:54 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(7): CodeIgniter\Router\RouteCollection->match([...], 'welcome', 'Welcome::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\inspect_ci4_api.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:09:54 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(9): CodeIgniter\Router\RouteCollection->match([...], 'login', 'Login::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\inspect_ci4_api.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:09:54 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(9): CodeIgniter\Router\RouteCollection->match([...], 'login', 'Login::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\inspect_ci4_api.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:09:54 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(12): CodeIgniter\Router\RouteCollection->match([...], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\inspect_ci4_api.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:09:54 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(12): CodeIgniter\Router\RouteCollection->match([...], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\inspect_ci4_api.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:09:54 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(13): CodeIgniter\Router\RouteCollection->match([...], 'report/masterreport/item_code_pdf', 'Report\\Masterreport::item_code_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\inspect_ci4_api.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:09:54 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(13): CodeIgniter\Router\RouteCollection->match([...], 'report/masterreport/item_code_pdf', 'Report\\Masterreport::item_code_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\inspect_ci4_api.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:09:54 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(14): CodeIgniter\Router\RouteCollection->match([...], 'report/prereportpdf/participant_regno_photo', 'Report\\Prereportpdf::participant_regno_photo')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\inspect_ci4_api.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:09:54 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(14): CodeIgniter\Router\RouteCollection->match([...], 'report/prereportpdf/participant_regno_photo', 'Report\\Prereportpdf::participant_regno_photo')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\inspect_ci4_api.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:03 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(7): CodeIgniter\Router\RouteCollection->match([...], 'welcome', 'Welcome::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_builder_behaviors.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:03 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(7): CodeIgniter\Router\RouteCollection->match([...], 'welcome', 'Welcome::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_builder_behaviors.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:03 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(9): CodeIgniter\Router\RouteCollection->match([...], 'login', 'Login::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_builder_behaviors.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:03 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(9): CodeIgniter\Router\RouteCollection->match([...], 'login', 'Login::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_builder_behaviors.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:03 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(12): CodeIgniter\Router\RouteCollection->match([...], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_builder_behaviors.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:03 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(12): CodeIgniter\Router\RouteCollection->match([...], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_builder_behaviors.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:03 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(13): CodeIgniter\Router\RouteCollection->match([...], 'report/masterreport/item_code_pdf', 'Report\\Masterreport::item_code_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_builder_behaviors.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:03 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(13): CodeIgniter\Router\RouteCollection->match([...], 'report/masterreport/item_code_pdf', 'Report\\Masterreport::item_code_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_builder_behaviors.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:03 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(14): CodeIgniter\Router\RouteCollection->match([...], 'report/prereportpdf/participant_regno_photo', 'Report\\Prereportpdf::participant_regno_photo')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_builder_behaviors.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:03 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(14): CodeIgniter\Router\RouteCollection->match([...], 'report/prereportpdf/participant_regno_photo', 'Report\\Prereportpdf::participant_regno_photo')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_builder_behaviors.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+CRITICAL - 2026-08-28 18:10:03 --> CodeIgniter\Database\Exceptions\DatabaseException: You must set the database table to be used with your query.
+[Method: CLI, Route: /]
+in SYSTEMPATH\Database\BaseConnection.php on line 1123.
+ 1 C:\Users\Dominic\AppData\Local\Temp\opencode\test_builder_behaviors.php(14): CodeIgniter\Database\BaseConnection->table('')
+WARNING - 2026-08-28 18:10:10 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(7): CodeIgniter\Router\RouteCollection->match([...], 'welcome', 'Welcome::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_direct_builder.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:10 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(7): CodeIgniter\Router\RouteCollection->match([...], 'welcome', 'Welcome::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_direct_builder.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:10 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(9): CodeIgniter\Router\RouteCollection->match([...], 'login', 'Login::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_direct_builder.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:10 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(9): CodeIgniter\Router\RouteCollection->match([...], 'login', 'Login::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_direct_builder.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:10 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(12): CodeIgniter\Router\RouteCollection->match([...], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_direct_builder.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:10 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(12): CodeIgniter\Router\RouteCollection->match([...], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_direct_builder.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:10 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(13): CodeIgniter\Router\RouteCollection->match([...], 'report/masterreport/item_code_pdf', 'Report\\Masterreport::item_code_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_direct_builder.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:10 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(13): CodeIgniter\Router\RouteCollection->match([...], 'report/masterreport/item_code_pdf', 'Report\\Masterreport::item_code_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_direct_builder.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:10 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(14): CodeIgniter\Router\RouteCollection->match([...], 'report/prereportpdf/participant_regno_photo', 'Report\\Prereportpdf::participant_regno_photo')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_direct_builder.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:10 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(14): CodeIgniter\Router\RouteCollection->match([...], 'report/prereportpdf/participant_regno_photo', 'Report\\Prereportpdf::participant_regno_photo')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_direct_builder.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:33 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(7): CodeIgniter\Router\RouteCollection->match([...], 'welcome', 'Welcome::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_ci_database_proto.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:33 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(7): CodeIgniter\Router\RouteCollection->match([...], 'welcome', 'Welcome::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_ci_database_proto.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:33 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(9): CodeIgniter\Router\RouteCollection->match([...], 'login', 'Login::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_ci_database_proto.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:33 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(9): CodeIgniter\Router\RouteCollection->match([...], 'login', 'Login::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_ci_database_proto.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:33 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(12): CodeIgniter\Router\RouteCollection->match([...], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_ci_database_proto.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:33 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(12): CodeIgniter\Router\RouteCollection->match([...], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_ci_database_proto.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:33 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(13): CodeIgniter\Router\RouteCollection->match([...], 'report/masterreport/item_code_pdf', 'Report\\Masterreport::item_code_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_ci_database_proto.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:33 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(13): CodeIgniter\Router\RouteCollection->match([...], 'report/masterreport/item_code_pdf', 'Report\\Masterreport::item_code_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_ci_database_proto.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:33 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(14): CodeIgniter\Router\RouteCollection->match([...], 'report/prereportpdf/participant_regno_photo', 'Report\\Prereportpdf::participant_regno_photo')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_ci_database_proto.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:10:33 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(14): CodeIgniter\Router\RouteCollection->match([...], 'report/prereportpdf/participant_regno_photo', 'Report\\Prereportpdf::participant_regno_photo')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_ci_database_proto.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:15:50 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(7): CodeIgniter\Router\RouteCollection->match([...], 'welcome', 'Welcome::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\cidatabase_test.php(10): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:15:50 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(7): CodeIgniter\Router\RouteCollection->match([...], 'welcome', 'Welcome::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\cidatabase_test.php(10): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:15:50 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(9): CodeIgniter\Router\RouteCollection->match([...], 'login', 'Login::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\cidatabase_test.php(10): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:15:50 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(9): CodeIgniter\Router\RouteCollection->match([...], 'login', 'Login::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\cidatabase_test.php(10): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:15:50 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(12): CodeIgniter\Router\RouteCollection->match([...], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\cidatabase_test.php(10): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:15:50 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(12): CodeIgniter\Router\RouteCollection->match([...], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\cidatabase_test.php(10): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:15:50 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(13): CodeIgniter\Router\RouteCollection->match([...], 'report/masterreport/item_code_pdf', 'Report\\Masterreport::item_code_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\cidatabase_test.php(10): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:15:50 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(13): CodeIgniter\Router\RouteCollection->match([...], 'report/masterreport/item_code_pdf', 'Report\\Masterreport::item_code_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\cidatabase_test.php(10): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:15:50 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(14): CodeIgniter\Router\RouteCollection->match([...], 'report/prereportpdf/participant_regno_photo', 'Report\\Prereportpdf::participant_regno_photo')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\cidatabase_test.php(10): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:15:50 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(14): CodeIgniter\Router\RouteCollection->match([...], 'report/prereportpdf/participant_regno_photo', 'Report\\Prereportpdf::participant_regno_photo')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\cidatabase_test.php(10): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+DEBUG - 2026-08-28 18:15:52 --> Session: Initialization under CLI aborted.
+CRITICAL - 2026-08-28 18:18:59 --> Error: Call to undefined method CodeIgniter\Database\MySQLi\Connection::where()
+[Method: POST, Route: itemreport/itemreport_pdf]
+in APPPATH\Helpers\general_helper.php on line 153.
+ 1 APPPATH\Models\Session_Model.php(36): is_import_data_finish('0')
+ 2 APPPATH\Controllers\Itemreport.php(12): App\Models\Session_Model->is_user_logged(true)
+ 3 SYSTEMPATH\CodeIgniter.php(944): App\Controllers\Itemreport->__construct()
+ 4 SYSTEMPATH\CodeIgniter.php(511): CodeIgniter\CodeIgniter->createController()
+ 5 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 6 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 7 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 8 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 18:19:19 --> Error: Call to undefined method CodeIgniter\Database\MySQLi\Connection::where()
+[Method: POST, Route: report/masterreport/item_code_pdf]
+in APPPATH\Helpers\general_helper.php on line 153.
+ 1 APPPATH\Models\Session_Model.php(36): is_import_data_finish('0')
+ 2 APPPATH\Controllers\report\Masterreport.php(12): App\Models\Session_Model->is_user_logged(true)
+ 3 SYSTEMPATH\CodeIgniter.php(944): App\Controllers\Report\Masterreport->__construct()
+ 4 SYSTEMPATH\CodeIgniter.php(511): CodeIgniter\CodeIgniter->createController()
+ 5 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 6 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 7 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 8 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 18:19:20 --> Error: Call to undefined method CodeIgniter\Database\MySQLi\Connection::where()
+[Method: POST, Route: report/prereportpdf/participant_regno_photo]
+in APPPATH\Helpers\general_helper.php on line 153.
+ 1 APPPATH\Models\Session_Model.php(36): is_import_data_finish('0')
+ 2 APPPATH\Controllers\report\Prereportpdf.php(10): App\Models\Session_Model->is_user_logged(true)
+ 3 SYSTEMPATH\CodeIgniter.php(944): App\Controllers\Report\Prereportpdf->__construct()
+ 4 SYSTEMPATH\CodeIgniter.php(511): CodeIgniter\CodeIgniter->createController()
+ 5 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 6 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 7 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 8 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2026-08-28 18:24:20 --> Incorrect DATE value: ''
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'')
+ 3 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1659): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = :sub_district_code:
+AND `venue` != :venue:
+AND `start_date` != :start_date:
+AND `end_date` != :end_date:', [...], false)
+ 5 APPPATH\Libraries\CiDatabase.php(274): CodeIgniter\Database\BaseBuilder->get(null, 0)
+ 6 APPPATH\Helpers\general_helper.php(182): App\Libraries\CiDatabase->get('sub_dist_kalolsavam_master')
+ 7 APPPATH\Models\Session_Model.php(38): is_define_kalolsavam('0')
+ 8 APPPATH\Controllers\Itemreport.php(12): App\Models\Session_Model->is_user_logged(true)
+ 9 SYSTEMPATH\CodeIgniter.php(944): App\Controllers\Itemreport->__construct()
+10 SYSTEMPATH\CodeIgniter.php(511): CodeIgniter\CodeIgniter->createController()
+11 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 18:24:20 --> CodeIgniter\Database\Exceptions\DatabaseException: Incorrect DATE value: ''
+[Method: POST, Route: itemreport/itemreport_pdf]
+in SYSTEMPATH\Database\BaseConnection.php on line 863.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1659): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = :sub_district_code:
+AND `venue` != :venue:
+AND `start_date` != :start_date:
+AND `end_date` != :end_date:', [...], false)
+ 2 APPPATH\Libraries\CiDatabase.php(274): CodeIgniter\Database\BaseBuilder->get(null, 0)
+ 3 APPPATH\Helpers\general_helper.php(182): App\Libraries\CiDatabase->get('sub_dist_kalolsavam_master')
+ 4 APPPATH\Models\Session_Model.php(38): is_define_kalolsavam('0')
+ 5 APPPATH\Controllers\Itemreport.php(12): App\Models\Session_Model->is_user_logged(true)
+ 6 SYSTEMPATH\CodeIgniter.php(944): App\Controllers\Itemreport->__construct()
+ 7 SYSTEMPATH\CodeIgniter.php(511): CodeIgniter\CodeIgniter->createController()
+ 8 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 18:24:20 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Incorrect DATE value: ''
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 310.
+ 1 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'')
+ 2 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1659): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = :sub_district_code:
+AND `venue` != :venue:
+AND `start_date` != :start_date:
+AND `end_date` != :end_date:', [...], false)
+ 4 APPPATH\Libraries\CiDatabase.php(274): CodeIgniter\Database\BaseBuilder->get(null, 0)
+ 5 APPPATH\Helpers\general_helper.php(182): App\Libraries\CiDatabase->get('sub_dist_kalolsavam_master')
+ 6 APPPATH\Models\Session_Model.php(38): is_define_kalolsavam('0')
+ 7 APPPATH\Controllers\Itemreport.php(12): App\Models\Session_Model->is_user_logged(true)
+ 8 SYSTEMPATH\CodeIgniter.php(944): App\Controllers\Itemreport->__construct()
+ 9 SYSTEMPATH\CodeIgniter.php(511): CodeIgniter\CodeIgniter->createController()
+10 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 18:24:20 --> [Caused by] mysqli_sql_exception: Incorrect DATE value: ''
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'')
+ 3 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1659): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = :sub_district_code:
+AND `venue` != :venue:
+AND `start_date` != :start_date:
+AND `end_date` != :end_date:', [...], false)
+ 5 APPPATH\Libraries\CiDatabase.php(274): CodeIgniter\Database\BaseBuilder->get(null, 0)
+ 6 APPPATH\Helpers\general_helper.php(182): App\Libraries\CiDatabase->get('sub_dist_kalolsavam_master')
+ 7 APPPATH\Models\Session_Model.php(38): is_define_kalolsavam('0')
+ 8 APPPATH\Controllers\Itemreport.php(12): App\Models\Session_Model->is_user_logged(true)
+ 9 SYSTEMPATH\CodeIgniter.php(944): App\Controllers\Itemreport->__construct()
+10 SYSTEMPATH\CodeIgniter.php(511): CodeIgniter\CodeIgniter->createController()
+11 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2026-08-28 18:24:23 --> Incorrect DATE value: ''
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'')
+ 3 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1659): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = :sub_district_code:
+AND `venue` != :venue:
+AND `start_date` != :start_date:
+AND `end_date` != :end_date:', [...], false)
+ 5 APPPATH\Libraries\CiDatabase.php(274): CodeIgniter\Database\BaseBuilder->get(null, 0)
+ 6 APPPATH\Helpers\general_helper.php(182): App\Libraries\CiDatabase->get('sub_dist_kalolsavam_master')
+ 7 APPPATH\Models\Session_Model.php(38): is_define_kalolsavam('0')
+ 8 APPPATH\Controllers\report\Masterreport.php(12): App\Models\Session_Model->is_user_logged(true)
+ 9 SYSTEMPATH\CodeIgniter.php(944): App\Controllers\Report\Masterreport->__construct()
+10 SYSTEMPATH\CodeIgniter.php(511): CodeIgniter\CodeIgniter->createController()
+11 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 18:24:23 --> CodeIgniter\Database\Exceptions\DatabaseException: Incorrect DATE value: ''
+[Method: POST, Route: report/masterreport/item_code_pdf]
+in SYSTEMPATH\Database\BaseConnection.php on line 863.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1659): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = :sub_district_code:
+AND `venue` != :venue:
+AND `start_date` != :start_date:
+AND `end_date` != :end_date:', [...], false)
+ 2 APPPATH\Libraries\CiDatabase.php(274): CodeIgniter\Database\BaseBuilder->get(null, 0)
+ 3 APPPATH\Helpers\general_helper.php(182): App\Libraries\CiDatabase->get('sub_dist_kalolsavam_master')
+ 4 APPPATH\Models\Session_Model.php(38): is_define_kalolsavam('0')
+ 5 APPPATH\Controllers\report\Masterreport.php(12): App\Models\Session_Model->is_user_logged(true)
+ 6 SYSTEMPATH\CodeIgniter.php(944): App\Controllers\Report\Masterreport->__construct()
+ 7 SYSTEMPATH\CodeIgniter.php(511): CodeIgniter\CodeIgniter->createController()
+ 8 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 18:24:23 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Incorrect DATE value: ''
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 310.
+ 1 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'')
+ 2 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1659): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = :sub_district_code:
+AND `venue` != :venue:
+AND `start_date` != :start_date:
+AND `end_date` != :end_date:', [...], false)
+ 4 APPPATH\Libraries\CiDatabase.php(274): CodeIgniter\Database\BaseBuilder->get(null, 0)
+ 5 APPPATH\Helpers\general_helper.php(182): App\Libraries\CiDatabase->get('sub_dist_kalolsavam_master')
+ 6 APPPATH\Models\Session_Model.php(38): is_define_kalolsavam('0')
+ 7 APPPATH\Controllers\report\Masterreport.php(12): App\Models\Session_Model->is_user_logged(true)
+ 8 SYSTEMPATH\CodeIgniter.php(944): App\Controllers\Report\Masterreport->__construct()
+ 9 SYSTEMPATH\CodeIgniter.php(511): CodeIgniter\CodeIgniter->createController()
+10 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 18:24:23 --> [Caused by] mysqli_sql_exception: Incorrect DATE value: ''
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'')
+ 3 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1659): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = :sub_district_code:
+AND `venue` != :venue:
+AND `start_date` != :start_date:
+AND `end_date` != :end_date:', [...], false)
+ 5 APPPATH\Libraries\CiDatabase.php(274): CodeIgniter\Database\BaseBuilder->get(null, 0)
+ 6 APPPATH\Helpers\general_helper.php(182): App\Libraries\CiDatabase->get('sub_dist_kalolsavam_master')
+ 7 APPPATH\Models\Session_Model.php(38): is_define_kalolsavam('0')
+ 8 APPPATH\Controllers\report\Masterreport.php(12): App\Models\Session_Model->is_user_logged(true)
+ 9 SYSTEMPATH\CodeIgniter.php(944): App\Controllers\Report\Masterreport->__construct()
+10 SYSTEMPATH\CodeIgniter.php(511): CodeIgniter\CodeIgniter->createController()
+11 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2026-08-28 18:24:25 --> Incorrect DATE value: ''
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'')
+ 3 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1659): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = :sub_district_code:
+AND `venue` != :venue:
+AND `start_date` != :start_date:
+AND `end_date` != :end_date:', [...], false)
+ 5 APPPATH\Libraries\CiDatabase.php(274): CodeIgniter\Database\BaseBuilder->get(null, 0)
+ 6 APPPATH\Helpers\general_helper.php(182): App\Libraries\CiDatabase->get('sub_dist_kalolsavam_master')
+ 7 APPPATH\Models\Session_Model.php(38): is_define_kalolsavam('0')
+ 8 APPPATH\Controllers\report\Prereportpdf.php(10): App\Models\Session_Model->is_user_logged(true)
+ 9 SYSTEMPATH\CodeIgniter.php(944): App\Controllers\Report\Prereportpdf->__construct()
+10 SYSTEMPATH\CodeIgniter.php(511): CodeIgniter\CodeIgniter->createController()
+11 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 18:24:25 --> CodeIgniter\Database\Exceptions\DatabaseException: Incorrect DATE value: ''
+[Method: POST, Route: report/prereportpdf/participant_regno_photo]
+in SYSTEMPATH\Database\BaseConnection.php on line 863.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1659): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = :sub_district_code:
+AND `venue` != :venue:
+AND `start_date` != :start_date:
+AND `end_date` != :end_date:', [...], false)
+ 2 APPPATH\Libraries\CiDatabase.php(274): CodeIgniter\Database\BaseBuilder->get(null, 0)
+ 3 APPPATH\Helpers\general_helper.php(182): App\Libraries\CiDatabase->get('sub_dist_kalolsavam_master')
+ 4 APPPATH\Models\Session_Model.php(38): is_define_kalolsavam('0')
+ 5 APPPATH\Controllers\report\Prereportpdf.php(10): App\Models\Session_Model->is_user_logged(true)
+ 6 SYSTEMPATH\CodeIgniter.php(944): App\Controllers\Report\Prereportpdf->__construct()
+ 7 SYSTEMPATH\CodeIgniter.php(511): CodeIgniter\CodeIgniter->createController()
+ 8 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 18:24:25 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Incorrect DATE value: ''
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 310.
+ 1 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'')
+ 2 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1659): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = :sub_district_code:
+AND `venue` != :venue:
+AND `start_date` != :start_date:
+AND `end_date` != :end_date:', [...], false)
+ 4 APPPATH\Libraries\CiDatabase.php(274): CodeIgniter\Database\BaseBuilder->get(null, 0)
+ 5 APPPATH\Helpers\general_helper.php(182): App\Libraries\CiDatabase->get('sub_dist_kalolsavam_master')
+ 6 APPPATH\Models\Session_Model.php(38): is_define_kalolsavam('0')
+ 7 APPPATH\Controllers\report\Prereportpdf.php(10): App\Models\Session_Model->is_user_logged(true)
+ 8 SYSTEMPATH\CodeIgniter.php(944): App\Controllers\Report\Prereportpdf->__construct()
+ 9 SYSTEMPATH\CodeIgniter.php(511): CodeIgniter\CodeIgniter->createController()
+10 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 18:24:25 --> [Caused by] mysqli_sql_exception: Incorrect DATE value: ''
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'')
+ 3 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'\'
+AND `end_date` != \'\'')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1659): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = :sub_district_code:
+AND `venue` != :venue:
+AND `start_date` != :start_date:
+AND `end_date` != :end_date:', [...], false)
+ 5 APPPATH\Libraries\CiDatabase.php(274): CodeIgniter\Database\BaseBuilder->get(null, 0)
+ 6 APPPATH\Helpers\general_helper.php(182): App\Libraries\CiDatabase->get('sub_dist_kalolsavam_master')
+ 7 APPPATH\Models\Session_Model.php(38): is_define_kalolsavam('0')
+ 8 APPPATH\Controllers\report\Prereportpdf.php(10): App\Models\Session_Model->is_user_logged(true)
+ 9 SYSTEMPATH\CodeIgniter.php(944): App\Controllers\Report\Prereportpdf->__construct()
+10 SYSTEMPATH\CodeIgniter.php(511): CodeIgniter\CodeIgniter->createController()
+11 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+WARNING - 2026-08-28 18:26:57 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(7): CodeIgniter\Router\RouteCollection->match([...], 'welcome', 'Welcome::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_date_fix.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:26:57 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(7): CodeIgniter\Router\RouteCollection->match([...], 'welcome', 'Welcome::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_date_fix.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:26:57 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(9): CodeIgniter\Router\RouteCollection->match([...], 'login', 'Login::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_date_fix.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:26:57 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(9): CodeIgniter\Router\RouteCollection->match([...], 'login', 'Login::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_date_fix.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:26:57 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(12): CodeIgniter\Router\RouteCollection->match([...], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_date_fix.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:26:57 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(12): CodeIgniter\Router\RouteCollection->match([...], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_date_fix.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:26:57 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(13): CodeIgniter\Router\RouteCollection->match([...], 'report/masterreport/item_code_pdf', 'Report\\Masterreport::item_code_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_date_fix.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:26:57 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(13): CodeIgniter\Router\RouteCollection->match([...], 'report/masterreport/item_code_pdf', 'Report\\Masterreport::item_code_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_date_fix.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:26:57 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(14): CodeIgniter\Router\RouteCollection->match([...], 'report/prereportpdf/participant_regno_photo', 'Report\\Prereportpdf::participant_regno_photo')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_date_fix.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:26:57 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(14): CodeIgniter\Router\RouteCollection->match([...], 'report/prereportpdf/participant_regno_photo', 'Report\\Prereportpdf::participant_regno_photo')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_date_fix.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+ERROR - 2026-08-28 18:27:00 --> Incorrect DATE value: '0000-00-00'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'0000-00-00\'
+AND `end_date` != \'0000-00-00\'', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'0000-00-00\'
+AND `end_date` != \'0000-00-00\'')
+ 3 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'0000-00-00\'
+AND `end_date` != \'0000-00-00\'')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1659): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = :sub_district_code:
+AND `venue` != :venue:
+AND `start_date` != :start_date:
+AND `end_date` != :end_date:', [...], false)
+ 5 APPPATH\Libraries\CiDatabase.php(274): CodeIgniter\Database\BaseBuilder->get(null, 0)
+ 6 C:\Users\Dominic\AppData\Local\Temp\opencode\test_date_fix.php(22): App\Libraries\CiDatabase->get('sub_dist_kalolsavam_master')
+ERROR - 2026-08-28 18:27:00 --> Incorrect DATE value: '0000-00-00'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'0000-00-00\'
+AND `end_date` != \'0000-00-00\'
+AND `sub_district_code` = \'112\'
+AND `venue` != \'\'
+AND `start_date` != \'0000-00-00\'
+AND `end_date` != \'0000-00-00\'', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'0000-00-00\'
+AND `end_date` != \'0000-00-00\'
+AND `sub_district_code` = \'112\'
+AND `venue` != \'\'
+AND `start_date` != \'0000-00-00\'
+AND `end_date` != \'0000-00-00\'')
+ 3 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = \'0\'
+AND `venue` != \'\'
+AND `start_date` != \'0000-00-00\'
+AND `end_date` != \'0000-00-00\'
+AND `sub_district_code` = \'112\'
+AND `venue` != \'\'
+AND `start_date` != \'0000-00-00\'
+AND `end_date` != \'0000-00-00\'')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1659): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `sub_dist_kalolsavam_master`
+WHERE `sub_district_code` = :sub_district_code:
+AND `venue` != :venue:
+AND `start_date` != :start_date:
+AND `end_date` != :end_date:
+AND `sub_district_code` = :sub_district_code.1:
+AND `venue` != :venue.1:
+AND `start_date` != :start_date.1:
+AND `end_date` != :end_date.1:', [...], false)
+ 5 APPPATH\Libraries\CiDatabase.php(274): CodeIgniter\Database\BaseBuilder->get(null, 0)
+ 6 C:\Users\Dominic\AppData\Local\Temp\opencode\test_date_fix.php(35): App\Libraries\CiDatabase->get('sub_dist_kalolsavam_master')
+WARNING - 2026-08-28 18:27:15 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(7): CodeIgniter\Router\RouteCollection->match([...], 'welcome', 'Welcome::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_cidatabase_date.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:27:15 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(7): CodeIgniter\Router\RouteCollection->match([...], 'welcome', 'Welcome::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_cidatabase_date.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:27:15 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(9): CodeIgniter\Router\RouteCollection->match([...], 'login', 'Login::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_cidatabase_date.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:27:15 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(9): CodeIgniter\Router\RouteCollection->match([...], 'login', 'Login::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_cidatabase_date.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:27:15 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(12): CodeIgniter\Router\RouteCollection->match([...], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_cidatabase_date.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:27:15 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(12): CodeIgniter\Router\RouteCollection->match([...], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_cidatabase_date.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:27:15 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(13): CodeIgniter\Router\RouteCollection->match([...], 'report/masterreport/item_code_pdf', 'Report\\Masterreport::item_code_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_cidatabase_date.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:27:15 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(13): CodeIgniter\Router\RouteCollection->match([...], 'report/masterreport/item_code_pdf', 'Report\\Masterreport::item_code_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_cidatabase_date.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:27:15 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(14): CodeIgniter\Router\RouteCollection->match([...], 'report/prereportpdf/participant_regno_photo', 'Report\\Prereportpdf::participant_regno_photo')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_cidatabase_date.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:27:15 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(14): CodeIgniter\Router\RouteCollection->match([...], 'report/prereportpdf/participant_regno_photo', 'Report\\Prereportpdf::participant_regno_photo')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_cidatabase_date.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+CRITICAL - 2026-08-28 23:59:42 --> TypeError: CodeIgniter\HTTP\SiteURI::stringifyRelativePath(): Return value must be of type string, false returned
+[Method: POST, Route: itemreport/itemreport_pdf]
+in SYSTEMPATH\HTTP\SiteURI.php on line 419.
+ 1 SYSTEMPATH\HTTP\SiteURI.php(393): CodeIgniter\HTTP\SiteURI->stringifyRelativePath(false)
+ 2 SYSTEMPATH\Helpers\url_helper.php(60): CodeIgniter\HTTP\SiteURI->baseUrl(false, null)
+ 3 APPPATH\Views\menu.php(6): base_url(false)
+ 4 SYSTEMPATH\View\View.php(240): include('C:\\xampp\\htdocs\\tk25\\app\\Views\\menu.php')
+ 5 SYSTEMPATH\View\View.php(243): CodeIgniter\View\View->{closure:CodeIgniter\View\View::render():237}()
+ 6 SYSTEMPATH\Common.php(1268): CodeIgniter\View\View->render('menu', [], true)
+ 7 APPPATH\Libraries\Template.php(132): view('menu', [], [])
+ 8 APPPATH\Controllers\Itemreport.php(16): App\Libraries\Template->write_view('menu', 'menu', '')
+ 9 SYSTEMPATH\CodeIgniter.php(944): App\Controllers\Itemreport->__construct()
+10 SYSTEMPATH\CodeIgniter.php(511): CodeIgniter\CodeIgniter->createController()
+11 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 23:59:45 --> TypeError: CodeIgniter\HTTP\SiteURI::stringifyRelativePath(): Return value must be of type string, false returned
+[Method: POST, Route: report/masterreport/item_code_pdf]
+in SYSTEMPATH\HTTP\SiteURI.php on line 419.
+ 1 SYSTEMPATH\HTTP\SiteURI.php(393): CodeIgniter\HTTP\SiteURI->stringifyRelativePath(false)
+ 2 SYSTEMPATH\Helpers\url_helper.php(60): CodeIgniter\HTTP\SiteURI->baseUrl(false, null)
+ 3 APPPATH\Views\menu.php(6): base_url(false)
+ 4 SYSTEMPATH\View\View.php(240): include('C:\\xampp\\htdocs\\tk25\\app\\Views\\menu.php')
+ 5 SYSTEMPATH\View\View.php(243): CodeIgniter\View\View->{closure:CodeIgniter\View\View::render():237}()
+ 6 SYSTEMPATH\Common.php(1268): CodeIgniter\View\View->render('menu', [], true)
+ 7 APPPATH\Libraries\Template.php(132): view('menu', [], [])
+ 8 APPPATH\Controllers\report\Masterreport.php(16): App\Libraries\Template->write_view('menu', 'menu', '')
+ 9 SYSTEMPATH\CodeIgniter.php(944): App\Controllers\Report\Masterreport->__construct()
+10 SYSTEMPATH\CodeIgniter.php(511): CodeIgniter\CodeIgniter->createController()
+11 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2026-08-28 23:59:47 --> Expression #10 of SELECT list is not in GROUP BY clause and contains nonaggregated column 'tk2025.pid.item_type' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('SELECT `sd`.`school_code`, `mj`.`school_name`, `pd`.`participant_id`, `pd`.`admn_no`, `pd`.`school_code`, `pd`.`participant_name`, `pd`.`class`, `pd`.`gender`, `pid`.`item_code`, `pid`.`item_type`, `pid`.`is_captain`, `it`.`item_name`, `it`.`fest_id`, `sm`.`stage_id`, `sm`.`start_time` AS `datee`, `ssm`.`stage_desc`, `ssm`.`stage_name`, `fm`.`fest_name`, `cpd`.`cluster_no`, `SUB`.`sub_district_name`
+FROM `school_details` AS `sd`
+JOIN `school_master` AS `mj` ON `mj`.`school_code` = `sd`.`school_code`
+JOIN `participant_details` AS `pd` ON `pd`.`school_code` = `sd`.`school_code`
+JOIN `participant_item_details` AS `pid` ON `pid`.`participant_id` = `pd`.`participant_id`
+JOIN `item_master` AS `it` ON `it`.`item_code` = `pid`.`item_code`
+JOIN `festival_master` AS `fm` ON `fm`.`fest_id` = `it`.`fest_id`
+JOIN `stage_item_master` AS `sm` ON `sm`.`item_code` = `it`.`item_code`
+JOIN `stage_master` AS `ssm` ON `ssm`.`stage_id` = `sm`.`stage_id`
+JOIN `cluster_participant_details` AS `cpd` ON `cpd`.`item_code` = `pid`.`item_code`
+JOIN `sub_district_master` AS `SUB` ON `SUB`.`sub_district_code` = `mj`.`sub_district_code`
+WHERE `pd`.`participant_id` = \'1001\'
+GROUP BY `pid`.`item_code`
+ORDER BY `it`.`fest_id`, `pd`.`participant_id`, `pid`.`item_code`', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `sd`.`school_code`, `mj`.`school_name`, `pd`.`participant_id`, `pd`.`admn_no`, `pd`.`school_code`, `pd`.`participant_name`, `pd`.`class`, `pd`.`gender`, `pid`.`item_code`, `pid`.`item_type`, `pid`.`is_captain`, `it`.`item_name`, `it`.`fest_id`, `sm`.`stage_id`, `sm`.`start_time` AS `datee`, `ssm`.`stage_desc`, `ssm`.`stage_name`, `fm`.`fest_name`, `cpd`.`cluster_no`, `SUB`.`sub_district_name`
+FROM `school_details` AS `sd`
+JOIN `school_master` AS `mj` ON `mj`.`school_code` = `sd`.`school_code`
+JOIN `participant_details` AS `pd` ON `pd`.`school_code` = `sd`.`school_code`
+JOIN `participant_item_details` AS `pid` ON `pid`.`participant_id` = `pd`.`participant_id`
+JOIN `item_master` AS `it` ON `it`.`item_code` = `pid`.`item_code`
+JOIN `festival_master` AS `fm` ON `fm`.`fest_id` = `it`.`fest_id`
+JOIN `stage_item_master` AS `sm` ON `sm`.`item_code` = `it`.`item_code`
+JOIN `stage_master` AS `ssm` ON `ssm`.`stage_id` = `sm`.`stage_id`
+JOIN `cluster_participant_details` AS `cpd` ON `cpd`.`item_code` = `pid`.`item_code`
+JOIN `sub_district_master` AS `SUB` ON `SUB`.`sub_district_code` = `mj`.`sub_district_code`
+WHERE `pd`.`participant_id` = \'1001\'
+GROUP BY `pid`.`item_code`
+ORDER BY `it`.`fest_id`, `pd`.`participant_id`, `pid`.`item_code`')
+ 3 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `sd`.`school_code`, `mj`.`school_name`, `pd`.`participant_id`, `pd`.`admn_no`, `pd`.`school_code`, `pd`.`participant_name`, `pd`.`class`, `pd`.`gender`, `pid`.`item_code`, `pid`.`item_type`, `pid`.`is_captain`, `it`.`item_name`, `it`.`fest_id`, `sm`.`stage_id`, `sm`.`start_time` AS `datee`, `ssm`.`stage_desc`, `ssm`.`stage_name`, `fm`.`fest_name`, `cpd`.`cluster_no`, `SUB`.`sub_district_name`
+FROM `school_details` AS `sd`
+JOIN `school_master` AS `mj` ON `mj`.`school_code` = `sd`.`school_code`
+JOIN `participant_details` AS `pd` ON `pd`.`school_code` = `sd`.`school_code`
+JOIN `participant_item_details` AS `pid` ON `pid`.`participant_id` = `pd`.`participant_id`
+JOIN `item_master` AS `it` ON `it`.`item_code` = `pid`.`item_code`
+JOIN `festival_master` AS `fm` ON `fm`.`fest_id` = `it`.`fest_id`
+JOIN `stage_item_master` AS `sm` ON `sm`.`item_code` = `it`.`item_code`
+JOIN `stage_master` AS `ssm` ON `ssm`.`stage_id` = `sm`.`stage_id`
+JOIN `cluster_participant_details` AS `cpd` ON `cpd`.`item_code` = `pid`.`item_code`
+JOIN `sub_district_master` AS `SUB` ON `SUB`.`sub_district_code` = `mj`.`sub_district_code`
+WHERE `pd`.`participant_id` = \'1001\'
+GROUP BY `pid`.`item_code`
+ORDER BY `it`.`fest_id`, `pd`.`participant_id`, `pid`.`item_code`')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1659): CodeIgniter\Database\BaseConnection->query('SELECT `sd`.`school_code`, `mj`.`school_name`, `pd`.`participant_id`, `pd`.`admn_no`, `pd`.`school_code`, `pd`.`participant_name`, `pd`.`class`, `pd`.`gender`, `pid`.`item_code`, `pid`.`item_type`, `pid`.`is_captain`, `it`.`item_name`, `it`.`fest_id`, `sm`.`stage_id`, `sm`.`start_time` AS `datee`, `ssm`.`stage_desc`, `ssm`.`stage_name`, `fm`.`fest_name`, `cpd`.`cluster_no`, `SUB`.`sub_district_name`
+FROM `school_details` AS `sd`
+JOIN `school_master` AS `mj` ON `mj`.`school_code` = `sd`.`school_code`
+JOIN `participant_details` AS `pd` ON `pd`.`school_code` = `sd`.`school_code`
+JOIN `participant_item_details` AS `pid` ON `pid`.`participant_id` = `pd`.`participant_id`
+JOIN `item_master` AS `it` ON `it`.`item_code` = `pid`.`item_code`
+JOIN `festival_master` AS `fm` ON `fm`.`fest_id` = `it`.`fest_id`
+JOIN `stage_item_master` AS `sm` ON `sm`.`item_code` = `it`.`item_code`
+JOIN `stage_master` AS `ssm` ON `ssm`.`stage_id` = `sm`.`stage_id`
+JOIN `cluster_participant_details` AS `cpd` ON `cpd`.`item_code` = `pid`.`item_code`
+JOIN `sub_district_master` AS `SUB` ON `SUB`.`sub_district_code` = `mj`.`sub_district_code`
+WHERE `pd`.`participant_id` = :pd.participant_id:
+GROUP BY `pid`.`item_code`
+ORDER BY `it`.`fest_id`, `pd`.`participant_id`, `pid`.`item_code`', [...], false)
+ 5 APPPATH\Libraries\CiDatabase.php(278): CodeIgniter\Database\BaseBuilder->get(null, 0)
+ 6 APPPATH\Models\report\Prereport_Model.php(523): App\Libraries\CiDatabase->get()
+ 7 APPPATH\Controllers\report\Prereportpdf.php(457): App\Models\Report\Prereport_Model->get_participant_regno('1001')
+ 8 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Report\Prereportpdf->participant_regno_photo()
+ 9 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Report\Prereportpdf))
+10 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 23:59:47 --> CodeIgniter\Database\Exceptions\DatabaseException: Expression #10 of SELECT list is not in GROUP BY clause and contains nonaggregated column 'tk2025.pid.item_type' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by
+[Method: POST, Route: report/prereportpdf/participant_regno_photo]
+in SYSTEMPATH\Database\BaseConnection.php on line 863.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1659): CodeIgniter\Database\BaseConnection->query('SELECT `sd`.`school_code`, `mj`.`school_name`, `pd`.`participant_id`, `pd`.`admn_no`, `pd`.`school_code`, `pd`.`participant_name`, `pd`.`class`, `pd`.`gender`, `pid`.`item_code`, `pid`.`item_type`, `pid`.`is_captain`, `it`.`item_name`, `it`.`fest_id`, `sm`.`stage_id`, `sm`.`start_time` AS `datee`, `ssm`.`stage_desc`, `ssm`.`stage_name`, `fm`.`fest_name`, `cpd`.`cluster_no`, `SUB`.`sub_district_name`
+FROM `school_details` AS `sd`
+JOIN `school_master` AS `mj` ON `mj`.`school_code` = `sd`.`school_code`
+JOIN `participant_details` AS `pd` ON `pd`.`school_code` = `sd`.`school_code`
+JOIN `participant_item_details` AS `pid` ON `pid`.`participant_id` = `pd`.`participant_id`
+JOIN `item_master` AS `it` ON `it`.`item_code` = `pid`.`item_code`
+JOIN `festival_master` AS `fm` ON `fm`.`fest_id` = `it`.`fest_id`
+JOIN `stage_item_master` AS `sm` ON `sm`.`item_code` = `it`.`item_code`
+JOIN `stage_master` AS `ssm` ON `ssm`.`stage_id` = `sm`.`stage_id`
+JOIN `cluster_participant_details` AS `cpd` ON `cpd`.`item_code` = `pid`.`item_code`
+JOIN `sub_district_master` AS `SUB` ON `SUB`.`sub_district_code` = `mj`.`sub_district_code`
+WHERE `pd`.`participant_id` = :pd.participant_id:
+GROUP BY `pid`.`item_code`
+ORDER BY `it`.`fest_id`, `pd`.`participant_id`, `pid`.`item_code`', [...], false)
+ 2 APPPATH\Libraries\CiDatabase.php(278): CodeIgniter\Database\BaseBuilder->get(null, 0)
+ 3 APPPATH\Models\report\Prereport_Model.php(523): App\Libraries\CiDatabase->get()
+ 4 APPPATH\Controllers\report\Prereportpdf.php(457): App\Models\Report\Prereport_Model->get_participant_regno('1001')
+ 5 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Report\Prereportpdf->participant_regno_photo()
+ 6 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Report\Prereportpdf))
+ 7 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 23:59:47 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Expression #10 of SELECT list is not in GROUP BY clause and contains nonaggregated column 'tk2025.pid.item_type' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 310.
+ 1 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `sd`.`school_code`, `mj`.`school_name`, `pd`.`participant_id`, `pd`.`admn_no`, `pd`.`school_code`, `pd`.`participant_name`, `pd`.`class`, `pd`.`gender`, `pid`.`item_code`, `pid`.`item_type`, `pid`.`is_captain`, `it`.`item_name`, `it`.`fest_id`, `sm`.`stage_id`, `sm`.`start_time` AS `datee`, `ssm`.`stage_desc`, `ssm`.`stage_name`, `fm`.`fest_name`, `cpd`.`cluster_no`, `SUB`.`sub_district_name`
+FROM `school_details` AS `sd`
+JOIN `school_master` AS `mj` ON `mj`.`school_code` = `sd`.`school_code`
+JOIN `participant_details` AS `pd` ON `pd`.`school_code` = `sd`.`school_code`
+JOIN `participant_item_details` AS `pid` ON `pid`.`participant_id` = `pd`.`participant_id`
+JOIN `item_master` AS `it` ON `it`.`item_code` = `pid`.`item_code`
+JOIN `festival_master` AS `fm` ON `fm`.`fest_id` = `it`.`fest_id`
+JOIN `stage_item_master` AS `sm` ON `sm`.`item_code` = `it`.`item_code`
+JOIN `stage_master` AS `ssm` ON `ssm`.`stage_id` = `sm`.`stage_id`
+JOIN `cluster_participant_details` AS `cpd` ON `cpd`.`item_code` = `pid`.`item_code`
+JOIN `sub_district_master` AS `SUB` ON `SUB`.`sub_district_code` = `mj`.`sub_district_code`
+WHERE `pd`.`participant_id` = \'1001\'
+GROUP BY `pid`.`item_code`
+ORDER BY `it`.`fest_id`, `pd`.`participant_id`, `pid`.`item_code`')
+ 2 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `sd`.`school_code`, `mj`.`school_name`, `pd`.`participant_id`, `pd`.`admn_no`, `pd`.`school_code`, `pd`.`participant_name`, `pd`.`class`, `pd`.`gender`, `pid`.`item_code`, `pid`.`item_type`, `pid`.`is_captain`, `it`.`item_name`, `it`.`fest_id`, `sm`.`stage_id`, `sm`.`start_time` AS `datee`, `ssm`.`stage_desc`, `ssm`.`stage_name`, `fm`.`fest_name`, `cpd`.`cluster_no`, `SUB`.`sub_district_name`
+FROM `school_details` AS `sd`
+JOIN `school_master` AS `mj` ON `mj`.`school_code` = `sd`.`school_code`
+JOIN `participant_details` AS `pd` ON `pd`.`school_code` = `sd`.`school_code`
+JOIN `participant_item_details` AS `pid` ON `pid`.`participant_id` = `pd`.`participant_id`
+JOIN `item_master` AS `it` ON `it`.`item_code` = `pid`.`item_code`
+JOIN `festival_master` AS `fm` ON `fm`.`fest_id` = `it`.`fest_id`
+JOIN `stage_item_master` AS `sm` ON `sm`.`item_code` = `it`.`item_code`
+JOIN `stage_master` AS `ssm` ON `ssm`.`stage_id` = `sm`.`stage_id`
+JOIN `cluster_participant_details` AS `cpd` ON `cpd`.`item_code` = `pid`.`item_code`
+JOIN `sub_district_master` AS `SUB` ON `SUB`.`sub_district_code` = `mj`.`sub_district_code`
+WHERE `pd`.`participant_id` = \'1001\'
+GROUP BY `pid`.`item_code`
+ORDER BY `it`.`fest_id`, `pd`.`participant_id`, `pid`.`item_code`')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1659): CodeIgniter\Database\BaseConnection->query('SELECT `sd`.`school_code`, `mj`.`school_name`, `pd`.`participant_id`, `pd`.`admn_no`, `pd`.`school_code`, `pd`.`participant_name`, `pd`.`class`, `pd`.`gender`, `pid`.`item_code`, `pid`.`item_type`, `pid`.`is_captain`, `it`.`item_name`, `it`.`fest_id`, `sm`.`stage_id`, `sm`.`start_time` AS `datee`, `ssm`.`stage_desc`, `ssm`.`stage_name`, `fm`.`fest_name`, `cpd`.`cluster_no`, `SUB`.`sub_district_name`
+FROM `school_details` AS `sd`
+JOIN `school_master` AS `mj` ON `mj`.`school_code` = `sd`.`school_code`
+JOIN `participant_details` AS `pd` ON `pd`.`school_code` = `sd`.`school_code`
+JOIN `participant_item_details` AS `pid` ON `pid`.`participant_id` = `pd`.`participant_id`
+JOIN `item_master` AS `it` ON `it`.`item_code` = `pid`.`item_code`
+JOIN `festival_master` AS `fm` ON `fm`.`fest_id` = `it`.`fest_id`
+JOIN `stage_item_master` AS `sm` ON `sm`.`item_code` = `it`.`item_code`
+JOIN `stage_master` AS `ssm` ON `ssm`.`stage_id` = `sm`.`stage_id`
+JOIN `cluster_participant_details` AS `cpd` ON `cpd`.`item_code` = `pid`.`item_code`
+JOIN `sub_district_master` AS `SUB` ON `SUB`.`sub_district_code` = `mj`.`sub_district_code`
+WHERE `pd`.`participant_id` = :pd.participant_id:
+GROUP BY `pid`.`item_code`
+ORDER BY `it`.`fest_id`, `pd`.`participant_id`, `pid`.`item_code`', [...], false)
+ 4 APPPATH\Libraries\CiDatabase.php(278): CodeIgniter\Database\BaseBuilder->get(null, 0)
+ 5 APPPATH\Models\report\Prereport_Model.php(523): App\Libraries\CiDatabase->get()
+ 6 APPPATH\Controllers\report\Prereportpdf.php(457): App\Models\Report\Prereport_Model->get_participant_regno('1001')
+ 7 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Report\Prereportpdf->participant_regno_photo()
+ 8 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Report\Prereportpdf))
+ 9 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 23:59:47 --> [Caused by] mysqli_sql_exception: Expression #10 of SELECT list is not in GROUP BY clause and contains nonaggregated column 'tk2025.pid.item_type' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('SELECT `sd`.`school_code`, `mj`.`school_name`, `pd`.`participant_id`, `pd`.`admn_no`, `pd`.`school_code`, `pd`.`participant_name`, `pd`.`class`, `pd`.`gender`, `pid`.`item_code`, `pid`.`item_type`, `pid`.`is_captain`, `it`.`item_name`, `it`.`fest_id`, `sm`.`stage_id`, `sm`.`start_time` AS `datee`, `ssm`.`stage_desc`, `ssm`.`stage_name`, `fm`.`fest_name`, `cpd`.`cluster_no`, `SUB`.`sub_district_name`
+FROM `school_details` AS `sd`
+JOIN `school_master` AS `mj` ON `mj`.`school_code` = `sd`.`school_code`
+JOIN `participant_details` AS `pd` ON `pd`.`school_code` = `sd`.`school_code`
+JOIN `participant_item_details` AS `pid` ON `pid`.`participant_id` = `pd`.`participant_id`
+JOIN `item_master` AS `it` ON `it`.`item_code` = `pid`.`item_code`
+JOIN `festival_master` AS `fm` ON `fm`.`fest_id` = `it`.`fest_id`
+JOIN `stage_item_master` AS `sm` ON `sm`.`item_code` = `it`.`item_code`
+JOIN `stage_master` AS `ssm` ON `ssm`.`stage_id` = `sm`.`stage_id`
+JOIN `cluster_participant_details` AS `cpd` ON `cpd`.`item_code` = `pid`.`item_code`
+JOIN `sub_district_master` AS `SUB` ON `SUB`.`sub_district_code` = `mj`.`sub_district_code`
+WHERE `pd`.`participant_id` = \'1001\'
+GROUP BY `pid`.`item_code`
+ORDER BY `it`.`fest_id`, `pd`.`participant_id`, `pid`.`item_code`', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `sd`.`school_code`, `mj`.`school_name`, `pd`.`participant_id`, `pd`.`admn_no`, `pd`.`school_code`, `pd`.`participant_name`, `pd`.`class`, `pd`.`gender`, `pid`.`item_code`, `pid`.`item_type`, `pid`.`is_captain`, `it`.`item_name`, `it`.`fest_id`, `sm`.`stage_id`, `sm`.`start_time` AS `datee`, `ssm`.`stage_desc`, `ssm`.`stage_name`, `fm`.`fest_name`, `cpd`.`cluster_no`, `SUB`.`sub_district_name`
+FROM `school_details` AS `sd`
+JOIN `school_master` AS `mj` ON `mj`.`school_code` = `sd`.`school_code`
+JOIN `participant_details` AS `pd` ON `pd`.`school_code` = `sd`.`school_code`
+JOIN `participant_item_details` AS `pid` ON `pid`.`participant_id` = `pd`.`participant_id`
+JOIN `item_master` AS `it` ON `it`.`item_code` = `pid`.`item_code`
+JOIN `festival_master` AS `fm` ON `fm`.`fest_id` = `it`.`fest_id`
+JOIN `stage_item_master` AS `sm` ON `sm`.`item_code` = `it`.`item_code`
+JOIN `stage_master` AS `ssm` ON `ssm`.`stage_id` = `sm`.`stage_id`
+JOIN `cluster_participant_details` AS `cpd` ON `cpd`.`item_code` = `pid`.`item_code`
+JOIN `sub_district_master` AS `SUB` ON `SUB`.`sub_district_code` = `mj`.`sub_district_code`
+WHERE `pd`.`participant_id` = \'1001\'
+GROUP BY `pid`.`item_code`
+ORDER BY `it`.`fest_id`, `pd`.`participant_id`, `pid`.`item_code`')
+ 3 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `sd`.`school_code`, `mj`.`school_name`, `pd`.`participant_id`, `pd`.`admn_no`, `pd`.`school_code`, `pd`.`participant_name`, `pd`.`class`, `pd`.`gender`, `pid`.`item_code`, `pid`.`item_type`, `pid`.`is_captain`, `it`.`item_name`, `it`.`fest_id`, `sm`.`stage_id`, `sm`.`start_time` AS `datee`, `ssm`.`stage_desc`, `ssm`.`stage_name`, `fm`.`fest_name`, `cpd`.`cluster_no`, `SUB`.`sub_district_name`
+FROM `school_details` AS `sd`
+JOIN `school_master` AS `mj` ON `mj`.`school_code` = `sd`.`school_code`
+JOIN `participant_details` AS `pd` ON `pd`.`school_code` = `sd`.`school_code`
+JOIN `participant_item_details` AS `pid` ON `pid`.`participant_id` = `pd`.`participant_id`
+JOIN `item_master` AS `it` ON `it`.`item_code` = `pid`.`item_code`
+JOIN `festival_master` AS `fm` ON `fm`.`fest_id` = `it`.`fest_id`
+JOIN `stage_item_master` AS `sm` ON `sm`.`item_code` = `it`.`item_code`
+JOIN `stage_master` AS `ssm` ON `ssm`.`stage_id` = `sm`.`stage_id`
+JOIN `cluster_participant_details` AS `cpd` ON `cpd`.`item_code` = `pid`.`item_code`
+JOIN `sub_district_master` AS `SUB` ON `SUB`.`sub_district_code` = `mj`.`sub_district_code`
+WHERE `pd`.`participant_id` = \'1001\'
+GROUP BY `pid`.`item_code`
+ORDER BY `it`.`fest_id`, `pd`.`participant_id`, `pid`.`item_code`')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1659): CodeIgniter\Database\BaseConnection->query('SELECT `sd`.`school_code`, `mj`.`school_name`, `pd`.`participant_id`, `pd`.`admn_no`, `pd`.`school_code`, `pd`.`participant_name`, `pd`.`class`, `pd`.`gender`, `pid`.`item_code`, `pid`.`item_type`, `pid`.`is_captain`, `it`.`item_name`, `it`.`fest_id`, `sm`.`stage_id`, `sm`.`start_time` AS `datee`, `ssm`.`stage_desc`, `ssm`.`stage_name`, `fm`.`fest_name`, `cpd`.`cluster_no`, `SUB`.`sub_district_name`
+FROM `school_details` AS `sd`
+JOIN `school_master` AS `mj` ON `mj`.`school_code` = `sd`.`school_code`
+JOIN `participant_details` AS `pd` ON `pd`.`school_code` = `sd`.`school_code`
+JOIN `participant_item_details` AS `pid` ON `pid`.`participant_id` = `pd`.`participant_id`
+JOIN `item_master` AS `it` ON `it`.`item_code` = `pid`.`item_code`
+JOIN `festival_master` AS `fm` ON `fm`.`fest_id` = `it`.`fest_id`
+JOIN `stage_item_master` AS `sm` ON `sm`.`item_code` = `it`.`item_code`
+JOIN `stage_master` AS `ssm` ON `ssm`.`stage_id` = `sm`.`stage_id`
+JOIN `cluster_participant_details` AS `cpd` ON `cpd`.`item_code` = `pid`.`item_code`
+JOIN `sub_district_master` AS `SUB` ON `SUB`.`sub_district_code` = `mj`.`sub_district_code`
+WHERE `pd`.`participant_id` = :pd.participant_id:
+GROUP BY `pid`.`item_code`
+ORDER BY `it`.`fest_id`, `pd`.`participant_id`, `pid`.`item_code`', [...], false)
+ 5 APPPATH\Libraries\CiDatabase.php(278): CodeIgniter\Database\BaseBuilder->get(null, 0)
+ 6 APPPATH\Models\report\Prereport_Model.php(523): App\Libraries\CiDatabase->get()
+ 7 APPPATH\Controllers\report\Prereportpdf.php(457): App\Models\Report\Prereport_Model->get_participant_regno('1001')
+ 8 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Report\Prereportpdf->participant_regno_photo()
+ 9 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Report\Prereportpdf))
+10 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+WARNING - 2026-08-28 18:46:15 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(7): CodeIgniter\Router\RouteCollection->match([...], 'welcome', 'Welcome::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_is_all_stage_alloted.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:46:15 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(7): CodeIgniter\Router\RouteCollection->match([...], 'welcome', 'Welcome::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_is_all_stage_alloted.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:46:15 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(9): CodeIgniter\Router\RouteCollection->match([...], 'login', 'Login::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_is_all_stage_alloted.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:46:15 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(9): CodeIgniter\Router\RouteCollection->match([...], 'login', 'Login::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_is_all_stage_alloted.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:46:15 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(12): CodeIgniter\Router\RouteCollection->match([...], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_is_all_stage_alloted.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:46:15 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(12): CodeIgniter\Router\RouteCollection->match([...], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_is_all_stage_alloted.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:46:15 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(13): CodeIgniter\Router\RouteCollection->match([...], 'report/masterreport/item_code_pdf', 'Report\\Masterreport::item_code_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_is_all_stage_alloted.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:46:15 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(13): CodeIgniter\Router\RouteCollection->match([...], 'report/masterreport/item_code_pdf', 'Report\\Masterreport::item_code_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_is_all_stage_alloted.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:46:15 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(14): CodeIgniter\Router\RouteCollection->match([...], 'report/prereportpdf/participant_regno_photo', 'Report\\Prereportpdf::participant_regno_photo')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_is_all_stage_alloted.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:46:15 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(14): CodeIgniter\Router\RouteCollection->match([...], 'report/prereportpdf/participant_regno_photo', 'Report\\Prereportpdf::participant_regno_photo')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_is_all_stage_alloted.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:50:03 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(7): CodeIgniter\Router\RouteCollection->match([...], 'welcome', 'Welcome::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_is_all_result_entered.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:50:03 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(7): CodeIgniter\Router\RouteCollection->match([...], 'welcome', 'Welcome::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_is_all_result_entered.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:50:03 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(9): CodeIgniter\Router\RouteCollection->match([...], 'login', 'Login::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_is_all_result_entered.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:50:03 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(9): CodeIgniter\Router\RouteCollection->match([...], 'login', 'Login::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_is_all_result_entered.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:50:03 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(12): CodeIgniter\Router\RouteCollection->match([...], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_is_all_result_entered.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:50:03 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(12): CodeIgniter\Router\RouteCollection->match([...], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_is_all_result_entered.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:50:03 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(13): CodeIgniter\Router\RouteCollection->match([...], 'report/masterreport/item_code_pdf', 'Report\\Masterreport::item_code_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_is_all_result_entered.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:50:03 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(13): CodeIgniter\Router\RouteCollection->match([...], 'report/masterreport/item_code_pdf', 'Report\\Masterreport::item_code_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_is_all_result_entered.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:50:03 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(14): CodeIgniter\Router\RouteCollection->match([...], 'report/prereportpdf/participant_regno_photo', 'Report\\Prereportpdf::participant_regno_photo')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_is_all_result_entered.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:50:03 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(14): CodeIgniter\Router\RouteCollection->match([...], 'report/prereportpdf/participant_regno_photo', 'Report\\Prereportpdf::participant_regno_photo')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_is_all_result_entered.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:59:27 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(7): CodeIgniter\Router\RouteCollection->match([...], 'welcome', 'Welcome::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_gm_direct.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:59:27 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(7): CodeIgniter\Router\RouteCollection->match([...], 'welcome', 'Welcome::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_gm_direct.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:59:27 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(9): CodeIgniter\Router\RouteCollection->match([...], 'login', 'Login::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_gm_direct.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:59:27 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(9): CodeIgniter\Router\RouteCollection->match([...], 'login', 'Login::index')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_gm_direct.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:59:27 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(12): CodeIgniter\Router\RouteCollection->match([...], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_gm_direct.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:59:27 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(12): CodeIgniter\Router\RouteCollection->match([...], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_gm_direct.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:59:27 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(13): CodeIgniter\Router\RouteCollection->match([...], 'report/masterreport/item_code_pdf', 'Report\\Masterreport::item_code_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_gm_direct.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:59:27 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(13): CodeIgniter\Router\RouteCollection->match([...], 'report/masterreport/item_code_pdf', 'Report\\Masterreport::item_code_pdf')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_gm_direct.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:59:27 --> [DEPRECATED] Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "get" is deprecated. Use uppercase HTTP method like "GET".', 16384)
+ 2 APPPATH\Config\Routes.php(14): CodeIgniter\Router\RouteCollection->match([...], 'report/prereportpdf/participant_regno_photo', 'Report\\Prereportpdf::participant_regno_photo')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_gm_direct.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+WARNING - 2026-08-28 18:59:27 --> [DEPRECATED] Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST". in SYSTEMPATH\Router\RouteCollection.php on line 1026.
+ 1 SYSTEMPATH\Router\RouteCollection.php(1026): trigger_error('Passing lowercase HTTP method "post" is deprecated. Use uppercase HTTP method like "POST".', 16384)
+ 2 APPPATH\Config\Routes.php(14): CodeIgniter\Router\RouteCollection->match([...], 'report/prereportpdf/participant_regno_photo', 'Report\\Prereportpdf::participant_regno_photo')
+ 3 SYSTEMPATH\Router\RouteCollection.php(339): require('C:\\xampp\\htdocs\\tk25\\app\\Config\\Routes.php')
+ 4 SYSTEMPATH\Boot.php(137): CodeIgniter\Router\RouteCollection->loadRoutes()
+ 5 C:\Users\Dominic\AppData\Local\Temp\opencode\test_gm_direct.php(9): CodeIgniter\Boot::bootConsole(Object(Config\Paths))
+DEBUG - 2026-08-28 18:59:27 --> Session: Initialization under CLI aborted.
+CRITICAL - 2026-08-28 19:07:42 --> TypeError: count(): Argument #1 ($value) must be of type Countable|array, int given
+[Method: POST, Route: login]
+in APPPATH\Controllers\Login.php on line 34.
+ 1 APPPATH\Controllers\Login.php(34): count(2)
+ 2 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Login->index()
+ 3 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Login))
+ 4 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-28 19:07:54 --> TypeError: count(): Argument #1 ($value) must be of type Countable|array, int given
+[Method: POST, Route: login]
+in APPPATH\Controllers\Login.php on line 34.
+ 1 APPPATH\Controllers\Login.php(34): count(2)
+ 2 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Login->index()
+ 3 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Login))
+ 4 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(54): CodeIgniter\Boot::bootWeb(Object(Config\Paths))

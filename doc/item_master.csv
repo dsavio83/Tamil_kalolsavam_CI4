@@ -1,0 +1,41 @@
+#,Item Code,Fest Name,Item Type,Item Name,Gender,Item Type,Max Time,Time Type,Max Participants,Max Pinnani,Is Of Stage
+1,151,LP,LP Kalaivizha Single,STORY TELLING,C,S,5,M,1,0,N
+2,152,LP,LP Kalaivizha Single,EXTEMPORE,C,S,5,M,1,0,N
+3,153,LP,LP Kalaivizha Single,HAND WRITING,C,S,60,M,1,0,Y
+4,154,LP,LP Kalaivizha Single,THIRUKKURAL PRESENT,C,S,5,M,1,0,N
+5,155,LP,LP Kalaivizha Single,RECITATION,C,S,5,M,1,0,N
+6,156,LP,LP Kalaivizha Single,MONO ACT,C,S,5,M,1,0,N
+7,157,LP,LP Kalaivizha Single,LIGHT MUSIC,C,S,5,M,1,0,N
+8,158,LP,LP Kalaivizha Single,PATRIOTIC SONG,C,G,5,M,7,0,N
+9,159,LP,LP Kalaivizha Group,DRAMA,C,G,30,M,7,3,N
+10,351,UP,UP Kalaivizha Single,STORY WRITING,C,S,90,M,1,0,Y
+11,352,UP,UP Kalaivizha Single,EXTEMPORE,C,S,5,M,1,0,N
+12,353,UP,UP Kalaivizha Single,VERSIFICATION,C,S,90,M,1,0,Y
+13,354,UP,UP Kalaivizha Single,ESSAY WRITING,C,S,90,M,1,0,Y
+14,355,UP,UP Kalaivizha Single,RECITATION,C,S,5,M,1,0,N
+15,356,UP,UP Kalaivizha Single,MONO ACT,C,S,5,M,1,0,N
+16,357,UP,UP Kalaivizha Single,LIGHT MUSIC,C,S,5,M,1,0,N
+17,358,UP,UP Kalaivizha Single,THIRUKKURAL PRESENT,C,S,5,M,1,0,N
+18,359,UP,UP Kalaivizha Group,PATRIOTIC SONG,C,G,5,M,7,0,N
+19,360,UP,UP Kalaivizha Group,FOLK SONG ,C,G,10,M,7,0,N
+20,361,UP,UP Kalaivizha Group,DRAMA,C,G,30,M,7,3,N
+21,551,HS,HS Kalaivizha Single,STORY WRITING,C,S,90,M,1,0,Y
+22,552,HS,HS Kalaivizha Single,EXTEMPORE,C,S,5,M,1,0,N
+23,553,HS,HS Kalaivizha Single,VERSIFICATION,C,S,90,M,1,0,Y
+24,554,HS,HS Kalaivizha Single,ESSAY WRITING,C,S,90,M,1,0,Y
+25,555,HS,HS Kalaivizha Single,RECITATION,C,S,5,M,1,0,N
+26,556,HS,HS Kalaivizha Single,MONO ACT,C,S,5,M,1,0,N
+27,557,HS,HS Kalaivizha Single,LIGHT MUSIC,C,S,5,M,1,0,N
+28,558,HS,HS Kalaivizha Group,PATRIOTIC SONG,C,G,5,M,7,0,N
+29,559,HS,HS Kalaivizha Group,FOLK SONG ,C,G,10,M,7,0,N
+30,560,HS,HS Kalaivizha Group,DRAMA,C,G,30,M,7,3,N
+31,751,HSS,HSS Kalaivizha Single,STORY WRITING,C,S,90,M,1,0,Y
+32,752,HSS,HSS Kalaivizha Single,EXTEMPORE,C,S,5,M,1,0,N
+33,753,HSS,HSS Kalaivizha Single,VERSIFICATION,C,S,90,M,1,0,Y
+34,754,HSS,HSS Kalaivizha Single,ESSAY WRITING,C,S,90,M,1,0,Y
+35,755,HSS,HSS Kalaivizha Single,RECITATION,C,S,5,M,1,0,N
+36,756,HSS,HSS Kalaivizha Single,MONO ACT,C,S,5,M,1,0,N
+37,757,HSS,HSS Kalaivizha Single,LIGHT MUSIC,C,S,5,M,1,0,N
+38,758,HSS,HSS Kalaivizha Group,PATRIOTIC SONG,C,G,5,M,7,0,N
+39,759,HSS,HSS Kalaivizha Group,FOLK SONG ,C,G,10,M,7,0,N
+40,760,HSS,HSS Kalaivizha Group,DRAMA,C,G,30,M,7,3,N

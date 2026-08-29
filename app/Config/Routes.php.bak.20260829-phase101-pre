@@ -1,0 +1,65 @@
+<?php
+
+use CodeIgniter\Router\RouteCollection;
+
+/** @var RouteCollection $routes */
+$routes->get('/', 'Welcome::index');
+$routes->match(['get', 'post'], 'welcome', 'Welcome::index');
+
+$routes->match(['get', 'post'], 'login', 'Login::index');
+
+// Confirmed PDF Endpoints
+$routes->match(['get', 'post'], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf');
+$routes->match(['get', 'post'], 'report/masterreport/item_code_pdf', 'Report\Masterreport::item_code_pdf');
+$routes->match(['get', 'post'], 'report/prereportpdf/participant_regno_photo', 'Report\Prereportpdf::participant_regno_photo');
+
+// ------------------------------------------------------------------
+// PHASE 75 - PRIMARY BUSINESS WORKFLOW ROUTES (OPTION A: explicit GET)
+// Restores reachability of the minimum primary post-login destinations.
+// All target controllers self-protect via is_user_logged()/permission
+// checks in their constructors. Dangerous/legacy endpoints (Test,
+// Import restore/initialize, Export, Afterresult_model, staticreport,
+// certificate calibration, and the broad report surface) are NOT routed.
+// ------------------------------------------------------------------
+
+// Post-login redirect targets
+$routes->get('welcome/district_details', 'Welcome::district_details');
+$routes->get('welcome/sub_district_details', 'Welcome::sub_district_details');
+$routes->get('welcome/cluster_details', 'Welcome::cluster_details');
+$routes->get('welcome/cluster_schools', 'Welcome::cluster_schools');
+$routes->get('login/change_password', 'Login::change_password');
+
+// Settings / Kalolsavam definition
+$routes->get('admin/kalolsavam', 'Admin\Kalolsavam::index');
+
+// Registrations / participant entry (primary)
+$routes->get('schools/registration', 'Schools\Registration::index');
+$routes->get('schools/school_master', 'Schools\School_Master::index');
+$routes->get('schools/special_order_entry', 'Schools\Special_Order_Entry::index');
+
+// User administration
+$routes->get('user/admin_users', 'User\Admin_Users::index');
+$routes->get('user/user_registration', 'User\User_Registration::index');
+$routes->get('user/user_cluster', 'User\User_Cluster::index');
+
+// Stage / allotment
+$routes->get('stage/stage_details', 'Stage\Stage_Details::index');
+$routes->get('stage/allotment', 'Stage\Allotment::index');
+$routes->get('stage/item_participant/participant_nodetails', 'Stage\Item_Participant::participant_nodetails');
+$routes->get('stage/festival_scheduling', 'Stage\Festival_Scheduling::index');
+$routes->get('stage/festival_scheduling/order_of_events', 'Stage\Festival_Scheduling::order_of_events');
+
+// Result entry / publishing (primary landing pages only)
+$routes->get('result/resultentry', 'Result\Resultentry::index');
+$routes->get('result/resultentry/item_result_list', 'Result\Resultentry::item_result_list');
+$routes->get('publishresult/resultindex/resultview', 'Publishresult\Resultindex::resultview');
+
+// ------------------------------------------------------------------
+// PHASE 97 - Protected Admin Users AJAX endpoints (POST only)
+// Required by js/user/adminusers.js loadSubDistrict()/loadSchool().
+// Loadajax constructor enforces login + USER_GROUP == 'W'.
+// Do NOT add GET or wildcard routes here.
+// ------------------------------------------------------------------
+$routes->post('ajax/loadajax/get_subdistrict_details', 'Ajax\Loadajax::get_subdistrict_details');
+$routes->post('ajax/loadajax/get_school_details', 'Ajax\Loadajax::get_school_details');
+
