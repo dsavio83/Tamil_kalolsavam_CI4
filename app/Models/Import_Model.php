@@ -9,6 +9,33 @@ class Import_Model extends \App\Models\BaseModel {
      parent::__construct ();
     }
 
+    /**
+     * Neutralize spreadsheet formula-injection in imported string values.
+     *
+     * Values beginning with a formula trigger (=, +, - or @) are prefixed with a
+     * single quote unless the whole value is a valid number (negative/positive
+     * numeric data such as -5 or +10.5 is preserved unchanged). This prevents
+     * user-controlled CSV text from becoming an executable formula when the data
+     * is later opened in spreadsheet software.
+     *
+     * @param mixed $value
+     * @return mixed
+     */
+    private function sanitizeCsvFormula($value) {
+        if (!is_string($value) || $value === '') {
+            return $value;
+        }
+        $first = $value[0];
+        if ($first !== '=' && $first !== '+' && $first !== '-' && $first !== '@') {
+            return $value;
+        }
+        // Preserve legitimate numeric values such as -5, +10, 3.14, -2.5e3.
+        if (is_numeric($value)) {
+            return $value;
+        }
+        return "'" . $value;
+    }
+
     function insert_import_data($file_name) {
         $file = $this->config->item('base_path') . 'uploads/csv/' . $file_name;
         if (file_exists($file)) {
@@ -52,7 +79,7 @@ class Import_Model extends \App\Models\BaseModel {
                                             $data_array['sub_district_code'] = trim($csvData[$i][1]);
                                             $data_array['edu_district_code'] = trim($csvData[$i][2]);
                                             $data_array['rev_district_code'] = trim($csvData[$i][3]);
-                                            $data_array['school_name'] = trim($csvData[$i][4], '"');
+                                            $data_array['school_name'] = $this->sanitizeCsvFormula(trim($csvData[$i][4], '"'));
                                             $data_array['school_type'] = trim($csvData[$i][5]);
                                             // $data_array['master_confirm'] = trim($csvData[$i][6]);
                                             $data_array['master_confirm'] = 'N';
@@ -79,12 +106,12 @@ class Import_Model extends \App\Models\BaseModel {
                                             $data_array['class_start'] = trim($csvData[$i][1]);
                                             $data_array['class_end'] = trim($csvData[$i][2]);
                                             $data_array['school_phone'] = trim($csvData[$i][3]);
-                                            $data_array['school_email'] = trim($csvData[$i][4]);
-                                            $data_array['hm_name'] = trim($csvData[$i][5]);
+                                            $data_array['school_email'] = $this->sanitizeCsvFormula(trim($csvData[$i][4]));
+                                            $data_array['hm_name'] = $this->sanitizeCsvFormula(trim($csvData[$i][5]));
                                             $data_array['hm_phone'] = trim($csvData[$i][6]);
-                                            $data_array['principal_name'] = trim($csvData[$i][7]);
+                                            $data_array['principal_name'] = $this->sanitizeCsvFormula(trim($csvData[$i][7]));
                                             $data_array['principal_phone'] = trim($csvData[$i][8]);
-                                            $data_array['teachers'] = trim($csvData[$i][9]);
+                                            $data_array['teachers'] = $this->sanitizeCsvFormula(trim($csvData[$i][9]));
                                             $data_array['strength_lp'] = trim($csvData[$i][10]);
                                             $data_array['strength_up'] = trim($csvData[$i][11]);
                                             $data_array['strength_hs'] = trim($csvData[$i][12]);
@@ -127,14 +154,14 @@ class Import_Model extends \App\Models\BaseModel {
                                             $data_array['school_code'] = trim($csvData[$i][1]);
                                             $data_array['sub_district_code'] = trim($csvData[$i][2]);
                                             $data_array['admn_no'] = trim($csvData[$i][3]);
-                                            $data_array['participant_name'] = trim($csvData[$i][4], '"');
+                                            $data_array['participant_name'] = $this->sanitizeCsvFormula(trim($csvData[$i][4], '"'));
                                             $data_array['class'] = trim($csvData[$i][5]);
                                             $data_array['gender'] = trim($csvData[$i][6]);
                                             //Modifications
                                             $data_array['bank_id'] = trim($csvData[$i][7]);
-                                            $data_array['branch_name'] = trim($csvData[$i][8]);
+                                            $data_array['branch_name'] = $this->sanitizeCsvFormula(trim($csvData[$i][8]));
                                             $data_array['account_no'] = trim($csvData[$i][9]);
-                                            $data_array['ifsc_code'] = trim($csvData[$i][10]);
+                                            $data_array['ifsc_code'] = $this->sanitizeCsvFormula(trim($csvData[$i][10]));
                                             //echo "tttt" ;print_r($data_array);exit;
                                             
                                             if (!$this->db->insert('participant_details', $data_array)) {
@@ -168,7 +195,7 @@ class Import_Model extends \App\Models\BaseModel {
                                             $data_array['item_code'] = trim($csvData[$i][4]);
                                             $data_array['item_type'] = trim($csvData[$i][5]);
                                             $data_array['spo_id'] = trim($csvData[$i][6]);
-                                            $data_array['spo_remarks'] = trim($csvData[$i][7]);
+                                            $data_array['spo_remarks'] = $this->sanitizeCsvFormula(trim($csvData[$i][7]));
                                             $data_array['is_captain'] = trim($csvData[$i][8]);
 
                                             if (!$this->db->insert('participant_item_details', $data_array)) {
@@ -249,7 +276,7 @@ class Import_Model extends \App\Models\BaseModel {
                                                 $data_array['school_code'] = trim($csvData[$i][0]);
                                                 $data_array['sub_district_code'] = trim($csvData[$i][1]);
                                                 $data_array['admn_no'] = trim($csvData[$i][2]);
-                                                $data_array['participant_name'] = trim($csvData[$i][3], '"');
+                                                $data_array['participant_name'] = $this->sanitizeCsvFormula(trim($csvData[$i][3], '"'));
                                                 $data_array['class'] = trim($csvData[$i][4]);
                                                 $data_array['gender'] = trim($csvData[$i][5]);
                                                 if (!$this->db->insert('temp_dist_participant_details', $data_array)) {

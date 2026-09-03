@@ -168,7 +168,28 @@ function printContentt(element_id)
     WindowObject.close();
 }
 function fncrestoreKalolsavamdatabase() {
-    $('formKalolsavam').submit();
+    var confirmed = $('i_confirm') && $('i_confirm').checked;
+    if (!confirmed) {
+        alert('Please tick the confirmation box before restoring the database.');
+        return false;
+    }
+    // Append the server-side confirmation value required for restore.
+    var form = $('formKalolsavam');
+    if (!form) {
+        return false;
+    }
+    var inp = $('confirm_restore');
+    if (!inp) {
+        inp = document.createElement('input');
+        inp.type = 'hidden';
+        inp.name = 'confirm_restore';
+        inp.id = 'confirm_restore';
+        inp.value = 'RESTORE';
+        form.appendChild(inp);
+    } else {
+        inp.value = 'RESTORE';
+    }
+    form.submit();
     return true;
 
 }

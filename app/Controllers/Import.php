@@ -40,7 +40,8 @@ class Import  extends \App\Controllers\BaseController {
                
                 
                 if (!$file_name) {
-                    $this->template->write('error', $this->upload->display_errors());
+                    $this->Contents['upload_error'] = 'Invalid CSV file. Only .csv text files up to 8 MB are accepted.';
+                    $this->template->write('error', $this->Contents['upload_error']);
                     $this->template->write_view('content', 'import/import_csv_data', $this->Contents);
                     $this->template->load();
                     return;
@@ -85,7 +86,10 @@ class Import  extends \App\Controllers\BaseController {
             if (isset($_FILES['kalolsavamCSV']['name']) && !empty($_FILES['kalolsavamCSV']['name'])) {
                 $file_name = $this->General_Model->upload_kalolsavam_csv_data('kalolsavamCSV', 'kalolsavamCSV' . substr(fncUuid(), 10));
                 if (!$file_name) {
-                    $this->template->write('error', $this->upload->display_errors());
+                    $this->template->write('error', 'Invalid CSV file. Only .csv text files up to 8 MB are accepted.');
+                    $this->template->write_view('content', 'import/import_csv_data', $this->Contents);
+                    $this->template->load();
+                    return;
                 }
                 if ($this->Import_Model->insert_import_data($file_name)) {
                     $this->template->write('message', 'CSV Data saved successfully');
@@ -168,37 +172,107 @@ class Import  extends \App\Controllers\BaseController {
         $this->template->load();
     }
 
+    /**
+     * Write an audit log entry for a database restore attempt using the
+     * project's existing table-based activity log convention (z_*_log).
+     * Never logs passwords, credentials or file contents.
+     *
+     * @param string $action  e.g. 'restore'
+     * @param string $status  'S' success, 'F' failure, 'D' denied
+     * @param string $message Short human-readable result detail.
+     * @return void
+     */
+    private function writeRestoreLog($action, $status, $message = '') {
+        $uid  = (int)$this->session->get('USERID');
+        $uname = (string)$this->session->get('USER_NAME');
+        if ($uname === '' ) {
+            $uname = (string)$this->session->get('USER');
+        }
+        $logdata = array(
+            'user_id'            => $uid ?: 0,
+            'user_name'          => $uname,
+            'rev_district_code'  => (int)$this->session->get('DISTRICT') ?: 0,
+            'sub_district_code'  => (int)$this->session->get('SUB_DISTRICT') ?: 0,
+            'school_code'        => (int)$this->session->get('SCHOOL_CODE') ?: 0,
+            'ip'                 => service('request')->getIPAddress(),
+            'action'             => (string)$action,
+            'status'             => (string)$status,
+            'message'            => mb_substr($message, 0, 255),
+        );
+        try {
+            $this->db->insert('z_restore_log', $logdata);
+        } catch (\Throwable $e) {
+            // Failures to write the audit log must not break the request.
+        }
+    }
+
     function restore_database() {
 
         $this->template->write_view('menu', 'menu', '');
-        if ($this->session->get('USER_GROUP') == 'W') {
+        if ($this->session->get('USER_GROUP') != 'W') {
+            $this->writeRestoreLog('restore', 'D', 'restore denied to non-Web-admin user');
+            redirect('welcome');
+            return;
+        }
 
-            if (isset($_FILES['kalolsavamdatabase']['name']) && !empty($_FILES['kalolsavamdatabase']['name'])) {
-                //echo "<br /><br /><br />kiii";
-                $file_name = $this->General_Model->restore_database('kalolsavamdatabase', 'kalolsavamdatabase' . substr(fncUuid(), 10));
-                if (!$file_name) {
-                    $this->template->write('error', $this->upload->display_errors());
-                    $this->template->write_view('content', 'import/restore_data', $this->Contents);
-                    $this->template->load();
-                    return;
-                }
-                if ($this->session->get('USER_GROUP') == 'W') {
-                    $import_result = $this->Import_Model->restore_Database($file_name);
-
-
-                    if (TRUE == $import_result) {
-                        $this->template->write_view('menu', 'menu', '');
-                        $this->template->write('message', 'Restore Database successfully');
-                    } else {
-                        $this->template->write('error', 'Failed to Restore Database');
-                    }
-                }
-            }
-
+        // Generate a one-time server-side confirmation token when the form is shown.
+        if (!$this->request->getPost()) {
+            $confirmToken = bin2hex(random_bytes(16));
+            $this->session->set('restore_confirm_token', $confirmToken);
+            $this->Contents['confirm_token'] = $confirmToken;
             $this->template->write_view('content', 'import/restore_data', $this->Contents);
             $this->template->load();
-        } else
-            redirect('welcome');
+            return;
+        }
+
+        // POST: enforce the confirmation server-side. A bare/direct POST to this
+        // URL (without going through the confirmed form) is rejected.
+        $sentToken = (string)$this->request->getPost('confirm_token');
+        $sessionToken = (string)$this->session->get('restore_confirm_token');
+        $typedConfirm = strtoupper(trim((string)$this->request->getPost('confirm_restore')));
+
+        $authorized = ($sentToken !== ''
+            && $sessionToken !== ''
+            && hash_equals($sessionToken, $sentToken)
+            && $typedConfirm === 'RESTORE');
+
+        if (!$authorized) {
+            $this->writeRestoreLog('restore', 'F', 'restore rejected: confirmation token missing or invalid');
+            $this->template->write('error', 'Please confirm the restore by ticking the confirmation box on the form and submitting from there.');
+            $this->Contents['confirm_token'] = $sessionToken;
+            $this->template->write_view('content', 'import/restore_data', $this->Contents);
+            $this->template->load();
+            return;
+        }
+
+        if (isset($_FILES['kalolsavamdatabase']['name']) && !empty($_FILES['kalolsavamdatabase']['name'])) {
+            $file_name = $this->General_Model->restore_database('kalolsavamdatabase', 'kalolsavamdatabase' . substr(fncUuid(), 10));
+            if (!$file_name) {
+                $this->writeRestoreLog('restore', 'F', 'restore rejected: invalid upload (type/size/content)');
+                $this->template->write('error', 'Invalid database backup file. Only .sql text files up to 16 MB are accepted.');
+                $this->template->write_view('content', 'import/restore_data', $this->Contents);
+                $this->template->load();
+                return;
+            }
+
+            $import_result = $this->Import_Model->restore_Database($file_name);
+
+            if (TRUE == $import_result) {
+                $this->writeRestoreLog('restore', 'S', 'database restored successfully');
+                $this->template->write_view('menu', 'menu', '');
+                $this->template->write('message', 'Restore Database successfully');
+            } else {
+                $this->writeRestoreLog('restore', 'F', 'database restore failed');
+                $this->template->write('error', 'Failed to Restore Database');
+            }
+        } else {
+            $this->writeRestoreLog('restore', 'F', 'restore rejected: no database file uploaded');
+            $this->template->write('error', 'Please select a database backup (.sql) file to restore.');
+        }
+
+        $this->Contents['confirm_token'] = $this->session->get('restore_confirm_token');
+        $this->template->write_view('content', 'import/restore_data', $this->Contents);
+        $this->template->load();
     }
 
     function initialize_data() {

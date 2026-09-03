@@ -39,7 +39,17 @@ echo form_open_multipart('import/restore_database', array('id' => 'formKalolsava
         <td align="left" colspan="2" class="table_row_first">&nbsp;</td>
     </tr>
     <tr>
+        <td align="left" class="table_row_first" colspan="4">
+            <label style="font-weight:bold; color:#dc3545;">
+                <?php echo form_checkbox('i_confirm', '1', FALSE, 'id="i_confirm" '); ?>
+                I confirm that I have taken a backup and understand that all existing data will be permanently deleted.
+            </label>
+            <span class="guide_line"></span>
+        </td>
+    </tr>
+    <tr>
         <td align="center" colspan="2">
+            <?php echo form_hidden('confirm_token', isset($confirm_token) ? $confirm_token : ''); ?>
             <?php echo form_button('save_kalolsavamdatabase', 'Save', 'id="save_kalolsavamdatabase" onClick="javascript:fncrestoreKalolsavamdatabase();" class="btn btn-primary"'); ?>
         </td>
     </tr>

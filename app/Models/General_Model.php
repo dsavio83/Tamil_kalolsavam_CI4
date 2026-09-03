@@ -301,15 +301,80 @@ class General_Model extends \App\Models\BaseModel {
         return [];
     }
 
+    /** Maximum acceptable size (bytes) for an uploaded CSV import file. */
+    private const CSV_MAX_UPLOAD_BYTES = 8388608; // 8 MB
+
+    /** Maximum acceptable size (bytes) for an uploaded SQL restore file. */
+    private const SQL_MAX_UPLOAD_BYTES = 16777216; // 16 MB
+
+    /**
+     * Validate an uploaded candidate file before it is stored.
+     * Enforced server-side only; the browser-supplied MIME type is never trusted.
+     *
+     * @param string $file_input_name The $_FILES key.
+     * @param array  $allowed_exts    Allowed lowercase extensions, e.g. ['csv'].
+     * @param int    $max_bytes       Maximum upload size in bytes.
+     * @param bool   $must_be_text    Require plain-text content (no NUL/binary bytes).
+     * @return bool True if the file may be stored, false otherwise.
+     */
+    private function validateUpload($file_input_name, array $allowed_exts, $max_bytes, $must_be_text = true) {
+        if (!isset($_FILES[$file_input_name]) || !is_array($_FILES[$file_input_name])) {
+            return false;
+        }
+        $f = $_FILES[$file_input_name];
+
+        // Reject PHP-provided upload errors.
+        if (isset($f['error']) && (int)$f['error'] !== UPLOAD_ERR_OK) {
+            return false;
+        }
+
+        $tmp = isset($f['tmp_name']) ? $f['tmp_name'] : '';
+        $orig = isset($f['name']) ? $f['name'] : '';
+
+        // Must be a real uploaded file and not empty.
+        if (empty($orig) || empty($tmp) || !is_uploaded_file($tmp)) {
+            return false;
+        }
+
+        // Explicit server-side size limit (bytes).
+        $size = isset($f['size']) ? (int)$f['size'] : filesize($tmp);
+        if ($size < 1 || $size > $max_bytes) {
+            return false;
+        }
+
+        // Extension must appear in the strict server-side whitelist.
+        $ext = strtolower(pathinfo($orig, PATHINFO_EXTENSION));
+        if (!in_array($ext, $allowed_exts, true)) {
+            return false;
+        }
+
+        // Reject mismatched content: enforce plain text unless binary allowed.
+        if ($must_be_text) {
+            $size = ($size > 1048576) ? 1048576 : $size; // sniff first 1 MB only
+            $head = @file_get_contents($tmp, false, null, 0, $size);
+            if ($head === false || strpos($head, "\0") !== false) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     function upload_kalolsavam_csv_data($file_input_name, $file_name) {
         $base_dir = defined('FCPATH') ? FCPATH . 'uploads/csv/' : (ROOTPATH . 'public/uploads/csv/');
         if (!is_dir($base_dir)) {
             @mkdir($base_dir, 0777, true);
         }
-        if (empty($_FILES[$file_input_name]['name']) || empty($_FILES[$file_input_name]['tmp_name']) || !is_uploaded_file($_FILES[$file_input_name]['tmp_name'])) {
+
+        // Server-side file validation: CSV/text only, 8 MB max.
+        if (!$this->validateUpload($file_input_name, ['csv', 'txt'], self::CSV_MAX_UPLOAD_BYTES, true)) {
             return false;
         }
-        $ext = strtolower(pathinfo($_FILES[$file_input_name]['name'], PATHINFO_EXTENSION) ?: 'csv');
+
+        $ext = strtolower(pathinfo($_FILES[$file_input_name]['name'], PATHINFO_EXTENSION));
+        if ($ext !== 'csv') {
+            $ext = 'csv';
+        }
         $target_file_name = $file_name . '.' . $ext;
         if (move_uploaded_file($_FILES[$file_input_name]['tmp_name'], $base_dir . $target_file_name)) {
             return $target_file_name;
@@ -386,10 +451,16 @@ class General_Model extends \App\Models\BaseModel {
         if (!is_dir($base_dir)) {
             @mkdir($base_dir, 0777, true);
         }
-        if (empty($_FILES[$file_input_name]['name']) || empty($_FILES[$file_input_name]['tmp_name']) || !is_uploaded_file($_FILES[$file_input_name]['tmp_name'])) {
+
+        // Server-side file validation: SQL only, 16 MB max.
+        if (!$this->validateUpload($file_input_name, ['sql'], self::SQL_MAX_UPLOAD_BYTES, true)) {
             return false;
         }
-        $ext = strtolower(pathinfo($_FILES[$file_input_name]['name'], PATHINFO_EXTENSION) ?: 'sql');
+
+        $ext = strtolower(pathinfo($_FILES[$file_input_name]['name'], PATHINFO_EXTENSION));
+        if ($ext !== 'sql') {
+            $ext = 'sql';
+        }
         $target_file_name = $file_name . '.' . $ext;
         if (move_uploaded_file($_FILES[$file_input_name]['tmp_name'], $base_dir . $target_file_name)) {
             return $target_file_name;
