@@ -69,6 +69,49 @@ class Registration extends \App\Controllers\BaseController {
         return $school_details;
     }
 
+    /**
+     * Resolve a school (Type 5) user's own school code from session or user_cluster.
+     *
+     * @return string The authenticated user's own school code, or '' if unknown.
+     */
+    private function resolveOwnSchoolCode() {
+        $own = trim((string)$this->session->get('SCHOOL_CODE'));
+        if (empty($own) || $own === '0' || $own === '') {
+            if ((int)$this->session->get('USER_TYPE') == 5) {
+                $db = \Config\Database::connect();
+                $cluster = $db->table('user_cluster')->select('school_code')
+                    ->where('user_id', $this->session->get('USERID'))->get()->getRowArray();
+                if (!empty($cluster['school_code'])) {
+                    $own = $cluster['school_code'];
+                } elseif (is_numeric($this->session->get('USER_NAME') ?: $this->session->get('USER'))) {
+                    $own = $this->session->get('USER_NAME') ?: $this->session->get('USER');
+                }
+            }
+        }
+        return $own;
+    }
+
+    /**
+     * Server-side ownership check: school (Type 5) users may only operate on
+     * their own school's records, preventing object identifier (IDOR) access
+     * to other schools' participants/data. Admin/district/sub-district users
+     * (Types 0-3) are not constrained here.
+     *
+     * @param string|int|null $requestedSchoolCode The school code supplied by the client.
+     * @return bool True if access is permitted, false otherwise.
+     */
+    private function assertSchoolOwnership($requestedSchoolCode) {
+        if ((int)$this->session->get('USER_TYPE') !== 5) {
+            return true;
+        }
+        $own = $this->resolveOwnSchoolCode();
+        $requested = trim((string)$requestedSchoolCode);
+        if ($own === '' || $requested === '') {
+            return false;
+        }
+        return (string)(int)$own === (string)(int)$requested;
+    }
+
     function index($message = array()) {
         // Prevent page caching to ensure photos load on reload
         $this->response->setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -153,7 +196,24 @@ class Registration extends \App\Controllers\BaseController {
                 $this->session->set('SCHOOL_CODE', $schoolCode);
             }
         }
-        
+
+        // Prevent school users from browsing other schools' participant data (IDOR).
+        if (!$this->assertSchoolOwnership($schoolCode)) {
+            session()->setFlashdata('error', 'You do not have permission to view this school.');
+            if ($is_school_user) {
+                $this->Content['school_details'] = array();
+                $this->Content['school_show'] = '';
+                $this->Content['participant_details'] = array();
+                $this->Content['participant_photos'] = array();
+                $this->Content['group_details'] = array();
+                $this->Content['participant_item_list'] = array();
+                $this->Content['all_festival_items'] = $this->Registration_Model->get_all_festival_items();
+            }
+            $this->template->write_view('content', ($is_school_user ? 'schools/registration' : 'schools/school_entry'), $this->Content);
+            $this->template->load();
+            return;
+        }
+
         $this->Content['bank_details'] = $bank_details = $this->General_Model->prepare_select_box_data('bank_master', 'bank_id,bank_name', array(), 'Select Bank');
         
         // Initial visibility: If schoolCode is present/loaded, DO NOT show/expand school details on page load or reload
@@ -576,6 +636,16 @@ class Registration extends \App\Controllers\BaseController {
             }
         }
 
+        // Prevent school users from browsing other schools' entries (IDOR).
+        if (!$this->assertSchoolOwnership($schoolCode)) {
+            $this->Content = array();
+            $this->Content['school_show'] = '';
+            session()->setFlashdata('error', 'You do not have permission to view this school.');
+            $this->template->write_view('content', 'schools/school_entry', $this->Content);
+            $this->template->load();
+            return;
+        }
+
         if ($schoolCode) {
             // Set school code in session for consistency
             $this->session->set('SCHOOL_CODE', (int)$schoolCode);
@@ -608,6 +678,21 @@ class Registration extends \App\Controllers\BaseController {
             $this->template->load();
             return;
         }
+        $requested_school = $this->input->post('hidSchoolId') ?: $this->session->get('SCHOOL_CODE');
+
+        // Prevent school users from creating/updating other schools' participants (IDOR).
+        if (!$this->assertSchoolOwnership($requested_school)) {
+            session()->setFlashdata('error', 'You do not have permission to modify participants for this school.');
+            $user_type = (int)$this->session->get('USER_TYPE');
+            $is_admin = in_array($user_type, [0, 1, 2, 3], true);
+            if ($is_admin) {
+                $this->school_entry();
+            } else {
+                $this->index();
+            }
+            return;
+        }
+
         $save_participant = $this->Registration_Model->save_participant_details();
 
         // Handle photo upload if participant saved successfully
@@ -680,6 +765,21 @@ class Registration extends \App\Controllers\BaseController {
             $this->template->load();
             return;
         }
+        $requested_school = $this->input->post('hidSchoolId') ?: $this->session->get('SCHOOL_CODE');
+
+        // Prevent school users from editing other schools' participants (IDOR).
+        if (!$this->assertSchoolOwnership($requested_school)) {
+            session()->setFlashdata('error', 'You do not have permission to view this participant.');
+            $user_type = (int)$this->session->get('USER_TYPE');
+            $is_admin = in_array($user_type, [0, 1, 2, 3], true);
+            if ($is_admin) {
+                $this->school_entry();
+            } else {
+                $this->index();
+            }
+            return;
+        }
+
         $this->Content['selected_participant'] = $this->General_Model->get_data('participant_details', '*', 'school_code = "' . $this->input->post('hidSchoolId') . '" AND admn_no = "' . $this->input->post('hidADNO') . '"');
         if (!empty($this->Content['selected_participant'])) {
             $this->Content['selected_participant_items'] = $this->Registration_Model->get_participant_item_details($this->Content['selected_participant'][0]['participant_id'], $this->Content['selected_participant'][0]['admn_no']);
@@ -698,6 +798,20 @@ class Registration extends \App\Controllers\BaseController {
         if (!($this->Session_Model->check_user_permission(14) || $this->Session_Model->check_user_permission(17) || $this->Session_Model->check_user_permission(2) || $this->Session_Model->check_user_permission(22) || $this->Session_Model->check_user_permission(5) || in_array((int)$this->session->get('USER_TYPE'), [0, 1, 2, 3, 5], true))) {
             $this->template->write('error', permission_warning());
             $this->template->load();
+            return;
+        }
+        $requested_school = $this->input->post('hidSchoolId') ?: $this->session->get('SCHOOL_CODE');
+
+        // Prevent school users from updating other schools' participants (IDOR).
+        if (!$this->assertSchoolOwnership($requested_school)) {
+            session()->setFlashdata('error', 'You do not have permission to modify this participant.');
+            $user_type = (int)$this->session->get('USER_TYPE');
+            $is_admin = in_array($user_type, [0, 1, 2, 3], true);
+            if ($is_admin) {
+                $this->school_entry();
+            } else {
+                $this->index();
+            }
             return;
         }
         $update_participant = $this->Registration_Model->update_participant_details();
@@ -780,6 +894,12 @@ class Registration extends \App\Controllers\BaseController {
             return;
         }
 
+        // Prevent school users from reading other schools' participant data (IDOR).
+        if (!$this->assertSchoolOwnership($school_code)) {
+            echo json_encode(array('error' => 'Participant not found'));
+            return;
+        }
+
         $participant = $this->General_Model->get_data('participant_details', '*', 'school_code = "' . $school_code . '" AND admn_no = "' . $admn_no . '"');
         if (!empty($participant)) {
             $data = $participant[0];
@@ -815,6 +935,19 @@ class Registration extends \App\Controllers\BaseController {
 
         if (!$school_code) {
             $school_code = (int)$this->session->get('SCHOOL_CODE');
+        }
+
+        // Prevent school users from deleting other schools' participants (IDOR).
+        if (!$this->assertSchoolOwnership($school_code)) {
+            session()->setFlashdata('error', 'You do not have permission to modify this participant.');
+            $user_type = (int)$this->session->get('USER_TYPE');
+            $is_admin = in_array($user_type, [0, 1, 2, 3], true);
+            if ($is_admin) {
+                $this->school_entry();
+            } else {
+                $this->index();
+            }
+            return;
         }
 
         // Delete photo file
