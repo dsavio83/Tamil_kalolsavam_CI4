@@ -1,4 +1,49 @@
 // JavaScript Document
+function moveFocus(currentInput, nextInputId, maxLen) {
+    var max = maxLen || currentInput.maxLength || 2;
+    if (currentInput && currentInput.value.length >= max) {
+        var nextEl = document.getElementById(nextInputId);
+        if (nextEl) nextEl.focus();
+    }
+}
+
+function autoCalculateTotal() {
+    var hidNoJudgeEl = document.getElementById('hidNoJudge');
+    var totalMarkEl = document.getElementById('totalMark');
+    if (!hidNoJudgeEl || !totalMarkEl) return;
+    
+    var numJudges = parseInt(hidNoJudgeEl.value) || 0;
+    var total = 0;
+    var countFilled = 0;
+    
+    for (var i = 1; i <= numJudges; i++) {
+        var markEl = document.getElementById('mark_' + i);
+        if (markEl && markEl.value.trim() !== '') {
+            var val = parseFloat(markEl.value);
+            if (!isNaN(val)) {
+                total += val;
+                countFilled++;
+            }
+        }
+    }
+    
+    if (countFilled === numJudges && numJudges > 0) {
+        totalMarkEl.value = total;
+    }
+}
+
+function onJudgeMarkInput(el, nextInputId) {
+    autoCalculateTotal();
+    moveFocus(el, nextInputId, 2);
+}
+
+function checkTotalMark(totalMarkInput) {
+    if (totalMarkInput && totalMarkInput.value.length === 3) {
+        var saveBtn = document.getElementById("saveButton");
+        if (saveBtn) saveBtn.click();
+    }
+}
+
 function showItemSpinner() {
     var spin = document.getElementById('itemCodeSpinner');
     if (spin) {
