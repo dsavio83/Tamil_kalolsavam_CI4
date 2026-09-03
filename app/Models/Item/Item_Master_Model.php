@@ -33,7 +33,7 @@ class Item_Master_Model extends \App\Models\BaseModel {
     function check_item_code_exists($item_id, $item_code) {
         $this->db->where('item_code', $item_code);
         if ($item_id != '') {
-            $this->db->where('item_id != "' . $item_id . '"');
+            $this->db->where('item_id !=', $item_id);
         }
         $this->db->select('item_id');
         $this->db->from('item_master');

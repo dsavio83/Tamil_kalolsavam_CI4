@@ -136,16 +136,16 @@ function index() {
         $this->Content['retvalue'] = $this->Admin_Users_Model->exist_admin_details();
         $this->Content['user_type_name'] = $this->Content['district_name'] = $this->Content['sub_district_name'] = '';
         if (isset($_POST['userTypeFilter']) && trim($_POST['userTypeFilter']) != 0) {
-            $user_type_name = $this->General_Model->get_single_column_value('user_types', 'type_name', 'user_type_id = ' . trim($_POST['userTypeFilter']));
-            $this->Content['user_type_name'] = $user_type_name[0];
+            $user_type_name = $this->db->where('user_type_id', trim($_POST['userTypeFilter']))->limit(1)->get('user_types')->getRowArray();
+            $this->Content['user_type_name'] = $user_type_name ? $user_type_name['type_name'] : '';
         }
         if (isset($_POST['cmbDistrictFilter']) && trim($_POST['cmbDistrictFilter']) != 0) {
-            $district_name = $this->General_Model->get_single_column_value('rev_district_master', 'rev_district_name', 'rev_district_code = ' . trim($_POST['cmbDistrictFilter']));
-            $this->Content['district_name'] = $district_name[0];
+            $district_name = $this->db->where('rev_district_code', trim($_POST['cmbDistrictFilter']))->limit(1)->get('rev_district_master')->getRowArray();
+            $this->Content['district_name'] = $district_name ? $district_name['rev_district_name'] : '';
         }
         if (isset($_POST['cmbSubDistrictFilter']) && trim($_POST['cmbSubDistrictFilter']) != 0) {
-            $sub_district_name = $this->General_Model->get_single_column_value('sub_district_master', 'sub_district_name', 'sub_district_code = ' . trim($_POST['cmbSubDistrictFilter']));
-            $this->Content['sub_district_name'] = $sub_district_name[0];
+            $sub_district_name = $this->db->where('sub_district_code', trim($_POST['cmbSubDistrictFilter']))->limit(1)->get('sub_district_master')->getRowArray();
+            $this->Content['sub_district_name'] = $sub_district_name ? $sub_district_name['sub_district_name'] : '';
         }
         $content = $this->load->view('report/prereportpdf/list_sub_district_details', $this->Content, true);
 

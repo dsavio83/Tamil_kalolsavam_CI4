@@ -91,8 +91,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         $festpart_school = $this->input->post('Festpart');
         // echo  $festpart_school;
 
-        $where = 'school_code=' . $fest_id;
-        $item_details = $this->General_Model->fetch_data('school_details', 'school_code', $where);
+        $item_details = $this->db->where('school_code', $fest_id)->limit(1)->get('school_details')->getResultArray();
         if (count($item_details) > 0) {
             //$school_det			=	$this->Prereport_Model->get_school_single($this->input->post('txtSchoolCode'));
             $part_details = $this->Prereport_Model->part_item_details($this->input->post('txtSchoolCode'), $festpart_school);
@@ -513,7 +512,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         $festival = $this->input->post('cmbFestType');
         $this->Contents['itemtime'] = $this->Prereport_Model->timesheet($itemcode);
 
-        $this->Contents['item_count'] = $this->General_Model->get_record_count('participant_item_details', "item_code = '$itemcode' AND is_captain = 'Y'");
+        $this->Contents['item_count'] = $this->db->where('item_code', $itemcode)->where('is_captain', 'Y')->countAllResults('participant_item_details');
 
         $this->Contents['festname'] = $this->Prereport_Model->Festname($festival);
         $content = $this->load->view('report/prereportpdf/timesheet', $this->Contents, true);

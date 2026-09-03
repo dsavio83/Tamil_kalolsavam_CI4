@@ -395,7 +395,7 @@ class Certificate_Model extends \App\Models\BaseModel {
         $this->db->join('participant_details AS pd', 'pd.participant_id=cm.participant_id');
         $this->db->where('cm.item_code', $item_code);
         if (!empty($captain_id) && 0 != $captain_id)
-            $this->db->where('cm.parent_admn_no =(SELECT parent_admn_no FROM certificate_master WHERE participant_id=' . $captain_id . ' AND item_code=' . $item_code . ' GROUP BY participant_id)', NULL, FALSE);
+            $this->db->where('cm.parent_admn_no =(SELECT parent_admn_no FROM certificate_master WHERE participant_id=? AND item_code=? GROUP BY participant_id)', [$captain_id, $item_code]);
 
         $this->db->where('cm.is_withheld', 'N');
         if (!empty($school_code))

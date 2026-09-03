@@ -70,8 +70,8 @@ class Login extends \App\Controllers\BaseController {
                         'SCHOOL_CODE' => $school_code,
                         'USER_TYPE' => $login[0]['user_type']);
                     if ($sub_dist_code != '' && $sub_dist_code != 0) {
-                        $rev_district = $this->General_Model->get_single_column_value('sub_district_master', 'edu_district_code', 'sub_district_code = "' . $sub_dist_code . '"');
-                        $set_session_data['EDU_DISTRICT'] = isset($rev_district[0]) ? $rev_district[0] : '';
+                        $rev_district = $this->db->where('sub_district_code', $sub_dist_code)->limit(1)->get('sub_district_master')->getRowArray();
+                        $set_session_data['EDU_DISTRICT'] = $rev_district ? $rev_district['edu_district_code'] : '';
                     } else {
                         $set_session_data['EDU_DISTRICT'] = '';
                     }
@@ -202,8 +202,8 @@ class Login extends \App\Controllers\BaseController {
             );
 
             if ($sub_dist_code != '' && $sub_dist_code != 0) {
-                $rev_district = $this->General_Model->get_single_column_value('sub_district_master', 'edu_district_code', 'sub_district_code = "' . $sub_dist_code . '"');
-                $set_session_data['EDU_DISTRICT'] = isset($rev_district[0]) ? $rev_district[0] : '';
+                $rev_district = $this->db->where('sub_district_code', $sub_dist_code)->limit(1)->get('sub_district_master')->getRowArray();
+                $set_session_data['EDU_DISTRICT'] = $rev_district ? $rev_district['edu_district_code'] : '';
             } else {
                 $set_session_data['EDU_DISTRICT'] = '';
             }

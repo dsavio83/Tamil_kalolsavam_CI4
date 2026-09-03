@@ -129,8 +129,8 @@ class User_Registration_Model extends \App\Models\BaseModel {
 
     function check_username_exists($userId = '', $username) {
         if ($userId != '')
-            $this->db->where('user_id != "' . $userId . '"');
-        $this->db->where('user_name = "' . $username . '"');
+            $this->db->where('user_id !=', $userId);
+        $this->db->where('user_name', $username);
         $this->db->select('user_id');
         $this->db->from('user_master');
         $result = $this->db->get();

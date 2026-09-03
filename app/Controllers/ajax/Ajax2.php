@@ -13,17 +13,15 @@ class Ajax2 extends \App\Controllers\BaseController {
     function fetch_school_from_festival() {
         $fest_id = $this->input->post('fest_id');
         if ($fest_id != "") {
-            $where = 'school_code=' . $fest_id;
-            $item_details = $this->General_Model->fetch_data('school_master', 'school_name,school_code', $where);
-            if (count($item_details) > 0)
-                echo "School Name : " . $item_details[0]['school_name'];
+            $row = $this->db->where('school_code', $fest_id)->limit(1)->get('school_master')->getRowArray();
+            if ($row)
+                echo "School Name : " . $row['school_name'];
         }
     }
 
     function fetch_school_checkdetails_festival() {
         $fest_id = $this->input->post('fest_id');
-        $where = 'school_code=' . $fest_id;
-        $item_details = $this->General_Model->fetch_data('school_master', 'school_name,school_code', $where);
+        $row = $this->db->where('school_code', $fest_id)->limit(1)->get('school_master')->getRowArray();
     }
 
     function fetch_callsheet_festival() {

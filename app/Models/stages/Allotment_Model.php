@@ -78,7 +78,7 @@ class Allotment_Model extends \App\Models\BaseModel {
         $end_time = date('Y-m-d H:i:s', $timestamp);
 
         $this->db->where('stage_id', $stage_id);
-        $this->db->where("('" . $start_time . "' BETWEEN start_time AND end_time) OR ('" . $end_time . "' BETWEEN start_time AND end_time)");
+        $this->db->where("(? BETWEEN start_time AND end_time) OR (? BETWEEN start_time AND end_time)", [$start_time, $end_time]);
         $cnt_stage_exist = $this->db->countAllResults('cluster_master');
 
         $data['stage_id'] = $stage_id;

@@ -319,15 +319,15 @@ class Resultindex_Model extends \App\Models\BaseModel {
                                     JOIN item_master AS IM ON IM.item_code = RM.item_code
                                     JOIN school_master AS SM ON SM.school_code = RM.school_code
                                     JOIN festival_master AS FM ON IM.fest_id = FM.fest_id 
-                                    WHERE RM.item_code = '" . $item_code . "' AND (SPD.is_withheld = 'N' OR SPD.is_withheld IS NULL) AND RM.is_finish = 'Y' AND RM.grade != ''
+                                    WHERE RM.item_code = ? AND (SPD.is_withheld = 'N' OR SPD.is_withheld IS NULL) AND RM.is_finish = 'Y' AND RM.grade != ''
                                     ORDER BY FM.fest_id ASC, RM.item_code ASC, RM.rank ASC, RM.point DESC";
-                    $parti_det = $this->db->query($parti_query);
+                    $parti_det = $this->db->query($parti_query, [$item_code]);
                     $details['parti_det'][$item_code] = $parti_det->getResultArray();
                     $parti_count += count($parti_det->getResultArray());
                     $confirm_date = $row['confirm_date'];
                     $confirm_time = $row['confirm_time'];
-                    $query1 = "SELECT RT.item_code,RT.confirm_date,RT.confirm_time,RT.result_no from  result_time AS RT	where  RT.confirm_date ='" . $to_date . "' and RT.confirm_time >'" . $to_time . ":00:00' and  RT.is_finalized='Y'";
-                    $disc_code = $this->db->query($query1);
+                    $query1 = "SELECT RT.item_code,RT.confirm_date,RT.confirm_time,RT.result_no from  result_time AS RT	where  RT.confirm_date =? and RT.confirm_time >? and  RT.is_finalized='Y'";
+                    $disc_code = $this->db->query($query1, [$to_date, $to_time . ":00:00"]);
                     $details['disc_code'] = $disc_code->getResultArray();
                     //echo "<br /><br /><br />item_code-->".$item_code;
                     //echo "<br />date-->".$confirm_date;
@@ -359,10 +359,10 @@ class Resultindex_Model extends \App\Models\BaseModel {
                       JOIN school_master AS SM ON SM.school_code = RM.school_code
                       JOIN festival_master AS FM ON IM.fest_id = FM.fest_id
                       JOIN result_time AS RT ON RM.item_code = RT.item_code
-                      WHERE RM.is_finish = 'Y' AND RM.grade != '' AND RT.result_no = '$result_no'
+                      WHERE RM.is_finish = 'Y' AND RM.grade != '' AND RT.result_no = ?
                       GROUP BY RM.rm_id
                       ORDER BY FM.fest_id ASC, IM.item_code, RM.total_mark DESC";
-            $details = $this->db->query($query);
+            $details = $this->db->query($query, [$result_no]);
             $det_report[$i] = $details->getResultArray();
         }
 

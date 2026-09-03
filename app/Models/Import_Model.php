@@ -294,7 +294,7 @@ class Import_Model extends \App\Models\BaseModel {
                                 $query = $this->db->query("UPDATE temp_dist_participant_item_details TPID SET TPID.participant_id = ( SELECT TPD.participant_id
 														FROM temp_dist_participant_details TPD WHERE TPID.school_code = TPD.school_code AND TPD.admn_no=TPID.admn_no)
 														WHERE  TPID.admn_no IN(SELECT TPD.admn_no FROM temp_dist_participant_details TPD
-															WHERE TPD.sub_district_code=" . $sub_dist_code . ")");
+															WHERE TPD.sub_district_code=?)", [$sub_dist_code]);
                                 if (!$query) {
                                     $this->db->transRollback();
                                     return FALSE;

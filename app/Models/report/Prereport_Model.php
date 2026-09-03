@@ -743,10 +743,10 @@ LEFT JOIN school_master AS SM ON SM.school_code = PD.school_code
 LEFT JOIN item_master AS IM ON IM.item_code = PID.item_code
 LEFT JOIN cluster_master AS CM ON CM. cluster_id = CPD. cluster_id and CM. item_code = PID. item_code
 LEFT JOIN festival_master AS FM ON FM.fest_id = IM.fest_id
-WHERE C.participant_id = PD.participant_id and CM.start_time!='' and CM.end_time!='' and date(CM.start_time)='$date'
+WHERE C.participant_id = PD.participant_id and CM.start_time!='' and CM.end_time!='' and date(CM.start_time)=?
 ORDER BY FM.fest_id,PD.participant_name,CM.start_time,CM.end_time";
 
-            $clash_detail = $this->db->query($que);
+            $clash_detail = $this->db->query($que, [$date]);
 
 
             return $clash_detail->getResultArray();
@@ -765,10 +765,10 @@ LEFT JOIN school_master AS SM ON SM.school_code = PD.school_code
 LEFT JOIN item_master AS IM ON IM.item_code = PID.item_code
 LEFT JOIN cluster_master AS CM ON CM. cluster_id = CPD. cluster_id and CM. item_code = PID. item_code
 LEFT JOIN festival_master AS FM ON FM.fest_id = IM.fest_id
-WHERE C.participant_id = PD.participant_id and CM.start_time!='' and CM.end_time!='' and IM.fest_id=$festival and date(CM.start_time)='$date'
+WHERE C.participant_id = PD.participant_id and CM.start_time!='' and CM.end_time!='' and IM.fest_id=? and date(CM.start_time)=?
 ORDER BY  PD.participant_name,CM.start_time,CM.end_time";
 
-            $clash_detail = $this->db->query($query);
+            $clash_detail = $this->db->query($query, [$festival, $date]);
 
 
             return $clash_detail->getResultArray();
@@ -788,8 +788,8 @@ ORDER BY  PD.participant_name,CM.start_time,CM.end_time";
     }
 
     function fetch_item_name($item_id) {
-        $query = "SELECT item_name FROM item_master WHERE item_master.`item_code`=$item_id";
-        $item_name = $this->db->query($query);
+        $query = "SELECT item_name FROM item_master WHERE item_master.`item_code`=?";
+        $item_name = $this->db->query($query, [$item_id]);
         return $item_name->getResultArray();
     }
 
@@ -804,9 +804,9 @@ ORDER BY  PD.participant_name,CM.start_time,CM.end_time";
     function tabulation_details($itemcode) {
 
         //echo $itemcode;
-        $query = "SELECT IM.item_code, IM.item_name,date(SM.start_time) as timer,SM.no_of_participant AS num FROM (`item_master` AS IM) LEFT JOIN participant_item_details AS PD ON IM.item_code =PD.item_code LEFT JOIN stage_item_master  AS SM ON IM.item_code =SM.item_code GROUP BY IM.item_code HAVING IM.item_code =$itemcode";
+        $query = "SELECT IM.item_code, IM.item_name,date(SM.start_time) as timer,SM.no_of_participant AS num FROM (`item_master` AS IM) LEFT JOIN participant_item_details AS PD ON IM.item_code =PD.item_code LEFT JOIN stage_item_master  AS SM ON IM.item_code =SM.item_code GROUP BY IM.item_code HAVING IM.item_code =?";
 
-        $tabulation_detail = $this->db->query($query);
+        $tabulation_detail = $this->db->query($query, [$itemcode]);
         return $tabulation_detail->getResultArray();
     }
 
@@ -825,9 +825,9 @@ ORDER BY  PD.participant_name,CM.start_time,CM.end_time";
     JOIN festival_master AS FM ON FM.`fest_id` = IM.`fest_id`
     LEFT JOIN participant_item_details AS PID ON PID.`item_code` = IM.`item_code`
 	LEFT JOIN stage_item_master  AS SM ON IM.item_code =SM.item_code
-    WHERE FM.`fest_id` =$festival
+    WHERE FM.`fest_id` =?
     GROUP BY (IM.item_code)";
-        $fest_detail1 = $this->db->query($que);
+        $fest_detail1 = $this->db->query($que, [$festival]);
         return $fest_detail1->getResultArray();
     }
 
@@ -1024,9 +1024,9 @@ FROM `item_master` AS IM
 JOIN festival_master AS FM ON IM.`fest_id` = FM.`fest_id`
 LEFT JOIN stage_item_master AS SM ON IM.`item_code` = SM.`item_code`
 LEFT JOIN stage_master AS ST ON ST.`stage_id` = SM.`stage_id`
-WHERE IM.`item_code` =$item_id";
+WHERE IM.`item_code` =?";
 
-        $fest_data = $this->db->query($que);
+        $fest_data = $this->db->query($que, [$item_id]);
         return $fest_data->getResultArray();
 
 
@@ -1272,9 +1272,9 @@ WHERE IM.`item_code` =$item_id";
 		JOIN festival_master AS FM ON IM.`fest_id` = FM.`fest_id`
 		JOIN stage_item_master AS SM ON IM.`item_code` = SM.`item_code`
 		JOIN stage_master AS ST ON ST.`stage_id` = SM.`stage_id`
-		WHERE date(SM.start_time) ='$date' and FM.fest_id='$festival'";
+		WHERE date(SM.start_time) =? and FM.fest_id=?";
 
-            $fest_data = $this->db->query($que);
+            $fest_data = $this->db->query($que, [$date, $festival]);
             return $fest_data->getResultArray();
         } else {
             $que = "SELECT *,SM.start_time,
@@ -1284,9 +1284,9 @@ WHERE IM.`item_code` =$item_id";
 		JOIN festival_master AS FM ON IM.`fest_id` = FM.`fest_id`
 		JOIN stage_item_master AS SM ON IM.`item_code` = SM.`item_code`
 		JOIN stage_master AS ST ON ST.`stage_id` = SM.`stage_id`
-		WHERE FM.fest_id='$festival'";
+		WHERE FM.fest_id=?";
 
-            $fest_data = $this->db->query($que);
+            $fest_data = $this->db->query($que, [$festival]);
             return $fest_data->getResultArray();
         }
     }

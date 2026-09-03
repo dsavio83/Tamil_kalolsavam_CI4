@@ -112,8 +112,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         $festpart_school = $this->input->post('Festpart');
 
         if ($school_code > 0) {
-            $where = 'school_code=' . $school_code;
-            $item_details = $this->General_Model->fetch_data('school_details', 'school_code', $where);
+            $item_details = $this->db->where('school_code', $school_code)->limit(1)->get('school_details')->getResultArray();
             if (count($item_details) > 0) {
                 $part_details = $this->Prereport_Model->part_item_details($school_code, $festpart_school);
                 $this->Content['subdistrict'] = $this->Prereport_Model->find_subdistrict();
@@ -822,7 +821,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         $festival = $this->input->post('cmbFestType');
         $this->Contents['itemtime'] = $this->Prereport_Model->timesheet($itemcode);
 
-        $this->Contents['item_count'] = $this->General_Model->get_record_count('participant_item_details', "item_code = '$itemcode' AND is_captain = 'Y'");
+        $this->Contents['item_count'] = $this->db->where('item_code', $itemcode)->where('is_captain', 'Y')->countAllResults('participant_item_details');
 
         $this->Contents['festname'] = $this->Prereport_Model->Festname($festival);
         $content = $this->load->view('report/prereportpdf/timesheet', $this->Contents, true);
@@ -1157,7 +1156,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         } elseif ($time == 'Time Sheet') {
             $this->Contents = array();
             $this->Contents['itemtime'] = $this->Prereport_Model->timesheet($item_code);
-            $this->Contents['item_count'] = $this->General_Model->get_record_count('participant_item_details', "item_code = '$item_code' AND is_captain = 'Y'");
+            $this->Contents['item_count'] = $this->db->where('item_code', $item_code)->where('is_captain', 'Y')->countAllResults('participant_item_details');
             $this->Contents['festname'] = $this->Prereport_Model->Festname($festId);
             if (!empty($this->Contents['itemtime'])) {
                 $content = $this->load->view('report/prereportpdf/timesheet', $this->Contents, true);
