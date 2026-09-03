@@ -24,11 +24,22 @@ function onItemCodeInput(el) {
     }
 }
 
-function fetch_item_details_result()
+var _isFetchingItemResult = false;
+var _lastFetchedItemCode = null;
+
+function fetch_item_details_result(force)
 {
     var itemCodeEl = document.getElementById('txtItemCode');
     if (itemCodeEl && itemCodeEl.value.trim() !== '') {
         var item_code = itemCodeEl.value.trim();
+        if (!force && item_code === _lastFetchedItemCode && !_isFetchingItemResult) {
+            return false;
+        }
+        if (_isFetchingItemResult) {
+            return false;
+        }
+        _isFetchingItemResult = true;
+        _lastFetchedItemCode = item_code;
         showItemSpinner();
         
         // Use modern fetch API if available, fallback to Ajax
@@ -49,15 +60,25 @@ function fetch_item_details_result()
             .then(data => {
                 var divEl = document.getElementById('divEntryForm');
                 if (divEl) {
-                    divEl.outerHTML = data;
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(data, 'text/html');
+                    var newDiv = doc.getElementById('divEntryForm');
+                    if (newDiv) {
+                        divEl.innerHTML = newDiv.innerHTML;
+                    } else {
+                        divEl.innerHTML = data;
+                    }
                     var codeNoEl = document.getElementById('txt_code_no');
                     if (codeNoEl) {
                         codeNoEl.focus();
                     }
                 }
+                _isFetchingItemResult = false;
+                hideItemSpinner();
             })
             .catch(error => {
                 console.error('Error:', error);
+                _isFetchingItemResult = false;
                 hideItemSpinner();
             });
         } else if (typeof Ajax !== 'undefined') {
@@ -66,23 +87,34 @@ function fetch_item_details_result()
                 parameters: {'code': item_code},
                 onFailure: function (oXHR, oJson) {
                     console.error("An error occurred: " + oXHR.status);
+                    _isFetchingItemResult = false;
                     hideItemSpinner();
                 },
                 onSuccess: function (transport) {
                     var response = transport.responseText;
                     var divEl = document.getElementById('divEntryForm');
                     if (divEl) {
-                        divEl.outerHTML = response;
+                        var parser = new DOMParser();
+                        var doc = parser.parseFromString(response, 'text/html');
+                        var newDiv = doc.getElementById('divEntryForm');
+                        if (newDiv) {
+                            divEl.innerHTML = newDiv.innerHTML;
+                        } else {
+                            divEl.innerHTML = response;
+                        }
                         var codeNoEl = document.getElementById('txt_code_no');
                         if (codeNoEl) {
                             codeNoEl.focus();
                         }
                     }
+                    _isFetchingItemResult = false;
+                    hideItemSpinner();
                 }
             };
             var oRequest = new Ajax.Updater({}, path + "result/resultentry/get_item_details_result", oOptions);
         }
     } else {
+        _isFetchingItemResult = false;
         hideItemSpinner();
         return false;
     }
@@ -145,6 +177,7 @@ function fncSaveResultEntry()
     }
 
     if (formEl) {
+        _lastFetchedItemCode = null;
         formEl.action = path + 'result/resultentry/save_result_entry/';
         formEl.submit();
     }
@@ -155,6 +188,7 @@ function editResult(id) {
     var formEl = document.getElementById('resultEntryList');
     if (hidResultIdEl) hidResultIdEl.value = id;
     if (formEl) {
+        _lastFetchedItemCode = null;
         formEl.action = path + 'result/resultentry/edit_result_entry/';
         formEl.submit();
     }
@@ -176,6 +210,7 @@ function deleteResult(id) {
             var formEl = document.getElementById('resultEntryList');
             if (hidResultIdEl) hidResultIdEl.value = id;
             if (formEl) {
+                _lastFetchedItemCode = null;
                 formEl.action = path + 'result/resultentry/delete_result_entry/';
                 formEl.submit();
             }
@@ -186,6 +221,7 @@ function deleteResult(id) {
 function fncCancel() {
     var formEl = document.getElementById('resultEntryList');
     if (formEl) {
+        _lastFetchedItemCode = null;
         formEl.action = path + 'result/resultentry/';
         formEl.submit();
     }
