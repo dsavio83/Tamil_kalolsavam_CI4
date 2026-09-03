@@ -170,6 +170,7 @@ body {
          </div>
          
          <form id="loginform" name="loginform" onsubmit="return handleAjaxLogin(event);" method="post" accept-charset="utf-8">
+            <?php echo csrf_field(); ?>
             <div class="modal-body p-4">
                <div class="mb-3">
                    <label for="txtUserName" class="form-label small fw-semibold text-dark mb-1">Username / School Code</label>

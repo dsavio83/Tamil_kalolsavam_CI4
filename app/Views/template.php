@@ -64,6 +64,7 @@ if (empty($dynamic_fest_title)) {
   <title><?php echo (isset($title) && trim($title) != '') ? $title : esc($dynamic_fest_title) . ' <span id="year-range"></span>'; ?></title>
   <meta content="" name="description">
   <meta content="" name="keywords">
+  <meta name="csrf-token" content="<?php echo csrf_hash(); ?>">
 
   <!-- Favicons -->
   <link href="<?php echo base_url(); ?>assets/img/favicon.png" rel="icon">
@@ -612,6 +613,65 @@ if (empty($dynamic_fest_title)) {
       }
     });
   }
+
+  // CSRF Token Global AJAX Handler
+  (function() {
+    var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    if (!csrfMeta) return;
+    var token = csrfMeta.getAttribute('content');
+    if (!token) return;
+
+    // Patch fetch() to include CSRF header on same-origin POST requests
+    var _origFetch = window.fetch;
+    window.fetch = function(url, opts) {
+      opts = opts || {};
+      var method = (opts.method || 'GET').toUpperCase();
+      if (method === 'POST' || method === 'PUT' || method === 'PATCH' || method === 'DELETE') {
+        opts.headers = opts.headers || {};
+        if (opts.headers instanceof Headers) {
+          opts.headers.set('X-CSRF-TOKEN', token);
+        } else if (typeof opts.headers === 'object' && !(opts.headers instanceof Headers)) {
+          opts.headers['X-CSRF-TOKEN'] = token;
+        }
+      }
+      return _origFetch.call(window, url, opts);
+    };
+
+    // Patch Prototype.js Ajax.Request to include CSRF header on POST requests
+    if (typeof Ajax !== 'undefined' && Ajax.Request) {
+      var _origSetRequestHeaders = Ajax.Request.prototype.setRequestHeaders;
+      Ajax.Request.prototype.setRequestHeaders = function() {
+        _origSetRequestHeaders.call(this);
+        if (this.method === 'post') {
+          this.transport.setRequestHeader('X-CSRF-TOKEN', token);
+        }
+      };
+    }
+
+    // Patch jQuery AJAX to include CSRF header (if present)
+    if (typeof jQuery !== 'undefined' && jQuery.ajaxSetup) {
+      jQuery.ajaxSetup({
+        beforeSend: function(xhr) {
+          xhr.setRequestHeader('X-CSRF-TOKEN', token);
+        }
+      });
+    }
+
+    // Auto-inject CSRF hidden field into all POST forms on DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', function() {
+      var forms = document.querySelectorAll('form[method="post"], form[method="POST"]');
+      for (var i = 0; i < forms.length; i++) {
+        var f = forms[i];
+        if (!f.querySelector('input[name="csrf_test_name"]')) {
+          var inp = document.createElement('input');
+          inp.type = 'hidden';
+          inp.name = 'csrf_test_name';
+          inp.value = token;
+          f.appendChild(inp);
+        }
+      }
+    });
+  })();
 
   // jQuery Global AJAX Hook
   if (typeof jQuery !== 'undefined') {
