@@ -59,20 +59,8 @@ if (count($fest_master_details) > 0) {
     $venue = wordwrap(@$fest_master_details[0]['venue'], 40, '<br/>');
     $logo = @$fest_master_details[0]['logo_name'];
 
-    $baseN = basename($logo);
-    $logo1 = explode(".",$baseN);
-       if(strtolower($logo1[1]) == "png"){
-        $file_path ="";
-       } else {
-                if (file_exists(base_path() . 'uploads/sub_district/' . $logo) and trim($logo) != '') {
-                    $file_path = base_url(false) . 'uploads/sub_district/thumb_' . $logo;
-                } else {
+    $file_path = pdf_safe_logo_image('sub_district', $logo, true);
 
-                    $file_path = "";
-                }
-       }
-
-   
 
 
 }

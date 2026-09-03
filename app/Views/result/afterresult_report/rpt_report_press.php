@@ -1,45 +1,35 @@
 <style type="text/css">
-    <!--
     .style1 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
         font-size: 14px;
         font-weight: bold;
         color: #0d6efd;
     }
-    .style2{
-        font-size: 12px;
+    .style2 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
+        font-size: 14px;
         font-weight: bold;
-        color:#000000;
+        color: #000000;
     }
-    .style3{ 
-        font-size: 11px;
+    .style3 { 
+        font-size: 10px;
         font-weight: bold;
-        color:#000000;
+        color: #000000;
     }
-    .tb{
-        font-size: 11px;
-        font-weight: bold;
-        color:#000000;}
-
-    .ety{
-        font-size: 12px;
-        color:#000000;
-    }
-
-
-    -->
 </style>
-
 
 <?php
 $count = 0;
 $previous = "";
 $pre = "";
 $j = 0;
+$db = \Config\Database::connect();
 
 foreach ($retvalue AS $data) {
     if ($previous != $data['item_code']) {
-        $link = connectionLink();
-        $sql = mysqli_query($link,"update result_master set is_printed=1 where item_code=" . $data['item_code']);
+        if (!empty($data['item_code'])) {
+            $db->table('result_master')->where('item_code', (int)$data['item_code'])->update(['is_printed' => 1]);
+        }
         $previous = $data['item_code'];
         $count = 0;
         if ($j != 0) {

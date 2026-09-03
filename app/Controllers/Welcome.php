@@ -32,6 +32,27 @@ class Welcome extends \App\Controllers\BaseController {
 	}
 	public function index()
 	{
+		// Check if school_details entry exists for school user
+		$school_code = $this->session->get('SCHOOL_CODE');
+		if (!$school_code && (int)$this->session->get('USER_TYPE') == 5) {
+			$db = \Config\Database::connect();
+			$cluster = $db->table('user_cluster')->select('school_code')->where('user_id', $this->session->get('USERID'))->get()->getRowArray();
+			if (!empty($cluster['school_code'])) {
+				$school_code = $cluster['school_code'];
+				$this->session->set('SCHOOL_CODE', $school_code);
+			}
+		}
+		if ($school_code && $school_code != 0 && (int)$this->session->get('USER_TYPE') == 5) {
+			$db = \Config\Database::connect();
+			$builder = $db->table('school_details');
+			$builder->where('school_code', $school_code);
+			if ($builder->countAllResults() == 0) {
+				session()->setFlashdata('message', 'Please fill out your school profile details first.');
+				redirect('schools/profile');
+				return;
+			}
+		}
+
 		// $this->load->view('welcome_message');
 
 		        //echo $this->session->get('USER_TYPE');.
@@ -87,7 +108,29 @@ class Welcome extends \App\Controllers\BaseController {
 
                $this->Contents['has_kalolsavam'] = !empty($kalolsavam_details);
 
-   $this->Contents['welcome_label'] = $welcome_label;
+                // Fetch stage schedule for the dashboard
+                $schedule = $this->db->query("
+                    SELECT sm.stage_id, sm.stage_name, im.item_name, sim.start_time, sim.item_time, im.gender, im.item_code
+                    FROM stage_item_master sim
+                    INNER JOIN stage_master sm ON sim.stage_id = sm.stage_id
+                    INNER JOIN item_master im ON sim.item_code = im.item_code
+                    ORDER BY sm.stage_name ASC, sim.start_time ASC
+                ")->getResultArray();
+                
+                $stages = array();
+                foreach ($schedule as $row) {
+                    $stage_id = $row['stage_id'];
+                    if (!isset($stages[$stage_id])) {
+                        $stages[$stage_id] = array(
+                            'name' => $row['stage_name'],
+                            'events' => array()
+                        );
+                    }
+                    $stages[$stage_id]['events'][] = $row;
+                }
+                $this->Contents['stages_schedule'] = $stages;
+
+				$this->Contents['welcome_label'] = $welcome_label;
 				$this->Contents['fest_name'] = $fest_name;
 				$this->Contents['venue'] = $venue;
 				$this->Contents['start_date'] = $start_date;
@@ -108,8 +151,8 @@ class Welcome extends \App\Controllers\BaseController {
                 }
             }
         }
-        if ('' != trim($this->input->post('sel_sub_district_id')))
-            $subdist = $this->input->post('sel_sub_district_id');
+        if ('' != trim($this->input->get_post('sel_sub_district_id')))
+            $subdist = $this->input->get_post('sel_sub_district_id');
         else
             $subdist = $this->session->get('SUB_DISTRICT');
 
@@ -119,6 +162,8 @@ class Welcome extends \App\Controllers\BaseController {
         $clusters = $this->Login_Model->get_cluster_details($subdist);
         $this->Contents['sub_admin'] = $sub_admin;
         $this->Contents['clusters'] = $clusters;
+
+        $this->Contents['district_code'] = $this->Login_Model->get_subdist_district_code($subdist);
 
         $sub_school = $this->Login_Model->get_sub_school_details($subdist);
         $nonclust = $this->Login_Model->get_unclustersch_details($subdist);
@@ -155,6 +200,9 @@ class Welcome extends \App\Controllers\BaseController {
             $this->Contents['statistics'] = $this->get_school_stats($school_code);
             $this->Contents['venue_details'] = $this->get_venue($sub_district_code);
             $this->Contents['sub_district_name'] = $this->get_subdist_name($sub_district_code);
+            $this->Contents['district_code'] = $this->Login_Model->get_subdist_district_code($sub_district_code);
+            $this->Contents['sub_district_code'] = $sub_district_code;
+            $this->Contents['cluster_id'] = $clusterId;
             
             $this->template->write_view('content', 'login/clustschool', $this->Contents);
             $this->template->load();
@@ -214,7 +262,7 @@ class Welcome extends \App\Controllers\BaseController {
         $result = $this->db->query("SELECT COUNT(DISTINCT item_code) as count FROM participant_item_details WHERE school_code = ?", array($school_code));
         if ($result && $result->getNumRows() > 0) $stats['total_items_participated'] = (int)$result->getRowArray()['count'];
         
-        $result = $this->db->query("SELECT COUNT(*) as count FROM result_details rd INNER JOIN participant_item_details pid ON rd.reg_no = pid.reg_no WHERE pid.school_code = ? AND rd.grade IN ('A', 'B', 'C')", array($school_code));
+        $result = $this->db->query("SELECT COUNT(*) as count FROM result_master WHERE school_code = ? AND grade IN ('A', 'B', 'C')", array($school_code));
         if ($result && $result->getNumRows() > 0) $stats['prizes_won'] = (int)$result->getRowArray()['count'];
         
         if ($stats['total_items_participated'] > 0) $stats['result_percentage'] = round(($stats['prizes_won'] / $stats['total_items_participated']) * 100, 2);
@@ -268,8 +316,8 @@ class Welcome extends \App\Controllers\BaseController {
 
     function sub_district_details() {
         if ($this->session->get('USER_TYPE') == 0 || $this->session->get('USER_TYPE') == 1 || $this->session->get('USER_TYPE') == 2) {
-            if ($this->input->post('sel_district_id'))
-                $district_id = $this->input->post('sel_district_id');
+            if ($this->input->get_post('sel_district_id'))
+                $district_id = $this->input->get_post('sel_district_id');
             else if ($this->session->get('DISTRICT'))
                 $district_id = $this->session->get('DISTRICT');
             else
@@ -277,6 +325,7 @@ class Welcome extends \App\Controllers\BaseController {
 
             $district_details = $this->General_Model->get_data('rev_district_master', '*', array("rev_district_code" => $district_id), 'rev_district_code');
             $this->Contents['district_name'] = $district_details[0]['rev_district_name'];
+            $this->Contents['district_code'] = $district_id;
             $this->Contents['sub_district_details'] = $this->General_Model->get_data('sub_district_master', '*', array("rev_district_code" => $district_id), 'sub_district_name');
             $this->template->write_view('content', 'login/list_sub_district_details', $this->Contents);
         } else
@@ -292,6 +341,8 @@ class Welcome extends \App\Controllers\BaseController {
         $nonschool = $this->Login_Model->nonclustdetails_nosname($subdist);
         $this->Contents['val'] = $val;
         $this->Contents['nonschool'] = $nonschool;
+        $this->Contents['sub_district_code'] = $subdist;
+        $this->Contents['district_code'] = $this->Login_Model->get_subdist_district_code($subdist);
         $this->template->write_view('content', 'login/nonclustschool', $this->Contents);
         $this->template->load();
     }
@@ -336,9 +387,9 @@ class Welcome extends \App\Controllers\BaseController {
         
         if (!$sub_dist_code) return $stats;
         
-        $school_query = "SELECT sm.school_code, sd.class_start, sd.class_end, sd.is_finalize
+        $school_query = "SELECT sm.school_code, sm.school_name, sd.class_start, sd.class_end, sd.is_finalize
         FROM school_master sm
-        INNER JOIN school_details sd ON sm.school_code = sd.school_code
+        LEFT JOIN school_details sd ON sm.school_code = sd.school_code
         WHERE sm.sub_district_code = ? AND sm.school_status = 'A'";
         
         $schools = $this->db->query($school_query, array($sub_dist_code))->getResultArray();
@@ -350,25 +401,55 @@ class Welcome extends \App\Controllers\BaseController {
         $hss_schools = array();
         
         foreach ($schools as $school) {
-            $start = (int)$school['class_start'];
-            $end = (int)$school['class_end'];
+            $start = $school['class_start'] !== null ? (int)$school['class_start'] : null;
+            $end = $school['class_end'] !== null ? (int)$school['class_end'] : null;
             $finalized = $school['is_finalize'] == 'Y';
             
             if ($finalized) $stats['finalized_schools']++;
             
-            if ($start == 1 && $end == 4) {
+            $has_lp = false;
+            $has_up = false;
+            $has_hs = false;
+            $has_hss = false;
+            
+            if ($start !== null && $end !== null) {
+                $has_lp = ($start <= 4 && $end >= 1);
+                $has_up = ($start <= 7 && $end >= 5);
+                $has_hs = ($start <= 10 && $end >= 8);
+                $has_hss = ($start <= 12 && $end >= 11);
+            } else {
+                // Guess category based on school name
+                $name = strtoupper($school['school_name']);
+                if (strpos($name, 'L.P.') !== false || strpos($name, 'L P') !== false || strpos($name, 'LPS') !== false || strpos($name, 'LP S') !== false || strpos($name, 'PRIMARY') !== false) {
+                    $has_lp = true;
+                }
+                if (strpos($name, 'U.P.') !== false || strpos($name, 'U P') !== false || strpos($name, 'UPS') !== false || strpos($name, 'UP S') !== false) {
+                    $has_up = true;
+                }
+                if (strpos($name, 'H.S.') !== false || strpos($name, 'H S') !== false || strpos($name, 'HIGH SCHOOL') !== false || strpos($name, 'H.S.S') !== false || strpos($name, 'HSS') !== false || strpos($name, 'VHSS') !== false || strpos($name, 'V.H.S.S') !== false) {
+                    $has_hs = true;
+                }
+                if (strpos($name, 'H.S.S') !== false || strpos($name, 'HSS') !== false || strpos($name, 'VHSS') !== false || strpos($name, 'V.H.S.S') !== false) {
+                    $has_hss = true;
+                }
+            }
+            
+            if ($has_lp) {
                 $stats['lp_schools']++;
                 $lp_schools[] = $school['school_code'];
                 if ($finalized) $stats['lp_finalized']++;
-            } elseif ($start == 5 && $end == 7) {
+            }
+            if ($has_up) {
                 $stats['up_schools']++;
                 $up_schools[] = $school['school_code'];
                 if ($finalized) $stats['up_finalized']++;
-            } elseif ($start == 8 && $end == 10) {
+            }
+            if ($has_hs) {
                 $stats['hs_schools']++;
                 $hs_schools[] = $school['school_code'];
                 if ($finalized) $stats['hs_finalized']++;
-            } elseif ($start == 11 && $end == 12) {
+            }
+            if ($has_hss) {
                 $stats['hss_schools']++;
                 $hss_schools[] = $school['school_code'];
                 if ($finalized) $stats['hss_finalized']++;

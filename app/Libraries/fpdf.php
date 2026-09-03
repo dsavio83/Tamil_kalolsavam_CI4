@@ -77,10 +77,14 @@ var $PDFVersion;         //PDF version number
 *******************************************************************************/
 function __construct($props = array())
 {
-      if(count($props) == 3)
+      if(is_array($props) && count($props) == 3)
       {
           list($orientation,$unit,$format) = $props;
           $this->initialize($orientation,$unit,$format);
+      }
+      else
+      {
+          $this->initialize();
       }
 }
 
@@ -521,7 +525,7 @@ function SetFont($family,$style='',$size=0)
 	//Select a font; size given in points
 	global $fpdf_charwidths;
 
-	$family=strtolower($family);
+	$family=strtolower(trim($family, "'\" "));
 	if($family=='')
 		$family=$this->FontFamily;
 	if($family=='arial')
@@ -564,7 +568,31 @@ function SetFont($family,$style='',$size=0)
 			$this->fonts[$fontkey]=array('i'=>$i,'type'=>'core','name'=>$this->CoreFonts[$fontkey],'up'=>-100,'ut'=>50,'cw'=>$fpdf_charwidths[$fontkey]);
 		}
 		else
-			$this->Error('Undefined font: '.$family.' '.$style);
+		{
+			// Check if custom font file exists in font directory
+			$clean_name = str_replace(array(' ', '-', '_'), '', $family);
+			$fontpath = $this->_getfontpath();
+			$style_file = $clean_name . strtolower($style) . '.php';
+			$reg_file = $clean_name . '.php';
+
+			if (file_exists($fontpath . $style_file)) {
+				$this->AddFont($family, $style, $style_file);
+			} elseif (file_exists($fontpath . $reg_file)) {
+				$this->AddFont($family, $style, $reg_file);
+			} else {
+				// Graceful fallback to helvetica so PDF rendering never crashes
+				$family = 'helvetica';
+				$fontkey = $family . $style;
+				if (!isset($this->fonts[$fontkey])) {
+					if (!isset($fpdf_charwidths[$fontkey])) {
+						$file = $family . strtolower($style);
+						include($fontpath . $file . '.php');
+					}
+					$i = count($this->fonts) + 1;
+					$this->fonts[$fontkey] = array('i' => $i, 'type' => 'core', 'name' => $this->CoreFonts[$fontkey], 'up' => -100, 'ut' => 50, 'cw' => $fpdf_charwidths[$fontkey]);
+				}
+			}
+		}
 	}
 	//Select it
 	$this->FontFamily=$family;
@@ -1084,8 +1112,8 @@ function _dochecks()
 
 function _getfontpath()
 {
-	if(!defined('FPDF_FONTPATH') && is_dir(dirname(__FILE__).'/_fpdf'))
-		define('FPDF_FONTPATH',dirname(__FILE__).'/_fpdf/');
+	if(!defined('FPDF_FONTPATH') && is_dir(dirname(__FILE__).'/_fpdf/font'))
+		define('FPDF_FONTPATH',dirname(__FILE__).'/_fpdf/font/');
 	return defined('FPDF_FONTPATH') ? FPDF_FONTPATH : '';
 }
 

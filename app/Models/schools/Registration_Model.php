@@ -9,6 +9,15 @@ class Registration_Model extends \App\Models\BaseModel {
         parent::__construct ();
     }
 
+    public function get_all_festival_items() {
+        $db = \Config\Database::connect();
+        return $db->table('item_master IM')
+            ->select('IM.item_code, IM.item_name, IM.item_type, IM.gender as item_gender, IM.max_participants, IM.max_pinnani as max_pinnany, FM.fest_name, FM.class_start, FM.class_end')
+            ->join('festival_master FM', 'FM.fest_id = IM.fest_id', 'left')
+            ->orderBy('IM.item_code', 'ASC')
+            ->get()->getResultArray();
+    }
+
     function get_school_details($schoolCode) {
 
         if (trim($this->session->get('SUB_DISTRICT')) != 0)
@@ -129,7 +138,7 @@ class Registration_Model extends \App\Models\BaseModel {
         $this->db->where('PD.item_type', 'G');
         $this->db->from('participant_item_details AS PD');
         $this->db->join('item_master AS IM', 'PD.item_code = IM.item_code');
-        $this->db->select('IM.item_code,IM.item_name,PD.admn_no');
+        $this->db->select('IM.item_code,IM.item_name');
         $this->db->groupBy('PD.item_code');
         $group_items = $this->db->get();
         if ($group_items->getNumRows() > 0) {
@@ -195,23 +204,23 @@ class Registration_Model extends \App\Models\BaseModel {
             $school = $school_details->getResultArray();
 
             $data = array();
-            $data['school_code'] = $school[0]['school_code'];
-            $data['class_start'] = $school[0]['class_start'];
-            $data['class_end'] = $school[0]['class_end'];
-            $data['school_phone'] = $school[0]['school_phone'];
-            $data['hm_name'] = $school[0]['hm_name'];
-            $data['hm_phone'] = $school[0]['hm_phone'];
-            $data['principal_name'] = $school[0]['principal_name'];
-            $data['principal_phone'] = $school[0]['principal_phone'];
-            $data['teachers'] = $school[0]['teachers'];
-            $data['strength_lp'] = $school[0]['strength_lp'];
-            $data['strength_up'] = $school[0]['strength_up'];
-            $data['strength_hs'] = $school[0]['strength_hs'];
-            $data['strength_hss'] = $school[0]['strength_hss'];
-            $data['strength_vhss'] = $school[0]['strength_vhss'];
-            $data['total_strength'] = $school[0]['total_strength'];
-            $data['ip'] = $this->input->ip_address();
-            $data['user_id'] = $this->session->get('USERID');
+            $data['school_code'] = $school[0]['school_code'] ?? $schoolCode;
+            $data['class_start'] = $school[0]['class_start'] ?? 1;
+            $data['class_end'] = $school[0]['class_end'] ?? 10;
+            $data['school_phone'] = (string)($school[0]['school_phone'] ?? '');
+            $data['hm_name'] = (string)($school[0]['hm_name'] ?? '');
+            $data['hm_phone'] = (string)($school[0]['hm_phone'] ?? '');
+            $data['principal_name'] = (string)($school[0]['principal_name'] ?? '');
+            $data['principal_phone'] = (string)($school[0]['principal_phone'] ?? '');
+            $data['teachers'] = (string)($school[0]['teachers'] ?? '');
+            $data['strength_lp'] = (int)($school[0]['strength_lp'] ?? 0);
+            $data['strength_up'] = (int)($school[0]['strength_up'] ?? 0);
+            $data['strength_hs'] = (int)($school[0]['strength_hs'] ?? 0);
+            $data['strength_hss'] = (int)($school[0]['strength_hss'] ?? 0);
+            $data['strength_vhss'] = (int)($school[0]['strength_vhss'] ?? 0);
+            $data['total_strength'] = (int)($school[0]['total_strength'] ?? 0);
+            $data['ip'] = (string)($this->input->ip_address() ?? '');
+            $data['user_id'] = (int)($this->session->get('USERID') ?? 0);
             $data['status'] = $status;
 
             $this->db->insert('z_school_details_log', $data);
@@ -299,12 +308,12 @@ class Registration_Model extends \App\Models\BaseModel {
         }
         $data['class_start'] = (int) $this->input->post('txtStandardFrom');
         $data['class_end'] = (int) $this->input->post('txtStandardTo');
-        $data['school_phone'] = $this->input->post('txtSchoolPhone');
-        $data['school_email'] = $this->input->post('txtSchoolEmail');
-        $data['hm_name'] = $this->input->post('txtHeadmaster');
-        $data['hm_phone'] = $this->input->post('txtHeadmasterPhone');
-        $data['principal_name'] = $this->input->post('txtPrincipal');
-        $data['principal_phone'] = $this->input->post('txtPrincipalPhone');
+        $data['school_phone'] = (string) ($this->input->post('txtSchoolPhone') ?? '');
+        $data['school_email'] = (string) ($this->input->post('txtSchoolEmail') ?? '');
+        $data['hm_name'] = (string) ($this->input->post('txtHeadmaster') ?? '');
+        $data['hm_phone'] = (string) ($this->input->post('txtHeadmasterPhone') ?? '');
+        $data['principal_name'] = (string) ($this->input->post('txtPrincipal') ?? '');
+        $data['principal_phone'] = (string) ($this->input->post('txtPrincipalPhone') ?? '');
         $data['teachers'] = $teachers;
         $data['strength_lp'] = (int) $this->input->post('txtTotalLP');
         $data['strength_up'] = (int) $this->input->post('txtTotalUP');
@@ -466,47 +475,15 @@ class Registration_Model extends \App\Models\BaseModel {
             $data['class'] = $this->input->post('txtClass');
             $data['gender'] = $this->input->post('txtGender');
 
-            //Modifications
-            $accountno = $this->input->post('txtAccNo');
-            $link = connectionLink();
-            $sql = mysqli_query($link,"select account_no from participant_details where account_no=" . $accountno );
-
-            while (@$accno = mysqli_fetch_array(@$sql)) {
-                if ($accno['account_no'] != 0 && $accno['account_no'] == $accountno) {
-                    $error_array[] = 'Duplicate Account Number. Please verify Account entered number';
-                    $return_array['error_array'] = $error_array;
-                    return $return_array;
-                    //return false;
-                }
-            }
-
-            if ($this->input->post('txtBank')) {
-                $this->form_validation->set_rules('txtBank', 'Bank Name', 'numeric|greater_than[0]');
-            }
-            $this->form_validation->set_rules('txtBranch', 'Branch');
-            $this->form_validation->set_rules('txtAccNo', 'Account No.', 'numeric|min_length[9]');
-            $this->form_validation->set_rules('txtIfscCode', 'IFSC Code', 'alpha_numeric|min_length[11]');
-            if ($this->form_validation->run() == false) {
-                //$this->template->write ('error', validation_errors () . '<br><br>');
-                $this->template->write('error', validation_errors() . ' ');
-            } else {
-                $data['bank_id'] = $this->input->post('txtBank');
-                $data['branch_name'] = $this->input->post('txtBranch');
-                $data['account_no'] = $this->input->post('txtAccNo');
-                $data['ifsc_code'] = $this->input->post('txtIfscCode');
-
-                if (count($participant) > 0) {
-                        $participant_id = $participant[0]['participant_id'];
-                        $this->db->where('school_code', $schoolCode);
-                        $this->db->where('admn_no', $admnNo);
-                        $this->db->update('participant_details', $data);
-                    } else {
-                        $this->db->insert('participant_details', $data);
-                        $participant_id = $this->db->insertID();
-                    }
-
-
+            if (count($participant) > 0) {
+                $participant_id = $participant[0]['participant_id'];
                 $this->db->where('school_code', $schoolCode);
+                $this->db->where('admn_no', $admnNo);
+                $this->db->update('participant_details', $data);
+            } else {
+                $this->db->insert('participant_details', $data);
+                $participant_id = $this->db->insertID();
+            }
                 $this->db->where('admn_no', $admnNo);
                 $participant_details = $this->db->get('participant_details');
                 $participant = $participant_details->getResultArray();
@@ -624,7 +601,6 @@ class Registration_Model extends \App\Models\BaseModel {
 
                 $return_array['error_array'] = $error_array;
                 return $return_array;
-            }
         }
     }
 
@@ -636,7 +612,7 @@ class Registration_Model extends \App\Models\BaseModel {
         
         $bankDetails = $this->General_Model->prepare_select_box_data('bank_master', 'bank_id,bank_name', array(), 'Select Bank');
         $this->Content['bank_details'] = $bankDetails;
-        if ($this->input->post('cmbParticipant') != '0' || $this->input->post('cmbParticipant') !='') {
+        if ($this->input->post('cmbParticipant') != '0' && $this->input->post('cmbParticipant') !='') {
             $admnNo = $this->input->post('cmbParticipant');
             $this->db->where('school_code', $schoolCode);
             $this->db->where('admn_no', $admnNo);
@@ -670,38 +646,8 @@ class Registration_Model extends \App\Models\BaseModel {
             $data['gender'] = $this->input->post('txtGender');
             
             //$part_id = @$participant[0]['participant_id'];
-            $accountno = $this->input->post('txtAccNo');
-            $link = connectionLink();
-            $sql = mysqli_query($link,"select account_no from participant_details where account_no=" . $accountno);
-
-            while (@$accno = mysqli_fetch_array(@$sql)) {
-                if ($accno['account_no']!=0 && $accno['account_no'] == $accountno) {                
-                    $error_array[] = 'Duplicate Account Number. Please verify Account entered number';
-                    $return_array['error_array'] = $error_array;
-                    return $return_array;
-                    //return false;                
-                }
-            }
-            if($this->input->post('txtBank')){
-                $this->form_validation->set_rules('txtBank', 'Bank Name', 'numeric|greater_than[0]');
-            }
-            $this->form_validation->set_rules('txtBranch', 'Branch');
-            $this->form_validation->set_rules('txtAccNo', 'Account No.', 'min_length[9]|numeric|greater_than[0]');
-            $this->form_validation->set_rules('txtIfscCode', 'IFSC Code', 'min_length[11]|alpha_numeric');
-
-            if ($this->form_validation->run() == false) {
-                $this->template->write('error', validation_errors() . ' ');
-            } else {
-                $data['bank_id'] = $this->input->post('txtBank');
-                $data['branch_name'] = $this->input->post('txtBranch');
-                $data['account_no'] = $this->input->post('txtAccNo');
-                $data['ifsc_code'] = $this->input->post('txtIfscCode');
-                
-                $this->db->insert('participant_details', $data);
-                $participant_id = $this->db->insertID();
-            }
-               
-            
+            $this->db->insert('participant_details', $data);
+            $participant_id = $this->db->insertID();
         }
 
         $this->db->where('school_code', $schoolCode);
@@ -830,8 +776,9 @@ class Registration_Model extends \App\Models\BaseModel {
 
         $schoolCode = $this->input->post('hidSchoolId');
         $admnNo = $this->input->post('txtADNO');
-        $this->log_participant_details($schoolCode, $admnNo, 'O');
-        if ($admnNo != $this->input->post('hidADNO')) {
+        $hidADNO = $this->input->post('hidADNO');
+
+        if ($admnNo != $hidADNO) {
             $this->db->where('school_code', $schoolCode);
             $this->db->where('admn_no', $admnNo);
             $this->db->select('participant_id');
@@ -842,70 +789,125 @@ class Registration_Model extends \App\Models\BaseModel {
                 $return_array['error_array'] = $error_array;
                 return $return_array;
             }
+        }
+
+        $this->db->where('school_code', $schoolCode);
+        $this->db->where('admn_no', $hidADNO);
+        $this->db->select('participant_id, class');
+        $result = $this->db->get('participant_details');
+        $participant = $result->getResultArray();
+
+        if (count($participant) <= 0) {
+            $error_array[] = 'Invalid details.';
+            $return_array['error_array'] = $error_array;
+            return $return_array;
+        }
+        $participant_id = $participant[0]['participant_id'];
+        $class = $participant[0]['class'];
+
+        $participant_id = $participant[0]['participant_id'];
+        $class = $participant[0]['class'];
+
+        $this->db->where('school_code', $schoolCode);
+        $this->db->where('admn_no', $hidADNO);
+        $this->db->where('is_captain', 'Y');
+        $this->db->where('spo_id', '0');
+        $this->db->select('item_code');
+        $exist_item_details = $this->db->get('participant_item_details');
+        $pre_item_array = array();
+        foreach ($exist_item_details->getResultArray() as $exist_item) {
+            $pre_item_array[] = $exist_item['item_code'];
+        }
+
+        for ($i = 1; $i <= 10; $i++) {
+            if (isset($_POST['txtItemCode_' . $i]) && trim($_POST['txtItemCode_' . $i]) != '') {
+                $item_code = $_POST['txtItemCode_' . $i];
+                if (in_array($item_code, $pre_item_array)) {
+                    $not_valid_item_fest = $this->is_not_valid_item_fest($item_code, $class);
+                    $not_valid_gender = $this->is_not_valid_gender($item_code, $hidADNO, $schoolCode);
+                    if ($not_valid_item_fest) {
+                        $error_array[] = $item_code . " " . $not_valid_item_fest;
+                    } elseif ($not_valid_gender) {
+                        $error_array[] = $item_code . " " . $not_valid_gender;
+                    } else {
+                        $pre_item_array = array_remove($pre_item_array, $item_code);
+                    }
+                } else {
+                    $item_validation = $this->validate_item_school_participant($item_code, $hidADNO, $schoolCode, $class);
+                    if ($item_validation) {
+                        $error_array[] = $item_validation;
+                    } else {
+                        $this->db->where('item_code', $item_code);
+                        $this->db->select('item_type');
+                        $result = $this->db->get('item_master');
+                        $itemcode = $result->getResultArray();
+                        if (count($itemcode) <= 0) {
+                            $error_array[] = 'Invalid Item Code : ' . $_POST['txtItemCode_' . $i] . '.';
+                        }
+                    }
+                }
+            }
+        }
+
+        for ($i = 1; $i <= 5; $i++) {
+            if (isset($_POST['txtPinnanyCode_' . $i]) && trim($_POST['txtPinnanyCode_' . $i]) != '') {
+                $item_code = $_POST['txtPinnanyCode_' . $i];
+                $item_validation = $this->validate_item_school_participant($item_code, $hidADNO, $schoolCode, $class, 'P');
+                if ($item_validation) {
+                    $error_array[] = $item_validation;
+                } else {
+                    $this->db->where('item_code', $item_code);
+                    $this->db->select('item_type');
+                    $result = $this->db->get('item_master');
+                    $itemcode = $result->getResultArray();
+                    if (count($itemcode) <= 0) {
+                        $error_array[] = 'Invalid Item Code : ' . $_POST['txtItemCode_' . $i] . '.';
+                    } else {
+                        $this->db->where('item_code', $item_code);
+                        $this->db->where('school_code', $schoolCode);
+                        $this->db->where('is_captain', 'Y');
+                        $this->db->where('spo_id', '0');
+                        $this->db->select('admn_no');
+                        $result = $this->db->get('participant_item_details');
+                        $caption = $result->getResultArray();
+                        if (count($caption) <= 0) {
+                            $error_array[] = $_POST['txtPinnanyCode_' . $i] . ' pinnany has no main participants';
+                        }
+                    }
+                }
+            }
+        }
+
+        if (count($error_array) > 0) {
+            $return_array['error_array'] = $error_array;
+            return $return_array;
+        }
+
+        $this->log_participant_details($schoolCode, $admnNo, 'O');
+
+        if ($admnNo != $hidADNO) {
             $this->db->where('school_code', $schoolCode);
-            $this->db->where('parent_admn_no', $this->input->post('hidADNO'));
+            $this->db->where('parent_admn_no', $hidADNO);
             $data = array();
             $data['parent_admn_no'] = $admnNo;
             $this->db->update('participant_item_details', $data);
 
             $this->db->where('school_code', $schoolCode);
-            $this->db->where('admn_no', $this->input->post('hidADNO'));
+            $this->db->where('admn_no', $hidADNO);
             $data = array();
             $data['admn_no'] = $admnNo;
             $this->db->update('participant_item_details', $data);
         }
 
-
-        $this->db->where('school_code', $schoolCode);
-        $this->db->where('admn_no', $this->input->post('hidADNO'));
-        $this->db->select('participant_id');
-        $result = $this->db->get('participant_details');
-        $participant = $result->getResultArray();
         $data = array();
         $data['school_code'] = $schoolCode;
-        $data['admn_no'] = $this->input->post('txtADNO');
+        $data['admn_no'] = $admnNo;
         $data['participant_name'] = $this->input->post('txtParticipantName');
         $data['class'] = $this->input->post('txtClass');
         $data['gender'] = $this->input->post('txtGender');
-        
-        $participant_id = $participant[0]['participant_id'];
-        $accountno = $this->input->post('txtAccNo');
-        $link = connectionLink();
-        $sql = mysqli_query($link,"select account_no from participant_details where account_no=" . $accountno." and participant_id<>".$participant_id);
-
-        while (@$accno = mysqli_fetch_array(@$sql)) {
-            if ($accno['account_no']!=0 && $accno['account_no'] == $accountno) {                
-                $error_array[] = 'Duplicate Account Number. Please verify Account entered number';
-                $return_array['error_array'] = $error_array;
-                return $return_array;
-                //return false;                
-            }
-        }
-        if($this->input->post('txtBank')){
-            $this->form_validation->set_rules('txtBank', 'Bank Name', 'numeric|greater_than[0]');
-        }
-        $this->form_validation->set_rules('txtBranch', 'Branch');
-        $this->form_validation->set_rules('txtAccNo', 'Account No.', 'min_length[9]|numeric|greater_than[0]');
-        $this->form_validation->set_rules('txtIfscCode', 'IFSC Code', 'min_length[11]|alpha_numeric');
-            
-        if ($this->form_validation->run() == false) {
-            $this->template->write('error', validation_errors() . ' ');
-        } else {
-            $data['bank_id'] = $this->input->post('txtBank');
-            $data['branch_name'] = $this->input->post('txtBranch');
-            $data['account_no'] = $this->input->post('txtAccNo');
-            $data['ifsc_code'] = $this->input->post('txtIfscCode');
-            
-        }   
-        
-        if (count($participant) > 0) {
-            $participant_id = $participant[0]['participant_id'];
-            $this->db->where('school_code', $schoolCode);
-            $this->db->where('admn_no', $this->input->post('hidADNO'));
-            $this->db->update('participant_details', $data);
-        } else {
-            $error_array[] = 'Invalid details.';
-        }
+        $this->db->where('school_code', $schoolCode);
+        $this->db->where('admn_no', $hidADNO);
+        $this->db->update('participant_details', $data);
 
 
         $this->db->where('school_code', $schoolCode);
@@ -1372,6 +1374,7 @@ class Registration_Model extends \App\Models\BaseModel {
             $this->db->from('participant_item_details AS PD');
             $this->db->join('item_master AS IM', 'PD.item_code = IM.item_code');
             $this->db->groupBy('PD.item_code');
+            $this->db->select('PD.item_code');
 
             $item = $this->db->get('participant_item_details');
             if ($item->getNumRows() >= $max_no) {
@@ -1435,6 +1438,7 @@ class Registration_Model extends \App\Models\BaseModel {
         $this->db->from('participant_item_details AS PD');
         $this->db->join('item_master AS IM', 'PD.item_code = IM.item_code');
         $this->db->groupBy('PD.item_code');
+        $this->db->select('PD.item_code');
         $item_details = $this->db->get();
         if ($item_details->getNumRows() >= $max_items) {
             return "Maximum number of students in " . $vibhagam_name . " was exceed";
@@ -1583,10 +1587,10 @@ class Registration_Model extends \App\Models\BaseModel {
     }
 
     function is_editable_school($school_code) {
-        /* if ($this->session->get('USER_TYPE') != 5)
-          {
-          return 'no';
-          } */
+        $user_type = (int)$this->session->get('USER_TYPE');
+        if (in_array($user_type, [0, 1, 2, 3], true)) {
+            return 'yes';
+        }
         $this->db->where('school_code', $school_code);
         $school_details = $this->db->get('school_master');
         if ($school_details->getNumRows() > 0) {
@@ -1711,6 +1715,124 @@ class Registration_Model extends \App\Models\BaseModel {
         }
     }
 
+    function update_special_order_participant_details() {
+        $error_array = array();
+
+        $schoolCode = $this->input->post('hidSchoolId');
+        $pi_id      = $this->input->post('hidPiId');
+        $admnNo     = $this->input->post('txtADNO');
+        $item_code  = $this->input->post('txtItemCode_1');
+        $spo_id     = $this->input->post('cmbOrder');
+        $parent_admn_no = $this->input->post('txtCaptionAdNo');
+        $remarks    = $this->input->post('txtRemarks');
+        $is_pinnany = isset($_POST['chkIsPinnany']);
+
+        if (trim((string) $pi_id) == '') {
+            $error_array[] = 'Invalid record. Please refresh and try again.';
+            $return_array['error_array'] = $error_array;
+            return $return_array;
+        }
+        if (trim((string) $schoolCode) == '') {
+            $error_array[] = 'Please select a school.';
+        }
+        if ($spo_id == '0' || trim((string) $spo_id) == '') {
+            $error_array[] = 'Please select the order type';
+        }
+        if (trim((string) $item_code) == '') {
+            $error_array[] = 'Please enter the item code';
+        }
+        if (trim((string) $admnNo) == '') {
+            $error_array[] = 'Please enter the admission number';
+        }
+        if ($is_pinnany && trim((string) $parent_admn_no) == '') {
+            $error_array[] = 'Please enter the Captain AD No for pinnany';
+        }
+
+        $this->db->where('pi_id', $pi_id);
+        $existing = $this->db->get('participant_item_details');
+        $existing_row = $existing->getResultArray();
+        if (count($existing_row) <= 0) {
+            $error_array[] = 'Invalid participant entry.';
+            $return_array['error_array'] = $error_array;
+            return $return_array;
+        }
+
+        $this->db->where('school_code', $schoolCode);
+        $this->db->where('admn_no', $admnNo);
+        $this->db->select('participant_id, class');
+        $pdx = $this->db->get('participant_details');
+        $pd = $pdx->getResultArray();
+        if (count($pd) <= 0) {
+            $error_array[] = 'Invalid admission number';
+        }
+
+        $this->db->where('item_code', $item_code);
+        $this->db->select('item_type');
+        $im = $this->db->get('item_master');
+        $item_row = $im->getResultArray();
+        if (count($item_row) <= 0) {
+            $error_array[] = 'Invalid Item Code : ' . $item_code;
+        }
+
+        if (count($error_array) > 0) {
+            $return_array['error_array'] = $error_array;
+            return $return_array;
+        }
+
+        $participant_id = $pd[0]['participant_id'];
+        $class = $pd[0]['class'];
+        $item_type = $item_row[0]['item_type'];
+
+        if ($is_pinnany) {
+            $this->db->where('school_code', $schoolCode);
+            $this->db->where('admn_no', $parent_admn_no);
+            $this->db->where('item_code', $item_code);
+            $this->db->where('spo_id', $spo_id);
+            $this->db->where('pi_id !=', $pi_id);
+            $this->db->select('pi_id');
+            $capt = $this->db->get('participant_item_details');
+            $caption = $capt->getResultArray();
+            if (count($caption) > 0) {
+                $item_type = 'P';
+                $is_captain = 'N';
+            } else {
+                $error_array[] = 'Caption AD NO is invalid';
+                $return_array['error_array'] = $error_array;
+                return $return_array;
+            }
+        } else {
+            $item_type = $item_type;
+            $parent_admn_no = $admnNo;
+            $is_captain = 'Y';
+        }
+
+        $data = array(
+            'participant_id'   => $participant_id,
+            'school_code'      => (int) $schoolCode,
+            'admn_no'          => $admnNo,
+            'item_code'        => $item_code,
+            'item_type'        => $item_type,
+            'parent_admn_no'   => $parent_admn_no,
+            'spo_id'           => $spo_id,
+            'spo_remarks'      => $remarks,
+            'is_captain'       => $is_captain,
+        );
+        $this->db->where('pi_id', $pi_id);
+        $this->db->update('participant_item_details', $data);
+
+        $base = array();
+        $base['participant_name'] = $this->input->post('txtParticipantName');
+        $base['class']            = $this->input->post('txtClass');
+        $base['gender']           = $this->input->post('txtGender');
+        $this->db->where('participant_id', $participant_id);
+        $this->db->update('participant_details', $base);
+
+        $this->log_participant_details($schoolCode, $admnNo, 'O');
+
+        $return_array['error_array'] = $error_array;
+        return $return_array;
+    }
+
     function get_participant_item_list($school_code) {
         $this->db->where('PD.school_code', $school_code);
         $this->db->groupBy('PD.item_code');
@@ -1752,6 +1874,7 @@ class Registration_Model extends \App\Models\BaseModel {
             }
             return $item_details_array;
         }
+        return $item_details_array;
     }
 
     function get_all_schools_list() {
@@ -2092,9 +2215,9 @@ class Registration_Model extends \App\Models\BaseModel {
         $this->db->where('FM.class_start <=', (int)$class);
         $this->db->where('FM.class_end >=', (int)$class);
 
-        // Filter by gender if provided
+        // Filter by gender if provided (include Common 'C' along with 'B' or 'G')
         if ($gender && $gender != 'C') {
-            $this->db->where('IM.gender', $gender);
+            $this->db->whereIn('IM.gender', array($gender, 'C'));
         }
 
         $this->db->orderBy('FM.fest_name', 'ASC');

@@ -60,13 +60,7 @@ if (count($fest_master_details) > 0) {
     //$title		=	wordwrap(get_sub_dist_name($this->session->get('SUB_DISTRICT')).' Sub District',40,'<br/>');
     $venue = wordwrap(@$fest_master_details[0]['venue'], 40, '<br/>');
     $logo = @$fest_master_details[0]['logo_name'];
-    $file_path = '';
-    if (file_exists(base_path() . 'uploads/district/' . $logo) and trim($logo) != '') {
-        $file_path = base_url(false) . 'uploads/district/thumb_' . $logo;
-    } else {
-
-        $file_path = "";
-    }
+    $file_path = pdf_safe_logo_image('district', $logo, true);
 }
 ?>
 

@@ -1,32 +1,21 @@
 <style type="text/css">
-    <!--
     .style1 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
         font-size: 14px;
         font-weight: bold;
         color: #0d6efd;
     }
-    .style2{
-        font-size: 12px;
+    .style2 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
+        font-size: 14px;
         font-weight: bold;
-        color:#000000;
+        color: #000000;
     }
-    .style3{ 
-        font-size: 11px;
+    .style3 { 
+        font-size: 10px;
         font-weight: bold;
-        color:#000000;
+        color: #000000;
     }
-    .tb{
-        font-size: 11px;
-        font-weight: bold;
-        color:#000000;}
-
-    .ety{
-        font-size: 12px;
-        color:#000000;
-    }
-
-
-    -->
 </style>
 
 

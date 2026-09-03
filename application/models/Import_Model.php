@@ -314,7 +314,7 @@ class Import_Model extends CI_Model {
         }
     }
 
-    function backup_tables($tables = '*') {
+function backup_tables($tables = '*') {
         $return = '';
         $link = connectionLink();
         //get all of the tables
@@ -363,14 +363,14 @@ class Import_Model extends CI_Model {
 
         //save file
       //  $handle = @fopen($_SERVER['DOCUMENT_ROOT'] . '/kalolsavam_subdistrict_2022/dbBackup/kalolsavam_subdistrict_' . date('d-m-Y-h-i-s') . '.sql', 'x');
-         $baseValue = basename(base_url()); 
+          $baseValue = basename(base_url()); 
 
         $handle = @fopen($_SERVER['DOCUMENT_ROOT'] . '/'.$baseValue.'/dbBackup/kalolsavam_subdistrict_' . date('d-m-Y-h-i-s') . '.sql', 'x');
         
         fwrite($handle, $return);
         fclose($handle);
         mysqli_query($link,'REPAIR TABLE `result_master`');
-        return true;
+        return $return;
     }
 
     function restore_Database($fileName) {

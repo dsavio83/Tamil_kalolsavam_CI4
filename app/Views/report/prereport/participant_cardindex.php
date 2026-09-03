@@ -1,48 +1,73 @@
-<div class="pagetitle">
-      <h1>PreFest Report</h1>
-      <nav>
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="<?php echo base_url(); ?>welcome" title="Home">Home</a></li>
-          <li class="breadcrumb-item active">Participant Card (without photo)</li>
-        </ol>
-      </nav>
+<div class="pagetitle mb-4">
+  <h1 class="h3 fw-bold text-dark d-flex align-items-center gap-2">
+    <i class="bi bi-person-badge-fill text-primary"></i> Participant Cards (without Photo)
+  </h1>
+  <nav>
+    <ol class="breadcrumb mb-0">
+      <li class="breadcrumb-item"><a href="<?php echo base_url(); ?>welcome" class="text-decoration-none">Home</a></li>
+      <li class="breadcrumb-item">Pre-Fest Reports</li>
+      <li class="breadcrumb-item active">Participant Card (without Photo)</li>
+    </ol>
+  </nav>
 </div>
 
-<?php
-echo form_open('report/prereportpdf/participant_cardindex', array('id' => 'formPWD', 'target' => '_blank'));
- 
-
-for ($j = 0; $j < count($retdat); $j++) {
-    $dat[$retdat[$j]['school_code']] = $retdat[$j]['school_name'];
-}
-?>
-<input type="hidden" name="hiddtext" name="hiddtext" value="">
-    <div class="row">
-        <div class="col-12 mt-2">
-           <h3 class="card-title"> Participants Cards - School Wise </h3>
+<div class="row g-4">
+  <!-- Card 1: School-Wise Participant Cards (Without Photo) -->
+  <div class="col-md-12 col-xl-6">
+    <div class="card border-0 shadow-sm rounded-4 h-100 d-flex flex-column overflow-hidden">
+      
+      <!-- Card Header -->
+      <div class="card-header bg-primary text-white py-3 px-4 border-0 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+          <div class="bg-white bg-opacity-25 rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+            <i class="bi bi-buildings-fill text-white fs-5"></i>
+          </div>
+          <div>
+            <h5 class="card-title mb-0 text-white fw-bold fs-6">School Wise Cards</h5>
+            <small class="text-white-50">Generate batch participant cards for entire school</small>
+          </div>
         </div>
+        <span class="badge bg-white text-primary fw-bold shadow-sm px-2.5 py-1.5 rounded-pill small">
+          <i class="bi bi-printer me-1"></i> PDF
+        </span>
+      </div>
+
+      <!-- Card Body -->
+      <div class="card-body p-4 d-flex flex-column flex-grow-1">
+        <?php echo form_open('report/prereportpdf/participant_cardindex', array('id' => 'formPartCardSchool', 'target' => '_blank', 'class' => 'no-global-loader d-flex flex-column flex-grow-1')); ?>
+        
+        <!-- School Dropdown -->
+        <div class="mb-4">
+          <label for="txtSchoolCode" class="form-label fw-semibold text-dark small mb-1.5 d-flex align-items-center gap-1.5">
+            <i class="bi bi-building text-primary"></i>
+            <span>Select School</span>
+            <span class="text-danger">*</span>
+          </label>
+          <select name="txtSchoolCode" id="txtSchoolCode" class="form-select py-2 fs-6" required>
+            <option value="" disabled selected>-- Select Participating School --</option>
+            <?php
+            if (!empty($retdat)) {
+                foreach ($retdat as $s) {
+                    echo '<option value="' . htmlspecialchars((string)$s['school_code']) . '">' . htmlspecialchars($s['school_code'] . ' - ' . $s['school_name']) . '</option>';
+                }
+            }
+            ?>
+          </select>
+          <small class="text-muted mt-1.5 d-block" style="font-size: 0.78rem;">
+            <i class="bi bi-info-circle text-primary me-1"></i> Prints participant cards (4 cards per page, landscape) for all registered students.
+          </small>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="mt-auto pt-3">
+          <button type="submit" class="btn btn-primary w-100 rounded-pill py-2.5 fw-semibold shadow-sm d-flex align-items-center justify-content-center gap-2">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+            <span>Generate School Cards (PDF)</span>
+          </button>
+        </div>
+
+        <?php echo form_close(); ?>
+      </div>
+
     </div>
-
-
-    <div class="row mt-3">
-        <div class="col-xl-3 col-sm-6 col-md-3 col-lg-6">
-            Enter School Code :
-        </div>
-
-        <div class="col-xl-3 col-sm-6 col-md-3 col-lg-6">
-            <?php echo form_input("txtSchoolCode", @$school_details[0]['school_code'], 'class="form-control" id="txtSchoolCode"  onkeypress="javascript:return numbersonly(this, event, false);" onBlur="javascript:fetch_schooldetails(this.value)"'); ?> 
-        </div>
-        <div class="col-xl-3 col-sm-6 col-md-3 col-lg-6">
-            <div id="cmbitem"> </div>
-        </div>
-    </div>
-    
-    <div class="row">
-        <div class="col-12 mt-2">
-           <?php echo form_submit('Report', 'Report','class="btn btn-primary mt-3"', 'onClick="javascript: return fnschgpwdAddrr()"'); ?>
-        </div>
-    </div>
-<?php
-echo form_close();
- 
-?>
+  </div>

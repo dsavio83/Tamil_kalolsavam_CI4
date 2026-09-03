@@ -99,7 +99,7 @@ class Special_Order_Entry  extends \App\Controllers\BaseController {
             $this->template->load();
             return;
         }
-        $update_participant = $this->Registration_Model->update_participant_details();
+        $update_participant = $this->Registration_Model->update_special_order_participant_details();
         $this->index($update_participant);
     }
 

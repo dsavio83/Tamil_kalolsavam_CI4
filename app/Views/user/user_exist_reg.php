@@ -31,8 +31,8 @@ echo form_open('user/user_registration/userinsert', array('id' => 'editUser'));
                     ?>
                     <td scope="row"class="<?php echo $class_name; ?>"><?php echo $i; ?></th>
                     <td class="<?php echo $class_name; ?>"><?php echo ($value['user_name']); ?></td>
-                    <td class="<?php echo $class_name; ?>" ><a href="javascript:void(0)" onClick="javascript:editUser('<?php echo $value['user_id'] ?>')"> <img src="<?php echo base_url(false) ?>images/edit.png" border="0"> </a> </td>
-                    <td  class="<?php echo $class_name; ?>"><a href="javascript:void(0)" onClick="javascript:deleteUser('<?php echo $value['user_id'] ?>')"> <img src="<?php echo base_url(false) ?>images/delete.png" border="0"> </a></td>
+                    <td class="<?php echo $class_name; ?>" ><a href="javascript:void(0)" onClick="javascript:editUser('<?php echo $value['user_id'] ?>')"> <img src="<?php echo base_url() ?>images/edit.png" border="0"> </a> </td>
+                    <td  class="<?php echo $class_name; ?>"><a href="javascript:void(0)" onClick="javascript:deleteUser('<?php echo $value['user_id'] ?>')"> <img src="<?php echo base_url() ?>images/delete.png" border="0"> </a></td>
                   </tr>
                   </tbody>
               <?php $i++;} ?>

@@ -1,56 +1,73 @@
-<div class="pagetitle">
-      <h1>PreFest Report</h1>
-      <nav>
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="<?php echo base_url(); ?>welcome" title="Home">Home</a></li>
-          <li class="breadcrumb-item active">Participant Card (With Photo)</li>
-        </ol>
-      </nav>
+<div class="pagetitle mb-4">
+  <h1 class="h3 fw-bold text-dark d-flex align-items-center gap-2">
+    <i class="bi bi-image text-danger"></i> Participant Cards (with Photo)
+  </h1>
+  <nav>
+    <ol class="breadcrumb mb-0">
+      <li class="breadcrumb-item"><a href="<?php echo base_url(); ?>welcome" class="text-decoration-none">Home</a></li>
+      <li class="breadcrumb-item">Pre-Fest Reports</li>
+      <li class="breadcrumb-item active">Participant Card (with Photo)</li>
+    </ol>
+  </nav>
 </div>
 
-<?php
-echo form_open('report/prereportpdf/participant_cardindex_school_photo', array('id' => 'formPW', 'target' => '_blank'));
- 
-
-for ($j = 0; $j < count($retdat); $j++) {
-    $dat[$retdat[$j]['school_code']] = $retdat[$j]['school_name'];
-}
-?>
-<input type="hidden" name="hiddtext" id="hiddtext" value="">
-<div class="container">
-    <div class="row">
-        <div class="col-12 mt-2">
-           <h3 class="card-title"> Participants Cards - School Wise </h3>
+<div class="row g-4">
+  <!-- Card 1: School-Wise Participant Cards (With Photo) -->
+  <div class="col-md-12 col-xl-6">
+    <div class="card border-0 shadow-sm rounded-4 h-100 d-flex flex-column overflow-hidden">
+      
+      <!-- Card Header -->
+      <div class="card-header bg-danger text-white py-3 px-4 border-0 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+          <div class="bg-white bg-opacity-25 rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+            <i class="bi bi-camera-fill text-white fs-5"></i>
+          </div>
+          <div>
+            <h5 class="card-title mb-0 text-white fw-bold fs-6">School Wise Photo Cards</h5>
+            <small class="text-white-50">Generate batch photo identity cards for entire school</small>
+          </div>
         </div>
-    </div>
+        <span class="badge bg-white text-danger fw-bold shadow-sm px-2.5 py-1.5 rounded-pill small">
+          <i class="bi bi-printer me-1"></i> PDF
+        </span>
+      </div>
 
-
-    <div class="row">
-        <div class="col-xl-3 col-sm-6 col-md-3 col-lg-6">
-            Enter School Code
-        </div>
-
-        <div class="col-xl-3 col-sm-6 col-md-3 col-lg-6 mt-2">
-            <?php echo form_input("txtSchoolCode", @$school_details[0]['school_code'], 'class="form-control" id="txtSchoolCode"  onkeypress="javascript:return numbersonly(this, event, false);" onBlur="javascript:fetch_schooldetails(this.value)"'); ?>
-        </div>
+      <!-- Card Body -->
+      <div class="card-body p-4 d-flex flex-column flex-grow-1">
+        <?php echo form_open('report/prereportpdf/participant_cardindex_school_photo', array('id' => 'formPartCardSchoolPhoto', 'target' => '_blank', 'class' => 'no-global-loader d-flex flex-column flex-grow-1')); ?>
         
-        <div class="col-xl-3 col-sm-6 col-md-3 col-lg-6">
-            <div id="cmbitem"> </div>
+        <!-- School Dropdown -->
+        <div class="mb-4">
+          <label for="txtSchoolCode" class="form-label fw-semibold text-dark small mb-1.5 d-flex align-items-center gap-1.5">
+            <i class="bi bi-buildings-fill text-danger"></i>
+            <span>Select School</span>
+            <span class="text-danger">*</span>
+          </label>
+          <select name="txtSchoolCode" id="txtSchoolCode" class="form-select py-2 fs-6" required>
+            <option value="" disabled selected>-- Select Participating School --</option>
+            <?php
+            if (!empty($retdat)) {
+                foreach ($retdat as $s) {
+                    echo '<option value="' . htmlspecialchars((string)$s['school_code']) . '">' . htmlspecialchars($s['school_code'] . ' - ' . $s['school_name']) . '</option>';
+                }
+            }
+            ?>
+          </select>
+          <small class="text-muted mt-1.5 d-block" style="font-size: 0.78rem;">
+            <i class="bi bi-info-circle text-danger me-1"></i> Generates full photo identity cards with participant photos, schedule, and stage details.
+          </small>
         </div>
-    </div>
-        
 
-    
-    
-    <div class="row">
-        <div class="col-12 text-center mt-3">
-                <?php echo form_submit('Report', 'Report', 'onClick="javascript: return fnschgpwdAddrr()" class="btn btn-primary"'); ?>
+        <!-- Submit Button -->
+        <div class="mt-auto pt-3">
+          <button type="submit" class="btn btn-danger w-100 rounded-pill py-2.5 fw-semibold shadow-sm d-flex align-items-center justify-content-center gap-2">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+            <span>Generate School Photo Cards (PDF)</span>
+          </button>
         </div>
-    </div>
-    </div>
-  
 
-<?php
-echo form_close();
- 
-?>
+        <?php echo form_close(); ?>
+      </div>
+
+    </div>
+  </div>

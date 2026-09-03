@@ -8,16 +8,16 @@ class Loadajax  extends \App\Controllers\BaseController {
     function __construct () {
 		parent::__construct ();
         $this->Session_Model->is_user_logged();
-        if ($this->session->get('USER_GROUP') != 'W') {
-            return redirect(base_url() . 'welcome/');
-        }
     }
 
     function fetch_item_from_festival() {
         $fest_id = $this->input->post('fest_id');
+        if (empty($fest_id) || $fest_id == '0') {
+            echo form_dropdown('cbo_item', array('' => '-- Select Item --'), '', 'id="cbo_item" class="form-select py-2" required');
+            return;
+        }
         $item_details = $this->General_Model->prepare_select_box_data_special('item_master', 'item_code,item_name', 'item_code,CONCAT_WS(\' - \',item_code,item_name ) as item_name', array('fest_id' => $fest_id), 'Select Item', 'item_code');
-        //$item_details['ALL']  = 'ALL Item';
-        echo form_dropdown('cbo_item', $item_details, '', 'id="cbo_item" class="form-control"');
+        echo form_dropdown('cbo_item', $item_details, '', 'id="cbo_item" class="form-select py-2" required');
     }
 
     function fetch_item_from_participantt() {
@@ -98,11 +98,15 @@ class Loadajax  extends \App\Controllers\BaseController {
     function change_confirmation_status() {
         $this->load->model('login/Login_Model');
         $school_code = $this->input->post('school_code');
+        if (empty($school_code)) {
+            echo 'ERROR: School code is empty';
+            return;
+        }
         $status_details = $this->Login_Model->get_confirmation_status($school_code);
         if (is_array($status_details) && count($status_details) > 0) {
-            $status = $status_details[0]['is_finalize'];
-            $status = ($status == 'Y') ? 'N' : 'Y';
-            echo $this->Login_Model->set_confirmation_status($school_code, $status);
+            echo $this->Login_Model->set_confirmation_status($school_code, 'N');
+        } else {
+            echo 'ERROR: School details not found';
         }
     }
 
@@ -134,7 +138,7 @@ class Loadajax  extends \App\Controllers\BaseController {
         if (!empty($captain_id) && 0 != $captain_id) {
             echo $this->Certificate_model->get_group_participants($item_code, $captain_id, $school_code);
         } else {
-            echo '<select  class="form-control"  name="participant_id" id="participant_id" ><option value="0">All Participant</option></select>';
+            echo '<select class="form-select form-select-lg rounded-3 shadow-none border-secondary-subtle" name="participant_id" id="participant_id"><option value="0">All Participants</option></select>';
         }
     }
 
@@ -142,15 +146,6 @@ class Loadajax  extends \App\Controllers\BaseController {
         $this->load->model('report/Afterresult_model');
         $fest_id = $this->input->post('fest_id');
         $item_details = $this->Afterresult_model->prepare_select_box_data_special($fest_id);
-        //   echo "<pre>";  print_r($item_details);
-        /* 			     for($i=0;$i<count($item_details);$i++){
-          for($j=0;$j<count($item_details);j++){
-          $item[$i][$j]=$item_details[$i][$j];
-          }
-          }
-          //echo "<pre>";  print_r($item);
-         */         //$last=array('ALL'=>'AllResult');
-        //$item_details=array_merge($item_details,$last);
         echo form_dropdown('cbo_item', $item_details, 'id="cbo_item" class="form-control"');
     }
 
@@ -162,7 +157,7 @@ class Loadajax  extends \App\Controllers\BaseController {
         if (!empty($fest_id) && 0 != $fest_id) {
             echo $this->Certificate_model->get_school_item_details($school_code, $fest_id);
         } else {
-            echo '<select  class="form-control"  name="item_code" id="item_code" ><option value="0">All Items</option></select>';
+            echo '<select class="form-select form-select-lg rounded-3 shadow-none border-secondary-subtle" name="item_code" id="item_code"><option value="0">All Items</option></select>';
         }
     }
 
@@ -172,9 +167,9 @@ class Loadajax  extends \App\Controllers\BaseController {
         $item_code = $this->input->post('item_code');
         $captain_array = $this->Certificate_model->get_captains_details($item_code, $school_code);
         if (is_array($captain_array) && count($captain_array) > 0) {
-            echo form_dropdown('captain_id', $captain_array, '', 'class="form-control" id="captain_id" onChange=javascript:get_school_group_participants(this.value);');
+            echo form_dropdown('captain_id', $captain_array, '', 'class="form-select form-select-lg rounded-3 shadow-none border-secondary-subtle" id="captain_id" onChange="get_school_group_participants(this.value);"');
         } else {
-            echo '<select  class="form-control"  name="captain_id" id="captain_id" ><option value="0">All Participant</option></select>';
+            echo '<select class="form-select form-select-lg rounded-3 shadow-none border-secondary-subtle" name="captain_id" id="captain_id"><option value="0">All Participants</option></select>';
         }
     }
 
@@ -185,13 +180,15 @@ class Loadajax  extends \App\Controllers\BaseController {
         $this->Contents['participant_id'] = $this->input->post('participant_id');
         $participant_details = $this->Certificate_model->get_participant_details_with_id($participant_id);
         if (is_array($participant_details) && count($participant_details) > 0) {
-            $this->Contents['participant_details'] = $participant_details[0]['participant_name'] . ' ,&nbsp;&nbsp;' . $participant_details[0]['school_name'];
+            $this->Contents['participant_details'] = $participant_details[0]['participant_name'] . ' ,  ' . $participant_details[0]['school_name'];
+            $this->Contents['participant_info'] = $participant_details[0];
         }
         $item_details_array = $this->Certificate_model->get_participant_item_details($participant_id);
         if (is_array($item_details_array) && count($item_details_array) > 0) {
-            $this->Contents['item_drop_down'] = form_dropdown('item_code', $item_details_array, '', 'class="form-control" id="item_code"');
+            $this->Contents['item_details_array'] = $item_details_array;
+            $this->Contents['item_drop_down'] = form_dropdown('item_code', $item_details_array, '', 'class="form-select form-select-sm" id="item_code"');
         }
-        $contents = $this->load->view('certificate/participant_item_details', $this->Contents);
+        $contents = $this->load->view('certificate/participant_item_details', $this->Contents, true);
         echo $contents;
 //		print_r($this->certificate_model->get_participant_item_details($participant_id));
     }

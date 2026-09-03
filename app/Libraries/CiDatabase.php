@@ -28,6 +28,9 @@ class CiDatabase
     public function __construct(BaseConnection $conn)
     {
         $this->conn = $conn;
+        try {
+            $this->conn->query("SET SESSION sql_mode=(SELECT REPLACE(REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''),',,',','))");
+        } catch (\Throwable $e) {}
     }
 
     /**
@@ -269,26 +272,30 @@ class CiDatabase
 
     public function get(?string $table = null, ?int $limit = null, int $offset = 0)
     {
-        if ($table !== null && !is_numeric($table)) {
-            $builder = $this->getBuilder($table);
-            $result  = $builder->get($limit, $offset);
-        } else {
-            $limitNum = is_numeric($table) ? (int)$table : $limit;
-            $builder  = $this->getBuilder();
-            $result   = $builder->get($limitNum, $offset);
+        try {
+            if ($table !== null && !is_numeric($table)) {
+                $builder = $this->getBuilder($table);
+                return $builder->get($limit, $offset);
+            } else {
+                $limitNum = is_numeric($table) ? (int)$table : $limit;
+                $builder  = $this->getBuilder();
+                return $builder->get($limitNum, $offset);
+            }
+        } finally {
+            $this->reset();
         }
-        $this->reset();
-        return $result;
     }
 
     public function getWhere($where = null, ?int $limit = null, ?int $offset = 0, bool $reset = true)
     {
-        $builder = $this->getBuilder();
-        $result  = $builder->getWhere($where, $limit, $offset, $reset);
-        if ($reset) {
-            $this->reset();
+        try {
+            $builder = $this->getBuilder();
+            return $builder->getWhere($where, $limit, $offset, $reset);
+        } finally {
+            if ($reset) {
+                $this->reset();
+            }
         }
-        return $result;
     }
 
     public function countAllResults($table = null, bool $reset = true): int

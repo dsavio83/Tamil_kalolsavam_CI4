@@ -90,7 +90,38 @@ class Certificate_Model extends \App\Models\BaseModel {
         $this->db->where('district_code', $dist_code);
 
         $certificate_template = $this->db->get('certificate_template');
-        return $certificate_template->getResultArray();
+        $result = $certificate_template->getResultArray();
+        if (is_array($result) && count($result) > 0 && (!empty($result[0]['name_x']) || !empty($result[0]['name_y']))) {
+            return $result;
+        }
+
+        // Fallback: if no calibrated template exists for this district/sub-district,
+        // return standard legible coordinates so certificates always print properly.
+        return array(array(
+            'ct_id' => $result[0]['ct_id'] ?? null,
+            'sub_district_code' => $sub_dist_code,
+            'district_code' => $dist_code,
+            'page_style' => !empty($result[0]['page_style']) ? $result[0]['page_style'] : 'L',
+            'line_height' => !empty($result[0]['line_height']) ? $result[0]['line_height'] : 5,
+            'top_margin' => !empty($result[0]['top_margin']) ? $result[0]['top_margin'] : 10,
+            'left_margin' => !empty($result[0]['left_margin']) ? $result[0]['left_margin'] : 15,
+            'right_margin' => !empty($result[0]['right_margin']) ? $result[0]['right_margin'] : 15,
+            'type_id' => !empty($result[0]['type_id']) ? $result[0]['type_id'] : 3,
+            'label_print' => !empty($result[0]['label_print']) ? $result[0]['label_print'] : 'Y',
+            'title' => !empty($result[0]['title']) ? $result[0]['title'] : 'KERALA STATE TAMIL FESTIVAL 2026',
+            'title_x' => 70, 'title_y' => 35, 'title_font' => 'Arial', 'title_size' => 16,
+            'name_x' => 80, 'name_y' => 70, 'name_font' => 'Arial', 'name_size' => 13,
+            'class_x' => 80, 'class_y' => 80, 'class_font' => 'Arial', 'class_size' => 11,
+            'school_x' => 80, 'school_y' => 90, 'school_font' => 'Arial', 'school_size' => 11,
+            'sub_dist_x' => 80, 'sub_dist_y' => 100, 'sub_dist_font' => 'Arial', 'sub_dist_size' => 11,
+            'item_x' => 80, 'item_y' => 110, 'item_font' => 'Arial', 'item_size' => 11,
+            'category_x' => 80, 'category_y' => 120, 'category_font' => 'Arial', 'category_size' => 11,
+            'grade_x' => 80, 'grade_y' => 130, 'grade_font' => 'Arial', 'grade_size' => 13,
+            'ehs_X' => 80, 'ehs_Y' => 140, 'ehs_font' => 'Arial', 'ehs_size' => 11,
+            'date_x' => 45, 'date_y' => 170, 'date_font' => 'Arial', 'date_size' => 10,
+            'place_x' => 190, 'place_y' => 170, 'place_font' => 'Arial', 'place_size' => 10,
+            'photoX' => 0, 'photoY' => 0, 'photoWidth' => 0, 'photoHight' => 0
+        ));
     }
 
     function save_certificate_details($dist_code, $sub_dist_code) {
@@ -310,18 +341,19 @@ class Certificate_Model extends \App\Models\BaseModel {
 
         $this->db->join('item_master AS i', 'i.item_code = p.item_code');
         $this->db->join('festival_master AS f', 'i.fest_id = f.fest_id');
-        $this->db->orderBy('FIELD(rank, 1, 2, 3, 4, 0)');
-        $this->db->orderBy('cm.grade', 'ASC');
+        $this->db->orderBy('FIELD(`cm`.`rank`, 1, 2, 3, 4, 0)');
         $this->db->orderBy('cm.grade', 'ASC');
         $this->db->where('cm.is_withheld', 'N');
 
 
 
-        if ('' != $participant_id) {
-            $this->db->where('p.participant_id', $captain_id);
+        if ('' != $participant_id && '0' != $participant_id && 0 != $participant_id) {
+            if (!empty($captain_id) && $captain_id != 'all' && '0' != $captain_id && 0 != $captain_id) {
+                $this->db->where('p.participant_id', $captain_id);
+            }
             $this->db->where('cm.participant_id', $participant_id);
         } else {
-            if ($captain_id != 'all') {
+            if ($captain_id != 'all' && !empty($captain_id) && $captain_id !== 0 && $captain_id !== '0') {
                 if ('S' == $item_type)
                     $this->db->where('cm.participant_id', $captain_id);
                 else if ('G' == $item_type) {
@@ -372,7 +404,7 @@ class Certificate_Model extends \App\Models\BaseModel {
         $captains = $this->db->get();
         $captains = $captains->getResultArray();
         if (isset($captains) && count($captains) > 0) {
-            $participant_select_box = '<select  class="form-control" name="participant_id" id="participant_id" ><option value="0">All Participant</option>';
+            $participant_select_box = '<select class="form-select form-select-lg rounded-3 shadow-none border-secondary-subtle" name="participant_id" id="participant_id"><option value="0">All Participants</option>';
             foreach ($captains as $key => $captains) {
                 $participant_select_box .= '<option value="' . $captains['participant_id'] . '">' . $captains['participant_id'] . ' - ' . $captains['participant_name'] . '</option>';
             }
@@ -388,20 +420,19 @@ class Certificate_Model extends \App\Models\BaseModel {
         }
         $this->db->select('sm.school_name, sm.school_code, 
 				(SELECT SUM(spd.point) FROM school_point_details spd WHERE spd.school_code=cm.school_code)  AS total_point, 
-				(SELECT COUNT(rm.participant_id) FROM result_master rm WHERE rm.school_code=sm.school_code GROUP BY rm.school_code ) as no_participation, 
+				(SELECT COUNT(rm.participant_id) FROM result_master rm WHERE rm.school_code=sm.school_code) as no_participation, 
 				
 				(SELECT COUNT(cm1.grade) FROM certificate_master cm1 WHERE cm1.school_code=cm.school_code AND 
-				is_withheld = "N" AND cm1.parent_admn_no=cm1.admn_no AND cm1.grade = "A" GROUP BY cm.item_code) AS a_grade,
+				is_withheld = "N" AND cm1.parent_admn_no=cm1.admn_no AND cm1.grade = "A") AS a_grade,
 				
-				
-				(SELECT COUNT(cm1.grade) FROM certificate_master cm1 WHERE cm1.school_code=cm.school_code AND is_withheld = "N"  AND cm1.parent_admn_no=cm1.admn_no AND cm1.grade = "B" GROUP BY cm.item_code) AS b_grade,
-				(SELECT COUNT(cm1.grade) FROM certificate_master cm1 WHERE cm1.school_code=cm.school_code AND is_withheld = "N"  AND cm1.parent_admn_no=cm1.admn_no AND cm1.grade = "C" GROUP BY cm.item_code) AS c_grade', FALSE);
+				(SELECT COUNT(cm1.grade) FROM certificate_master cm1 WHERE cm1.school_code=cm.school_code AND is_withheld = "N"  AND cm1.parent_admn_no=cm1.admn_no AND cm1.grade = "B") AS b_grade,
+				(SELECT COUNT(cm1.grade) FROM certificate_master cm1 WHERE cm1.school_code=cm.school_code AND is_withheld = "N"  AND cm1.parent_admn_no=cm1.admn_no AND cm1.grade = "C") AS c_grade', FALSE);
         $this->db->from('school_master AS sm');
         $this->db->join('certificate_master AS cm', 'cm.school_code=sm.school_code');
         //	$this->db->join ('school_point_details AS spd', 'spd.school_code=cm.school_code');
         $this->db->join('result_master AS rm', 'rm.school_code=cm.school_code');
         $this->db->orderBy('sm.school_code', 'ASC');
-        $this->db->groupBy('cm.school_code');
+        $this->db->groupBy('sm.school_code, sm.school_name, cm.school_code');
         $result = $this->db->get();
         return $result->getResultArray();
     }
@@ -418,7 +449,7 @@ class Certificate_Model extends \App\Models\BaseModel {
         $this->db->from('certificate_master cm');
         $this->db->join('item_master i', 'i.item_code=cm.item_code');
         $this->db->join('festival_master fm', 'fm.fest_id=i.fest_id');
-        $this->db->groupBy('fm.fest_id');
+        $this->db->groupBy('fm.fest_id, fm.fest_name');
         $this->db->where('cm.is_withheld', 'N');
         $this->db->where('cm.school_code', $school_code);
         $fest_array = $this->db->get();
@@ -454,7 +485,7 @@ class Certificate_Model extends \App\Models\BaseModel {
         $item_array = $item_array->getResultArray();
         $item_select_box = '';
         if (is_array($item_array) && count($item_array) > 0) {
-            $item_select_box = '<select class="form-control" name="item_code" id="item_code" onChange="javascript:get_school_captains(this.value);" ><option value="0">All Items</option>';
+            $item_select_box = '<select class="form-select form-select-lg rounded-3 shadow-none border-secondary-subtle" name="item_code" id="item_code" onChange="javascript:get_school_captains(this.value);"><option value="0">All Items</option>';
             foreach ($item_array as $item_array) {
                 $item_select_box .= '<option value="' . $item_array['item_code'] . '">' . $item_array['item_code'] . ' - ' . $item_array['item_name'] . '</option>';
             }
@@ -492,11 +523,14 @@ class Certificate_Model extends \App\Models\BaseModel {
             $this->db->where('cm.item_code', $item_code);
         }
         if (!empty($captain_id) && 0 != $captain_id) {
-            $this->db->where('cm.parent_admn_no = (SELECT parent_admn_no FROM certificate_master WHERE item_code=' . $item_code . ' AND participant_id=' . $captain_id . ')', NULL, FALSE);
+            if (!empty($item_code) && 0 != $item_code) {
+                $this->db->where('cm.parent_admn_no = (SELECT parent_admn_no FROM certificate_master WHERE item_code=' . (int)$item_code . ' AND participant_id=' . (int)$captain_id . ' LIMIT 1)', NULL, FALSE);
+            } else {
+                $this->db->where('cm.parent_admn_no = (SELECT parent_admn_no FROM certificate_master WHERE participant_id=' . (int)$captain_id . ' LIMIT 1)', NULL, FALSE);
+            }
         }
         if (!empty($participant_id) && 0 != $participant_id) {
             $this->db->where('cm.participant_id', $participant_id);
-            $this->db->groupBy('cm.participant_id');
         }
 
         $participant_details = $this->db->get();

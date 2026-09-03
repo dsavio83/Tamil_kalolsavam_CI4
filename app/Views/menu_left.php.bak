@@ -127,13 +127,6 @@
   </li>
 
   <li>
-  <a class="nav-link collapsed" href="<?php echo base_url(); ?>publishresult/resultindex/resultview/">
-      <i class="bi bi-stack"></i>
-      <span>View Results</span>
-    </a>
-  </li>
-
-  <li>
     <a class="nav-link collapsed" href="<?php echo base_url(); ?>login/change_password">
       <i class="bi bi-key"></i>
       <span>Change Password</span>

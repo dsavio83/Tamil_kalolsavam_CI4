@@ -1097,22 +1097,58 @@ class FPDF {
 
     function _parsepng($file) {
         //Extract info from a PNG file
-        $f = fopen($file, 'rb');
+        $f = @fopen($file, 'rb');
         if (!$f)
             $this->Error('Can\'t open image file: ' . $file);
         //Check signature
-        if ($this->_readstream($f, 8) != chr(137) . 'PNG' . chr(13) . chr(10) . chr(26) . chr(10))
+        if ($this->_readstream($f, 8) != chr(137) . 'PNG' . chr(13) . chr(10) . chr(26) . chr(10)) {
+            fclose($f);
             $this->Error('Not a PNG file: ' . $file);
+        }
         //Read header chunk
         $this->_readstream($f, 4);
-        if ($this->_readstream($f, 4) != 'IHDR')
+        if ($this->_readstream($f, 4) != 'IHDR') {
+            fclose($f);
             $this->Error('Incorrect PNG file: ' . $file);
+        }
         $w = $this->_readint($f);
         $h = $this->_readint($f);
         $bpc = ord($this->_readstream($f, 1));
-        if ($bpc > 8)
-            $this->Error('16-bit depth not supported: ' . $file);
         $ct = ord($this->_readstream($f, 1));
+        $cm = ord($this->_readstream($f, 1));
+        $fm = ord($this->_readstream($f, 1));
+        $im = ord($this->_readstream($f, 1));
+
+        // Auto-flatten alpha/complex PNGs
+        if ($ct == 4 || $ct == 6 || $bpc > 8 || $cm != 0 || $fm != 0 || $im != 0) {
+            fclose($f);
+            if (function_exists('imagecreatefrompng') && function_exists('imagejpeg')) {
+                $src_im = @imagecreatefrompng($file);
+                if ($src_im !== false) {
+                    $tw = imagesx($src_im);
+                    $th = imagesy($src_im);
+                    $bg_im = imagecreatetruecolor($tw, $th);
+                    $white = imagecolorallocate($bg_im, 255, 255, 255);
+                    imagefill($bg_im, 0, 0, $white);
+                    imagecopy($bg_im, $src_im, 0, 0, 0, 0, $tw, $th);
+                    $tmp_jpg = tempnam(sys_get_temp_dir(), 'fpdf_png_');
+                    imagejpeg($bg_im, $tmp_jpg, 95);
+                    imagedestroy($src_im);
+                    imagedestroy($bg_im);
+                    $jpg_info = $this->_parsejpg($tmp_jpg);
+                    @unlink($tmp_jpg);
+                    return $jpg_info;
+                }
+            }
+            if ($ct == 4 || $ct == 6)
+                $this->Error('Alpha channel not supported: ' . $file);
+            if ($bpc > 8)
+                $this->Error('16-bit depth not supported: ' . $file);
+            if ($im != 0)
+                $this->Error('Interlacing not supported: ' . $file);
+            $this->Error('Unsupported PNG file: ' . $file);
+        }
+
         if ($ct == 0)
             $colspace = 'DeviceGray';
         elseif ($ct == 2)
@@ -1121,12 +1157,7 @@ class FPDF {
             $colspace = 'Indexed';
         else
             $this->Error('Alpha channel not supported: ' . $file);
-        if (ord($this->_readstream($f, 1)) != 0)
-            $this->Error('Unknown compression method: ' . $file);
-        if (ord($this->_readstream($f, 1)) != 0)
-            $this->Error('Unknown filter method: ' . $file);
-        if (ord($this->_readstream($f, 1)) != 0)
-            $this->Error('Interlacing not supported: ' . $file);
+
         $this->_readstream($f, 4);
         $parms = '/DecodeParms <</Predictor 15 /Colors ' . ($ct == 2 ? 3 : 1) . ' /BitsPerComponent ' . $bpc . ' /Columns ' . $w . '>>';
         //Scan chunks looking for palette, transparency and image data

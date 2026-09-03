@@ -4672,10 +4672,14 @@ if (!defined('__CLASS_HTML2PDF__')) {
             echo (HTML2PDF::textGET('txt03')) . ' ' . $line . '<br>';
             echo '<br>';
             echo $msg;
-            exit;
         }
 
     }
 
 }
+
+if (!class_exists('App\Controllers\Report\HTML2PDF', false)) {
+    class_alias('HTML2PDF', 'App\Controllers\Report\HTML2PDF');
+}
+
 

@@ -24,6 +24,7 @@ defined('APP_NAMESPACE') || define('APP_NAMESPACE', 'App');
  | (global-class) legacy libraries to load.
  */
 defined('BASEPATH') || define('BASEPATH', __DIR__);
+defined('FCPATH') || define('FCPATH', ROOTPATH);
 
 /*
  | --------------------------------------------------------------------

@@ -1,103 +1,101 @@
 <style type="text/css">
-    <!--
     .style1 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
         font-size: 14px;
         font-weight: bold;
         color: #0d6efd;
     }
-    .style2{
-        font-size: 12px;
+    .style2 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
+        font-size: 14px;
         font-weight: bold;
-        color:#000000;
+        color: #000000;
     }
-    .style3{ 
-        font-size: 11px;
+    .style3 { 
+        font-size: 10px;
         font-weight: bold;
-        color:#000000;
+        color: #000000;
     }
-
-
-    -->
+    .data-cell {
+        font-size: 10px;
+        color: #000000;
+    }
 </style>
 <style>
-    @media print
-    {
-        h1 {page-break-before:always}
+    @media print {
+        h1 { page-break-before: always; }
     }
 </style>
 
-
 <?php
-$prevrankcode = "";
-$previtem_code = "";
-$j = 0;
-foreach ($rankwise as $value) {
-    if ($value['is_publish'] != 'N') {
+$rankwise = $rankwise ?? $item_code ?? [];
+if (!empty($rankwise)) {
+    $prevrankcode = "";
+    $j = 0;
+    $count = 0;
 
+    foreach ($rankwise as $value) {
+        if (($value['is_publish'] ?? '') == 'N') {
+            continue;
+        }
 
         if ($prevrankcode != $value['fest_id']) {
             $count = 0;
             $prevrankcode = $value['fest_id'];
 
             if ($j != 0) {
-                print("</table></page>");
+                echo "</table></page>";
             }
+            $j++;
             ?>
-            <page backtop="20mm" backbottom="20mm " >
+            <page backtop="20mm" backbottom="20mm">
                 <page_header>
-                    <?php
-                    $this->load->view('report/report_header');
-                    ?>
+                    <?php $this->load->view('report/report_header'); ?>
                 </page_header>
                 <page_footer>
-                    <?php
-                    $this->load->view('report/report_footer');
-                    ?>
-                </page_footer>       
+                    <?php $this->load->view('report/report_footer'); ?>
+                </page_footer>
 
-
-                <table width="77%" border="0" cellspacing="0" cellpadding="0" align="center" >
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" align="center" style="margin-bottom: 8px;">
                     <tr>
-                        <td height="30" align="center" class="style1">Item  Wise Participants Details&nbsp;
-                            <?php echo $value['fest_name']; ?> </td>
+                        <td height="30" align="center" class="style1">
+                            Item Wise Participants Details - <?php echo htmlspecialchars((string)$value['fest_name']); ?>
+                        </td>
                     </tr>
                 </table>
 
-                <table width="93%" align="center" border="1" cellpadding="0" cellspacing="0" >
-
+                <table width="100%" align="center" border="1" cellpadding="3" cellspacing="0" style="border-collapse: collapse; border: 0.5px solid #000000;">
                     <tr>
-                        <td colspan="6" align="center" class="style1" height="24" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;">Winners in <?php echo $value['item_code'] . ' - ' . $value['item_name']; ?></td>
+                        <td colspan="6" align="center" class="style1" height="24" style="background-color: #f1f5f9; border: 0.5px solid #000000;">
+                            Winners in <?php echo htmlspecialchars((string)($value['item_code'] . ' - ' . $value['item_name'])); ?>
+                        </td>
                     </tr>
-
-                    <tr>
-                        <td width=41  align="center" class="style3" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"> &nbsp;Sl.No&nbsp;</td>
-
-                        <td width=140  align="left" class="style3" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">&nbsp;&nbsp;Name</td>
-
-                        <td width=280  align="left" class="style3" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">&nbsp;&nbsp;School </td>
-                        <td width="36" height="25" align="center" class="style3" style=" border-bottom:1px #000000; border-right:1px #000000; padding:2px;">Rank</td>
-
-
-                        <td width="36" height="25" align="center" class="style3" style=" border-bottom:1px #000000; border-right:1px #000000; padding:2px;">Grade</td>
-                        <td width="34" height="25" align="center" class="style3" style=" border-bottom:1px #000000; border-right:0px #000000; padding:2px;">Point</td>
-
+                    <tr style="background-color: #f8fafc;">
+                        <td width="40" align="center" class="style3" style="border: 0.5px solid #000000;">Sl.No</td>
+                        <td width="170" align="left" class="style3" style="border: 0.5px solid #000000;">&nbsp;Participant Name</td>
+                        <td width="260" align="left" class="style3" style="border: 0.5px solid #000000;">&nbsp;School</td>
+                        <td width="45" align="center" class="style3" style="border: 0.5px solid #000000;">Rank</td>
+                        <td width="45" align="center" class="style3" style="border: 0.5px solid #000000;">Grade</td>
+                        <td width="45" align="center" class="style3" style="border: 0.5px solid #000000;">Point</td>
                     </tr>
-                    <?php   }
+            <?php
+        }
 
-                    $count++;
-                    $j++;  ?>
-                    <tr>
-                        <td width="41" height="18" align="center" class="style3" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">&nbsp;<?php echo $count; ?></td>
-
-                    <?php } ?>
-                    <td width="150" class="style3" align="left" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">&nbsp;<?php echo wordwrap($value['participant_name'], 35, '<br>'); ?></td>
-                    <!-- <td width="240" class="style3" align="left" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">&nbsp;<?//php echo wordwrap($value['school_code'] . ' - ' . $value['school_name'] . ' (' . $value['rev_district_name'] . ')', 65, '<br>'); ?></td> -->
-                    <td width="250" class="style3" align="left" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">&nbsp;<?php echo wordwrap($value['school_code'] . ' - ' . $value['school_name'] . ' (' . $value['sub_district_name'] . ')', 60, '<br>'); ?></td>
-                    <td width="42" class="style3" align="center"  style=" border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $value['rank']; ?></td> 
-
-                    <td width="36" class="style3" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $value['grade']; ?></td>
-                    <td width="34" class="style3" align="center" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;"><?php echo $value['point']; ?></td>
+        $count++;
+        ?>
+        <tr>
+            <td align="center" class="data-cell" style="border: 0.5px solid #000000;"><?php echo $count; ?></td>
+            <td align="left" class="data-cell" style="border: 0.5px solid #000000;">&nbsp;<?php echo htmlspecialchars((string)$value['participant_name']); ?></td>
+            <td align="left" class="data-cell" style="border: 0.5px solid #000000;">&nbsp;<?php echo htmlspecialchars((string)($value['school_code'] . ' - ' . $value['school_name'] . ' (' . ($value['sub_district_name'] ?? '') . ')')); ?></td>
+            <td align="center" class="data-cell" style="border: 0.5px solid #000000;"><?php echo htmlspecialchars((string)$value['rank']); ?></td>
+            <td align="center" class="data-cell" style="border: 0.5px solid #000000;"><?php echo htmlspecialchars((string)$value['grade']); ?></td>
+            <td align="center" class="data-cell" style="border: 0.5px solid #000000;"><?php echo htmlspecialchars((string)$value['point']); ?></td>
         </tr>
-        <?php   }   ?>
-    </table>
-</page>
+        <?php
+    }
+
+    if ($j > 0) {
+        echo "</table></page>";
+    }
+}
+?>

@@ -1,7 +1,7 @@
 <br />
 <div style="text-align: left; margin-bottom: 10px;">
     <a href="<?php echo base_url(); ?>user/user_registration" class="btn btn-primary">
-        <img src="<?php echo base_url(false) ?>images/add_folder.png" border="0" width="16" height="16" style="margin-right: 5px;"> Add Users
+        <img src="<?php echo base_url() ?>images/add_folder.png" border="0" width="16" height="16" style="margin-right: 5px;"> Add Users
     </a>
 </div>
 <?php
@@ -79,8 +79,8 @@ echo form_open('user/admin_users/', array('id' => 'filter'));
             <td align="center" class="<?php echo $class_name; ?>"><?php echo $i; ?></td>
             <td align="left" class="<?php echo $class_name; ?>"><?php echo ($value['user_name']); ?></td>
             <td align="left" class="<?php echo $class_name; ?>"><?php echo $user_type ?></td>
-            <td align="center" class="<?php echo $class_name; ?>" ><a href="javascript:void(0)" onClick="javascript:editUser('<?php echo $value['user_id'] ?>')"> <img src="<?php echo base_url(false) ?>images/edit.png" border="0" width="18" height="20"> </a> </td>
-            <td align="center" class="<?php echo $class_name; ?>"><a href="javascript:void(0)" onClick="javascript:deleteUser('<?php echo $value['user_id'] ?>', '<?php echo $user_type ?>', '<?php echo ($value['user_name']); ?>')"> <img src="<?php echo base_url(false) ?>images/delete.png" border="0" width="17" height="20"> </a> </td>
+            <td align="center" class="<?php echo $class_name; ?>" ><a href="javascript:void(0)" onClick="javascript:editUser('<?php echo $value['user_id'] ?>')"> <img src="<?php echo base_url() ?>images/edit.png" border="0" width="18" height="20"> </a> </td>
+            <td align="center" class="<?php echo $class_name; ?>"><a href="javascript:void(0)" onClick="javascript:deleteUser('<?php echo $value['user_id'] ?>', '<?php echo $user_type ?>', '<?php echo ($value['user_name']); ?>')"> <img src="<?php echo base_url() ?>images/delete.png" border="0" width="17" height="20"> </a> </td>
         </tr>
         <?php $i++;} ?>
         <input type="hidden" name="UserIdty" id="UserIdty" value="">

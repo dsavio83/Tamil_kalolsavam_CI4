@@ -1,20 +1,24 @@
 
 <style type="text/css">
-    <!--
     .style1 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
         font-size: 14px;
         font-weight: bold;
-        color: #0d6efd;
-    }.style2 {
+        color: #000000;
+    }
+    .style2 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
         font-size: 11px;
-        font-weight: 100;
-
+        font-weight: bold;
+        color: #000000;
     }
     .style3 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
         font-size: 10px;
-        font-weight: 100;
-        height:9px;
-        border:0 0 0.5px 0.5px 0 #000000 ; 
+        font-weight: normal;
+        height: 12px;
+        border: 0 0 0.5px 0.5px 0 #000000; 
+        color: #000000;
     }
 </style>
 
@@ -74,22 +78,22 @@ for ($j = 0; $j < count($festresult); $j++) {
             $withheldno = 0;
         }
         ?>   
-        <page backtop="25mm" backbottom="20mm">
+        <page backtop="28mm" backbottom="20mm">
             <page_header>
                 <?php
                 $this->load->view('report/report_header');
                 ?>
-                <table width="100%" border="0" align="left" cellpadding="0" cellspacing="0">
+                <table width="100%" border="0" align="left" cellpadding="0" cellspacing="0" style="color: #000000;">
                     <tr>
-                        <td  align="left" width="400" class="style1"  style=" padding:2px;"height="25">&nbsp;&nbsp;&nbsp;&nbsp;
+                        <td  align="left" width="400" class="style1"  style="padding: 2px; color: #000000;" height="25">&nbsp;&nbsp;&nbsp;&nbsp;
                             <?php
-                                $festName = $retdat[0]['fest_name'];
+                                $festName = $festresult[$j]['fest_name'];
                                 $festName = str_replace('TAMIL KALAIVIZHA', '', $festName);
                                 ?>
 
-                                <?php echo $itemcode; ?> - <?php echo $retdat[0]['item_name']; ?> (<?php echo empty($festName)?"no data" :$festName;?>) 
+                                <?php echo $festresult[$j]['item_code']; ?> - <?php echo $festresult[$j]['item_name']; ?> (<?php echo empty($festName)?"no data" :$festName;?>) 
                         </td>
-                        <td  align="right" width="300" class="style1"  style=" padding:2px;"height="25">
+                        <td  align="right" width="300" class="style1"  style="padding: 2px; color: #000000;" height="25">
                             <?php echo $festresult[$j]['stage_name'] . ' on ' . datetophpmodel($festresult[$j]['start_time']); ?> 
                         </td>
                     </tr>
@@ -113,17 +117,18 @@ for ($j = 0; $j < count($festresult); $j++) {
                 $ctt = $festresult[$j]['no_of_judges'];
                 ?>
             </page_footer>
-            <table width="97%" border="1" align="center" cellpadding="0" cellspacing="0" bordercolor="#D4D0C8">
+            <table width="97%" border="1" align="center" cellpadding="0" cellspacing="0" bordercolor="#000000" style="margin-top: 5px;">
                 <tr>
-                    <td width=20 height="10" rowspan="2" align="center"style='border:0 0 0.5px 0.5px 0#000000 ; '>Sl No</td>
-                    <td width=40  height="10" rowspan="2" align="center"style='border:0 0 0.5px 0.5px 0 #000000 ;'>Reg No </td>
-                    <td width=27  height="10"rowspan="2" align="center"style='border:0 0 0.5px 0.5px 0 #000000 ; '>Code No</td>
-                    <td width=170  height="10"rowspan="2"  align="left" style='border:0 0 0.5px 0.5px 0 #000000 ;'>&nbsp;Name</td>
-                    <td width=170  height="10"rowspan="2"  align="left" style='border:0 0 0.5px 0.5px 0 #000000 ;'>&nbsp;School</td>
-                    <td align="center" colspan="<?php echo $ctt + 1; ?>" width=20  height="10"style='border:0 0 0.5px 0.5px 0 #000000; '>Marks</td>       <td align="center" rowspan="2" width=20 height="10" style='border:0 0 0.5px 0.5px 0 #000000 ; '> %</td>
-                    <td align="center" rowspan="2" width=20 height="10" style='border:0 0 0.5px 0.5px 0 #000000 ; '>R</td>
-                    <td align="center" rowspan="2"width=20  height="10"style='border:0 0 0.5px 0.5px 0 #000000 ; '>G</td>
-                    <td align="center" rowspan="2" width=20  height="10"style='border:0 0 0.5px 0.5px 0 #000000 ; '>P</td>
+                    <td width=20 height="10" rowspan="2" align="center" class="style2" style='border:0 0 0.5px 0.5px 0 #000000;'>Sl No</td>
+                    <td width=40  height="10" rowspan="2" align="center" class="style2" style='border:0 0 0.5px 0.5px 0 #000000;'>Reg No</td>
+                    <td width=27  height="10" rowspan="2" align="center" class="style2" style='border:0 0 0.5px 0.5px 0 #000000;'>Code No</td>
+                    <td width=170  height="10" rowspan="2" align="left" class="style2" style='border:0 0 0.5px 0.5px 0 #000000;'>&nbsp;Name</td>
+                    <td width=170  height="10" rowspan="2" align="left" class="style2" style='border:0 0 0.5px 0.5px 0 #000000;'>&nbsp;School</td>
+                    <td align="center" colspan="<?php echo $ctt + 1; ?>" width=20 height="10" class="style2" style='border:0 0 0.5px 0.5px 0 #000000;'>Marks</td>
+                    <td align="center" rowspan="2" width=20 height="10" class="style2" style='border:0 0 0.5px 0.5px 0 #000000;'>%</td>
+                    <td align="center" rowspan="2" width=20 height="10" class="style2" style='border:0 0 0.5px 0.5px 0 #000000;'>R</td>
+                    <td align="center" rowspan="2" width=20 height="10" class="style2" style='border:0 0 0.5px 0.5px 0 #000000;'>G</td>
+                    <td align="center" rowspan="2" width=20 height="10" class="style2" style='border:0 0 0.5px 0.5px 0 #000000;'>P</td>
                 </tr>
                 <tr>
                     <?php
@@ -185,7 +190,7 @@ for ($j = 0; $j < count($festresult); $j++) {
                         ?>
                         <td  width="20" align="center" class="style3" >
                             <?php
-                            echo $marks[$k];
+                            echo @$marks[$k];
                             ?>
                         </td>         
                         <?php

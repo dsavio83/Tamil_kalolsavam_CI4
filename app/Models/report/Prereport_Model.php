@@ -153,23 +153,28 @@ class Prereport_Model extends \App\Models\BaseModel {
         $sessSubdistrictId = $this->session->get('SUB_DISTRICT');
         $sessDistrictId    = $this->session->get('DISTRICT');
         $where = '';
-        if ($festid) {
-            $where = " and  F.fest_id='$festid' ";
+        if ($festid && $festid !== 'ALL' && $festid !== '0') {
+            $where = " AND F.fest_id = " . (int)$festid . " ";
         }
-        $qy = "SELECT p.participant_id,d.admn_no, p.school_code, p.item_code, p.item_type, p.is_captain, 						             d.participant_name, d.gender, d.class, c.cluster_no, date( s.start_time ) AS ddt,             im.time_type, ss.stage_name, ss.stage_desc, im.item_name, F.fest_id, F.fest_name,             m.school_name, s.no_of_participant, im.is_off_stage,im.max_time
-             FROM participant_item_details AS p
-             JOIN item_master AS im ON im.item_code = p.item_code
-             JOIN festival_master AS F ON F.fest_id = im.fest_id
-             JOIN school_master AS m ON m.school_code = p.school_code
-             JOIN participant_details AS d ON d.participant_id = p.participant_id
-             LEFT JOIN cluster_participant_details AS c ON p.participant_id = c.participant_id
-             AND c.item_code = p.item_code
-             LEFT JOIN stage_item_master AS s ON s.item_code = c.item_code
-             LEFT JOIN stage_master AS ss ON ss.stage_id = s.stage_id  
-             where s.sub_district_id =  $sessSubdistrictId 
-             $where
-             GROUP BY p.participant_id, p.item_code
-             ORDER BY p.school_code, F.fest_id, p.item_code,p.is_captain desc";
+        $subdist_where = '';
+        if ($sessSubdistrictId) {
+            $subdist_where = " AND m.sub_district_code = " . (int)$sessSubdistrictId . " ";
+        }
+        if ($sessDistrictId) {
+            $subdist_where .= " AND m.rev_district_code = " . (int)$sessDistrictId . " ";
+        }
+        $qy = "SELECT p.participant_id,d.admn_no, p.school_code, p.item_code, p.item_type, p.is_captain, d.participant_name, d.gender, d.class, c.cluster_no, date( s.start_time ) AS ddt, im.time_type, ss.stage_name, ss.stage_desc, im.item_name, F.fest_id, F.fest_name, m.school_name, s.no_of_participant, im.is_off_stage,im.max_time
+              FROM participant_item_details AS p
+              JOIN item_master AS im ON im.item_code = p.item_code
+              JOIN festival_master AS F ON F.fest_id = im.fest_id
+              JOIN school_master AS m ON m.school_code = p.school_code
+              JOIN participant_details AS d ON d.participant_id = p.participant_id
+              LEFT JOIN cluster_participant_details AS c ON p.participant_id = c.participant_id AND c.item_code = p.item_code
+              LEFT JOIN stage_item_master AS s ON s.item_code = c.item_code
+              LEFT JOIN stage_master AS ss ON ss.stage_id = s.stage_id  
+              WHERE 1=1 $subdist_where $where
+              GROUP BY p.participant_id, p.item_code
+              ORDER BY p.school_code, F.fest_id, p.item_code, p.is_captain desc";
         $fest_detail1 = $this->db->query($qy);
         return $fest_detail1->getResultArray();
 
@@ -305,11 +310,11 @@ class Prereport_Model extends \App\Models\BaseModel {
             }
         }
         $school = $this->get_school_data($school_code);
-        //print_r($hs_fee);
-        $return_array['up_fee'] = $up_fee;
-        $return_array['hs_fee'] = $hs_fee;
-        $return_array['hss_fee'] = $hss_fee;
-        $return_array['vhss_fee'] = $vhss_fee;
+        $default_fee = ['afliation' => 0, 'participant' => 0];
+        $return_array['up_fee'] = is_array($up_fee) ? $up_fee : $default_fee;
+        $return_array['hs_fee'] = is_array($hs_fee) ? $hs_fee : $default_fee;
+        $return_array['hss_fee'] = is_array($hss_fee) ? $hss_fee : $default_fee;
+        $return_array['vhss_fee'] = is_array($vhss_fee) ? $vhss_fee : $default_fee;
         $return_array['school'] = $school;
         return $return_array;
     }
@@ -320,7 +325,7 @@ class Prereport_Model extends \App\Models\BaseModel {
         $this->db->where('max_students >=', $no_studts);
         $fees_master = $this->db->get('fees_master');
         $fee_struct = $fees_master->getResultArray();
-        $fee['afliation'] = $fee_struct[0]['fees'];
+        $fee['afliation'] = isset($fee_struct[0]['fees']) ? $fee_struct[0]['fees'] : 0;
         $fee['participant'] = ($no_participant * 5);
         return $fee;
     }
@@ -331,9 +336,9 @@ class Prereport_Model extends \App\Models\BaseModel {
         $this->db->select('PD.*');
         $school_details = $this->db->get();
         $school_struct = $school_details->getResultArray();
-        $school['name'] = $school_struct[0]['school_name'];
-        $school['code'] = $school_struct[0]['school_code'];
-        $school['edu'] = $school_struct[0]['sub_district_code'];
+        $school['name'] = isset($school_struct[0]['school_name']) ? $school_struct[0]['school_name'] : '';
+        $school['code'] = isset($school_struct[0]['school_code']) ? $school_struct[0]['school_code'] : $school_code;
+        $school['edu'] = isset($school_struct[0]['sub_district_code']) ? $school_struct[0]['sub_district_code'] : '';
         return $school;
     }
 
@@ -347,12 +352,6 @@ class Prereport_Model extends \App\Models\BaseModel {
         $school_details = $this->db->get();
         $school_struct = $school_details->getResultArray();
 
-
-        /* 	if ($school_struct->getNumRows() > 0){
-
-          $school				=	$school_details->getRow();
-
-          } */
         $i = 0;
         $k = 0;
         for ($j = 0; $j < count($school_struct); $j++) {
@@ -386,20 +385,28 @@ class Prereport_Model extends \App\Models\BaseModel {
             }
             $school = $this->get_school_data_single($school_struct[$j]['school_code']);
 
-            //print_r($school);
-            $jh[$i] = array(
-                $return_array['school'] = $school_struct[$j]['school_code'],
-                $return_array['up_fee'] = $up_fee,
-                $return_array['hs_fee'] = $hs_fee,
-                $return_array['hss_fee'] = $hss_fee,
-                $return_array['vhss_fee'] = $vhss_fee
-            );
+            $default_fee = ['afliation' => 0, 'participant' => 0];
+            $up_f = is_array($up_fee) ? $up_fee : $default_fee;
+            $hs_f = is_array($hs_fee) ? $hs_fee : $default_fee;
+            $hss_f = is_array($hss_fee) ? $hss_fee : $default_fee;
+            $vhss_f = is_array($vhss_fee) ? $vhss_fee : $default_fee;
 
-            $jhh[$k] = array("schoolcode" => $school_struct[$j]['school_code'], "schoolname" => $school_struct[$j]['school_name'], "up_afli" => $up_fee['afliation'], "up_part" => $up_fee['participant'], "hs_afli" => $hs_fee['afliation'], "hs_part" => $hs_fee['participant'], "hss_afli" => $hss_fee['afliation'], "hss_part" => $hss_fee['participant'], "vhss_afli" => $vhss_fee['afliation'], "vhss_part" => $vhss_fee['participant']);
+            $jhh[$k] = array(
+                "schoolcode" => $school_struct[$j]['school_code'],
+                "schoolname" => $school_struct[$j]['school_name'],
+                "up_afli" => $up_f['afliation'],
+                "up_part" => $up_f['participant'],
+                "hs_afli" => $hs_f['afliation'],
+                "hs_part" => $hs_f['participant'],
+                "hss_afli" => $hss_f['afliation'],
+                "hss_part" => $hss_f['participant'],
+                "vhss_afli" => $vhss_f['afliation'],
+                "vhss_part" => $vhss_f['participant']
+            );
             $i++;
             $k++;
         }
-        return $jhh;
+        return $jhh ?? [];
     }
 
     function get_school_data_single($school_code) {
@@ -546,17 +553,51 @@ pd.class, pd.gender, pid.item_code, pid.item_type, pid.is_captain, it.item_name,
     }
 
     function list_more_limitpart($festid, $limit) {
+        $sessSubdistrictId = $this->session->get('SUB_DISTRICT');
+        $sessDistrictId = $this->session->get('DISTRICT');
         $this->db->from('participant_item_details AS PID');
         $this->db->select('count( PID.participant_id ) AS cnt, PID.participant_id, PD.school_code, PD.participant_name, PD.class, PD.gender, PD.admn_no, IM.fest_id,SM.school_name,FM.fest_name');
         $this->db->join('participant_details AS PD', 'PD.participant_id = PID.participant_id');
         $this->db->join('item_master AS IM', 'IM.item_code = PID.item_code');
         $this->db->join('festival_master AS FM', 'FM.fest_id=IM.fest_id');
         $this->db->join('school_master AS SM', 'SM.school_code=PD.school_code');
+        if ($sessSubdistrictId) {
+            $this->db->where('SM.sub_district_code', (int)$sessSubdistrictId);
+        }
+        if ($sessDistrictId) {
+            $this->db->where('SM.rev_district_code', (int)$sessDistrictId);
+        }
         $this->db->groupBy('PID.participant_id');
-        $this->db->having('cnt >=', $limit);
-        $this->db->where('IM.fest_id', $festid);
+        $this->db->having('cnt >=', (int)$limit);
+        if (!empty($festid) && $festid !== 'ALL' && $festid !== '0') {
+            $this->db->where('IM.fest_id', (int)$festid);
+        }
         $school_details = $this->db->get();
         return $school_details->getResultArray();
+    }
+
+    function list_more_limitpart_with_items($festid, $limit) {
+        $participants = $this->list_more_limitpart($festid, $limit);
+        if (empty($participants)) {
+            return [];
+        }
+
+        foreach ($participants as &$p) {
+            $this->db->select('PID.item_code, PID.item_type, PID.is_captain, IM.item_name, IM.is_off_stage, SIM.start_time, SM.stage_name');
+            $this->db->from('participant_item_details AS PID');
+            $this->db->join('item_master AS IM', 'IM.item_code = PID.item_code');
+            $this->db->join('stage_item_master AS SIM', 'SIM.item_code = PID.item_code', 'LEFT');
+            $this->db->join('stage_master AS SM', 'SM.stage_id = SIM.stage_id', 'LEFT');
+            $this->db->where('PID.participant_id', $p['participant_id']);
+            if (!empty($festid) && $festid !== 'ALL' && $festid !== '0') {
+                $this->db->where('IM.fest_id', (int)$festid);
+            }
+            $this->db->orderBy('PID.item_code', 'ASC');
+            $items = $this->db->get()->getResultArray();
+            $p['items'] = $items;
+        }
+
+        return $participants;
     }
 
     function find_subdistrict() {
@@ -1275,8 +1316,8 @@ WHERE IM.`item_code` =$item_id";
         $this->db->select('SD.*,SM.school_name');
         $this->db->from('school_master AS SM');
         $this->db->join('school_details AS SD', 'SM.school_code = SD.school_code');
-        $this->db->where('SD.sub_district_code', $sessSubdistrictId);
-        $this->db->where('SD.rev_district_code', $sessDistrictId);
+        $this->db->where('SM.sub_district_code', $sessSubdistrictId);
+        $this->db->where('SM.rev_district_code', $sessDistrictId);
         $school_details = $this->db->get();
         return $school_details->getResultArray(); 
     }

@@ -16,14 +16,13 @@ class Timefest_model  extends \App\Models\BaseModel {
         $this->db->join('item_master AS im', 'im.item_code = rs.item_code');
         $this->db->join('school_master AS sm', 'sm.school_code = rs.school_code');
         $this->db->join('participant_details AS pd', 'pd.participant_id = rs.participant_id', 'LEFT');
-        $this->db->join('participant_item_details AS pi', "pi.participant_id = rs.participant_id AND pi.item_code = rs.item_code and pi.is_captain='Y'");
+        $this->db->join('participant_item_details AS pi', "pi.participant_id = rs.participant_id AND pi.item_code = rs.item_code", 'LEFT');
         $this->db->join('special_order_master AS sp', "sp.spo_id = pi.spo_id AND sp.is_publish = 'N'", 'LEFT');
-        $this->db->join('stage_item_master AS si', 'si.item_code = rs.item_code');
-        $this->db->join('stage_master AS Sd', 'si.stage_id = Sd.stage_id');
+        $this->db->join('stage_item_master AS si', 'si.item_code = rs.item_code', 'LEFT');
+        $this->db->join('stage_master AS Sd', 'si.stage_id = Sd.stage_id', 'LEFT');
         $this->db->join('festival_master AS fm', 'fm.fest_id = im.fest_id');
         $this->db->where("rs.is_finish ='Y'");
-        $this->db->groupBy('rs.item_code');
-        $this->db->groupBy('rs.participant_id');
+        $this->db->groupBy('rs.rm_id');
         $this->db->orderBy('rs.total_mark', 'DESC');
         $details = $this->db->get();
         return $details->getResultArray();
@@ -33,9 +32,14 @@ class Timefest_model  extends \App\Models\BaseModel {
         $this->db->where('pi.item_code', $itemcode);
         $this->db->select('count(pi.item_code) as picount');
         $this->db->from('participant_item_details AS pi');
-        $this->db->where('pi.is_captain', 'Y');
-        $details = $this->db->get();
-        return $details->getResultArray();
+        $details = $this->db->get()->getResultArray();
+        if (!empty($details[0]['picount']) && $details[0]['picount'] > 0) {
+            return $details;
+        }
+        $this->db->where('rs.item_code', $itemcode);
+        $this->db->select('count(rs.item_code) as picount');
+        $this->db->from('result_master AS rs');
+        return $this->db->get()->getResultArray();
     }
 
     function timeoffest_count2($itemcode) {
@@ -64,19 +68,18 @@ class Timefest_model  extends \App\Models\BaseModel {
 
     function fetch_fest_all_result($festival) {
         $this->db->where('fm.fest_id', $festival);
-        $this->db->select('rs.item_code,Sd.stage_name,rs.code_no,rs.marks,rs.total_mark,rs.percentage,rs.grade,sp.is_publish,pi.spo_id,   rs.point,rs.rank,im.item_name,sm.school_code,sm.school_name,pd.participant_name,rs.participant_id,si.start_time,fm.fest_id,fm.fest_name,si.no_of_participant,si.no_of_judges');
+        $this->db->select('rs.item_code,Sd.stage_name,rs.code_no,rs.marks,rs.total_mark,rs.percentage,rs.grade,sp.is_publish,pi.spo_id, rs.point,rs.rank,im.item_name,sm.school_code,sm.school_name,pd.participant_name,rs.participant_id,si.start_time,fm.fest_id,fm.fest_name,si.no_of_participant,si.no_of_judges');
         $this->db->from('result_master AS rs');
         $this->db->join('item_master AS im', 'im.item_code = rs.item_code');
         $this->db->join('school_master AS sm', 'sm.school_code = rs.school_code');
         $this->db->join('participant_details AS pd', 'pd.participant_id = rs.participant_id', 'LEFT');
-        $this->db->join('participant_item_details AS pi', 'pi.participant_id = rs.participant_id AND pi.item_code = rs.item_code');
+        $this->db->join('participant_item_details AS pi', 'pi.participant_id = rs.participant_id AND pi.item_code = rs.item_code', 'LEFT');
         $this->db->join('special_order_master AS sp', "sp.spo_id = pi.spo_id AND sp.is_publish = 'N'", 'LEFT');
-        $this->db->join('stage_item_master AS si', 'si.item_code = rs.item_code');
-        $this->db->join('stage_master AS Sd', 'si.stage_id = Sd.stage_id');
+        $this->db->join('stage_item_master AS si', 'si.item_code = rs.item_code', 'LEFT');
+        $this->db->join('stage_master AS Sd', 'si.stage_id = Sd.stage_id', 'LEFT');
         $this->db->join('festival_master AS fm', 'fm.fest_id = im.fest_id');
         $this->db->where("rs.is_finish ='Y'");
-        $this->db->groupBy('rs.item_code');
-        $this->db->groupBy('rs.participant_id');
+        $this->db->groupBy('rs.rm_id');
         $this->db->orderBy('rs.item_code');
         $this->db->orderBy('rs.total_mark', 'DESC');
         $details = $this->db->get();

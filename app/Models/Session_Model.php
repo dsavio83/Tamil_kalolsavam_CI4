@@ -7,7 +7,8 @@ class Session_Model extends \App\Models\BaseModel {
 
     function __construct () {
         parent::__construct ();
-       }
+        helper(['general', 'url']);
+    }
 
     /* Set the session values */
 
@@ -22,21 +23,34 @@ class Session_Model extends \App\Models\BaseModel {
     function is_user_logged($redirect = true) {
 
         
-        if (trim($this->session->get('USERID')) == '' || (int) ($this->session->get('USERID')) <= 0) {
+        if (trim($this->session->get('USERID') ?? '') == '' || (int) ($this->session->get('USERID') ?? 0) <= 0) {
             if ($redirect == true) {
                 $uri = 'http' . (@$_SERVER['HTTPS'] ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
                 $set_session_data = array('REQUEST_URI' => $uri);
                 $this->set_session($set_session_data);
                
-               // header("Location: " . base_url() . 'login');
-                redirect(base_url() . 'login');
+                header("Location: " . base_url('login'));
+                exit;
             }
+            return false;
         } else if (trim($this->session->get('CHANGEPWD')) != 'Y') {
-            header("Location: " . base_url() . 'login/change_password/');
+            $uriStr = uri_string();
+            if ($uriStr !== 'login/change_password' && $uriStr !== 'login/change_Pwd_insert') {
+                header("Location: " . base_url() . 'login/change_password/');
+                exit;
+            }
         } else if (!is_import_data_finish($this->session->get('SUB_DISTRICT')) and $this->session->get('USER_GROUP') != 'W') {
-            header("Location: " . base_url() . 'import/');
+            $uriStr = uri_string();
+            if (strpos($uriStr, 'import') !== 0) {
+                header("Location: " . base_url() . 'import/');
+                exit;
+            }
         } else if (!is_define_kalolsavam($this->session->get('SUB_DISTRICT')) and $this->session->get('USER_GROUP') != 'W') {
-            header("Location: " . base_url() . 'admin/kalolsavam/');
+            $uriStr = uri_string();
+            if (strpos($uriStr, 'admin/kalolsavam') !== 0) {
+                header("Location: " . base_url() . 'admin/kalolsavam/');
+                exit;
+            }
         } else {
             return true;
         }

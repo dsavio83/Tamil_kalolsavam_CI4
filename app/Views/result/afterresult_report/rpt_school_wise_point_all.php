@@ -1,19 +1,19 @@
 <style type="text/css">
-    <!--
     .style1 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
         font-size: 14px;
         font-weight: bold;
         color: #0d6efd;
     }
     .style2 {
-        font-size: 12px;
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
+        font-size: 14px;
         font-weight: bold;
         color: #0d6efd;
     }
     .style3 {
-        font-size: 12px;
+        font-size: 10px;
         font-weight: 100;
-
     }
 </style>
 
@@ -91,17 +91,17 @@
                 $total = 0;
             }
             //echo $value['fest_id'];
-            $total = $total + $data['point'];
+            $total = $total + (int)(@$data['point'] ?? 0);
             $count++;
             $first++;
             ?>
             <tr>
                 <td align="center" class="style3" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'><?php echo $count; ?></td>
-                <td align="left" class="style3" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'>&nbsp;<?php echo $data['item_code'] . ' - ' . $data['item_name']; ?></td>
-                <td align="left"  class="style3"style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'>&nbsp;<?php echo $data['participant_name']; ?></td>
+                <td align="left" class="style3" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'>&nbsp;<?php echo htmlspecialchars((string)($data['item_code'] . ' - ' . $data['item_name'])); ?></td>
+                <td align="left"  class="style3"style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'>&nbsp;<?php echo htmlspecialchars((string)$data['participant_name']); ?></td>
 
-                <td align="center"  class="style3" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'><?php echo $data['grade']; ?></td>
-                <td align="center" class="style3" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'><?php echo $data['point']; ?></td>
+                <td align="center"  class="style3" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'><?php echo htmlspecialchars((string)@$data['grade']); ?></td>
+                <td align="center" class="style3" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'><?php echo htmlspecialchars((string)@$data['point']); ?></td>
             </tr>
             <?php
         }

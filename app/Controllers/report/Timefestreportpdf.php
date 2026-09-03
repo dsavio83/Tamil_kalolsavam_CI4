@@ -7,6 +7,7 @@ class Timefestreportpdf extends \App\Controllers\BaseController {
 
     function __construct () {
 		parent::__construct ();
+        $this->Session_Model->is_user_logged(true);
         $this->template->add_js('js/report/staticreport.js');
         $this->template->add_js('js/report/reportjs.js');
         $this->load->library('html2pdf');

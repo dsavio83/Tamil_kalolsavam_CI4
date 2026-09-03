@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Report;
 
+use HTML2PDF;
 
 class Prereportpdf  extends \App\Controllers\BaseController {
 
@@ -23,26 +24,45 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         }
         $this->Content = array();
         $this->load->model('report/Prereport_Model');
-        if ($this->input->post('txtfestFrom') != 0) {
+        $fest_id = $this->input->post('txtfestFrom');
+
+        if ($fest_id === 'ALL' || $fest_id === 'all') {
+            $this->schoolfestall();
+            exit;
+        }
+
+        if (!empty($fest_id) && $fest_id != 0) {
             $school_fest = $this->Prereport_Model->participate_school_details();
-            $part_details = $this->Prereport_Model->participate_item_details($this->input->post('txtfestFrom'));
+            $part_details = $this->Prereport_Model->participate_item_details($fest_id);
             $festdetails = $this->Prereport_Model->itempart_details();
             $subdistrict = $this->Prereport_Model->find_subdistrict();
-            //print_r( $subdistrict);
+
+            $fest_name = '';
+            if (!empty($festdetails)) {
+                foreach ($festdetails as $fm) {
+                    if ($fm['fest_id'] == $fest_id) {
+                        $fest_name = $fm['fest_name'];
+                        break;
+                    }
+                }
+            }
 
             $this->Content['school_fest'] = $school_fest;
             $this->Content['festtype'] = $part_details;
             $this->Content['festmaster'] = $festdetails;
-            $this->Content['fest'] = $this->input->post('txtfestFrom');
+            $this->Content['fest'] = $fest_id;
+            $this->Content['fest_name'] = $fest_name;
             $this->Content['subdist'] = $subdistrict;
             $content = $this->load->view('report/prereportpdf/list_school', $this->Content, true);
 
             $html2pdf = new HTML2PDF('P', 'A4', 'en');
             $html2pdf->pdf->SetDisplayMode('fullpage');
             $html2pdf->WriteHTML($content, '');
-            $html2pdf->Output('Participatingschools.pdf', 'I');
+            $html2pdf->Output('Participatingschools_' . $fest_id . '.pdf', 'I');
+            exit;
         } else {
-            redirect('test/nodata');
+            echo "<script>alert('Please select a Festival.'); window.close();</script>";
+            exit;
         }
     }
 
@@ -53,6 +73,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
             return;
         }
         $this->Content = array();
+        $this->load->model('report/Prereport_Model');
         $school_details = $this->Prereport_Model->list_all_school_details();
 
         $this->Content['school_details'] = $school_details;
@@ -63,6 +84,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         $html2pdf->pdf->SetDisplayMode('fullpage');
         $html2pdf->WriteHTML($content, '');
         $html2pdf->Output('Participatingschools.pdf', 'I');
+        exit;
     }
 
     function schoolfestall() {
@@ -75,6 +97,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         $html2pdf->pdf->SetDisplayMode('fullpage');
         $html2pdf->WriteHTML($content, '');
         $html2pdf->Output('Allparticipatingschools.pdf', 'I');
+        exit;
     }
 
     function list_participants() {
@@ -85,33 +108,28 @@ class Prereportpdf  extends \App\Controllers\BaseController {
             return;
         }
         $this->Content = array();
-        $fest_id = $this->input->post('txtSchoolCode');
+        $school_code = (int)$this->input->post('txtSchoolCode');
         $festpart_school = $this->input->post('Festpart');
-        // echo  $festpart_school;
 
-        $where = 'school_code=' . $fest_id;
-        $item_details = $this->General_Model->fetch_data('school_details', 'school_code', $where);
-        if (count($item_details) > 0) {
-            //$school_det			=	$this->Prereport_Model->get_school_single($this->input->post('txtSchoolCode'));
-            $part_details = $this->Prereport_Model->part_item_details($this->input->post('txtSchoolCode'), $festpart_school);
-            //$this->Content['subdistrict']     =   $this->Prereport_Model->find_subdistrict();
-            //$this->Content['school_det']		= 	$school_det;
-            $this->Content['part_details'] = $part_details;
-            // print_r($part_details);
-            if (count($part_details) > 0) {
+        if ($school_code > 0) {
+            $where = 'school_code=' . $school_code;
+            $item_details = $this->General_Model->fetch_data('school_details', 'school_code', $where);
+            if (count($item_details) > 0) {
+                $part_details = $this->Prereport_Model->part_item_details($school_code, $festpart_school);
+                $this->Content['subdistrict'] = $this->Prereport_Model->find_subdistrict();
+                $this->Content['part_details'] = $part_details;
+                if (count($part_details) > 0) {
+                    $content = $this->load->view('report/prereportpdf/list_participant_report', $this->Content, true);
 
-                $content = $this->load->view('report/prereportpdf/list_participant_report', $this->Content, true);
-
-                $html2pdf = new HTML2PDF('P', 'A4', 'en');
-                $html2pdf->pdf->SetDisplayMode('fullpage');
-                $html2pdf->WriteHTML($content, '');
-                $html2pdf->Output('Listofparticipantforteam_manager.pdf', 'I');
-            } else {
-                redirect('test/nodata');
+                    $html2pdf = new HTML2PDF('P', 'A4', 'en');
+                    $html2pdf->pdf->SetDisplayMode('fullpage');
+                    $html2pdf->WriteHTML($content, '');
+                    $html2pdf->Output('Listofparticipantforteam_manager.pdf', 'I');
+                    return;
+                }
             }
-        } else {
-            redirect('test/nodata');
         }
+        redirect('test/nodata');
     }
 
     function time_date_stage() {
@@ -131,6 +149,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
             $html2pdf->pdf->SetDisplayMode('fullpage');
             $html2pdf->WriteHTML($content, '');
             $html2pdf->Output('Time_sheet.pdf', 'I');
+            exit;
         } else {
             redirect('test/nodata');
         }
@@ -139,18 +158,21 @@ class Prereportpdf  extends \App\Controllers\BaseController {
     function timesheet_date() {
         $this->Contents = array();
         $this->template->write('title', '');
-        $date = $this->input->post('txtDate');
+        $date = $this->input->post('txtDate') ?: 'All';
         $festival = $this->input->post('cmbFestType');
-        $this->Contents['itemtime'] = $this->Prereport_Model->timesheet_date($festival, $date);
-        //$this->Contents['date']=$date;
-        //$this->Contents['item_count']= $this->General_Model->get_record_count('participant_item_details',"item_code = '$itemcode' AND is_captain = 'Y'");
-
-        $this->Contents['festname'] = $this->Prereport_Model->Festname($festival);
-        $content = $this->load->view('report/prereportpdf/timesheet_date', $this->Contents, true);
-        $html2pdf = new HTML2PDF('P', 'A4', 'en');
-        $html2pdf->pdf->SetDisplayMode('fullpage');
-        $html2pdf->WriteHTML($content, '');
-        $html2pdf->Output('Timesheet_date.pdf', 'I');
+        $itemtime = $this->Prereport_Model->timesheet_date($festival, $date);
+        if (count($itemtime) > 0) {
+            $this->Contents['itemtime'] = $itemtime;
+            $this->Contents['festname'] = $this->Prereport_Model->Festname($festival);
+            $content = $this->load->view('report/prereportpdf/timesheet_date', $this->Contents, true);
+            $html2pdf = new HTML2PDF('P', 'A4', 'en');
+            $html2pdf->pdf->SetDisplayMode('fullpage');
+            $html2pdf->WriteHTML($content, '');
+            $html2pdf->Output('Timesheet_date.pdf', 'I');
+            exit;
+        } else {
+            redirect('test/nodata');
+        }
     }
 
     function list_participants_datewise() {
@@ -230,21 +252,15 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         //print_r($getschool);
         if (count($getschool) > 0) {
             $fees_details = $this->Prereport_Model->get_fees_details($this->input->post('txtSchoolCode'));
-
-
             $this->Content['fees_details'] = $fees_details;
-            //if(($fees_details['up_fee']['afliation']!=0)&&($fees_details['hs_fee']['afliation']!=0))
-            if (($fees_details['up_fee']['afliation'] != 0) || ($fees_details['hs_fee']['afliation'] != 0) || ($fees_details['hss_fee']['afliation'] != 0) || ($fees_details['vhss_fee']['afliation'] != 0)) {
-                //	print_r($fees_details);
-                $content = $this->load->view('report/prereportpdf/feedetails', $this->Content, true);
+            $this->Content['subdistrict'] = $this->Prereport_Model->find_subdistrict();
 
-                $html2pdf = new HTML2PDF('P', 'A4', 'en');
-                $html2pdf->pdf->SetDisplayMode('fullpage');
-                $html2pdf->WriteHTML($content, '');
-                $html2pdf->Output('feedetails.pdf', 'I');
-            } else {
-                redirect('test/nodata');
-            }
+            $content = $this->load->view('report/prereportpdf/feedetails', $this->Content, true);
+
+            $html2pdf = new HTML2PDF('P', 'A4', 'en');
+            $html2pdf->pdf->SetDisplayMode('fullpage');
+            $html2pdf->WriteHTML($content, '');
+            $html2pdf->Output('feedetails.pdf', 'I');
         } else {
             redirect('test/nodata');
         }
@@ -284,6 +300,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
                 $html2pdf->pdf->SetDisplayMode('fullpage');
                 $html2pdf->WriteHTML($content, '');
                 $html2pdf->Output('Callsheet.pdf', 'I');
+                exit;
             } else {
                 redirect('test/nodata');
             }
@@ -302,6 +319,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
                 $html2pdf->pdf->SetDisplayMode('fullpage');
                 $html2pdf->WriteHTML($content, '');
                 $html2pdf->Output('Callsheetall.pdf', 'I');
+                exit;
             } else {
                 redirect('test/nodata');
             }
@@ -311,7 +329,8 @@ class Prereportpdf  extends \App\Controllers\BaseController {
     function callsheet_all() {
         $this->Content = array();
 
-        $fees_details = $this->Prereport_Model->all_callsheet_details($this->input->post('cmbFestType1'));
+        $festId = $this->input->post('cmbFestType1') ?: $this->input->post('cmbFestType');
+        $fees_details = $this->Prereport_Model->all_callsheet_details($festId);
         $this->Content['fees_details'] = $fees_details;
         //echo $this->input->post('cmbFestType');
         //print_r($fees_details);
@@ -323,6 +342,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
             $html2pdf->pdf->SetDisplayMode('fullpage');
             $html2pdf->WriteHTML($content, '');
             $html2pdf->Output('Callsheetall.pdf', 'I');
+            exit;
         } else {
             redirect('test/nodata');
         }
@@ -345,6 +365,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
             $html2pdf->pdf->SetDisplayMode('fullpage');
             $html2pdf->WriteHTML($content, '');
             $html2pdf->Output('tabulation.pdf', 'I');
+            exit;
         } else {
             redirect('test/nodata');
         }
@@ -367,6 +388,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
             $html2pdf->pdf->SetDisplayMode('fullpage');
             $html2pdf->WriteHTML($content, '');
             $html2pdf->Output('score_sheet.pdf', 'I');
+            exit;
         } else {
             redirect('test/nodata');
         }
@@ -389,6 +411,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
             $html2pdf->pdf->SetDisplayMode('fullpage');
             $html2pdf->WriteHTML($content, '');
             $html2pdf->Output('Call_sheet.pdf', 'I');
+            exit;
         } else {
             redirect('test/nodata');
         }
@@ -565,22 +588,49 @@ class Prereportpdf  extends \App\Controllers\BaseController {
 
     function more_limit_partlist() {
         $this->Content = array();
-        if ($this->input->post('cmbFestType')) {
-            $fees_details = $this->Prereport_Model->list_more_limitpart($this->input->post('cmbFestType'), $this->input->post('txtLimitcode'));
+        $fest_id = $this->input->post('cmbFestType');
+        $limit = $this->input->post('txtLimitcode');
+        if (!empty($fest_id)) {
+            $fees_details = $this->Prereport_Model->list_more_limitpart($fest_id, $limit);
             $this->Content['fees_details'] = $fees_details;
             $this->Content['subdistrict'] = $this->Prereport_Model->find_subdistrict();
-            //print_r($fees_details);
-            if (count($fees_details) > 0) {
-                $content = $this->load->view('report/prereportpdf/participant_limit_item_more', $this->Content, true);
 
-                $html2pdf = new HTML2PDF('P', 'A4', 'en');
+            $content = $this->load->view('report/prereportpdf/participant_limit_item_more', $this->Content, true);
 
-                $html2pdf->pdf->SetDisplayMode('fullpage');
-                $html2pdf->WriteHTML($content, '');
-                $html2pdf->Output('partmorethanoneitem.pdf', 'I');
-            }
+            $html2pdf = new HTML2PDF('P', 'A4', 'en');
+            $html2pdf->pdf->SetDisplayMode('fullpage');
+            $html2pdf->WriteHTML($content, '');
+            $html2pdf->Output('partmorethanoneitem.pdf', 'I');
+            exit;
         } else {
-            redirect('test/nodata');
+            echo "<script>alert('Please select a festival category.'); window.close();</script>";
+            exit;
+        }
+    }
+
+    function more_limit_partlist_detailed() {
+        $this->Content = array();
+        $fest_id = $this->input->post('cmbFestType');
+        $limit = $this->input->post('txtLimitcode');
+        if (!empty($fest_id)) {
+            $participants = $this->Prereport_Model->list_more_limitpart_with_items($fest_id, $limit);
+            if (empty($participants)) {
+                redirect('test/nodata');
+                return;
+            }
+            $this->Content['participants'] = $participants;
+            $this->Content['subdistrict'] = $this->Prereport_Model->find_subdistrict();
+
+            $content = $this->load->view('report/prereportpdf/participant_limit_item_more_detailed', $this->Content, true);
+
+            $html2pdf = new HTML2PDF('P', 'A4', 'en');
+            $html2pdf->pdf->SetDisplayMode('fullpage');
+            $html2pdf->WriteHTML($content, '');
+            $html2pdf->Output('Multiple_Items_Participants_With_Details.pdf', 'I');
+            exit;
+        } else {
+            echo "<script>alert('Please select a festival category.'); window.close();</script>";
+            exit;
         }
     }
 
@@ -590,19 +640,19 @@ class Prereportpdf  extends \App\Controllers\BaseController {
             $this->template->load();
             return;
         }
-        $this->Content = array();
-        $school_details = $this->Prereport_Model->list_eligible_schools();
-        $this->Content['school_details'] = $school_details;
-        //print_r($school_details);
+        $this->Contents = array();
+        $this->template->write('title', '');
+        $festcode = $this->input->post('cmbFestType');
+        $allot = $this->Prereport_Model->eligible_school($festcode);
+        $this->Contents['allot'] = $allot;
+        $this->Contents['subdistrict'] = $this->Prereport_Model->find_subdistrict();
+        $content = $this->load->view('report/prereportpdf/eligible_school', $this->Contents, true);
 
-        if (count($school_details) > 0) {
-            $content = $this->load->view('report/prereportpdf/list_eligible_school', $this->Content, true);
-
-            $html2pdf = new HTML2PDF('P', 'A4', 'en');
-            $html2pdf->pdf->SetDisplayMode('fullpage');
-            $html2pdf->WriteHTML($content, '');
-            $html2pdf->Output('Eligible_schools.pdf', 'I');
-        }
+        $html2pdf = new HTML2PDF('P', 'A4', 'en');
+        $html2pdf->pdf->SetDisplayMode('fullpage');
+        $html2pdf->WriteHTML($content, '');
+        $html2pdf->Output('Eligible_schools.pdf', 'I');
+        exit;
     }
 
     function clusterreport_report() {
@@ -612,39 +662,29 @@ class Prereportpdf  extends \App\Controllers\BaseController {
             return;
         }
         $this->Contents = array();
-        // echo $this->input->post('cbo_item');
-        if ($this->input->post('cbo_item') != 'ALL') {
+        $fest_id = $this->input->post('cmbFestType');
+        $item_code = $this->input->post('cbo_item');
 
-            $retdata = $this->Prereport_Model->cluster_reportreport(($this->input->post('cmbFestType')), ($this->input->post('cbo_item')));
-
-            $this->Contents['retdata'] = $retdata;
-            //print_r($retdata);
-            if (count($retdata) > 0) {
+        if (!empty($fest_id)) {
+            if ($item_code != 'ALL' && !empty($item_code)) {
+                $retdata = $this->Prereport_Model->cluster_reportreport($fest_id, $item_code);
+                $this->Contents['retdata'] = $retdata;
                 $content = $this->load->view('report/prereportpdf/clustor_report', $this->Contents, true);
-
-                $html2pdf = new HTML2PDF('P', 'A4', 'en');
-                $html2pdf->pdf->SetDisplayMode('fullpage');
-                $html2pdf->WriteHTML($content, '');
-                $html2pdf->Output('cluster.pdf', 'I');
             } else {
-                redirect('test/nodata');
-            }
-        } else {
-            $this->Contents = array();
-            $retdata = $this->Prereport_Model->cluster_report_all(($this->input->post('cmbFestType')));
-            $this->Contents['retdata'] = $retdata;
-            $this->Contents['subdistrict'] = $this->Prereport_Model->find_subdistrict();
-
-            if (count($retdata) > 0) {
+                $retdata = $this->Prereport_Model->cluster_report_all($fest_id);
+                $this->Contents['retdata'] = $retdata;
+                $this->Contents['subdistrict'] = $this->Prereport_Model->find_subdistrict();
                 $content = $this->load->view('report/prereportpdf/clustor_report_all', $this->Contents, true);
-
-                $html2pdf = new HTML2PDF('P', 'A4', 'en');
-                $html2pdf->pdf->SetDisplayMode('fullpage');
-                $html2pdf->WriteHTML($content, '');
-                $html2pdf->Output('cluster.pdf', 'I');
-            } else {
-                redirect('test/nodata');
             }
+
+            $html2pdf = new HTML2PDF('P', 'A4', 'en');
+            $html2pdf->pdf->SetDisplayMode('fullpage');
+            $html2pdf->WriteHTML($content, '');
+            $html2pdf->Output('cluster.pdf', 'I');
+            exit;
+        } else {
+            echo "<script>alert('Please select a festival.'); window.close();</script>";
+            exit;
         }
     }
 
@@ -655,20 +695,18 @@ class Prereportpdf  extends \App\Controllers\BaseController {
             return;
         }
         $this->Contents = array();
-        $retdata = $this->Prereport_Model->cluster_report_all(($this->input->post('cmbFestType1')));
+        $fest_id = $this->input->post('cmbFestType1');
+        $retdata = $this->Prereport_Model->cluster_report_all($fest_id);
         $this->Contents['retdata'] = $retdata;
         $this->Contents['subdistrict'] = $this->Prereport_Model->find_subdistrict();
 
-        if (count($retdata) > 0) {
-            $content = $this->load->view('report/prereportpdf/clustor_report_all', $this->Contents, true);
+        $content = $this->load->view('report/prereportpdf/clustor_report_all', $this->Contents, true);
 
-            $html2pdf = new HTML2PDF('P', 'A4', 'en');
-            $html2pdf->pdf->SetDisplayMode('fullpage');
-            $html2pdf->WriteHTML($content, '');
-            $html2pdf->Output('clusterall.pdf', 'I');
-        } else {
-            redirect('test/nodata');
-        }
+        $html2pdf = new HTML2PDF('P', 'A4', 'en');
+        $html2pdf->pdf->SetDisplayMode('fullpage');
+        $html2pdf->WriteHTML($content, '');
+        $html2pdf->Output('clusterall.pdf', 'I');
+        exit;
     }
 
     function cluster_report_all_doc() {
@@ -680,8 +718,10 @@ class Prereportpdf  extends \App\Controllers\BaseController {
             header("Content-type: application/vnd.txt");
             header("Content-Disposition: attachment; filename=cluster_report.txt");
             $this->load->view('report/prereportpdf/clustor_report_all_doc', $this->Contents);
+            exit;
         } else {
-            redirect('test/nodata');
+            echo "<script>alert('No data found for press report.'); window.close();</script>";
+            exit;
         }
     }
 
@@ -695,16 +735,14 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         $this->Contents = array();
         $retdata = $this->Prereport_Model->cluster_date_stage(($this->input->post('txtDate')), ($this->input->post('cmbstage')));
         $this->Contents['retdata'] = $retdata;
-        if (count($retdata) > 0) {
-            $content = $this->load->view('report/prereportpdf/cluster_report_date', $this->Contents, True);
 
-            $html2pdf = new HTML2PDF('P', 'A4', 'en');
-            $html2pdf->pdf->SetDisplayMode('fullpage');
-            $html2pdf->WriteHTML($content, '');
-            $html2pdf->Output('cluster.pdf', 'I');
-        } else {
-            redirect('test/nodata');
-        }
+        $content = $this->load->view('report/prereportpdf/cluster_report_date', $this->Contents, True);
+
+        $html2pdf = new HTML2PDF('P', 'A4', 'en');
+        $html2pdf->pdf->SetDisplayMode('fullpage');
+        $html2pdf->WriteHTML($content, '');
+        $html2pdf->Output('cluster.pdf', 'I');
+        exit;
     }
 
     function rpt_item_with_item_code() {//vipin
@@ -727,7 +765,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         }
         $ItemCode = $_POST['cbo_item'];
         $date = $this->Prereport_Model->fetch_item_name2($ItemCode);
-        if (count($date > 0)) {
+        if (is_array($date) && count($date) > 0) {
             $this->Contents = array();
 
             $this->Contents['itemcode'] = $ItemCode;
@@ -738,6 +776,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
             $html2pdf->pdf->SetDisplayMode('fullpage');
             $html2pdf->WriteHTML($content, '');
             $html2pdf->Output('scoresheet.pdf', 'I');
+            exit;
         } else {
 
             redirect('test/nodata');
@@ -745,7 +784,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
     }
 
     function fest_details() {
-        $festival_id = $_POST['txtfestFrom'];
+        $festival_id = $this->input->post('txtfestFrom');
         $this->Content = array();
         $fest_details = $this->Prereport_Model->fetch_fest_name($festival_id);
         $this->Content['festdata'] = $fest_details;
@@ -754,10 +793,11 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         $html2pdf->pdf->SetDisplayMode('fullpage');
         $html2pdf->WriteHTML($content, '');
         $html2pdf->Output('festdetails.pdf', 'I');
+        exit;
     }
 
     function fest_scoresheet_details() {//vipin
-        $fest_id = $_POST['txtfestFrom'];
+        $fest_id = $this->input->post('txtfestFrom');
         $this->Contents = array();
         $fest_details = $this->Prereport_Model->fetch_fest_scoresheet($fest_id);
         // print_r ($fest_details);				 
@@ -768,6 +808,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
             $html2pdf->pdf->SetDisplayMode('fullpage');
             $html2pdf->WriteHTML($content, '');
             $html2pdf->Output('festscoresheet.pdf', 'I');
+            exit;
         } else {
 
             redirect('test/nodata');
@@ -789,6 +830,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         $html2pdf->pdf->SetDisplayMode('fullpage');
         $html2pdf->WriteHTML($content, '');
         $html2pdf->Output('Timesheet.pdf', 'I');
+        exit;
     }
 
     function datewisepart() {
@@ -826,6 +868,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
             $html2pdf->pdf->SetDisplayMode('fullpage');
             $html2pdf->WriteHTML($content, '');
             $html2pdf->Output('datewise_participant.pdf', 'I');
+            exit;
         } else {
 
             $this->Contents['partdata'] = $this->Prereport_Model->datewise_participants($date);
@@ -847,6 +890,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
             $html2pdf->pdf->SetDisplayMode('fullpage');
             $html2pdf->WriteHTML($content, '');
             $html2pdf->Output('datewise_participant.pdf', 'I');
+            exit;
         }
     }
 
@@ -871,6 +915,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
             $html2pdf->pdf->SetDisplayMode('fullpage');
             $html2pdf->WriteHTML($content, '');
             $html2pdf->Output('Stagereport_date.pdf', 'I');
+            exit;
         } else {
             $this->Contents['date'] = $date;
             $this->Contents['stageid'] = $stageid;
@@ -881,6 +926,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
             $html2pdf->pdf->SetDisplayMode('fullpage');
             $html2pdf->WriteHTML($content, '');
             $html2pdf->Output('Stagereport_date.pdf', 'I');
+            exit;
         }
     }
 
@@ -899,6 +945,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         $html2pdf->pdf->SetDisplayMode('fullpage');
         $html2pdf->WriteHTML($content, '');
         $html2pdf->Output('stagereport_all.pdf', 'I');
+        exit;
     }
 
     function rpt_itemwiseparticipants() {//ratheesh
@@ -992,6 +1039,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
             $html2pdf->pdf->SetDisplayMode('fullpage');
             $html2pdf->WriteHTML($content, '');
             $html2pdf->Output('Clashes_details.pdf', 'I');
+            exit;
         } else {
             $content = $this->load->view('report/prereport/rpt_clashes_report_all', $this->Contents, true);
 
@@ -999,6 +1047,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
             $html2pdf->pdf->SetDisplayMode('fullpage');
             $html2pdf->WriteHTML($content, '');
             $html2pdf->Output('Clashes_details.pdf', 'I');
+            exit;
         }
     }
 
@@ -1011,20 +1060,21 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         $this->Contents = array();
         $this->template->write('title', '');
         $festcode = $this->input->post('cmbFestType');
-        $appeal = $this->Prereport_Model->appealed_part($festcode);
-        //print_r($allot);
-        $this->Contents['appeal'] = $appeal;
-        $this->Contents['subdistrict'] = $this->Prereport_Model->find_subdistrict();
-        //print_r($appeal);
-        if (count($appeal) > 0) {
+        if (!empty($festcode)) {
+            $appeal = $this->Prereport_Model->appealed_part($festcode);
+            $this->Contents['appeal'] = $appeal;
+            $this->Contents['subdistrict'] = $this->Prereport_Model->find_subdistrict();
+
             $content = $this->load->view('report/prereportpdf/appealed_part', $this->Contents, true);
 
             $html2pdf = new HTML2PDF('P', 'A4', 'en');
             $html2pdf->pdf->SetDisplayMode('fullpage');
             $html2pdf->WriteHTML($content, '');
             $html2pdf->Output('Appealed_participant.pdf', 'I');
+            exit;
         } else {
-            redirect('test/nodata');
+            echo "<script>alert('Please select a festival category.'); window.close();</script>";
+            exit;
         }
     }
 
@@ -1033,21 +1083,21 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         $this->Contents = array();
         $this->template->write('title', '');
         $festcode = $this->input->post('cmbFestType');
-        $appeal = $this->Prereport_Model->appeal_courtorder($festcode);
-        //print_r($allot);
-        $this->Contents['appeal'] = $appeal;
-        $this->Contents['subdistrict'] = $this->Prereport_Model->find_subdistrict();
-        //print_r($appeal);
+        if (!empty($festcode)) {
+            $appeal = $this->Prereport_Model->appeal_courtorder($festcode);
+            $this->Contents['appeal'] = $appeal;
+            $this->Contents['subdistrict'] = $this->Prereport_Model->find_subdistrict();
 
-        if (count($appeal) > 0) {
             $content = $this->load->view('report/prereportpdf/appeal_courtorder', $this->Contents, true);
 
             $html2pdf = new HTML2PDF('P', 'A4', 'en');
             $html2pdf->pdf->SetDisplayMode('fullpage');
             $html2pdf->WriteHTML($content, '');
             $html2pdf->Output('Appeal_courtorder.pdf', 'I');
+            exit;
         } else {
-            redirect('test/nodata');
+            echo "<script>alert('Please select a festival category.'); window.close();</script>";
+            exit;
         }
     }
 
@@ -1063,95 +1113,78 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         }
         $this->Contents = array();
         $abstract = $this->Prereport_Model->stageallot_abstract();
-        //	print_r($abstract);
 
-        if (count($abstract) > 0) {
-
-            $this->Contents['abstract'] = $abstract;
-            $content = $this->load->view('report/prereportpdf/stageallot_abstract', $this->Contents, true);
-            $html2pdf = new HTML2PDF('P', 'A4', 'en');
-            $html2pdf->pdf->SetDisplayMode('fullpage');
-            $html2pdf->WriteHTML($content, '');
-            $html2pdf->Output('StageallotAbstract.pdf', 'I');
-        }
+        $this->Contents['abstract'] = $abstract;
+        $content = $this->load->view('report/prereportpdf/stageallot_abstract', $this->Contents, true);
+        $html2pdf = new HTML2PDF('P', 'A4', 'en');
+        $html2pdf->pdf->SetDisplayMode('fullpage');
+        $html2pdf->WriteHTML($content, '');
+        $html2pdf->Output('StageallotAbstract.pdf', 'I');
+        exit;
     }
 
     function four_reports() {
-        $this->Contents = array();
-        $item_code = $this->input->post('item');
-
-
-     /*   $sql = mysqli_query("select fest_id from item_master where item_code=$item_code");
-        $fest = mysqli_fetch_row($sql); */
+        $item_code = trim((string)$this->input->post('item'));
+        if ($item_code === '') {
+            echo "<script>alert('Please enter an Item Code.'); window.close();</script>";
+            exit;
+        }
 
         $fest = $this->Prereport_Model->get_festId_by_itemcode($item_code);
+        $festId = (!empty($fest) && isset($fest[0]['fest_id'])) ? $fest[0]['fest_id'] : 0;
 
-        $festId = $fest[0]['fest_id'];
-        //echo $fest[0];
-        $call = $this->input->post('call');
-        $time = $this->input->post('time');
-        $tabulation = $this->input->post('tabulation');
-        $score = $this->input->post('score');
-        $participants = $this->input->post('participants');
-        //echo $tabulation;
-        //echo $time;
+        $report_type = $this->input->post('report_type');
+        $call = $this->input->post('call') ?: ($report_type == 'call' ? 'Call Sheet' : '');
+        $time = $this->input->post('time') ?: ($report_type == 'time' ? 'Time Sheet' : '');
+        $tabulation = $this->input->post('tabulation') ?: ($report_type == 'tabulation' ? 'Tabulation Sheet' : '');
+        $score = $this->input->post('score') ?: ($report_type == 'score' ? 'Score Sheet' : '');
+        $participants = $this->input->post('participants') ?: ($report_type == 'participants' ? 'Participant List' : '');
+
         if ($call == 'Call Sheet') {
             $fees_details = $this->Prereport_Model->get_callsheet_details($item_code);
+            $this->Content = array();
             $this->Content['fees_details'] = $fees_details;
             $this->Content['subdistrict'] = $this->Prereport_Model->find_subdistrict();
-            //print_r($fees_details);
-            if (count($fees_details) > 0) {
+            if (!empty($fees_details)) {
                 $content = $this->load->view('report/prereportpdf/callsheet_report', $this->Content, true);
 
                 $html2pdf = new HTML2PDF('P', 'A4', 'en');
                 $html2pdf->pdf->SetDisplayMode('fullpage');
                 $html2pdf->WriteHTML($content, '');
-                $html2pdf->Output('Callsheet.pdf', 'I');
+                $html2pdf->Output('Callsheet_' . $item_code . '.pdf', 'I');
+                exit;
             }
-        }
-        if ($time == 'Time Sheet') {
+        } elseif ($time == 'Time Sheet') {
             $this->Contents = array();
-            $this->template->write('title', '');
-            //$itemcode						=	$this->input->post('cbo_item');
-            //$festival						=	$this->input->post('cmbFestType');
             $this->Contents['itemtime'] = $this->Prereport_Model->timesheet($item_code);
-
             $this->Contents['item_count'] = $this->General_Model->get_record_count('participant_item_details', "item_code = '$item_code' AND is_captain = 'Y'");
-
             $this->Contents['festname'] = $this->Prereport_Model->Festname($festId);
-            $content = $this->load->view('report/prereportpdf/timesheet', $this->Contents, true);
-            $html2pdf = new HTML2PDF('P', 'A4', 'en');
-            $html2pdf->pdf->SetDisplayMode('fullpage');
-            $html2pdf->WriteHTML($content, '');
-            $html2pdf->Output('Timesheet.pdf', 'I');
-        }
-        if ($tabulation == 'Tabulation Sheet') {
+            if (!empty($this->Contents['itemtime'])) {
+                $content = $this->load->view('report/prereportpdf/timesheet', $this->Contents, true);
+                $html2pdf = new HTML2PDF('P', 'A4', 'en');
+                $html2pdf->pdf->SetDisplayMode('fullpage');
+                $html2pdf->WriteHTML($content, '');
+                $html2pdf->Output('Timesheet_' . $item_code . '.pdf', 'I');
+                exit;
+            }
+        } elseif ($tabulation == 'Tabulation Sheet') {
             $this->Contents = array();
-            $this->template->write('title', '');
-            //$itemcode						=	$this->input->post('item_code');
-            //$festival						=	$this->input->post('$fest[0]');
-            //$this->Contents['num']		    =	$this->input->post('txtParticipantNum');
             $retdata = $this->Prereport_Model->tabulation_details($item_code);
             $retdata1 = $this->Prereport_Model->tabulation_fest_details($festId);
             $this->Contents['retdata'] = $retdata;
             $this->Contents['retdata1'] = $retdata1;
-            if (count($retdata) > 0) {
-                //$this->template->write_view('content', 'report/prereport/rpt_tabulation_sheet_item', $this->Contents);
-                //$this->Contents['itemdet']= $this->Itemreports_Model->Eventname($itemcode);
+            if (!empty($retdata)) {
                 $content = $this->load->view('report/prereport/rpt_tabulation_sheet_item', $this->Contents, true);
                 $html2pdf = new HTML2PDF('P', 'A4', 'en');
                 $html2pdf->pdf->SetDisplayMode('fullpage');
                 $html2pdf->WriteHTML($content, '');
-                $html2pdf->Output('Tabulation_sheet.pdf', 'I');
-                $this->template->load();
+                $html2pdf->Output('Tabulation_sheet_' . $item_code . '.pdf', 'I');
+                exit;
             }
-        }
-        if ($score == 'Score Sheet') {
+        } elseif ($score == 'Score Sheet') {
             $date = $this->Prereport_Model->fetch_item_name2($item_code);
-            if(!empty($date)){
-            if (count($date)>0) {
+            if (!empty($date)) {
                 $this->Contents = array();
-
                 $this->Contents['itemcode'] = $item_code;
                 $this->Contents['start_time'] = $date;
 
@@ -1159,25 +1192,27 @@ class Prereportpdf  extends \App\Controllers\BaseController {
                 $html2pdf = new HTML2PDF('P', 'A4', 'en');
                 $html2pdf->pdf->SetDisplayMode('fullpage');
                 $html2pdf->WriteHTML($content, '');
-                $html2pdf->Output('scoresheet.pdf', 'I');
+                $html2pdf->Output('scoresheet_' . $item_code . '.pdf', 'I');
+                exit;
             }
-        }
-        }
-        if ($participants == 'Participant List') {
+        } elseif ($participants == 'Participant List') {
             $this->load->model('staticreport/Itemreports_Model');
             $this->Contents = array();
-            $this->template->write('title', '');
             $this->Contents['partdata'] = $this->Itemreports_Model->itemwise_participants($item_code);
             $this->Contents['itemdet'] = $this->Itemreports_Model->Eventname($item_code);
             $this->Contents['festdet'] = $this->Itemreports_Model->Festname($festId);
-            $content = $this->load->view('report/prereportpdf/rpt_itemwiseparticipants', $this->Contents, true);
-            $html2pdf = new HTML2PDF('P', 'A4', 'en');
-            $html2pdf->pdf->SetDisplayMode('fullpage');
-            $html2pdf->WriteHTML($content, '');
-            $html2pdf->Output('itemwiseparticipants.pdf', 'I');
-        } else {
-            redirect('test/nodata');
+            if (!empty($this->Contents['partdata'])) {
+                $content = $this->load->view('report/prereportpdf/rpt_itemwiseparticipants', $this->Contents, true);
+                $html2pdf = new HTML2PDF('P', 'A4', 'en');
+                $html2pdf->pdf->SetDisplayMode('fullpage');
+                $html2pdf->WriteHTML($content, '');
+                $html2pdf->Output('itemwiseparticipants_' . $item_code . '.pdf', 'I');
+                exit;
+            }
         }
+
+        echo "<script>alert('No data found for Item Code: " . htmlspecialchars($item_code) . "'); window.close();</script>";
+        exit;
     }
 
 }

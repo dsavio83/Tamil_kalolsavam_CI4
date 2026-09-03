@@ -488,7 +488,7 @@ if (!defined('__CLASS_STYLEHTML__')) {
                 switch ($nom) {
                     case 'font-family':
                         $val = explode(',', $val);
-                        $val = trim($val[0]);
+                        $val = trim($val[0], " \t\n\r\0\x0B'\"");
 
                         if ($val)
                             $this->value['font-family'] = $val;

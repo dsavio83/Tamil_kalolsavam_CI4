@@ -81,6 +81,7 @@ class Allotment extends \App\Controllers\BaseController {
             return;
         } else {
             $this->Allotment_Model->save_allotment();
+            session()->setFlashdata('success', 'Stage Allotment saved successfully!');
             $this->index($this->input->post('hidItemId'));
         }
     }
@@ -104,6 +105,7 @@ class Allotment extends \App\Controllers\BaseController {
             return;
         } else {
             $this->Allotment_Model->update_allotment();
+            session()->setFlashdata('success', 'Stage Allotment updated successfully!');
             $this->index($this->input->post('hidItemId'));
         }
     }
@@ -116,6 +118,7 @@ class Allotment extends \App\Controllers\BaseController {
         }
         $item_code = $this->input->post('hidClusterItemCode');
         $this->Allotment_Model->update_cluster_participant($item_code);
+        session()->setFlashdata('success', 'Participant Clusters updated successfully!');
         $this->index($item_code);
     }
 

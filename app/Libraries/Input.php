@@ -52,8 +52,8 @@ class Input
     protected function fetch($method, $index)
     {
         $raw = ($method === 'post')
-            ? $this->request->getPost()
-            : $this->request->getGet();
+            ? ($this->request->getPost() ?: $_POST)
+            : ($this->request->getGet() ?: $_GET);
 
         if ($index === null) {
             return $raw;

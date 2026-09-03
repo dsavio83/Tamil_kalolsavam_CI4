@@ -4,6 +4,10 @@ if ($this->session->get('SUB_DISTRICT')) {
     $label = $sub_dist_name . ' Subdistrict';
 }
 $fest_master_details = $this->General_Model->get_fest_master_details();
+$title = '';
+$venue = '';
+$start_date = '';
+$end_date = '';
 if (count($fest_master_details) > 0) {
     $title = (@$fest_master_details[0]['sub_dist_kalolsavam_name']) ? @$fest_master_details[0]['sub_dist_kalolsavam_name'] : '';
     $venue = @$fest_master_details[0]['venue'];
@@ -11,10 +15,7 @@ if (count($fest_master_details) > 0) {
     $end_date = datetophpmodel(@$fest_master_details[0]['end_date']);
 
     $logo = @$fest_master_details[0]['logo_name'];
-    $file_path = '';
-    if (file_exists(base_path() . 'uploads/sub_district/thumb_' . $logo)) {
-        $file_path = base_url(false) . 'uploads/sub_district/thumb_' . $logo;
-    }
+    $file_path = pdf_safe_logo_image('sub_district', $logo, true);
 }
 ?>
 

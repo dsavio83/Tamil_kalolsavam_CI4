@@ -10,35 +10,31 @@ class Afterresult_model extends \App\Models\BaseModel {
     }
 
     function school_wise_result($school) {
+        $school = (int)$school;
+        $query = "SELECT RM.item_code, IM.item_name, RM.participant_id, RM.percentage, RM.total_mark, RM.grade, SPD.point, RM.rank, PD.participant_name, RM.school_code, SM.school_name, COALESCE(SPD.is_withheld, 'N') as is_withheld, FM.fest_name 
+                  FROM result_master AS RM
+                  LEFT JOIN school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code 
+                  LEFT JOIN participant_details AS PD ON PD.participant_id = RM.participant_id 
+                  JOIN item_master AS IM ON IM.item_code = RM.item_code
+                  JOIN school_master AS SM ON SM.school_code = RM.school_code
+                  JOIN festival_master AS FM ON IM.fest_id = FM.fest_id
+                  WHERE RM.school_code = ? AND (SPD.is_withheld = 'N' OR SPD.is_withheld IS NULL) AND RM.is_finish = 'Y' AND RM.grade != ''
+                  ORDER BY FM.fest_id, IM.item_code, RM.total_mark DESC";
 
-        $query = "SELECT SPD.item_code,IM.item_name,SPD.participant_id,RM.percentage,RM.total_mark,RM.grade,SPD.point,RM.rank,PD.participant_name,SPD.school_code,SM.school_name,SPD.is_withheld,FM.fest_name 
-	 				from  result_master AS RM
-	                JOIN   school_point_details AS SPD ON RM.participant_id=SPD.participant_id and  RM.item_code=SPD.item_code 
-					JOIN participant_details AS PD ON PD.participant_id=RM.participant_id 
-					JOIN item_master AS IM ON IM.item_code=SPD.item_code
-					
-					JOIN school_master AS SM ON SM.school_code=RM.school_code
-					JOIN festival_master AS FM ON IM.fest_id=FM.fest_id
-					where  SPD.school_code = $school and SPD.is_withheld='N' and RM.is_finish='Y' and RM.grade!=''
-					
-					order by FM.fest_id,IM.item_code,RM.total_mark desc ";
-
-        $school_wise_result = $this->db->query($query);
+        $school_wise_result = $this->db->query($query, [$school]);
         return $school_wise_result->getResultArray();
     }
 
     function all_school_wise_result() {
-
-        $query = "SELECT SPD.item_code,IM.item_name,SPD.participant_id,RM.percentage,RM.total_mark,RM.grade,SPD.point,RM.rank,PD.participant_name,SPD.school_code,SM.school_name,SPD.is_withheld,FM.fest_name,FM.fest_id
-	 				from  result_master AS RM
-	                JOIN   school_point_details AS SPD ON RM.participant_id=SPD.participant_id and  RM.item_code=SPD.item_code 
-					JOIN participant_details AS PD ON PD.participant_id=RM.participant_id 
-					JOIN item_master AS IM ON IM.item_code=SPD.item_code
-					
-					JOIN school_master AS SM ON SM.school_code=RM.school_code
-					JOIN festival_master AS FM ON IM.fest_id=FM.fest_id
-					where  SPD.is_withheld='N' and RM.is_finish='Y' and  RM.grade!=''
-					order by FM.fest_id,IM.item_code,RM.total_mark desc ";
+        $query = "SELECT RM.item_code, IM.item_name, RM.participant_id, RM.percentage, RM.total_mark, RM.grade, SPD.point, RM.rank, PD.participant_name, RM.school_code, SM.school_name, COALESCE(SPD.is_withheld, 'N') as is_withheld, FM.fest_name, FM.fest_id
+                  FROM result_master AS RM
+                  LEFT JOIN school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code 
+                  LEFT JOIN participant_details AS PD ON PD.participant_id = RM.participant_id 
+                  JOIN item_master AS IM ON IM.item_code = RM.item_code
+                  JOIN school_master AS SM ON SM.school_code = RM.school_code
+                  JOIN festival_master AS FM ON IM.fest_id = FM.fest_id
+                  WHERE (SPD.is_withheld = 'N' OR SPD.is_withheld IS NULL) AND RM.is_finish = 'Y' AND RM.grade != ''
+                  ORDER BY FM.fest_id, IM.item_code, RM.total_mark DESC";
 
         $school_wise_result = $this->db->query($query);
         return $school_wise_result->getResultArray();
@@ -116,22 +112,22 @@ class Afterresult_model extends \App\Models\BaseModel {
     }
 
     function status_of_kalolsavam($fest, $date) {
+        $fest = ($fest !== 'All' && !empty($fest)) ? (int)$fest : 'All';
+        $date = $this->db->escapeString((string)$date);
         if ($date != 'All') {
             if ($fest != 'All') {
                 $query = "SELECT RP.item_code,IM.item_name,FM.fest_name,FM.fest_id from result_master AS RP
-	 JOIN stage_item_master AS sm ON sm.item_code = RP.item_code
-AND date( start_time ) = '$date'
-	  LEFT JOIN item_master AS IM ON IM.item_code=RP.item_code LEFT JOIN festival_master AS FM ON IM.fest_id=FM.fest_id where IM.fest_id=$fest and RP.is_finish='Y' group by RP.item_code order by FM.fest_id";
+	 LEFT JOIN stage_item_master AS sm ON sm.item_code = RP.item_code
+	  LEFT JOIN item_master AS IM ON IM.item_code=RP.item_code LEFT JOIN festival_master AS FM ON IM.fest_id=FM.fest_id where date(sm.start_time) = '$date' and IM.fest_id=$fest and RP.is_finish='Y' group by RP.item_code, IM.item_name, FM.fest_name, FM.fest_id order by FM.fest_id";
 
                 $school_wise_result = $this->db->query($query);
                 return $school_wise_result->getResultArray();
             } else {
                 $query = "SELECT RP.item_code,IM.item_name,FM.fest_name,FM.fest_id from result_master AS RP
-	 JOIN stage_item_master AS sm ON sm.item_code = RP.item_code
-AND date( start_time ) = '$date'
+	 LEFT JOIN stage_item_master AS sm ON sm.item_code = RP.item_code
 	 LEFT JOIN item_master AS IM ON IM.item_code=RP.item_code LEFT JOIN festival_master AS FM ON IM.fest_id=FM.fest_id
-	 where RP.is_finish='Y'
-	 group by RP.item_code
+	 where date(sm.start_time) = '$date' and RP.is_finish='Y'
+	 group by RP.item_code, IM.item_name, FM.fest_name, FM.fest_id
 	  order by FM.fest_id";
 
                 $school_wise_result = $this->db->query($query);
@@ -140,19 +136,17 @@ AND date( start_time ) = '$date'
         } else {
             if ($fest != 'All') {
                 $query = "SELECT RP.item_code,IM.item_name,FM.fest_name,FM.fest_id from result_master AS RP
-	 JOIN stage_item_master AS sm ON sm.item_code = RP.item_code
-
-	  LEFT JOIN item_master AS IM ON IM.item_code=RP.item_code LEFT JOIN festival_master AS FM ON IM.fest_id=FM.fest_id where IM.fest_id=$fest and RP.is_finish='Y' group by RP.item_code order by FM.fest_id";
+	 LEFT JOIN stage_item_master AS sm ON sm.item_code = RP.item_code
+	  LEFT JOIN item_master AS IM ON IM.item_code=RP.item_code LEFT JOIN festival_master AS FM ON IM.fest_id=FM.fest_id where IM.fest_id=$fest and RP.is_finish='Y' group by RP.item_code, IM.item_name, FM.fest_name, FM.fest_id order by FM.fest_id";
 
                 $school_wise_result = $this->db->query($query);
                 return $school_wise_result->getResultArray();
             } else {
                 $query = "SELECT RP.item_code,IM.item_name,FM.fest_name,FM.fest_id from result_master AS RP
-	 JOIN stage_item_master AS sm ON sm.item_code = RP.item_code
-
+	 LEFT JOIN stage_item_master AS sm ON sm.item_code = RP.item_code
 	 LEFT JOIN item_master AS IM ON IM.item_code=RP.item_code LEFT JOIN festival_master AS FM ON IM.fest_id=FM.fest_id
 	 where RP.is_finish='Y'
-	 group by RP.item_code
+	 group by RP.item_code, IM.item_name, FM.fest_name, FM.fest_id
 	  order by FM.fest_id";
 
                 $school_wise_result = $this->db->query($query);
@@ -162,6 +156,8 @@ AND date( start_time ) = '$date'
     }
 
     function status_of_kalolsavam1($fest, $festdate) {
+        $fest = ($fest !== 'All' && !empty($fest)) ? (int)$fest : 'All';
+        $festdate = $this->db->escapeString((string)$festdate);
         if ($festdate != 'All') {
             if ($fest != 'All') {
                 $query1 = "SELECT IM.item_name, FM.fest_name, IM.item_code,FM.fest_id
@@ -236,29 +232,32 @@ AND date( start_time ) = '$date'
     }
 
     function total_points() {
-        $query = "SELECT SPD.item_code,IM.item_name,SPD.participant_id,RM.percentage,RM.grade,SPD.point,RM.rank,PD.participant_name,SPD.school_code,SM.school_name,SPD.is_withheld,FM.fest_name,FM.fest_id from  result_master AS RM
-		                   JOIN school_point_details AS SPD ON RM.participant_id=SPD.participant_id and RM.item_code=SPD.item_code
-						  JOIN participant_details AS PD ON PD.participant_id=SPD.participant_id and PD.school_code=SPD.school_code 
-					      JOIN item_master AS IM ON IM.item_code=SPD.item_code
-						
-						   JOIN school_master AS SM ON SM.school_code=RM.school_code
-						   JOIN festival_master AS FM ON IM.fest_id=FM.fest_id
-						where SPD.is_withheld='N' AND RM.is_finish='Y' AND RM.grade!=''  
-						group by SPD.participant_id,SPD.item_code  order by FM.fest_id asc,IM.item_code,RM.total_mark desc ";
+        $query = "SELECT RM.item_code, IM.item_name, RM.participant_id, RM.percentage, RM.grade, SPD.point, RM.rank, PD.participant_name, RM.school_code, SM.school_name, COALESCE(SPD.is_withheld, 'N') as is_withheld, FM.fest_name, FM.fest_id
+                  FROM result_master AS RM
+                  LEFT JOIN school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code
+                  LEFT JOIN participant_details AS PD ON PD.participant_id = RM.participant_id
+                  JOIN item_master AS IM ON IM.item_code = RM.item_code
+                  JOIN school_master AS SM ON SM.school_code = RM.school_code
+                  JOIN festival_master AS FM ON IM.fest_id = FM.fest_id
+                  WHERE (SPD.is_withheld = 'N' OR SPD.is_withheld IS NULL) AND RM.is_finish = 'Y' AND RM.grade != ''  
+                  GROUP BY RM.rm_id
+                  ORDER BY FM.fest_id ASC, IM.item_code, RM.total_mark DESC";
 
         $school_wise_result = $this->db->query($query);
         return $school_wise_result->getResultArray();
     }
 
     function report_press() {
-        $query = "SELECT SPD.item_code,IM.item_name,SPD.participant_id,RM.percentage,RM.grade,SPD.point,RM.rank,PD.participant_name,SPD.school_code,SM.school_name,SPD.is_withheld,FM.fest_name,FM.fest_id from  result_master AS RM
-		                   JOIN school_point_details AS SPD ON RM.participant_id=SPD.participant_id and RM.item_code=SPD.item_code
-						  JOIN participant_details AS PD ON PD.participant_id=SPD.participant_id and PD.school_code=SPD.school_code 
-					      JOIN item_master AS IM ON IM.item_code=SPD.item_code
-						
-						   JOIN school_master AS SM ON SM.school_code=RM.school_code
-						   JOIN festival_master AS FM ON IM.fest_id=FM.fest_id
-						where SPD.is_withheld='N' AND RM.is_finish='Y' AND RM.grade!='' group by SPD.participant_id,SPD.item_code  order by FM.fest_id asc,IM.item_code,RM.total_mark desc ";
+        $query = "SELECT RM.item_code, IM.item_name, RM.participant_id, RM.percentage, RM.grade, SPD.point, RM.rank, PD.participant_name, RM.school_code, SM.school_name, COALESCE(SPD.is_withheld, 'N') as is_withheld, FM.fest_name, FM.fest_id
+                  FROM result_master AS RM
+                  LEFT JOIN school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code
+                  LEFT JOIN participant_details AS PD ON PD.participant_id = RM.participant_id
+                  JOIN item_master AS IM ON IM.item_code = RM.item_code
+                  JOIN school_master AS SM ON SM.school_code = RM.school_code
+                  JOIN festival_master AS FM ON IM.fest_id = FM.fest_id
+                  WHERE (SPD.is_withheld = 'N' OR SPD.is_withheld IS NULL) AND RM.is_finish = 'Y' AND RM.grade != ''
+                  GROUP BY RM.rm_id
+                  ORDER BY FM.fest_id ASC, IM.item_code, RM.total_mark DESC";
 
         $school_wise_result = $this->db->query($query);
         return $school_wise_result->getResultArray();

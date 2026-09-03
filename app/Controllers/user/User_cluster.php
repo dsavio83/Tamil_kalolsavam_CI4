@@ -87,7 +87,7 @@ class User_Cluster extends \App\Controllers\BaseController {
         }
         $this->User_Cluster_Model->delete_cluster_user_details();
         $this->template->write('message', 'User deleted successfully');
-        $this->index();
+        redirect('user/user_cluster');
     }
 }
 

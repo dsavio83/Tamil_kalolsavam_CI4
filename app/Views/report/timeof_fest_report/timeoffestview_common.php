@@ -13,7 +13,7 @@ echo form_open('', array('id' => 'resreport', 'target' => '_blank'));
 <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top:15px;">
     <tr>
         <th colspan="2" align="left">&nbsp;&nbsp;Festival:&nbsp;<?php echo $resultdet[0]['fest_name']; ?></th>
-        <th class="table_row_first" >Print&nbsp;&nbsp;<img src="<?php echo base_url(false) . 'images/print_icon.png'; ?>" title="print" class="window_print" 
+        <th class="table_row_first" >Print&nbsp;&nbsp;<img src="<?php echo base_url() . 'images/print_icon.png'; ?>" title="print" class="window_print" 
                                                            onClick="javascript:printContent('print_content');
                                                                    return false;" /></th>
     </tr>

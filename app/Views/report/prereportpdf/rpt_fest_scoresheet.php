@@ -74,7 +74,7 @@ foreach ($fest_details as $data) {
             <?php if (file_exists(base_path() . 'value_points/' . $data['item_code'] . '.JPG')) { ?>
                 <tr>
                     <td align="center" colspan="11" style='border:0 0 0.5px 0.5px 0 #000000 ; font:Georgia;'>
-                        <img src="<?php echo base_url(false) . 'value_points/' . $data['item_code'] . '.JPG' ?>" height="200" width="700" />            	</td>
+                        <img src="<?php echo base_url('value_points/') . $data['item_code'] . '.JPG' ?>" height="200" width="700" />            	</td>
                 </tr>
             <?php } ?>
             <tr>

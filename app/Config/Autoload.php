@@ -61,6 +61,7 @@ class Autoload extends AutoloadConfig
     public $classmap = [
         'HTML2PDF'     => APPPATH . 'Libraries/_html2pdf.php',
         'Html2pdf'     => APPPATH . 'Libraries/_html2pdf.php',
+        'App\\Controllers\\Report\\HTML2PDF' => APPPATH . 'Libraries/_html2pdf.php',
         'HTML2PDFgetTimerDebug' => APPPATH . 'Libraries/_html2pdf.php',
         'Fpdf'         => APPPATH . 'Libraries/fpdf.php',
         'FPDF'         => APPPATH . 'Libraries/fpdf.php',
@@ -98,6 +99,7 @@ class Autoload extends AutoloadConfig
      * @var list<string>
      */
     public $helpers = [
+        'compat',
         'url',
         'form',
         'file',
@@ -106,6 +108,5 @@ class Autoload extends AutoloadConfig
         'general',
         'connection',
         'csv',
-        'compat',
     ];
 }

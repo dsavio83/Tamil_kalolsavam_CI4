@@ -28,6 +28,7 @@ class Item_Participant  extends \App\Controllers\BaseController {
         if ($fest_id) {
 
             $this->Contents = array();
+            $this->Contents['fest_id'] = $fest_id;
             $this->Contents['fest'] = $this->General_Model->get_data('festival_master', 'fest_name', array('fest_id' => $fest_id));
             $itempart = $this->Participant_Model->get_item_participant($fest_id);
             $single = $this->Participant_Model->get_item_participant_single($fest_id);
@@ -53,12 +54,12 @@ class Item_Participant  extends \App\Controllers\BaseController {
     }
 
     function stage_allot_fest_all() {
-      
         $this->load->model('stages/Allotmentfest_Model');
         $fest_id = $this->input->post('txtFestId');
 
         if ($fest_id) {
             $this->Allotmentfest_Model->update_allotment($fest_id);
+            session()->setFlashdata('success', 'Stage Allotment updated successfully!');
         }
         $this->participant_nodetails();
     }

@@ -161,41 +161,79 @@ function delete_confirm(url, msg) {
 
 function addteacher() {
     var id = parseInt($('hidTeachers').value) + 1;
+    
     var porow = document.createElement('div');
-    var clear = document.createElement('div');
-    clear.className = 'clear_both';
     porow.className = 'teachersTextBox';
+    porow.style.width = '100%';
 
-    // Create teacher input field
+    var rowDiv = document.createElement('div');
+    rowDiv.className = 'row mb-2';
+
+    // Create Team Manager column (Top label, bottom input)
+    var col1 = document.createElement('div');
+    col1.className = 'col-md-6 mb-3';
+
+    var lbl1 = document.createElement('label');
+    lbl1.className = 'form-label fw-bold text-muted small text-uppercase';
+    lbl1.textContent = 'Team Manager ' + id;
+    col1.appendChild(lbl1);
+
     var teacher = document.createElement('input');
     teacher.type = 'text';
     teacher.id = 'txtTeacher_' + id;
     teacher.name = 'txtTeacher_' + id;
     teacher.className = 'form-control';
+    teacher.placeholder = 'Enter teacher name';
     teacher.onkeyup = function() { this.value = this.value.toUpperCase(); };
+    col1.appendChild(teacher);
 
-    // Create phone input field
+    // Create Phone column (Top label, bottom input with remove button)
+    var col2 = document.createElement('div');
+    col2.className = 'col-md-6 mb-3';
+
+    var lbl2 = document.createElement('label');
+    lbl2.className = 'form-label fw-bold text-muted small text-uppercase';
+    lbl2.textContent = 'Phone';
+    col2.appendChild(lbl2);
+
+    var inputGroup = document.createElement('div');
+    inputGroup.className = 'input-group';
+
     var phone = document.createElement('input');
     phone.type = 'text';
     phone.id = 'txtPhone_' + id;
     phone.name = 'txtPhone_' + id;
     phone.className = 'form-control';
+    phone.placeholder = 'Phone number';
     phone.maxLength = '11';
-    phone.onkeypress = function() { return numbersonly(this, event, false); };
+    phone.onkeypress = function(event) { return numbersonly(this, event || window.event, false); };
+    inputGroup.appendChild(phone);
 
-    // Create phone label
-    var phone1 = document.createElement('label');
-    phone1.id = 'txtPhone1_' + id;
-    phone1.innerHTML = '&nbsp;&nbsp;&nbsp;Phone : ';
+    var removeBtn = document.createElement('button');
+    removeBtn.className = 'btn btn-outline-danger';
+    removeBtn.type = 'button';
+    removeBtn.textContent = '✕';
+    removeBtn.title = 'Remove';
+    removeBtn.onclick = function() {
+        porow.remove();
+    };
+    inputGroup.appendChild(removeBtn);
 
-    // Append elements to the row
-    porow.appendChild(teacher);
-    porow.appendChild(phone1);
-    porow.appendChild(phone);
+    col2.appendChild(inputGroup);
 
-    // Append to teachers row
-    $("teachersRow").appendChild(clear);
-    $("teachersRow").appendChild(porow);
+    // Append columns to row
+    rowDiv.appendChild(col1);
+    rowDiv.appendChild(col2);
+
+    porow.appendChild(rowDiv);
+
+    // Append to teachers list
+    var addBtnDiv = document.getElementById("teachersAddBtnDiv");
+    if (addBtnDiv && $("teachersRow")) {
+        $("teachersRow").insertBefore(porow, addBtnDiv);
+    } else if ($("teachersRow")) {
+        $("teachersRow").appendChild(porow);
+    }
 
     // Update hidden field
     $('hidTeachers').value = id;
@@ -270,26 +308,35 @@ function change_text_max_to_focus(frm_txt, to_txt, obj)
 
 function fetch_school_details()
 {
-
-
-    var school_code = $('txtSchoolCode').value;
+    var schoolCodeEl = $('txtSchoolCode');
+    var school_code = schoolCodeEl ? trim(schoolCodeEl.value) : '';
+    if (school_code === '' || school_code === '0') {
+        if (typeof hideGlobalLoader === 'function') {
+            hideGlobalLoader();
+        }
+        return false;
+    }
+    if (typeof showGlobalLoader === 'function') {
+        showGlobalLoader('Fetching details...');
+    }
     ajax_loder2('divSchoolCode');
     var oOptions = {
         method: "post",
         parameters: {'code': school_code},
         onFailure: function (oXHR, oJson) {
-        //swal ( "Oops!" ,  "An error occurred: " + oXHR.status" ,  "error" )
-        //alert("An error occurred: " + oXHR.status);
+            if (typeof hideGlobalLoader === 'function') hideGlobalLoader();
+        },
+        onComplete: function () {
+            if (typeof hideGlobalLoader === 'function') hideGlobalLoader();
         },
         onSuccess: function (transport) {
             var response = transport.responseText;
 
             $('divEntryForm').innerHTML = response;
 
-            // Show Add Participant button after successful school data load
-            var addParticipantBtn = document.getElementById('addParticipantBtn');
-            if (addParticipantBtn) {
-                addParticipantBtn.style.display = 'inline-block';
+            // Reinitialize listeners and update visibility states after DOM content changes
+            if (typeof initializePage === 'function') {
+                initializePage();
             }
 
             // Close School Details modal when school data is loaded
@@ -297,6 +344,7 @@ function fetch_school_details()
             if (schoolModal) {
                 schoolModal.hide();
             }
+            if (typeof hideGlobalLoader === 'function') hideGlobalLoader();
         }
     };
     var oRequest = new Ajax.Updater({
@@ -307,23 +355,50 @@ function fetch_school_details()
 
 function fetch_special_order_school_details()
 {
-    var school_code = $('txtSchoolCode').value;
-    ajax_loder2('divSchoolCode');
+    var schoolCodeEl = $('txtSchoolCode');
+    var school_code = schoolCodeEl ? trim(schoolCodeEl.value) : '';
+    if (school_code === '' || school_code === '0') {
+        if (typeof hideGlobalLoader === 'function') {
+            hideGlobalLoader();
+        }
+        return false;
+    }
+    // Skip re-fetching when nothing changed (avoids duplicate request on blur).
+    if (schoolCodeEl && schoolCodeEl.getAttribute('data-soe-last') === school_code) {
+        if (typeof hideGlobalLoader === 'function') {
+            hideGlobalLoader();
+        }
+        return false;
+    }
+    if (typeof showGlobalLoader === 'function') {
+        showGlobalLoader('Fetching details...');
+    }
     var oOptions = {
         method: "post",
         parameters: {'code': school_code},
         onFailure: function (oXHR, oJson) {
-        swal ( "Oops!" ,  "An error occurred: " + oXHR.status,  "error" );
-        //alert("An error occurred: " + oXHR.status);
+            swal ( "Oops!" ,  "An error occurred: " + oXHR.status,  "error" );
+            if (typeof hideGlobalLoader === 'function') hideGlobalLoader();
+        },
+        onComplete: function () {
+            if (typeof hideGlobalLoader === 'function') hideGlobalLoader();
         },
         onSuccess: function (transport) {
             var response = transport.responseText;
-            $('divEntryForm').innerHTML = response;
 
-            // Show Add Participant button after successful school data load
-            var addParticipantBtn = document.getElementById('addParticipantBtn');
-            if (addParticipantBtn) {
-                addParticipantBtn.style.display = 'inline-block';
+            var current = document.getElementById('divEntryForm');
+            if (current) {
+                var temp = document.createElement('div');
+                temp.innerHTML = response;
+                // The AJAX response is the full view which is itself wrapped in
+                // <div id="divEntryForm">; swap the content instead of nesting.
+                var node = temp.querySelector('#divEntryForm') || temp.firstElementChild;
+                current.innerHTML = node ? node.innerHTML : response;
+            }
+
+            // Reinitialize listeners and update visibility states after DOM content changes
+            if (typeof initializePage === 'function') {
+                initializePage();
             }
 
             // Close School Details modal when school data is loaded
@@ -331,6 +406,7 @@ function fetch_special_order_school_details()
             if (schoolModal) {
                 schoolModal.hide();
             }
+            if (typeof hideGlobalLoader === 'function') hideGlobalLoader();
         }
     };
     var oRequest = new Ajax.Updater({
@@ -457,27 +533,21 @@ function fncCheckSchoolDeatils() {
     for (var j = 1; j <= $('hidTeachers').value; j++) {
         name = 'txtTeacher_' + j;
         phone = 'txtPhone_' + j;
-        if (trim($(name).value) != '') {
-            name_con = true;
-        }
-        if (trim($(phone).value) != '') {
-            if (trim($(name).value) == '')
-            {
-                swal ( "Oops!" ,  "Please enter the Team Manager name" ,  "error" )
-                //alert('Please enter the Team Manager name');
-                $(name).focus();
-                return false;
+        if ($(name)) {
+            if (trim($(name).value) != '') {
+                name_con = true;
             }
-            phone_con = true;
-            /*else if(trim($(phone).value) == '')
-             {
-             swal ( "Oops!" ,  "Please enter the Team Manager phone" ,  "error" )
-            //alert('Please enter the Team Manager phone');
-             $(phone).focus();
-             return false;
-             }*/
+            if ($(phone) && trim($(phone).value) != '') {
+                if (trim($(name).value) == '')
+                {
+                    swal ( "Oops!" ,  "Please enter the Team Manager name" ,  "error" )
+                    //alert('Please enter the Team Manager name');
+                    $(name).focus();
+                    return false;
+                }
+                phone_con = true;
+            }
         }
-
     }
     if (!name_con)
     {
@@ -490,10 +560,33 @@ function fncCheckSchoolDeatils() {
     {
         swal ( "Oops!" ,  "Please enter atleast one Team Manager phone" ,  "error" )
         //alert('Please enter atleast one Team Manager phone');
-        $('txtPhone_1').focus();
         return false;
     }
-    $('formSchool').submit();
+    swal({
+        title: "Save School Profile",
+        text: "Are you sure you want to save school profile details?",
+        icon: "info",
+        buttons: {
+            cancel: {
+                text: "Cancel",
+                value: null,
+                visible: true,
+                className: "btn btn-secondary",
+                closeModal: true,
+            },
+            confirm: {
+                text: "Yes, Save",
+                value: true,
+                visible: true,
+                className: "btn btn-primary",
+                closeModal: true
+            }
+        }
+    }).then(function(isConfirm) {
+        if (isConfirm) {
+            $('formSchool').submit();
+        }
+    });
 }
 
 function check_div(std)
@@ -530,80 +623,111 @@ function check_div(std)
 }
 
 function fncEditSchoolDeatils() {
-    $('formSchool').action = path + 'schools/registration/edit_school_details';
+    if (window.location.href.indexOf('schools/profile') !== -1) {
+        $('formSchool').action = path + 'schools/profile/edit';
+    } else {
+        $('formSchool').action = path + 'schools/registration/edit_school_details';
+    }
     $('formSchool').submit();
 }
 
 function fncSaveParticipant() {
-    if (trim($('txtADNO').value) == '') {
-        swal ( "Oops!" ,  "Please enter the admission number" ,  "error" )
-        //alert('Please enter the admission number');
-        $('txtADNO').focus();
+    var txtADNO = document.getElementById('txtADNO');
+    var txtClass = document.getElementById('txtClass');
+    var txtParticipantName = document.getElementById('txtParticipantName');
+    var hidVHSSNo = document.getElementById('hidVHSSNo');
+    var hidHSSNo = document.getElementById('hidHSSNo');
+
+    if (!txtADNO || trim(txtADNO.value) == '') {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({ icon: 'error', title: 'Oops!', text: 'Please enter the admission number' });
+        } else if (typeof swal !== 'undefined') {
+            swal("Oops!", "Please enter the admission number", "error");
+        } else {
+            alert('Please enter the admission number');
+        }
+        if (txtADNO) txtADNO.focus();
         return false;
     }
-    var admn_no = trim($('txtADNO').value);
-    if (trim($('txtClass').value) > 10)
-    {
-        var hss_vhse_chr = trim($('txtADNO').value).substring(0, 1);
-        if (!((hss_vhse_chr == 'V' && $('hidVHSSNo').value > 0) || (hss_vhse_chr == 'H' && $('hidHSSNo').value > 0)))
-        {
-            swal ( "Oops!" ,  "Invalid admission number" ,  "error" )
-        //alert('Invalid admission number');
-            $('txtADNO').focus();
+    var admn_no = trim(txtADNO.value);
+    if (txtClass && parseInt(trim(txtClass.value), 10) > 10) {
+        var hss_vhse_chr = trim(txtADNO.value).substring(0, 1).toUpperCase();
+        var vhssVal = hidVHSSNo ? parseInt(hidVHSSNo.value, 10) : 0;
+        var hssVal = hidHSSNo ? parseInt(hidHSSNo.value, 10) : 0;
+        if (!((hss_vhse_chr == 'V' && vhssVal > 0) || (hss_vhse_chr == 'H' && hssVal > 0))) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'error', title: 'Oops!', text: 'Invalid admission number' });
+            } else if (typeof swal !== 'undefined') {
+                swal("Oops!", "Invalid admission number", "error");
+            } else {
+                alert('Invalid admission number');
+            }
+            txtADNO.focus();
             return false;
         }
-        admn_no = trim($('txtADNO').value).substring(1);
+        admn_no = trim(txtADNO.value).substring(1);
     }
 
-    if (isNaN(admn_no))
-    {
-        swal ( "Oops!" ,  "Invalid admission number" ,  "error" )
-        //alert('Invalid admission number');
-        $('txtADNO').focus();
+    if (isNaN(admn_no)) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({ icon: 'error', title: 'Oops!', text: 'Invalid admission number' });
+        } else if (typeof swal !== 'undefined') {
+            swal("Oops!", "Invalid admission number", "error");
+        } else {
+            alert('Invalid admission number');
+        }
+        txtADNO.focus();
         return false;
     }
 
-    if (trim($('txtParticipantName').value) == '') {
-        swal ( "Oops!" ,  "Please enter the participant name" ,  "error" )
-        //alert('Please enter the participant name');
-        $('txtParticipantName').focus();
+    if (!txtParticipantName || trim(txtParticipantName.value) == '') {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({ icon: 'error', title: 'Oops!', text: 'Please enter the participant name' });
+        } else if (typeof swal !== 'undefined') {
+            swal("Oops!", "Please enter the participant name", "error");
+        } else {
+            alert('Please enter the participant name');
+        }
+        if (txtParticipantName) txtParticipantName.focus();
         return false;
-    }else{
+    } else {
         var alpha = /^[a-zA-Z\s.]+$/;
-        if (!$('txtParticipantName').value.match(alpha)) {
-            swal ( "Oops!" ,  "Please enter a valid name" ,  "error" )
-        //alert('Please enter a valid name.');
-            $('txtParticipantName').focus();
+        if (!txtParticipantName.value.match(alpha)) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'error', title: 'Oops!', text: 'Please enter a valid name' });
+            } else if (typeof swal !== 'undefined') {
+                swal("Oops!", "Please enter a valid name", "error");
+            } else {
+                alert('Please enter a valid name.');
+            }
+            txtParticipantName.focus();
             return false;
         }
     }
-
-    
 
     var items = 0;
-    var fieldId = '';
-    var fieldElement;
     for (var i = 1; i <= 10; i++) {
-        fieldId = 'txtItemCode_' + i;
-        fieldElement = document.getElementById(fieldId);
+        var fieldElement = document.getElementById('txtItemCode_' + i);
         if (fieldElement && trim(fieldElement.value) != '') {
             items++;
         }
     }
     var pinnani = 0;
-    var pinnanyId = '';
-    var pinnanyElement;
     for (var i = 1; i <= 5; i++) {
-        pinnanyId = 'txtPinnanyCode_' + i;
-        pinnanyElement = document.getElementById(pinnanyId);
+        var pinnanyElement = document.getElementById('txtPinnanyCode_' + i);
         if (pinnanyElement && trim(pinnanyElement.value) != '') {
             pinnani++;
         }
     }
 
     if ((items == 0) && (pinnani == 0)) {
-        swal ( "Oops!" ,  "Please enter the item code" ,  "error" )
-        //alert('Please enter the item code');
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({ icon: 'error', title: 'Oops!', text: 'Please enter the item code' });
+        } else if (typeof swal !== 'undefined') {
+            swal("Oops!", "Please enter the item code", "error");
+        } else {
+            alert('Please enter the item code');
+        }
         var firstItem = document.getElementById('txtItemCode_1');
         if (firstItem) firstItem.focus();
         return false;
@@ -614,200 +738,231 @@ function fncSaveParticipant() {
     if (saveBtn) {
         saveBtn.disabled = true;
         saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
-    }
-
-    // Store original button state for potential refresh
-    if (saveBtn) {
         saveBtn.setAttribute('data-original-text', 'Save Participant');
     }
 
-    document.getElementById('formParticipant').submit();
+    var formParticipant = document.getElementById('formParticipant');
+    if (formParticipant) {
+        formParticipant.action = (typeof path !== 'undefined' ? path : '') + 'schools/registration/save_participant';
+        formParticipant.submit();
+    }
 }
 
 function editParticipant(adno) {
-    var oOptions = {
-        method: "post",
-        parameters: {'hidSchoolId': $('hidSchoolId').value, 'hidADNO': adno},
-        onFailure: function (oXHR, oJson) {
-            alert("An error occurred: " + oXHR.status);
-        },
-        onSuccess: function (transport) {
-            var response = transport.responseText;
-            var data = JSON.parse(response);
-            
-            // populate fields with null checks
-            var el;
-            el = document.getElementById('hidADNO');
-            if (el) el.value = adno;
-            
-            el = document.getElementById('txtADNO');
-            if (el) el.value = data.admn_no || '';
-            
-            el = document.getElementById('txtParticipantName');
-            if (el) el.value = data.participant_name || '';
-            
-            el = document.getElementById('txtClass');
-            if (el) el.value = data.class || '';
-            
-            el = document.getElementById('txtGender');
-            if (el) el.value = data.gender || '';
-            
-            // Clear all item codes first
-            for (let i = 1; i <= 10; i++) {
-                el = document.getElementById('txtItemCode_' + i);
-                if (el) el.value = '';
-            }
-            
-            // Populate item codes from data
-            if (data.items && Array.isArray(data.items)) {
-                for (let i = 0; i < data.items.length && i < 10; i++) {
-                    el = document.getElementById('txtItemCode_' + (i + 1));
-                    if (el && data.items[i] && data.items[i].item_code) {
-                        el.value = data.items[i].item_code;
-                    }
-                }
-            }
-            
-            // Clear all pinnany codes first
-            for (let i = 1; i <= 5; i++) {
-                el = document.getElementById('txtPinnanyCode_' + i);
-                if (el) el.value = '';
-            }
-            
-            // Populate pinnany codes from data
-            if (data.pinnany && Array.isArray(data.pinnany)) {
-                for (let i = 0; i < data.pinnany.length && i < 5; i++) {
-                    el = document.getElementById('txtPinnanyCode_' + (i + 1));
-                    if (el && data.pinnany[i] && data.pinnany[i].pinnany_code) {
-                        el.value = data.pinnany[i].pinnany_code;
-                    }
-                }
-            }
-            
-            el = document.getElementById('participantModalLabel');
-            if (el) el.innerText = 'Edit Participant';
-            
-            el = document.getElementById('save_participant_btn');
-            if (el) {
-                el.innerText = 'Update Participant';
-                el.disabled = false;
-                el.setAttribute('onclick', 'fncUpdateParticipant(\'' + adno + '\')');
-            }
+    var hidADNO = document.getElementById('hidADNO');
+    if (hidADNO) hidADNO.value = adno;
 
-            // Handle photo display in edit modal with enhanced cache busting
-            var photoPreviewContainer = document.getElementById('photoPreviewContainer');
-            var noPhotoMessage = document.getElementById('noPhotoMessage');
-            var currentPhoto = document.getElementById('currentPhoto');
+    var hidSchoolId = document.getElementById('hidSchoolId');
+    var schCode = hidSchoolId ? hidSchoolId.value : '';
 
-            if (data.photo_url && data.photo_url.trim() !== '' && data.photo_url !== 'false') {
-                
-                // Show photo preview with enhanced cache busting
-                if (photoPreviewContainer) photoPreviewContainer.style.display = 'block';
-                if (noPhotoMessage) noPhotoMessage.style.display = 'none';
-                if (currentPhoto) {
-                    // Add cache busting to ensure fresh photo load
-                    var enhancedPhotoUrl = data.photo_url;
-                    var timestamp = new Date().getTime();
-                    var cacheBuster = Math.random().toString(36).substring(7);
+    var txtADNO = document.getElementById('txtADNO');
+    var txtParticipantName = document.getElementById('txtParticipantName');
+    var txtClass = document.getElementById('txtClass');
+    var txtGender = document.getElementById('txtGender');
+    var userfile = document.getElementById('userfile');
 
-                    if (enhancedPhotoUrl.indexOf('?') > -1) {
-                        enhancedPhotoUrl += '&edit=' + timestamp + '&cache=' + cacheBuster + '&modal=1';
-                    } else {
-                        enhancedPhotoUrl += '?edit=' + timestamp + '&cache=' + cacheBuster + '&modal=1';
-                    }
+    if (txtADNO) txtADNO.value = '';
+    if (txtParticipantName) txtParticipantName.value = '';
+    if (txtClass) txtClass.value = '';
+    if (txtGender) txtGender.value = '';
+    if (userfile) userfile.value = '';
 
-                    
-                    currentPhoto.src = enhancedPhotoUrl;
-                    currentPhoto.style.display = 'block';
+    // Clear item inputs first
+    for (var c = 1; c <= 5; c++) {
+        var inpC = document.getElementById('txtItemCode_' + c);
+        if (inpC) inpC.value = '';
+        var dC = document.getElementById('itemDetails_' + c);
+        if (dC) dC.style.display = 'none';
+        var iC = document.getElementById('itemTypeIcon_' + c);
+        if (iC) { iC.style.display = 'none'; iC.innerHTML = ''; }
+        var nC = document.getElementById('itemName_' + c);
+        if (nC) nC.innerText = '';
+    }
+    for (var p = 1; p <= 3; p++) {
+        var inP = document.getElementById('txtPinnanyCode_' + p);
+        if (inP) inP.value = '';
+        var dP = document.getElementById('pinnanyDetails_' + p);
+        if (dP) dP.style.display = 'none';
+        var iP = document.getElementById('pinnanyTypeIcon_' + p);
+        if (iP) { iP.style.display = 'none'; iP.innerHTML = ''; }
+        var nP = document.getElementById('pinnanyName_' + p);
+        if (nP) nP.innerText = '';
+    }
 
-                    currentPhoto.onload = function() {
-                    };
+    var requestUrl = (typeof path !== 'undefined' ? path : '') + 'schools/registration/get_participant_data';
+    var formData = new FormData();
+    formData.append('hidSchoolId', schCode);
+    formData.append('hidADNO', adno);
 
-                    currentPhoto.onerror = function() {
-                        this.onerror = null;
-                        var fallbackTimestamp = new Date().getTime();
-                        var fallbackCacheBuster = Math.random().toString(36).substring(7);
-                        this.src = path + 'photos/img_user_nophoto.png?t=' + fallbackTimestamp + '&cache=' + fallbackCacheBuster;
-                        this.alt = 'Photo not available';
-                    };
-                }
+    fetch(requestUrl, {
+        method: 'POST',
+        body: formData
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (data.error) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'error', title: 'Error', text: data.error });
+            } else if (typeof swal !== 'undefined') {
+                swal("Oops!", data.error, "error");
             } else {
-                
-                // Show no photo message
-                if (photoPreviewContainer) photoPreviewContainer.style.display = 'none';
-                if (noPhotoMessage) noPhotoMessage.style.display = 'block';
-                if (currentPhoto) {
-                    currentPhoto.src = '';
-                    currentPhoto.style.display = 'none';
+                alert(data.error);
+            }
+            return;
+        }
+
+        if (txtADNO) txtADNO.value = data.admn_no || '';
+        if (txtParticipantName) txtParticipantName.value = data.participant_name || '';
+        if (txtClass) txtClass.value = data.class || '';
+        if (txtGender) txtGender.value = data.gender || '';
+
+        // Populate item codes from response
+        if (data.items && Array.isArray(data.items)) {
+            var regularIdx = 1;
+            var pinnanyIdx = 1;
+            for (var i = 0; i < data.items.length; i++) {
+                var itm = data.items[i];
+                if (itm.item_type === 'P' || itm.is_pinnany === 'Y') {
+                    if (pinnanyIdx <= 3) {
+                        var pInput = document.getElementById('txtPinnanyCode_' + pinnanyIdx);
+                        if (pInput && itm.item_code) {
+                            pInput.value = itm.item_code;
+                            if (typeof window.updatePinnanyCodeIcon === 'function') {
+                                window.updatePinnanyCodeIcon(pinnanyIdx, itm.item_type || 'P', itm.item_name || '');
+                            }
+                        }
+                        pinnanyIdx++;
+                    }
+                } else {
+                    if (regularIdx <= 5) {
+                        var regInput = document.getElementById('txtItemCode_' + regularIdx);
+                        if (regInput && itm.item_code) {
+                            regInput.value = itm.item_code;
+                            if (typeof window.updateItemCodeIcon === 'function') {
+                                window.updateItemCodeIcon(regularIdx, itm.item_type || 'S', itm.item_name || '');
+                            }
+                        }
+                        regularIdx++;
+                    }
                 }
             }
-
-            // show modal
-            var myModal = new bootstrap.Modal(document.getElementById('participantModal'));
-            myModal.show();
         }
-    };
-    var oRequest = new Ajax.Request(path + "schools/registration/get_participant_data", oOptions);
+
+        // Re-render available items so current assigned items are excluded
+        if (typeof window.loadItemsByClass === 'function') {
+            window.loadItemsByClass();
+        }
+
+        var modalLabel = document.getElementById('participantModalLabel');
+        if (modalLabel) modalLabel.innerText = 'Edit Participant';
+
+        var saveBtn = document.getElementById('save_participant_btn');
+        if (saveBtn) {
+            saveBtn.innerText = 'Update Participant';
+            saveBtn.disabled = false;
+            saveBtn.setAttribute('onclick', 'fncUpdateParticipant(\'' + adno + '\')');
+        }
+
+        // Handle photo display in edit modal
+        if (data.photo_url && data.photo_url !== 'false' && data.photo_url !== 'null' && data.photo_url.trim() !== '') {
+            if (typeof loadModalPhoto === 'function') {
+                loadModalPhoto(data.photo_url);
+            }
+        } else {
+            if (typeof removeCurrentPhoto === 'function') {
+                removeCurrentPhoto();
+            }
+        }
+
+        var modalEl = document.getElementById('participantModal');
+        if (modalEl) {
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                var myModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                myModal.show();
+            } else if (typeof window.jQuery !== 'undefined' && typeof window.jQuery(modalEl).modal === 'function') {
+                window.jQuery(modalEl).modal('show');
+            } else {
+                modalEl.style.display = 'block';
+                modalEl.classList.add('show');
+                document.body.classList.add('modal-open');
+            }
+        }
+    })
+    .catch(function(err) {
+        console.error('Error fetching participant data:', err);
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Error loading participant data' });
+        } else {
+            alert('Error loading participant data');
+        }
+    });
 }
 
 function deleteParticipant(adno) {
-    
-
-    // Use browser confirm directly to avoid SweetAlert2 issues
-    if (confirm('Do you really want to delete the participant?')) {
-        
-
+    var executeDelete = function () {
         try {
-            // Set form values using multiple fallback methods
-            var hidADNO = null;
-            var formParticipant = null;
-
-            // Try multiple ways to find elements
-            hidADNO = document.getElementById('hidADNO');
-            if (!hidADNO) {
-                hidADNO = document.querySelector('input[name="hidADNO"]');
-            }
-            if (!hidADNO) {
-                hidADNO = document.querySelector('input[id="hidADNO"]');
-            }
-
-            formParticipant = document.getElementById('formParticipant');
-            if (!formParticipant) {
-                formParticipant = document.querySelector('form[action*="delete_participant_details"]');
-            }
-            if (!formParticipant) {
-                formParticipant = document.querySelector('form[id="formParticipant"]');
-            }
+            var hidADNO = document.getElementById('hidADNO') || document.querySelector('input[name="hidADNO"]');
+            var formParticipant = document.getElementById('formParticipant') || document.querySelector('form[action*="delete_participant_details"]') || document.querySelector('form[id="formParticipant"]');
 
             if (hidADNO) {
                 hidADNO.value = adno;
-                
             } else {
                 console.error('CRITICAL: hidADNO element not found!');
-                alert('Error: Could not find form field. Please refresh the page and try again.');
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Could not find form field. Please refresh the page and try again.' });
+                } else {
+                    alert('Error: Could not find form field. Please refresh the page and try again.');
+                }
                 return;
             }
 
             if (formParticipant) {
-                formParticipant.action = path + 'schools/registration/delete_participant_details';
-                
-
-                // Submit form
+                formParticipant.action = (typeof path !== 'undefined' ? path : '') + 'schools/registration/delete_participant_details';
                 formParticipant.submit();
-                
             } else {
                 console.error('CRITICAL: formParticipant element not found!');
-                alert('Error: Could not find form. Please refresh the page and try again.');
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Could not find form. Please refresh the page and try again.' });
+                } else {
+                    alert('Error: Could not find form. Please refresh the page and try again.');
+                }
                 return;
             }
-
-            
         } catch (error) {
             console.error('Error during delete operation:', error);
-            alert('Error during delete operation: ' + error.message);
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Error during delete operation: ' + error.message });
+            } else {
+                alert('Error during delete operation: ' + error.message);
+            }
         }
+    };
+
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: 'Delete Participant?',
+            text: 'Are you sure you want to delete this participant (AD No: ' + adno + ')?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="bi bi-trash3-fill me-1"></i> Yes, Delete',
+            cancelButtonText: 'Cancel'
+        }).then(function (result) {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Deleting...',
+                    text: 'Deleting participant. Please wait...',
+                    allowOutsideClick: false,
+                    didOpen: function () { Swal.showLoading(); }
+                });
+                executeDelete();
+            }
+        });
     } else {
-        
+        if (confirm('Are you sure you want to delete participant ' + adno + '?')) {
+            executeDelete();
+        }
     }
 }
 
@@ -816,154 +971,103 @@ function deleteParticipant(adno) {
 function fncCancelParticipant() {
     $('formParticipant').action = path + 'schools/registration';
     $('formParticipant').submit();
-}
+}function fncUpdateParticipant(adno) {
+    var txtADNO = document.getElementById('txtADNO');
+    var txtClass = document.getElementById('txtClass');
+    var txtParticipantName = document.getElementById('txtParticipantName');
+    var hidVHSSNo = document.getElementById('hidVHSSNo');
+    var hidHSSNo = document.getElementById('hidHSSNo');
 
-function fncUpdateParticipant(adno) {
-    if (trim($('txtADNO').value) == '') {
-        swal ( "Oops!" ,  "Please enter the admission number" ,  "error" )
-        //alert('Please enter the admission number');
-        $('txtADNO').focus();
+    if (!txtADNO || trim(txtADNO.value) == '') {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({ icon: 'error', title: 'Oops!', text: 'Please enter the admission number' });
+        } else if (typeof swal !== 'undefined') {
+            swal("Oops!", "Please enter the admission number", "error");
+        } else {
+            alert('Please enter the admission number');
+        }
+        if (txtADNO) txtADNO.focus();
         return false;
     }
-    var admn_no = trim($('txtADNO').value);
-    if (trim($('txtClass').value) > 10)
-    {
-        var hss_vhse_chr = trim($('txtADNO').value).substring(0, 1);
-        if (!((hss_vhse_chr == 'V' && $('hidVHSSNo').value > 0) || (hss_vhse_chr == 'H' && $('hidHSSNo').value > 0)))
-        {
-            swal ( "Oops!" ,  "Invalid admission number" ,  "error" )
-        //alert('Invalid admission number');
-            $('txtADNO').focus();
-            return false;
-        }
-        admn_no = trim($('txtADNO').value).substring(1);
-    }
-
-    if (isNaN(admn_no))
-    {
-        swal ( "Oops!" ,  "Invalid admission number" ,  "error" )
-        //alert('Invalid admission number');
-        $('txtADNO').focus();
-        return false;
-    }
-
-    if (trim($('txtParticipantName').value) == '') {
-        swal ( "Oops!" ,  "Please enter the participant name" ,  "error" )
-        //alert('Please enter the participant name');
-        $('txtParticipantName').focus();
-        return false;
-    }else{
-        var alpha = /^[a-zA-Z\s.]+$/;
-        if (!$('txtParticipantName').value.match(alpha)) {
-            swal ( "Oops!" ,  "Please enter a valid name" ,  "error" )
-        //alert('Please enter a valid name.');
-            $('txtParticipantName').focus();
-            return false;
-        }
-    }
-
-    // Show original participant photo before update
-    var photoPreviewContainer = document.getElementById('photoPreviewContainer');
-    var noPhotoMessage = document.getElementById('noPhotoMessage');
-    var currentPhoto = document.getElementById('currentPhoto');
-
-    // Make AJAX call to get current participant photo
-    var photoData = null;
-
-    var oOptions = {
-        method: "post",
-        asynchronous: false,
-        parameters: {'hidSchoolId': $('hidSchoolId').value, 'hidADNO': adno},
-        onFailure: function (oXHR, oJson) {
-            console.error("Error getting participant photo: " + oXHR.status);
-        },
-        onSuccess: function (transport) {
-            var response = transport.responseText;
-            photoData = JSON.parse(response);
-        }
-    };
-
-    // Make synchronous AJAX call to get photo data before form submission
-    if (typeof Ajax !== 'undefined' && Ajax.Request) {
-        var oRequest = new Ajax.Request(path + "schools/registration/get_participant_data", oOptions);
-    } else {
-        // Fallback for browsers that don't support Ajax.Request
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", path + "schools/registration/get_participant_data", false);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        var params = 'hidSchoolId=' + encodeURIComponent($('hidSchoolId').value) + '&hidADNO=' + encodeURIComponent(adno);
-        xhr.send(params);
-
-        if (xhr.status === 200) {
-            photoData = JSON.parse(xhr.responseText);
-        }
-    }
-
-    // Display the photo if data was retrieved successfully
-    if (photoData && photoData.photo_url && photoData.photo_url.trim() !== '') {
-        // Show photo preview with enhanced cache busting
-        if (photoPreviewContainer) photoPreviewContainer.style.display = 'block';
-        if (noPhotoMessage) noPhotoMessage.style.display = 'none';
-        if (currentPhoto) {
-            // Add cache busting to ensure fresh photo load
-            var enhancedPhotoUrl = photoData.photo_url;
-            var timestamp = new Date().getTime();
-            var cacheBuster = Math.random().toString(36).substring(7);
-
-            if (enhancedPhotoUrl.indexOf('?') > -1) {
-                enhancedPhotoUrl += '&update=' + timestamp + '&cache=' + cacheBuster;
+    var admn_no = trim(txtADNO.value);
+    if (txtClass && parseInt(trim(txtClass.value), 10) > 10) {
+        var hss_vhse_chr = trim(txtADNO.value).substring(0, 1).toUpperCase();
+        var vhssVal = hidVHSSNo ? parseInt(hidVHSSNo.value, 10) : 0;
+        var hssVal = hidHSSNo ? parseInt(hidHSSNo.value, 10) : 0;
+        if (!((hss_vhse_chr == 'V' && vhssVal > 0) || (hss_vhse_chr == 'H' && hssVal > 0))) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'error', title: 'Oops!', text: 'Invalid admission number' });
+            } else if (typeof swal !== 'undefined') {
+                swal("Oops!", "Invalid admission number", "error");
             } else {
-                enhancedPhotoUrl += '?update=' + timestamp + '&cache=' + cacheBuster;
+                alert('Invalid admission number');
             }
-
-            currentPhoto.src = enhancedPhotoUrl;
-            currentPhoto.style.display = 'block';
-
-            currentPhoto.onload = function() {
-            };
-
-            currentPhoto.onerror = function() {
-                this.onerror = null;
-                this.src = path + 'photos/img_user_nophoto.png?t=' + new Date().getTime();
-                this.alt = 'Photo not available';
-            };
+            txtADNO.focus();
+            return false;
         }
-    } else {
-        // Show no photo message
-        if (photoPreviewContainer) photoPreviewContainer.style.display = 'none';
-        if (noPhotoMessage) noPhotoMessage.style.display = 'block';
-        if (currentPhoto) {
-            currentPhoto.src = '';
-            currentPhoto.style.display = 'none';
-        }
+        admn_no = trim(txtADNO.value).substring(1);
     }
 
+    if (isNaN(admn_no)) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({ icon: 'error', title: 'Oops!', text: 'Invalid admission number' });
+        } else if (typeof swal !== 'undefined') {
+            swal("Oops!", "Invalid admission number", "error");
+        } else {
+            alert('Invalid admission number');
+        }
+        txtADNO.focus();
+        return false;
+    }
 
+    if (!txtParticipantName || trim(txtParticipantName.value) == '') {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({ icon: 'error', title: 'Oops!', text: 'Please enter the participant name' });
+        } else if (typeof swal !== 'undefined') {
+            swal("Oops!", "Please enter the participant name", "error");
+        } else {
+            alert('Please enter the participant name');
+        }
+        if (txtParticipantName) txtParticipantName.focus();
+        return false;
+    } else {
+        var alpha = /^[a-zA-Z\s.]+$/;
+        if (!txtParticipantName.value.match(alpha)) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'error', title: 'Oops!', text: 'Please enter a valid name' });
+            } else if (typeof swal !== 'undefined') {
+                swal("Oops!", "Please enter a valid name", "error");
+            } else {
+                alert('Please enter a valid name.');
+            }
+            txtParticipantName.focus();
+            return false;
+        }
+    }
 
     var items = 0;
-    var fieldId = '';
-    var fieldElement;
     for (var i = 1; i <= 10; i++) {
-        fieldId = 'txtItemCode_' + i;
-        fieldElement = document.getElementById(fieldId);
+        var fieldElement = document.getElementById('txtItemCode_' + i);
         if (fieldElement && trim(fieldElement.value) != '') {
             items++;
         }
     }
     var pinnani = 0;
-    var pinnanyId = '';
-    var pinnanyElement;
     for (var i = 1; i <= 5; i++) {
-        pinnanyId = 'txtPinnanyCode_' + i;
-        pinnanyElement = document.getElementById(pinnanyId);
+        var pinnanyElement = document.getElementById('txtPinnanyCode_' + i);
         if (pinnanyElement && trim(pinnanyElement.value) != '') {
             pinnani++;
         }
     }
 
     if ((items == 0) && (pinnani == 0)) {
-        swal ( "Oops!" ,  "Please enter the item code" ,  "error" )
-        //alert('Please enter the item code');
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({ icon: 'error', title: 'Oops!', text: 'Please enter the item code' });
+        } else if (typeof swal !== 'undefined') {
+            swal("Oops!", "Please enter the item code", "error");
+        } else {
+            alert('Please enter the item code');
+        }
         var firstItem = document.getElementById('txtItemCode_1');
         if (firstItem) firstItem.focus();
         return false;
@@ -977,18 +1081,14 @@ function fncUpdateParticipant(adno) {
     if (saveBtn) {
         saveBtn.disabled = true;
         saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Updating...';
-        // Store original button state for potential refresh
         saveBtn.setAttribute('data-original-text', 'Update Participant');
     }
 
-    document.getElementById('formParticipant').action = path + 'schools/registration/update_participant_details';
-    document.getElementById('formParticipant').submit();
-
-    // Enhanced photo refresh for participant list after update
-    setTimeout(function() {
-        refreshParticipantPhotos();
-        
-    }, 1500);
+    var formParticipant = document.getElementById('formParticipant');
+    if (formParticipant) {
+        formParticipant.action = (typeof path !== 'undefined' ? path : '') + 'schools/registration/update_participant_details';
+        formParticipant.submit();
+    }
 }
 
 function fnschgpwdAdd() {
@@ -1298,10 +1398,6 @@ function printContent(element_id)
 
 function fnc_change_confirmation_status(message, school_code, element_id)
 {
-    
-    
-    
-
     // Validate parameters
     if (typeof element_id === 'undefined' || element_id === null || element_id === '') {
         console.error('CRITICAL: element_id is undefined/null/empty:', element_id);
@@ -1315,103 +1411,101 @@ function fnc_change_confirmation_status(message, school_code, element_id)
         return;
     }
 
-    // Debug: Check what elements exist
-    
     var testElement = $(element_id);
-    
-
-    if (testElement) {
-        
-        
-    }
-
-    // Check if element exists
     if (!testElement) {
         console.error('CRITICAL ERROR: Element not found:', element_id);
-        console.error('Available elements with confirm in ID:');
-        var allElements = document.getElementsByTagName('*');
-        for (var i = 0; i < allElements.length; i++) {
-            if (allElements[i].id && allElements[i].id.indexOf('confirm') !== -1) {
-                console.error('Found element:', allElements[i].id, 'Tag:', allElements[i].tagName);
-            }
-        }
-        alert('Error: Element not found - ' + element_id);
         return;
     }
 
-    
-    
-
-    message = 'Do you really want to reset the confirmation status of ' + message;
-    
-    if (confirm(message))
-    {
-        
-        
-        ajax_loder2(element_id);
-        var oOptions = {
-            method: "post",
-            parameters: {'school_code': school_code},
-            onFailure: function (oXHR, oJson) {
-                console.error('AJAX failure in common.js:', oXHR, oJson);
-                swal ( "Oops!" ,  "An error occurred: " + oXHR.status ,  "error" )
-                //alert("An error occurred: " + oXHR.status);
-            },
-            onSuccess: function (transport) {
-                var response = transport.responseText;
-                
-
-                // Check if elements exist before updating
-                var element = $(element_id);
-                var disElement = $(element_id + '_dis');
-
-                if (!element) {
-                    console.error('Element not found after AJAX:', element_id);
-                    return;
+    Swal.fire({
+        title: 'Reset Confirmation Status?',
+        text: "Do you really want to reset the confirmation status of " + message + "?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Reset',
+        cancelButtonText: 'Cancel'
+    }).then(function(result) {
+        if (result.isConfirmed) {
+            // Show loading state
+            Swal.fire({
+                title: 'Resetting...',
+                text: 'Please wait...',
+                allowOutsideClick: false,
+                didOpen: function() {
+                    Swal.showLoading();
                 }
-
-                if (response == 'Yes' || response == 'No') {
-                    element.innerHTML = response;
-                    if (disElement) disElement.innerHTML = '';
-                    
-                    
-                } else {
-                    console.error('Unexpected response:', response);
-                    console.error('Response type:', typeof response);
-                    alert('Unexpected response: ' + response);
-                }
-            }
-        };
-        
-        
-        
-
-        if (typeof Ajax !== 'undefined' && Ajax.Request) {
-            
-            var oRequest = new Ajax.Request(path + "ajax/change_confirmation_status", oOptions);
-        } else {
-            
-            // Fallback for browsers that don't support Ajax.Request
-            fetch(path + "ajax/change_confirmation_status", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams(oOptions.parameters)
-            })
-            .then(function(response) {
-                return response.text();
-            })
-            .then(function(data) {
-                
-                oOptions.onSuccess({responseText: data});
-            })
-            .catch(function(error) {
-                console.error('Fetch error:', error);
-                alert('Network error: ' + error.message);
             });
+
+            ajax_loder2(element_id);
+            var oOptions = {
+                method: "post",
+                parameters: {'school_code': school_code},
+                onFailure: function (oXHR, oJson) {
+                    console.error('AJAX failure in common.js:', oXHR, oJson);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: "An error occurred: " + oXHR.status,
+                        icon: 'error',
+                        confirmButtonColor: '#dc3545'
+                    });
+                },
+                onSuccess: function (transport) {
+                    var response = transport.responseText.trim();
+                    var element = $(element_id);
+                    var disElement = $(element_id + '_dis');
+
+                    if (!element) {
+                        console.error('Element not found after AJAX:', element_id);
+                        return;
+                    }
+
+                    if (response == 'Yes' || response == 'No') {
+                        element.innerHTML = response;
+                        if (disElement) disElement.innerHTML = '';
+                        
+                        Swal.fire({
+                            title: 'Success!',
+                            text: 'Confirmation status has been reset successfully.',
+                            icon: 'success',
+                            confirmButtonColor: '#28a745'
+                        });
+                    } else {
+                        console.error('Unexpected response:', response);
+                        Swal.fire({
+                            title: 'Failed!',
+                            text: 'Failed to reset: ' + response,
+                            icon: 'error',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    }
+                }
+            };
+
+            if (typeof Ajax !== 'undefined' && Ajax.Request) {
+                var oRequest = new Ajax.Request(path + "ajax/change_confirmation_status", oOptions);
+            } else {
+                fetch(path + "ajax/change_confirmation_status", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams(oOptions.parameters)
+                })
+                .then(function(response) {
+                    return response.text();
+                })
+                .then(function(data) {
+                    oOptions.onSuccess({responseText: data});
+                })
+                .catch(function(error) {
+                    console.error('Fetch error:', error);
+                    oOptions.onFailure({status: error.message});
+                });
+            }
         }
-    }
+    });
 }
 
 
@@ -1440,10 +1534,18 @@ function clearForm() {
     for (let i = 1; i <= 10; i++) {
         el = document.getElementById('txtItemCode_' + i);
         if (el) el.value = '';
+        var d = document.getElementById('itemDetails_' + i);
+        if (d) d.style.display = 'none';
+        var ic = document.getElementById('itemTypeIcon_' + i);
+        if (ic) { ic.style.display = 'none'; ic.innerHTML = ''; }
     }
     for (let i = 1; i <= 5; i++) {
         el = document.getElementById('txtPinnanyCode_' + i);
         if (el) el.value = '';
+        var pd = document.getElementById('pinnanyDetails_' + i);
+        if (pd) pd.style.display = 'none';
+        var pic = document.getElementById('pinnanyTypeIcon_' + i);
+        if (pic) { pic.style.display = 'none'; pic.innerHTML = ''; }
     }
 
     el = document.getElementById('hidADNO');

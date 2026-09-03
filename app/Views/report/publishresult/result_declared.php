@@ -292,7 +292,7 @@
                         <i class="fas fa-trophy me-3"></i>
                         Competition Results
                     </h1>
-                    <!-- <p class="lead">Tamil Kalaivizha - <?php echo $details[0]['fest_name']; ?></p> -->
+                    <!-- <p class="lead">Tamil Kalaivizha Competition Results</p> -->
                 </div>
             </div>
         </div>

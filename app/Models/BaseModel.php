@@ -6,6 +6,7 @@ use Config\ModelMap;
 use App\Libraries\CiLoader;
 use App\Libraries\Input;
 use App\Libraries\CiDatabase;
+use App\Libraries\FormValidation;
 
 /**
  * Base Model
@@ -45,7 +46,7 @@ class BaseModel
         $this->config           = config(\Config\App::class);
         $this->load             = new CiLoader($this);
         $this->input            = new Input();
-        $this->form_validation  = service('validation');
+        $this->form_validation  = new FormValidation();
     }
 
     public function __get($name)

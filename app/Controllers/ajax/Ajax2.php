@@ -28,8 +28,12 @@ class Ajax2 extends \App\Controllers\BaseController {
 
     function fetch_callsheet_festival() {
         $fest_id = $this->input->post('fest_id');
+        if (empty($fest_id) || $fest_id == '0') {
+            echo form_dropdown('cbo_item', array('' => '-- Select Item --'), '', 'id="cbo_item" class="form-select py-2"');
+            return;
+        }
         $item_details = $this->General_Model->prepare_select_box_data_special('item_master', 'item_code,item_name', 'item_code,CONCAT_WS(\' - \',item_code,item_name ) as item_name', array('fest_id' => $fest_id), 'Select Item', 'item_code');
-        echo form_dropdown('cbo_item', $item_details, '', 'id="cbo_item" class="form-control"');
+        echo form_dropdown('cbo_item', $item_details, '', 'id="cbo_item" class="form-select py-2" required');
     }
 
     function fetch_item_name() {//vipin

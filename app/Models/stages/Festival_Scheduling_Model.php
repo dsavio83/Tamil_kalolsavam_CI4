@@ -353,33 +353,8 @@ class Festival_Scheduling_Model extends \App\Models\BaseModel {
         }
     }
 
-    // Save schedule to database
-    function save_schedule($schedule, $fest_id) {
-        // Clear existing schedule for this festival
-        $this->db->where('fest_id', $fest_id);
-        $this->db->delete('stage_item_master');
-
-        foreach ($schedule as $item_schedule) {
-            // Get or create stage ID
-            $stage_id = $this->get_or_create_stage($item_schedule['venue']);
-
-            $schedule_data = array(
-                'item_code' => $item_schedule['item_code'],
-                'stage_id' => $stage_id,
-                'start_time' => $item_schedule['start_time'],
-                'fest_id' => $fest_id,
-                'no_of_cluster' => 1,
-                'no_of_judges' => 3 // Default number of judges
-            );
-
-            $this->db->insert('stage_item_master', $schedule_data);
-        }
-
-        return $this->db->affectedRows();
-    }
-
     // Get or create stage
-    private function get_or_create_stage($stage_name) {
+    public function get_or_create_stage($stage_name) {
         // Check if stage exists
         $this->db->where('stage_name', $stage_name);
         $existing = $this->db->get('stage_master')->getRowArray();
@@ -393,8 +368,62 @@ class Festival_Scheduling_Model extends \App\Models\BaseModel {
             'stage_name' => $stage_name,
             'stage_desc' => $stage_name . ' - Auto Generated'
         );
-        $this->db->insert('stage_master', $stage_data);
+        $this->db->table('stage_master')->insert($stage_data);
         return $this->db->insertID();
+    }
+
+    // Clear existing schedule for a festival
+    public function clear_festival_schedule($fest_id) {
+        $items = $this->db->table('item_master')
+            ->select('item_code')
+            ->where('fest_id', $fest_id)
+            ->get()->getResultArray();
+        if (!empty($items)) {
+            $codes = array_column($items, 'item_code');
+            $this->db->table('stage_item_master')
+                ->whereIn('item_code', $codes)
+                ->delete();
+        }
+        return true;
+    }
+
+    // Save schedule to database (stage_item_master)
+    public function save_schedule($schedule, $fest_id) {
+        $this->clear_festival_schedule($fest_id);
+
+        $saved_count = 0;
+        foreach ($schedule as $item_schedule) {
+            if (empty($item_schedule['item_code'])) continue;
+
+            $stage_name = !empty($item_schedule['venue']) ? $item_schedule['venue'] : (!empty($item_schedule['stage_name']) ? $item_schedule['stage_name'] : 'Stage 1');
+            $stage_id = $this->get_or_create_stage($stage_name);
+
+            $date = !empty($item_schedule['date']) ? $item_schedule['date'] : date('Y-m-d');
+            $raw_time = !empty($item_schedule['start_time']) ? $item_schedule['start_time'] : '09:00:00';
+            if (strpos($raw_time, '-') !== false && strlen($raw_time) > 10) {
+                $start_datetime = date('Y-m-d H:i:s', strtotime($raw_time));
+            } else {
+                $start_datetime = date('Y-m-d H:i:s', strtotime($date . ' ' . $raw_time));
+            }
+
+            $duration = !empty($item_schedule['duration']) ? (int)$item_schedule['duration'] : 30;
+
+            $data = array(
+                'stage_id' => $stage_id,
+                'item_code' => $item_schedule['item_code'],
+                'start_time' => $start_datetime,
+                'no_of_cluster' => 1,
+                'no_of_participant' => !empty($item_schedule['total_participants']) ? (int)$item_schedule['total_participants'] : 1,
+                'no_of_judges' => 3,
+                'item_time' => $duration,
+                'time_type' => 'M'
+            );
+
+            $this->db->table('stage_item_master')->insert($data);
+            $saved_count++;
+        }
+
+        return $saved_count;
     }
 
     // Get complete schedule for a festival
@@ -411,8 +440,8 @@ class Festival_Scheduling_Model extends \App\Models\BaseModel {
             $this->db->from('stage_item_master AS sim');
             $this->db->join('stage_master AS sm', 'sm.stage_id = sim.stage_id');
             $this->db->join('item_master AS im', 'im.item_code = sim.item_code');
-            $this->db->join('festival_master AS fm', 'fm.fest_id = sim.fest_id', 'left');
-            $this->db->where('sim.fest_id', $fest_id);
+            $this->db->join('festival_master AS fm', 'fm.fest_id = im.fest_id', 'left');
+            $this->db->where('im.fest_id', $fest_id);
             $this->db->orderBy('sim.start_time');
             return $this->db->get()->getResultArray();
         } catch (Exception $e) {

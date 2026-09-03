@@ -1,23 +1,21 @@
 <style type="text/css">
-    <!--
     .style1 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
         font-size: 14px;
         font-weight: bold;
-        color: #0d6efd;
+        color: #000000;
     }
-    .style2{
-        font-size: 12px;
+    .style2 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
+        font-size: 14px;
         font-weight: bold;
-        color:#000000;
+        color: #000000;
     }
-    .style3{ 
-        font-size: 11px;
+    .style3 { 
+        font-size: 10px;
         font-weight: bold;
-        color:#000000;
+        color: #000000;
     }
-
-
-    -->
 </style>
 <style>
     @media print
@@ -28,6 +26,7 @@
 
 
 <?php
+if (!empty($rankwise)) {
 $prevrankcode = "";
 $previtem_code = "";
 $j = 0;
@@ -42,6 +41,7 @@ foreach ($rankwise as $value) {
             if ($j != 0) {
                 print("</table></page>");
             }
+            $j++;
             ?>
             <page backtop="20mm" backbottom="20mm " >
                 <page_header>
@@ -155,3 +155,4 @@ foreach ($rankwise as $value) {
         ?>
     </table>
 </page>
+<?php } ?>

@@ -7,6 +7,7 @@ class Afterresultreport  extends \App\Controllers\BaseController {
 
     function __construct () {
 		parent::__construct ();
+        $this->Session_Model->is_user_logged(true);
         $this->template->add_js('js/report/staticreport.js');
         $this->template->add_js('js/report/reportjs.js');
         $this->load->library('html2pdf');
@@ -16,6 +17,11 @@ class Afterresultreport  extends \App\Controllers\BaseController {
     }
 
     function timefest_result() {
+        if ($this->Session_Model->check_user_permission(44) == false) {
+            $this->template->write('error', permission_warning());
+            $this->template->load();
+            return;
+        }
         $this->template->add_js('js/popcalendar.js');
         $this->template->add_css('style/calendar.css');
 
@@ -31,6 +37,11 @@ class Afterresultreport  extends \App\Controllers\BaseController {
     }
 
     function school_wise_result_interface() {
+        if ($this->Session_Model->check_user_permission(44) == false) {
+            $this->template->write('error', permission_warning());
+            $this->template->load();
+            return;
+        }
         $school = $this->General_Model->prepare_select_box_data('school_master', 'school_code,school_code', '', 'Select School');
         $this->Contents = array();
         $this->Contents['school'] = $school;
@@ -54,6 +65,11 @@ class Afterresultreport  extends \App\Controllers\BaseController {
     }
 
     function status_of_kalolsavam_interface() {
+        if ($this->Session_Model->check_user_permission(44) == false) {
+            $this->template->write('error', permission_warning());
+            $this->template->load();
+            return;
+        }
         $fest = $this->General_Model->prepare_select_box_data('festival_master', 'fest_id,fest_name', '', 'Select Festival', 'fest_id');
         $this->Contents = array();
         $fest['All'] = "All festivals";
@@ -82,6 +98,11 @@ class Afterresultreport  extends \App\Controllers\BaseController {
     }
 
     function item_code_reports() {
+        if ($this->Session_Model->check_user_permission(44) == false) {
+            $this->template->write('error', permission_warning());
+            $this->template->load();
+            return;
+        }
         $fest = $this->General_Model->prepare_select_box_data('festival_master', 'fest_id,fest_name', '', 'Select Festival', 'fest_id');
         $this->Contents = array();
         $this->Contents['fest'] = $fest;

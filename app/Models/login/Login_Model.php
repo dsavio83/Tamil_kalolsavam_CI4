@@ -10,11 +10,14 @@ class Login_Model extends \App\Models\BaseModel {
     }
 
     function logincheck($userName, $password) {
-        $logdata['ip'] = $this->input->ip_address();
+        $logdata['ip'] = service('request')->getIPAddress();
         $logdata['user_name'] = $userName;
         $this->db->where('user_name', $userName);
         $user_master = $this->db->get('user_master');
+        
+        $username_exists = false;
         if ($user_master->getNumRows() > 0) {
+            $username_exists = true;
             $user = $user_master->getResultArray();
             $logdata['user_id'] = $user[0]['user_id'];
             $logdata['rev_district_code'] = $user[0]['rev_district_code'];
@@ -22,17 +25,22 @@ class Login_Model extends \App\Models\BaseModel {
             $logdata['school_code'] = $user[0]['school_code'];
         }
 
+        if (!$username_exists) {
+            $logdata['status'] = 'F';
+            $this->db->insert('z_login_log', $logdata);
+            return 2; // Username not found
+        }
+
         $this->db->where('user_name', $userName);
         $this->db->where('password', get_encr_password($password));
-        //$this->db->where('password',$password);
         $result = $this->db->get('user_master');
 
-        
         if ($result->getNumRows() > 0) {
             $logdata['status'] = 'L';
         } else {
             $logdata['status'] = 'F';
-            return 2;
+            $this->db->insert('z_login_log', $logdata);
+            return 3; // Password does not match
         }
         $this->db->insert('z_login_log', $logdata);
 
@@ -72,44 +80,21 @@ class Login_Model extends \App\Models\BaseModel {
         $this->db->transStart();
 
         $USRID = $this->session->get('USERID');
-        $this->db->where('user_id', $USRID);
-        $this->db->where('is_change_password', 'N');
-        $this->db->where('user_group', 'A');
-        $user_master = $this->db->get('user_master');
-        if ($user_master->getNumRows() > 0) {
-            $user = $user_master->getResultArray();
-            $sub_district_code = $user[0]['sub_district_code'];
-            if ($sub_district_code) {
-                $this->db->where('sub_district_code !=', $sub_district_code);
-                $this->db->where('user_group !=', 'W');
-                $this->db->delete('user_master');
 
-                /* $this->db->where('sub_district_code !=',$sub_district_code);
-                  $school_master		=	$this->db->get('school_master');
-                  foreach($school_master->getResultArray() as $school)
-                  {
-                  $school_code	=	$school['school_code'];
+        // PHASE 188: Removed destructive bulk DELETE from user_master.
+        // The legacy code conditionally deleted every non-W user whose
+        // sub_district_code differed from the session user's own, during a
+        // routine password change. That was a P0 data-loss defect. Only the
+        // session user's password/profile UPDATE (below) is retained; no
+        // other user's record is touched.
 
-                  //$this->db->where('school_code',$school_code);
-                  //$this->db->delete('participant_item_details');
-
-                  //$this->db->where('school_code',$school_code);
-                  //$this->db->delete('participant_details');
-
-                  //$this->db->where('school_code',$school_code);
-                  //$this->db->delete('school_details');
-
-                  } */
-            }
-        }
-
-
-
-        $data['password'] = get_encr_password($this->input->post('txtNewPassword'));
+        $request = service('request');
+        $data['password'] = get_encr_password($request->getPost('txtNewPassword'));
         $data['is_change_password'] = "Y";
-        $data['name'] = $this->input->post('Name');
-        $data['mobile'] = $this->input->post('Mobile_Number');
-        $data['email'] = $this->input->post('Email_id');
+        $data['name'] = $request->getPost('Name');
+        $mobile = $request->getPost('Mobile_Number');
+        $data['mobile'] = (!empty($mobile)) ? $mobile : null;
+        $data['email'] = $request->getPost('Email_id');
         $this->db->where('user_id', $USRID);
         $this->db->update('user_master', $data);
 
@@ -124,7 +109,7 @@ class Login_Model extends \App\Models\BaseModel {
             $logdata['rev_district_code'] = $user[0]['rev_district_code'];
             $logdata['sub_district_code'] = $user[0]['sub_district_code'];
             $logdata['school_code'] = $user[0]['school_code'];
-            $logdata['ip'] = $this->input->ip_address();
+            $logdata['ip'] = service('request')->getIPAddress();
             $logdata['user_name'] = $user[0]['user_name'];
             $logdata['status'] = 'C';
             $this->db->insert('z_login_log', $logdata);
@@ -135,35 +120,23 @@ class Login_Model extends \App\Models\BaseModel {
     }
 
     function logout_user() {
-
-        $user_id = $this->session->get('USERID');
-        $this->db->where('user_id', $user_id);
-        $user_master = $this->db->get('user_master');
-
-        if ($user_master->getNumRows() > 0) {
-            $user = $user_master->getResultArray();
-            $logdata['user_id'] = $user[0]['user_id'];
-            $logdata['rev_district_code'] = $user[0]['rev_district_code'];
-            $logdata['sub_district_code'] = $user[0]['sub_district_code'];
-            $logdata['school_code'] = $user[0]['school_code'];
-            $logdata['ip'] = $this->input->ip_address();
-            $logdata['user_name'] = $user[0]['user_name'];
-            $logdata['status'] = 'O';
-            $this->db->insert('z_login_log', $logdata);
+        $keys = [
+            'USERID',
+            'USERID_LIVE',
+            'USER_NAME',
+            'CHANGEPWD',
+            'USER_GROUP',
+            'DISTRICT',
+            'SUB_DISTRICT',
+            'SCHOOL_CODE',
+            'EDU_DISTRICT',
+            'USER_TYPE',
+            'REQUEST_URI'
+        ];
+        $this->session->remove($keys);
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session()->destroy();
         }
-
-
-        $sessiondata = array('USERID' => '',
-            'USERID_LIVE' => '',
-            'CHANGEPWD' => '',
-            'USER_GROUP' => '',
-            'DISTRICT' => '',
-            'SUB_DISTRICT' => '',
-            'SCHOOL_CODE' => '',
-            'EDU_DISTRICT' => '',
-            'USER_TYPE' => '');
-
-        $this->session->remove($sessiondata);
     }
 
     function get_cluster_details($subdist) {
@@ -271,10 +244,10 @@ class Login_Model extends \App\Models\BaseModel {
             $user_id = $this->input->post('hidClusterId');
             $this->db->select('sub_district_code');
             $this->db->where('user_id', $user_id);
-            $this->db->groupBy('user_id');
+            $this->db->groupBy('user_id, sub_district_code');
             $result = $this->db->get('user_cluster');
             $result = $result->getResultArray();
-            $subdist = $result[0]['sub_district_code'];
+            $subdist = $result[0]['sub_district_code'] ?? $subdist;
         }
 
         $this->db->select('sd.school_code, sd.sub_district_code, sm.school_name,dt.is_finalize');
@@ -449,6 +422,14 @@ class Login_Model extends \App\Models\BaseModel {
         $this->db->where('user_group', 'A');
         $user_master = $this->db->get('user_master');
         return $user_master->getResultArray();
+    }
+
+    function get_subdist_district_code($sub_district_code) {
+        $this->db->select('rev_district_code');
+        $this->db->where('sub_district_code', $sub_district_code);
+        $result = $this->db->get('sub_district_master');
+        $row = $result->getRowArray();
+        return ($row && isset($row['rev_district_code'])) ? $row['rev_district_code'] : $this->session->get('DISTRICT');
     }
 
     function changeKalolsavam($subdist, $sub_dist_name) {

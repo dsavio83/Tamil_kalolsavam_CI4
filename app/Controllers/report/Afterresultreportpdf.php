@@ -7,6 +7,7 @@ class Afterresultreportpdf extends \App\Controllers\BaseController {
 
     function __construct () {
 		parent::__construct ();
+        $this->Session_Model->is_user_logged(true);
         $this->template->add_js('js/report/staticreport.js');
         $this->template->add_js('js/report/reportjs.js');
         $this->load->library('html2pdf');
@@ -346,7 +347,7 @@ class Afterresultreportpdf extends \App\Controllers\BaseController {
         $numwise = $this->Resultindex_Model->numwise_timeresult_report();
         $this->Contents['result_numwise'] = $numwise;
         //echo "<br /><br /><br />---->".var_dump($numwise);	 
-        if (count($numwise[0]) > 0) {
+        if (!empty($numwise) && !empty($numwise[0]) && count($numwise[0]) > 0) {
             $content = $this->load->view('report/timeof_fest_reportpdf/result_numwise_report', $this->Contents, true);
             $html2pdf = new HTML2PDF('P', 'A4', 'en');
             $html2pdf->pdf->SetDisplayMode('fullpage');

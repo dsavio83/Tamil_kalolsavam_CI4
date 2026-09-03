@@ -1,10 +1,10 @@
 
 <style type="text/css">
-    <!--
     .style1 {
-        font-size: 15px;
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
+        font-size: 14px;
         font-weight: bold;
-        color: #0d6efd;
+        color: #000000;
     }
 </style>
 
@@ -70,7 +70,7 @@ for ($j = 0; $j < count($festresult); $j++) {
 
 
             // if(($festresult[$j]['is_publish']!='N')&&($festresult[$j]['grade']!='')){
-            if (($retdat[$j]['is_publish'] != 'N') && ($retdat[$j]['grade'] == 'A' || $retdat[$j]['grade'] == 'B' || $retdat[$j]['grade'] == 'C')) {
+            if (($festresult[$j]['is_publish'] != 'N') && ($festresult[$j]['grade'] == 'A' || $festresult[$j]['grade'] == 'B' || $festresult[$j]['grade'] == 'C')) {
                 ?>
 
                 <tr>

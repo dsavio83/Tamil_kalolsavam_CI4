@@ -61,11 +61,11 @@
 
             <tr>
                 <td align="center" colspan="11" style='border:0 0 0.5px 0.5px 0 #000000 ; font:Georgia;'>
-                    <img src="<?php echo base_url(false) . 'value_points/' . $itemcode . '.JPG' ?>" height="200" width="700" />            	</td>
+                    <img src="<?php echo base_url('value_points/') . $itemcode . '.JPG' ?>" height="200" width="700" />            	</td>
             </tr>
             <!--<tr>
               <td align="center" colspan="11" style='border:0 0 0.5px 0.5px 0 #000000 ; font:Georgia;'>
-                  <img src="<?php echo base_url(false) . 'value_points/' . $itemcode . '.JPG' ?>" height="100" width="700" />
+                  <img src="<?php echo base_url() . 'value_points/' . $itemcode . '.JPG' ?>" height="100" width="700" />
               </td>
             </tr>-->
         <?php } ?>

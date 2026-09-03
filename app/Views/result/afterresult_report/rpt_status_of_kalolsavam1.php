@@ -1,3 +1,17 @@
+<style type="text/css">
+    .style1 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
+        font-size: 14px;
+        font-weight: bold;
+        color: #0d6efd;
+    }
+    .style2 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
+        font-size: 14px;
+        font-weight: bold;
+        color: #000000;
+    }
+</style>
 <page backtop="20mm" backbottom="20mm ">
     <page_header>
         <?php
@@ -11,7 +25,7 @@
     </page_footer>  
     <table width="100%" height="62" border="0" align="center">
         <tr>
-            <td align="center"><h4 align="center">Status Of Kalolsavam</h4></td>
+            <td align="center"><h4 align="center" class="style1">Status Of Kalolsavam</h4></td>
         </tr>
     </table>
 

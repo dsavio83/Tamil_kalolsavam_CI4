@@ -143,7 +143,7 @@ class Template
     public function add_js($script, $type = 'import', $defer = false)
     {
         $js = null;
-        $filepath = base_url() . $script;
+        $filepath = base_url() . $script . '?v=20260831a';
 
         if ($type === 'import') {
             $js = '<script type="text/javascript" src="' . $filepath . '"';
@@ -171,7 +171,7 @@ class Template
     public function add_css($style, $type = 'link', $media = false)
     {
         $css = null;
-        $filepath = base_url() . $style;
+        $filepath = base_url() . $style . '?v=20260831a';
 
         if ($type === 'link') {
             $css = '<link type="text/css" rel="stylesheet" href="' . $filepath . '"';

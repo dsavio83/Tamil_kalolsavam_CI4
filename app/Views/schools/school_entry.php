@@ -1,445 +1,437 @@
 <div id="divEntryForm">
-	<div class="pagetitle">
-		<h1>Registrations</h1>
-		<nav>
-			<ol class="breadcrumb">
-				<li class="breadcrumb-item"><a href="<?php echo base_url(); ?>welcome" title="Home">Home</a></li>
-				<li class="breadcrumb-item active">School Registration</li>
-			</ol>
-		</nav>
-	</div>
-
 	<?php
-	echo form_open('schools/registration/update', array('id' => 'formSchool')); ?>
+	$school_details = $school_details ?? [];
+	$participant_details = $participant_details ?? [];
+	$participant_photos = $participant_photos ?? [];
+	$group_details = $group_details ?? [];
+	$participant_item_list = $participant_item_list ?? [];
+	$is_edit = $is_edit ?? 'yes';
+	$all_festival_items = $all_festival_items ?? [];
+	$bank_details = $bank_details ?? [];
+	$subdistrict_schools = $subdistrict_schools ?? [];
+	$initial_show_school_details = $initial_show_school_details ?? false;
 
-	<input type="hidden" name="hidTeachers" id="hidTeachers" value="1">
-	<div class="col-12 mb-3">
-		<button type="button" class="btn btn-info btn-sm me-2" id="schoolProfileBtn">
-			<i class="fas fa-eye"></i> <span id="schoolProfileBtnText">School Profile</span>
-		</button>
+	$session_code = trim((string)(session()->get('SCHOOL_CODE') ?? ''));
+	$active_code = (!empty($school_details[0]['school_code'])) ? $school_details[0]['school_code'] : ($session_code !== '0' ? $session_code : (service('request')->getPost('hidSchoolId') ?: ''));
+	$total_participants_count = !empty($participant_details) ? count($participant_details) : 0;
+	?>
 
-		<button type="button" class="btn btn-success btn-sm me-2" data-bs-toggle="modal"
-			data-bs-target="#participantModal" onclick="clearForm()" id="addParticipantBtn">
-			<i class="fas fa-plus"></i> Add Participant
-		</button>
-
-		<!-- <button type="button" class="btn btn-primary btn-sm" onclick="openRegistrationReport()" id="reportBtn">
-			<i class="fas fa-file-alt"></i> Report
-		</button> -->
-	</div>
-
-	<div class="row justify-content-center" id="schoolDetailsSection">
-		<div class="col-md-12 col-sm-12 col-xl-12">
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title"> School Details</h5>
-					<div class="table-responsive-sm">
-						<table>
-							<div class="row">
-								<div class="col-xl-2 col-md-2 col-sm-6 col-lg-2 mb-2">
-									School Code
-								</div>
-
-								<div class="col-xl-4 col-md-4 col-sm-6 col-lg-4 mb-2">
-									<div id="divSchoolCode">
-										<?php
-										if (trim($this->session->get('SCHOOL_CODE')) != 0 or @$school_show == 'edit') {
-											echo @$school_details[0]['school_code'];
-										} else {
-											echo form_input("txtSchoolCode", (string) (@$school_details[0]['school_code'] ?? ''), 'class="form-control" id="txtSchoolCode" onkeypress="javascript:return numbersonly(this, event, false);" onBlur="javascript:fetch_school_details()"');
-										} ?>
-									</div>
-								</div>
-								<div class="col-xl-2 col-md-2 col-sm-6 col-lg-2 mb-2">
-									School Name
-								</div>
-								<div class="col-xl-4 col-md-4 col-sm-6 col-lg-4 mb-2">
-									<?php @print ($school_details[0]['school_name']) ?>
-								</div>
-							</div>
-
-
-							<div class="row">
-								<div class="col-xl-2 col-md-2 col-sm-6 col-lg-2 mb-2">
-									E-mail
-								</div>
-
-								<div class="col-xl-4 col-md-4 col-sm-6 col-lg-4 mb-2">
-									<?php echo (@$school_show == 'show') ?
-										@$school_details[0]['school_email'] :
-										form_input(
-											"txtSchoolEmail",
-											(string) (@$school_details[0]['school_email'] ?? ''),
-											'class="form-control" id="txtSchoolEmail" maxlength="100" '
-										); ?>
-								</div>
-
-								<div class="col-xl-2 col-md-2 col-sm-6 col-lg-2 mb-2">
-									School Type
-								</div>
-
-								<div class="col-xl-4 col-md-4 col-sm-6 col-lg-4 mb-2">
-									<?php
-									if (@$school_details[0]['school_type'] == 'G')
-										$type = 'Government';
-									else if (@$school_details[0]['school_type'] == 'A')
-										$type = 'Aided';
-									else if (@$school_details[0]['school_type'] == 'U')
-										$type = 'Unaided';
-									else
-										$type = '';
-									echo $type; ?>
-								</div>
-							</div>
-
-							<div class="row">
-								<div class="col-xl-2 col-md-2 col-sm-6 col-lg-2 mb-2">
-									Standard From
-								</div>
-
-								<div class="col-xl-4 col-md-4 col-sm-6 col-lg-4 mb-2">
-									<?php echo (@$school_show == 'show') ?
-										@$school_details[0]['class_start'] :
-										form_dropdown(
-											"txtStandardFrom",
-											array(0 => '', 1 => 1, 5 => 5, 8 => 8, 11 => 11),
-											@$school_details[0]['class_start'],
-											'id="txtStandardFrom" class="form-control" onChange="javascript:fncShowHideStd()"'
-										); ?>
-								</div>
-
-								<div class="col-xl-2 col-md-2 col-sm-6 col-lg-2 mb-2">
-									Standard To
-								</div>
-
-								<div class="col-xl-4 col-md-4 col-sm-6 col-lg-4 mb-2">
-									<?php echo (@$school_show == 'show') ? @$school_details[0]['class_end'] : form_dropdown("txtStandardTo", array(0 => '', 4 => 4, 5 => 5, 7 => 7, 10 => 10, 12 => 12), @$school_details[0]['class_end'], 'id="txtStandardTo" class="form-control"  onChange="javascript:fncShowHideStd()"'); ?>
-								</div>
-							</div>
-
-							<div class="row">
-								<div class="col-xl-2 col-md-2 col-sm-6 col-lg-2 mb-2">
-									Principal
-								</div>
-
-								<div class="col-xl-4 col-md-4 col-sm-6 col-lg-4 mb-2">
-									<?php echo (@$school_show == 'show') ? @$school_details[0]['principal_name'] : form_input("txtPrincipal", (string) (@$school_details[0]['principal_name'] ?? ''), 'class="form-control" id="txtPrincipal" onkeyup="javascript:this.value=this.value.toUpperCase();"'); ?>
-								</div>
-
-								<div class="col-xl-2 col-md-2 col-sm-6 col-lg-2 mb-2">
-									Phone
-								</div>
-
-								<div class="col-xl-4 col-md-4 col-sm-6 col-lg-4 mb-2">
-									<?php echo (@$school_show == 'show') ? @$school_details[0]['principal_phone'] : form_input("txtPrincipalPhone", (string) (@$school_details[0]['principal_phone'] ?? ''), 'class="form-control" id="txtPrincipalPhone"  maxlength="11" onkeypress="javascript:return numbersonly(this, event, false);"'); ?>
-								</div>
-							</div>
-
-							<div class="row">
-								<div class="col-xl-2 col-md-2 col-sm-6 col-lg-2 mb-2">
-									Headmaster
-								</div>
-
-								<div class="col-xl-4 col-md-4 col-sm-6 col-lg-4 mb-2">
-									<?php echo (@$school_show == 'show') ? @$school_details[0]['hm_name'] :
-										form_input(
-											"txtHeadmaster",
-											(string) (@$school_details[0]['hm_name'] ?? ''),
-											'class="form-control" id="txtHeadmaster" 
-                                    onkeyup="javascript:this.value=this.value.toUpperCase();"'
-										); ?>
-								</div>
-
-								<div class="col-xl-2 col-md-2 col-sm-6 col-lg-2 mb-2">
-									Phone
-								</div>
-
-								<div class="col-xl-4 col-md-4 col-sm-6 col-lg-4 mb-2">
-									<?php echo (@$school_show == 'show') ? @$school_details[0]['hm_phone'] :
-										form_input(
-											"txtHeadmasterPhone",
-											(string) (@$school_details[0]['hm_phone'] ?? ''),
-											'class="form-control" id="txtHeadmasterPhone"  maxlength="11" 
-                                    onkeypress="javascript:return numbersonly(this, event, false);"'
-										); ?>
-								</div>
-							</div>
-
-							<div class="row">
-
-								<div id="teachersRow">
-									<?php
-									if (@$school_show == 'show') {
-										if (@$school_details[0]['teachers'] != '') {
-											$teachers = explode("#@#", $school_details[0]['teachers']);
-											echo '';
-											for ($i = 0; $i < count($teachers); $i++) {
-												$teachers_details = explode('#$#', $teachers[$i]);
-												if (count($teachers_details) > 1) {
-													echo '<div class="row">
-                                                    <div class="col-xl-2 col-md-2 col-sm-6 col-lg-2 mb-2">
-                                                        Team Manager
-                                                    </div>
-                                                    <div class="col-xl-4 col-md-4 col-sm-6 col-lg-4 mb-2">
-                                                        ' . @$teachers_details[0] . '</div>
-                                                    <div class="col-xl-2 col-md-2 col-sm-6 col-lg-2 mb-2">
-                                                        Phone </div>
-                                                    <div class="col-xl-4 col-md-4 col-sm-6 col-lg-4 mb-2">'
-														. @$teachers_details[1] . '</div></div></div>';
-												}
-											}
-											echo '';
-										}
-										?>
-									</div>
-									<div class="clear"></div>
-									<?php
-									} else if (@$school_show == 'edit') {
-										if (@$school_details[0]['teachers'] != '') {
-											$teachers = explode("#@#", $school_details[0]['teachers']);
-											for ($i = 1; $i < count($teachers); $i++) {
-												$teachers_details = explode('#$#', $teachers[$i - 1]);
-												?>
-												<div class="clear_both"></div>
-												<div class="teachersTextBox">
-													<?php
-													$name = 'txtTeacher_' . $i;
-													$phone = 'txtPhone_' . $i;
-													echo '<div class="row">
-                                                    <div class="col-xl-2 col-md-2 col-sm-6 col-lg-2 mb-2">
-                                                        Team Manager
-                                                    </div>
-                                                    <div class="col-xl-4 col-md-4 col-sm-6 col-lg-4 mb-2">';
-													echo form_input($name, (string) ($teachers_details[0] ?? ''), 'class="form-control" id="' . $name . '"  
-                                                onkeyup="javascript:this.value=this.value.toUpperCase();"') . ' 
-                                                </div>
-                                                    <div class="col-xl-2 col-md-2 col-sm-6 col-lg-2 mb-2">
-                                                        Phone </div>
-                                                    <div class="col-xl-4 col-md-4 col-sm-6 col-lg-4 mb-2"> ' .
-														form_input($phone, (string) (@$teachers_details[1] ?? ''), 'class="form-control" id="' .
-															$phone . '" onkeypress="javascript:return numbersonly(this, event, false);" maxlength="11"') . "</div>";
-													echo '</div> ';
-											}
-											//$teachersCount = (int) count($teachers) - 1;
-											//echo "<script>$('hidTeachers').value=" . $teachersCount . "</script>";
-											?>
-											</div>
-											<div class="clear"></div>
-											<div class="row">
-												<div class="col-2"> </div>
-												<div class="col-10">
-													<a href="javascript:void(0)" onclick="javascript:addteacher();
-												return false;">Add One</a>
-												</div>
-											</div>
-										<?php
-										} else {
-											echo "<script>$('hidTeachers').value=0</script>";
-											?>
-										</div>
-
-										<div class="clear"></div>
-										<div class="row">
-											<div class="col-2"> </div>
-											<div class="col-10">
-												<a href="javascript:void(0)" onclick="javascript:addteacher();
-												return false;">Add One</a>
-											</div>
-										</div>
-										</ <?php
-										}
-									} else {
-										echo '<div class="row">
-                                        <div class="col-xl-2 col-md-2 col-sm-6 col-lg-2 mb-2">
-                                            Team Manager 
-                                        </div>
-                                        <div class="col-xl-4 col-md-4 col-sm-6 col-lg-4 mb-2">';
-										echo form_input("txtTeacher_1", '', 'class="form-control" id="txtTeacher_1" onkeyup="javascript:this.value=this.value.toUpperCase();"') . '
-                                        </div>
-                                        <div class="col-xl-2 col-md-2 col-sm-6 col-lg-2 mb-2">
-                                            Phone 
-                                        </div>
-                                        <div class="col-xl-4 col-md-4 col-sm-6 col-lg-4 mb-2"> 
-                                            ' . form_input("txtPhone_1", '', 'class="form-control" id="txtPhone_1" onkeypress="javascript:return numbersonly(this, event, false);" maxlength="11"');
-										echo '</div></div>';
-										?>
-							</div>
-							<div class="clear"></div>
-							<a href="javascript:void(0)" onclick="javascript:addteacher();
-											return false;">Add One</a>
-					<?php } ?>
-				</div>
-
-				<div class="row mt-3">
-					<div class="col-xl-3 col-md-3 col-sm-6 col-lg-2 mb-3">
-						Total number of students
-					</div>
-
-					<div class="col-xl-9 col-md-9 col-sm-6 col-lg-9 mb-2">
-						<?php
-						$LPDiv = (@$school_details[0]['strength_lp'] != 0 && @$school_details[0]['strength_lp'] != '') ? 'block' : 'none';
-						$UPDiv = (@$school_details[0]['strength_up'] != 0 && @$school_details[0]['strength_up'] != '') ? 'block' : 'none';
-						$HSDiv = (@$school_details[0]['strength_hs'] != 0 && @$school_details[0]['strength_hs'] != '') ? 'block' : 'none';
-						$HSSDiv = (@$school_details[0]['strength_hss'] || @$school_details[0]['strength_vhss']) ? 'block' : 'none';
-						$VHSCDiv = (@$school_details[0]['strength_vhss'] || @$school_details[0]['strength_hss']) ? 'block' : 'none'; ?>
-
-						<div style="width:90px; float:left; display:<?php echo $LPDiv ?>; margin-right: 10px;"
-							id="divLP">LP
-							<?php echo (@$school_show == 'show') ? @$school_details[0]['strength_lp'] : form_input("txtTotalLP", (string) (@$school_details[0]['strength_lp'] ?? ''), 'class="form-control ml-3" id="txtTotalLP" maxlength="5" onkeypress="javascript:return numbersonly(this, event, false);" onkeyup="javascript:addTotal()"'); ?>
+	<!-- Modern Top Bar & Right-aligned Action Buttons -->
+	<div class="card border-0 shadow-sm rounded-4 mb-4" style="background: linear-gradient(135deg, #ffffff, #f8fafc); border: 1px solid #e2e8f0 !important;">
+		<div class="card-body p-3 p-md-4">
+			<div class="row align-items-center g-3">
+				<div class="col-md-6 col-12">
+					<div class="d-flex align-items-center gap-3">
+						<div class="d-flex align-items-center justify-content-center bg-primary text-white rounded-3 shadow-sm" style="width: 48px; height: 48px; min-width: 48px; background: linear-gradient(135deg, #0d6efd, #0b5ed7) !important;">
+							<i class="bi bi-people-fill fs-4"></i>
 						</div>
-
-						<div style="width:90px; float:left; display:<?php echo $UPDiv ?>; margin-right: 10px;"
-							id="divUP">UP
-							<?php echo (@$school_show == 'show') ? @$school_details[0]['strength_up'] : form_input("txtTotalUP", (string) (@$school_details[0]['strength_up'] ?? ''), 'class="form-control ml-3" id="txtTotalUP" maxlength="5" onkeypress="javascript:return numbersonly(this, event, false);" onkeyup="javascript:addTotal()"'); ?>
+						<div>
+							<h4 class="fw-bold mb-1 text-dark d-flex align-items-center gap-2">
+								School Entry & Registrations
+								<span class="badge bg-primary rounded-pill fs-7 px-2 py-1"><?php echo $total_participants_count; ?> Students</span>
+							</h4>
+							<div class="d-flex align-items-center gap-2 text-muted small">
+								<a href="<?php echo base_url(); ?>welcome" class="text-decoration-none text-muted"><i class="bi bi-house-door me-1"></i>Home</a>
+								<span>/</span>
+								<span class="text-primary fw-medium">School Entry</span>
+								<?php if (!empty($active_code)): ?>
+									<span class="ms-2 badge bg-light text-secondary border">School: <?php echo esc($active_code); ?></span>
+								<?php endif; ?>
+							</div>
 						</div>
-
-						<div style="width:90px; float:left; display:<?php echo $HSDiv ?>; margin-right: 10px;"
-							id="divHS">HS
-							<?php echo (@$school_show == 'show') ? @$school_details[0]['strength_hs'] : form_input("txtTotalHS", (string) (@$school_details[0]['strength_hs'] ?? ''), 'class="form-control ml-3" id="txtTotalHS" maxlength="5" onkeypress="javascript:return numbersonly(this, event, false);" onkeyup="javascript:addTotal()"'); ?>
-						</div>
-
-						<div style="width:90px; float:left; display:<?php echo $HSSDiv ?>; margin-right: 10px;"
-							id="divHSS">HSS
-							<?php echo (@$school_show == 'show') ? @$school_details[0]['strength_hss'] : form_input("txtTotalHSS", (string) (@$school_details[0]['strength_hss'] ?? ''), 'class="form-control ml-3" id="txtTotalHSS" maxlength="5" onkeypress="javascript:return numbersonly(this, event, false);" onkeyup="javascript:addTotal()"'); ?>
-						</div>
-
-						<div style="width:90px; float:left; display:<?php echo $VHSCDiv ?>; margin-right: 10px;"
-							id="divVHSC">VHSE
-							<?php echo (@$school_show == 'show') ? @$school_details[0]['strength_vhss'] : form_input("txtTotalVHSS", (string) (@$school_details[0]['strength_vhss'] ?? ''), 'class="form-control ml-3" id="txtTotalVHSS" maxlength="5" onkeypress="javascript:return numbersonly(this, event, false);" onkeyup="javascript:addTotal()"'); ?>
-						</div>
-
-						<div class="mr-3" style="width:120px; float:left;">Total
-							<?php echo (@$school_show == 'show') ? @$school_details[0]['total_strength'] : form_input("txtTotal", (string) (@$school_details[0]['total_strength'] ?? ''), 'style="width:120px;" class="form-control ml-3" id="txtTotal" maxlength="5" onkeypress="javascript:return numbersonly(this, event, false);" readonly="readonly" '); ?>
-						</div>
-
-						<input type="hidden" name="hidHSSNo" id="hidHSSNo"
-							value="<?php print ((@$school_details[0]['strength_hss']) ? @$school_details[0]['strength_hss'] : 0); ?>" />
-						<input type="hidden" name="hidHSSNo" id="hidVHSSNo"
-							value="<?php print ((@$school_details[0]['strength_vhss']) ? @$school_details[0]['strength_vhss'] : 0); ?>" />
 					</div>
 				</div>
+				<div class="col-md-6 col-12 text-md-end">
+					<div class="d-flex flex-wrap gap-2 justify-content-md-end align-items-center">
+						<?php if (!empty($is_admin)): ?>
+							<button type="button" class="btn btn-outline-primary shadow-sm rounded-3 px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2" id="schoolDetailsToggleBtn" onclick="toggleSchoolDetailsSection()">
+								<i class="bi bi-building"></i> <span id="schoolDetailsToggleBtnText"><?php echo (empty($active_code) && !empty($initial_show_school_details)) ? 'Hide School Details' : 'School Details'; ?></span>
+							</button>
+						<?php endif; ?>
 
-				<div class="row">
-					<div class="col-12 mb-2">
-						<center>
-							<?php
-							if (isset($is_edit) and $is_edit != 'no') {
-								echo (@$school_show == 'show') ?
-									form_button('Edit', 'Edit', 'onClick="javascript:fncEditSchoolDeatils()" class="btn btn-primary mt-3"') :
-									form_button('Continue', 'Continue', 'onClick="javascript:fncCheckSchoolDeatils()" class="btn btn-primary mt-3"');
+						<?php 
+						$can_show_add_participant = false;
+						if (!empty($is_school_user)) {
+							$can_show_add_participant = true;
+						} elseif (!empty($is_admin)) {
+							if (!empty($active_code) && $active_code !== '0') {
+								$can_show_add_participant = true;
 							}
-							?>
+						} else {
+							$can_show_add_participant = (!empty($active_code) && $active_code !== '0');
+						}
+						?>
 
-							<center>
+						<?php if ($can_show_add_participant): ?>
+							<?php if ((!isset($is_edit) || $is_edit != 'no') && (!isset($school_details[0]['is_finalize']) || $school_details[0]['is_finalize'] != 'Y')): ?>
+								<button type="button" class="btn btn-success shadow-sm rounded-3 px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2" data-bs-toggle="modal"
+									data-bs-target="#participantModal" onclick="clearForm()" id="addParticipantBtn">
+									<i class="bi bi-person-plus-fill fs-6"></i> Add Participant
+								</button>
+							<?php else: ?>
+								<span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill fs-7 fw-semibold d-inline-flex align-items-center gap-1 shadow-2xs">
+									<i class="bi bi-lock-fill"></i> Registration Finalized & Locked
+								</span>
+							<?php endif; ?>
+						<?php endif; ?>
 					</div>
 				</div>
-
-				</table>
 			</div>
 		</div>
 	</div>
-</div>
-</div>
 
+	<!-- School Details Section (Only for Admins: IT Master, State Admin, District Admin, Sub District Admin) -->
+	<?php if (!empty($is_admin)): ?>
+	<?php
+	$show_school_details_initial = empty($active_code) && !empty($initial_show_school_details);
+	?>
+	<div class="row justify-content-center mb-4" id="schoolDetailsSection" style="display: <?php echo $show_school_details_initial ? 'block' : 'none'; ?>;">
+		<div class="col-12">
+			<div class="card shadow-sm border-0 rounded-4 overflow-hidden" style="border: 1px solid #e2e8f0 !important;">
+				
+				<div class="card-header bg-white py-3 px-4 d-flex flex-wrap align-items-center justify-content-between gap-2" style="background: linear-gradient(135deg, #f8fafc, #ffffff) !important; border-bottom: 1px solid #edf2f7 !important;">
+					<div class="d-flex align-items-center gap-2">
+						<i class="bi bi-mortarboard-fill text-primary fs-5"></i>
+						<h5 class="fw-bold mb-0 text-dark">School Details & Institutional Profile</h5>
+					</div>
+					<div class="d-flex align-items-center gap-2">
+						<?php if (!empty($active_code)): ?>
+							<span class="badge bg-primary px-3 py-2 fs-7 rounded-pill">
+								<i class="bi bi-hash me-1"></i>School Code: <?php echo esc($active_code); ?>
+							</span>
+						<?php endif; ?>
+						<button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="hideSchoolDetailsSection()">
+							<i class="bi bi-chevron-up me-1"></i> Collapse
+						</button>
+					</div>
+				</div>
 
-<input type="hidden" name="hidSchoolId" id="hidSchoolId" value="
-<?php echo (@$school_details[0]['school_code']) ?
-	@$school_details[0]['school_code'] : @$this->input->post('hidSchoolId'); ?>">
+				<div class="card-body p-4">
+					<?php echo form_open('schools/registration/update', array('id' => 'formSchool')); ?>
+					<input type="hidden" name="hidTeachers" id="hidTeachers" value="<?php echo (!empty($school_details[0]['teachers'])) ? count(array_filter(explode('#@#', $school_details[0]['teachers']))) : 1; ?>">
+					<input type="hidden" name="hidSchoolId" id="formSchoolHidSchoolId" value="<?php echo esc($active_code); ?>">
+
+					<!-- School Search & Code Input Bar -->
+					<?php
+					$schools_json = [];
+					if (!empty($subdistrict_schools)) {
+						foreach ($subdistrict_schools as $sc_code => $sc_name) {
+							if (!empty($sc_code) && $sc_code !== '0' && $sc_code !== 0) {
+								$schools_json[] = [
+									'code' => (string)$sc_code,
+									'name' => (string)$sc_name
+								];
+							}
+						}
+					}
+					?>
+					<script>
+						var SUBDISTRICT_SCHOOLS_LIST = <?php echo json_encode($schools_json); ?>;
+					</script>
+					<div class="p-3 mb-4 rounded-4 shadow-2xs" style="background: linear-gradient(135deg, #f8fafc, #edf2f7); border: 1px solid #e2e8f0;">
+						<div class="row align-items-center g-3">
+							<div class="col-lg-3 col-md-4 col-12">
+								<label for="txtSearchSchool" class="form-label fw-bold text-dark small text-uppercase mb-0 d-flex align-items-center gap-2">
+									<i class="bi bi-search text-primary fs-6"></i> Search School / Code:
+								</label>
+							</div>
+							<div class="col-lg-7 col-md-8 col-12">
+								<div class="input-group">
+									<span class="input-group-text bg-white border-end-0 text-muted">
+										<i class="bi bi-buildings"></i>
+									</span>
+									<input type="text" list="schoolOptionsList" id="txtSearchSchool" class="form-control border-start-0 shadow-none fw-semibold" placeholder="Enter School Code or Type School Name to search..." value="<?php echo (!empty($active_code)) ? esc($active_code . (!empty($school_details[0]['school_name']) ? ' - ' . $school_details[0]['school_name'] : '')) : ''; ?>" oninput="handleSchoolSearchInput(this.value)" onchange="handleSchoolSearchInput(this.value)" onkeypress="if(event.key === 'Enter'){ event.preventDefault(); loadSchoolFromSearch(); }">
+									<datalist id="schoolOptionsList">
+										<?php if (!empty($subdistrict_schools)): ?>
+											<?php foreach ($subdistrict_schools as $sc_code => $sc_name): ?>
+												<?php if (!empty($sc_code) && $sc_code !== '0' && $sc_code !== 0): ?>
+													<option value="<?php echo esc($sc_name); ?>"><?php echo esc($sc_code); ?></option>
+												<?php endif; ?>
+											<?php endforeach; ?>
+										<?php endif; ?>
+									</datalist>
+									<button type="button" id="btnLoadSchool" class="btn btn-primary px-3 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm" onclick="loadSchoolFromSearch()">
+										<i class="bi bi-arrow-repeat"></i> Load School
+									</button>
+								</div>
+							</div>
+							<div class="col-lg-2 col-md-12 col-12 text-lg-end">
+								<?php if (!empty($active_code)): ?>
+									<span id="activeSchoolBadge" class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill fs-7 fw-semibold">
+										<i class="bi bi-check-circle-fill me-1"></i>Active: <?php echo esc($active_code); ?>
+									</span>
+								<?php else: ?>
+									<span id="activeSchoolBadge" class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-2 rounded-pill fs-7">
+										No School Loaded
+									</span>
+								<?php endif; ?>
+							</div>
+						</div>
+					</div>
+
+					<!-- Basic School Information -->
+					<div class="row mb-3 g-3">
+						<div class="col-md-6">
+							<label for="txtSchoolName" class="form-label fw-bold text-muted small text-uppercase">School Name</label>
+							<input type="text" id="txtSchoolName" name="txtSchoolName" class="form-control bg-light fw-semibold" value="<?php echo esc(@$school_details[0]['school_name'] ?? 'Not Selected'); ?>" readonly>
+						</div>
+						<div class="col-md-6">
+							<label for="txtSchoolType" class="form-label fw-bold text-muted small text-uppercase">School Type / Management</label>
+							<input type="text" id="txtSchoolType" name="txtSchoolType" class="form-control bg-light" value="<?php
+								$st = @$school_details[0]['school_type'] ?? '';
+								if ($st === 'G') echo 'Government (Govt)';
+								else if ($st === 'A') echo 'Aided';
+								else if ($st === 'U') echo 'Unaided / Private';
+								else echo esc($st ?: '-');
+							?>" readonly>
+						</div>
+						<div class="col-md-6">
+							<label for="txtSchoolEmail" class="form-label fw-bold text-muted small text-uppercase">Official E-mail</label>
+							<input type="email" name="txtSchoolEmail" id="txtSchoolEmail" class="form-control" placeholder="Enter school email" value="<?php echo esc(@$school_details[0]['school_email'] ?? ''); ?>">
+						</div>
+						<div class="col-md-6">
+							<label for="txtSchoolPhone" class="form-label fw-bold text-muted small text-uppercase">School Phone Number</label>
+							<input type="text" name="txtSchoolPhone" id="txtSchoolPhone" class="form-control" placeholder="Enter school phone" maxlength="11" value="<?php echo esc(@$school_details[0]['school_phone'] ?? ''); ?>" onkeypress="return numbersonly(this, event, false);">
+						</div>
+					</div>
+
+					<!-- Classes / Standards Range -->
+					<div class="border-top pt-3 mb-3">
+						<h6 class="fw-bold text-dark mb-3"><i class="bi bi-diagram-3-fill text-primary me-2"></i>Classes Offered (Standards Range)</h6>
+						<div class="row g-3">
+							<div class="col-md-6">
+								<label for="txtStandardFrom" class="form-label fw-bold text-muted small text-uppercase">Standard From <span class="text-danger">*</span></label>
+								<?php
+								$std_from_opts = array(0 => '-- Select Standard From --', 1 => '1st Standard', 5 => '5th Standard', 8 => '8th Standard', 11 => '11th Standard');
+								echo form_dropdown("txtStandardFrom", $std_from_opts, @$school_details[0]['class_start'], 'id="txtStandardFrom" class="form-select" onChange="javascript:fncShowHideStd()"');
+								?>
+							</div>
+							<div class="col-md-6">
+								<label for="txtStandardTo" class="form-label fw-bold text-muted small text-uppercase">Standard To <span class="text-danger">*</span></label>
+								<?php
+								$std_to_opts = array(0 => '-- Select Standard To --', 4 => '4th Standard', 5 => '5th Standard', 7 => '7th Standard', 10 => '10th Standard', 12 => '12th Standard');
+								echo form_dropdown("txtStandardTo", $std_to_opts, @$school_details[0]['class_end'], 'id="txtStandardTo" class="form-select" onChange="javascript:fncShowHideStd()"');
+								?>
+							</div>
+						</div>
+					</div>
+
+					<!-- Administration Details -->
+					<div class="border-top pt-3 mb-3">
+						<h6 class="fw-bold text-dark mb-3"><i class="bi bi-person-badge-fill text-primary me-2"></i>School Administration</h6>
+						<div class="row g-3">
+							<div class="col-md-6">
+								<label for="txtPrincipal" class="form-label fw-bold text-muted small text-uppercase">Principal Name</label>
+								<input type="text" name="txtPrincipal" id="txtPrincipal" class="form-control" placeholder="Enter principal name" value="<?php echo esc(@$school_details[0]['principal_name'] ?? ''); ?>" onkeyup="this.value=this.value.toUpperCase();">
+							</div>
+							<div class="col-md-6">
+								<label for="txtPrincipalPhone" class="form-label fw-bold text-muted small text-uppercase">Principal Phone</label>
+								<input type="text" name="txtPrincipalPhone" id="txtPrincipalPhone" class="form-control" placeholder="10-digit mobile number" maxlength="11" value="<?php echo esc(@$school_details[0]['principal_phone'] ?? ''); ?>" onkeypress="return numbersonly(this, event, false);">
+							</div>
+							<div class="col-md-6">
+								<label for="txtHeadmaster" class="form-label fw-bold text-muted small text-uppercase">Headmaster (HM) Name</label>
+								<input type="text" name="txtHeadmaster" id="txtHeadmaster" class="form-control" placeholder="Enter headmaster name" value="<?php echo esc(@$school_details[0]['hm_name'] ?? ''); ?>" onkeyup="this.value=this.value.toUpperCase();">
+							</div>
+							<div class="col-md-6">
+								<label for="txtHeadmasterPhone" class="form-label fw-bold text-muted small text-uppercase">Headmaster (HM) Phone</label>
+								<input type="text" name="txtHeadmasterPhone" id="txtHeadmasterPhone" class="form-control" placeholder="10-digit mobile number" maxlength="11" value="<?php echo esc(@$school_details[0]['hm_phone'] ?? ''); ?>" onkeypress="return numbersonly(this, event, false);">
+							</div>
+						</div>
+					</div>
+
+					<!-- Team Managers / Escorting Teachers -->
+					<div class="border-top pt-3 mb-3">
+						<h6 class="fw-bold text-dark mb-3"><i class="bi bi-person-lines-fill text-primary me-2"></i>Team Managers (Escorting Teachers)</h6>
+						<div id="teachersRow">
+							<?php
+							$teachers_str = @$school_details[0]['teachers'] ?? '';
+							$teacher_pairs = !empty($teachers_str) ? array_filter(explode('#@#', $teachers_str)) : [];
+							$t_idx = 1;
+							if (!empty($teacher_pairs)) {
+								foreach ($teacher_pairs as $t_pair) {
+									$t_info = explode('#$#', $t_pair);
+									$t_name = $t_info[0] ?? '';
+									$t_phone = $t_info[1] ?? '';
+							?>
+									<div class="row mb-2 teachersTextBox" id="teacherRow_<?php echo $t_idx; ?>">
+										<div class="col-md-6 mb-2">
+											<label class="form-label fw-bold text-muted small text-uppercase">Team Manager <?php echo $t_idx; ?></label>
+											<input type="text" name="txtTeacher_<?php echo $t_idx; ?>" id="txtTeacher_<?php echo $t_idx; ?>" class="form-control" placeholder="Enter teacher name" value="<?php echo esc($t_name); ?>" onkeyup="this.value=this.value.toUpperCase();">
+										</div>
+										<div class="col-md-6 mb-2">
+											<label class="form-label fw-bold text-muted small text-uppercase">Phone</label>
+											<div class="input-group">
+												<input type="text" name="txtPhone_<?php echo $t_idx; ?>" id="txtPhone_<?php echo $t_idx; ?>" class="form-control" placeholder="Phone number" maxlength="11" value="<?php echo esc($t_phone); ?>" onkeypress="return numbersonly(this, event, false);">
+												<?php if ($t_idx > 1): ?>
+													<button type="button" class="btn btn-outline-danger" onclick="this.closest('.teachersTextBox').remove();" title="Remove">✕</button>
+												<?php endif; ?>
+											</div>
+										</div>
+									</div>
+							<?php
+									$t_idx++;
+								}
+							} else {
+							?>
+								<div class="row mb-2 teachersTextBox" id="teacherRow_1">
+									<div class="col-md-6 mb-2">
+										<label class="form-label fw-bold text-muted small text-uppercase">Team Manager 1</label>
+										<input type="text" name="txtTeacher_1" id="txtTeacher_1" class="form-control" placeholder="Enter teacher name" value="" onkeyup="this.value=this.value.toUpperCase();">
+									</div>
+									<div class="col-md-6 mb-2">
+										<label class="form-label fw-bold text-muted small text-uppercase">Phone</label>
+										<input type="text" name="txtPhone_1" id="txtPhone_1" class="form-control" placeholder="Phone number" maxlength="11" value="" onkeypress="return numbersonly(this, event, false);">
+									</div>
+								</div>
+							<?php } ?>
+							<div id="teachersAddBtnDiv" class="mt-2 mb-3">
+								<button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="addteacher();">
+									<i class="bi bi-plus-circle me-1"></i> Add Another Team Manager
+								</button>
+							</div>
+						</div>
+					</div>
+
+					<!-- Total Number of Students -->
+					<div class="border-top pt-3 mb-4">
+						<h6 class="fw-bold text-dark mb-3"><i class="bi bi-people-fill text-primary me-2"></i>Student Strength Statistics</h6>
+						<div class="row g-2 align-items-center">
+							<div class="col-6 col-md-2" id="divLP" style="display: <?php echo (!empty($school_details[0]['strength_lp']) || (isset($school_details[0]['class_start']) && @$school_details[0]['class_start'] <= 4)) ? 'block' : 'none'; ?>;">
+								<label class="form-label small fw-bold text-muted mb-1">LP</label>
+								<input type="text" name="txtTotalLP" id="txtTotalLP" class="form-control form-control-sm" maxlength="5" value="<?php echo esc(@$school_details[0]['strength_lp'] ?? ''); ?>" onkeypress="return numbersonly(this, event, false);" onkeyup="addTotal();">
+							</div>
+							<div class="col-6 col-md-2" id="divUP" style="display: <?php echo (!empty($school_details[0]['strength_up']) || (isset($school_details[0]['class_start']) && @$school_details[0]['class_start'] <= 7 && @$school_details[0]['class_end'] >= 5)) ? 'block' : 'none'; ?>;">
+								<label class="form-label small fw-bold text-muted mb-1">UP</label>
+								<input type="text" name="txtTotalUP" id="txtTotalUP" class="form-control form-control-sm" maxlength="5" value="<?php echo esc(@$school_details[0]['strength_up'] ?? ''); ?>" onkeypress="return numbersonly(this, event, false);" onkeyup="addTotal();">
+							</div>
+							<div class="col-6 col-md-2" id="divHS" style="display: <?php echo (!empty($school_details[0]['strength_hs']) || (isset($school_details[0]['class_start']) && @$school_details[0]['class_start'] <= 10 && @$school_details[0]['class_end'] >= 8)) ? 'block' : 'none'; ?>;">
+								<label class="form-label small fw-bold text-muted mb-1">HS</label>
+								<input type="text" name="txtTotalHS" id="txtTotalHS" class="form-control form-control-sm" maxlength="5" value="<?php echo esc(@$school_details[0]['strength_hs'] ?? ''); ?>" onkeypress="return numbersonly(this, event, false);" onkeyup="addTotal();">
+							</div>
+							<div class="col-6 col-md-2" id="divHSS" style="display: <?php echo (!empty($school_details[0]['strength_hss']) || (isset($school_details[0]['class_end']) && @$school_details[0]['class_end'] >= 11)) ? 'block' : 'none'; ?>;">
+								<label class="form-label small fw-bold text-muted mb-1">HSS</label>
+								<input type="text" name="txtTotalHSS" id="txtTotalHSS" class="form-control form-control-sm" maxlength="5" value="<?php echo esc(@$school_details[0]['strength_hss'] ?? ''); ?>" onkeypress="return numbersonly(this, event, false);" onkeyup="addTotal();">
+							</div>
+							<div class="col-6 col-md-2" id="divVHSC" style="display: <?php echo (!empty($school_details[0]['strength_vhss'])) ? 'block' : 'none'; ?>;">
+								<label class="form-label small fw-bold text-muted mb-1">VHSE</label>
+								<input type="text" name="txtTotalVHSS" id="txtTotalVHSS" class="form-control form-control-sm" maxlength="5" value="<?php echo esc(@$school_details[0]['strength_vhss'] ?? ''); ?>" onkeypress="return numbersonly(this, event, false);" onkeyup="addTotal();">
+							</div>
+							<div class="col-6 col-md-2">
+								<label class="form-label small fw-bold text-dark mb-1">Total Strength</label>
+								<input type="text" name="txtTotal" id="txtTotal" class="form-control form-control-sm bg-light fw-bold" readonly value="<?php echo esc(@$school_details[0]['total_strength'] ?? ''); ?>">
+							</div>
+						</div>
+					</div>
+
+					<!-- Form Action Buttons -->
+					<div class="d-flex justify-content-end align-items-center gap-2 pt-3 border-top">
+						<button type="button" class="btn btn-light border rounded-pill px-4" onclick="hideSchoolDetailsSection()">
+							<i class="bi bi-arrow-left me-1"></i> Close / View Participants
+						</button>
+						<button type="button" id="btnSaveSchoolDetails" class="btn btn-primary rounded-pill px-4 fw-semibold" style="background: linear-gradient(135deg, #4338ca 0%, #3b82f6 100%); border: none;" onclick="saveSchoolDetailsWithSpinner()">
+							<i class="bi bi-check-circle-fill me-1"></i> Save School Details
+						</button>
+					</div>
+
+					<?php echo form_close(); ?>
+				</div>
+
+			</div>
+		</div>
+	</div>
+	<?php endif; ?>
+
 <?php
-echo form_close(); ?>
-
-<?php
-echo "<div class='clear_both'></div>";
 echo form_open('schools/registration/save_participant', array('id' => 'formParticipant', 'enctype' => 'multipart/form-data'));
 ?>
-<input type="hidden" name="hidSchoolId" id="hidSchoolId"
-	value="<?php echo (@$school_details[0]['school_code']) ? @$school_details[0]['school_code'] : @$this->input->post('hidSchoolId'); ?>">
+<input type="hidden" name="hidSchoolId" id="hidSchoolId" value="<?php echo esc($active_code); ?>">
 <input type="hidden" name="hidADNO" id="hidADNO" value="">
 <?php
 if (isset($is_edit) and $is_edit != 'no') {
 	?>
 
-
-
 	<!-- Participant Modal -->
 	<div class="modal fade" id="participantModal" tabindex="-1" aria-labelledby="participantModalLabel" aria-hidden="true"
 		data-bs-backdrop="static" data-bs-keyboard="false">
-		<div class="modal-dialog modal-xl">
+		<div class="modal-dialog modal-xl modal-dialog-scrollable">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title" id="participantModalLabel">Add Participant</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-						onclick="forceRemoveModalBackdrop()">X</button>
+					<h5 class="modal-title text-white" id="participantModalLabel">Add Participant</h5>
+					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"
+						onclick="forceRemoveModalBackdrop()"></button>
 				</div>
-				<div class="modal-body">
+				<div class="modal-body" style="overflow-y: auto !important; max-height: 80vh;">
 					<!-- Two Column Layout: Left (col-8) for inputs, Right (col-4) for class-based items -->
 					<div class="row">
-						<!-- Left Column: Participant Details (col-8) -->
+						<!-- Left Column: Participant Details (col-md-8) -->
 						<div class="col-md-8">
 							<div class="card border-0">
-								<div class="card-body">
-									<h6 class="card-title mb-3">Participant Details</h6>
+								<div class="card-body p-2">
+									<h6 class="card-title fw-bold text-primary mb-3">Participant Details</h6>
 
-									<!-- Basic Information -->
+									<!-- Row 1: Admission No. and Name (2 per row) -->
 									<div class="row mb-3">
-										<div class="col-md-6">
-											<label for="txtADNO" class="form-label">Admission No.</label>
+										<div class="col-md-6 mb-2">
+											<label for="txtADNO" class="form-label fw-bold text-muted small text-uppercase">Admission No. <span class="text-danger">*</span></label>
 											<?php echo form_input(
 												"txtADNO",
 												'',
-												'class="form-control" id="txtADNO" maxlength="6" onkeypress="javascript:this.value=this.value.toUpperCase();"'
+												'class="form-control" id="txtADNO" maxlength="6" placeholder="Enter admission number" onkeyup="javascript:this.value=this.value.toUpperCase();"'
 											); ?>
 										</div>
-										<div class="col-md-6">
-											<label for="txtParticipantName" class="form-label">Name</label>
+										<div class="col-md-6 mb-2">
+											<label for="txtParticipantName" class="form-label fw-bold text-muted small text-uppercase">Name <span class="text-danger">*</span></label>
 											<?php echo form_input(
 												"txtParticipantName",
 												'',
-												'class="form-control" id="txtParticipantName" onkeyup="javascript:this.value=this.value.toUpperCase();"'
+												'class="form-control" id="txtParticipantName" placeholder="Enter student name" onkeyup="javascript:this.value=this.value.toUpperCase();"'
 											); ?>
 										</div>
 									</div>
 
+									<!-- Row 2: Class and Gender (2 per row) -->
 									<div class="row mb-3">
-										<div class="col-md-6">
-											<label for="txtClass" class="form-label">Class</label>
+										<div class="col-md-6 mb-2">
+											<label for="txtClass" class="form-label fw-bold text-muted small text-uppercase">Class <span class="text-danger">*</span></label>
 											<?php
-											$class_array = array('' => 'Select Class');
-											for ($i = @$school_details[0]['class_start']; $i <= @$school_details[0]['class_end']; $i++) {
+											$class_array = array('' => '-- Select Class --');
+											$start = (int)(@$school_details[0]['class_start'] ?: 1);
+											$end = (int)(@$school_details[0]['class_end'] ?: 12);
+											for ($i = $start; $i <= $end; $i++) {
 												$class_array[$i] = $i;
 											}
 											echo form_dropdown(
 												"txtClass",
 												$class_array,
 												'',
-												'id="txtClass" class="form-control" onchange="loadItemsByClass()"'
+												'id="txtClass" class="form-select" onchange="loadItemsByClass()"'
 											); ?>
 										</div>
-										<div class="col-md-6">
-											<label for="txtGender" class="form-label">Gender</label>
+										<div class="col-md-6 mb-2">
+											<label for="txtGender" class="form-label fw-bold text-muted small text-uppercase">Gender <span class="text-danger">*</span></label>
 											<?php echo form_dropdown(
 												"txtGender",
-												array('' => 'Select Gender') + array('B' => 'Boy', 'G' => 'Girl'),
+												array('' => '-- Select Gender --', 'B' => 'Boy', 'G' => 'Girl'),
 												'',
-												'class="form-control" id="txtGender" onchange="loadItemsByClass()"'
+												'class="form-select" id="txtGender" onchange="loadItemsByClass()"'
 											); ?>
 										</div>
 									</div>
 
-									<!-- Item Codes Section -->
-									<div class="mb-3">
-										<label class="form-label">Item Codes</label>
-										<div class="teachersTextBox">
-											<div class="row" id="itemCodesContainer">
+									<!-- Row 3: Item Codes (Dedicated Row) -->
+									<div class="row mb-3">
+										<div class="col-12">
+											<label class="form-label fw-bold text-muted small text-uppercase mb-1">Item Codes (Max 5)</label>
+											<div class="row g-2" id="itemCodesContainer">
 												<?php
 												for ($i = 1; $i <= 5; $i++) {
-													echo '<div class="col-sm-6 col-xl-2 col-md-4 mb-2">';
-													echo '<div class="input-group">';
-													echo form_input("txtItemCode_" . $i, '', 'class="form-control item-code-input" id="txtItemCode_' . $i . '" onkeypress="javascript:return numbersonly(this, event, false);" onKeyUp="javascript:change_text_max_to_focus(\'txtItemCode_' . $i . '\',\'txtItemCode_' . ($i + 1) . '\',this);" maxlength="4" placeholder=""');
-													//echo '<button class="btn btn-outline-secondary btn-sm select-item-btn" type="button" data-input="txtItemCode_' . $i . '">Select</button>';
+													echo '<div class="col-4 mb-2">';
+													echo '<div class="position-relative">';
+													echo form_input("txtItemCode_" . $i, '', 'class="form-control item-code-input text-center fw-bold pe-4" id="txtItemCode_' . $i . '" onkeypress="javascript:return numbersonly(this, event, false);" onKeyUp="javascript:change_text_max_to_focus(\'txtItemCode_' . $i . '\',\'txtItemCode_' . ($i + 1) . '\',this); checkItemTypeIcon(' . $i . ');" oninput="checkItemTypeIcon(' . $i . ');" onchange="validateItemCodeFinal(' . $i . ', false);" onblur="validateItemCodeFinal(' . $i . ', false);" maxlength="4" placeholder="Item ' . $i . '"');
+													echo '<span id="itemTypeIcon_' . $i . '" class="position-absolute top-50 end-0 translate-middle-y me-2 d-flex align-items-center" style="display: none; pointer-events: none; z-index: 5;"></span>';
 													echo '</div>';
-													echo '<div class="item-details" id="itemDetails_' . $i . '" style="display: none; margin-top: 5px; padding: 5px; background-color: #f8f9fa; border-radius: 4px;">';
-													echo '<small class="text-muted" id="itemName_' . $i . '"></small>';
+													echo '<div class="item-details" id="itemDetails_' . $i . '" style="display: none; margin-top: 3px; padding: 2px 4px; background-color: #f8f9fa; border-radius: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">';
+													echo '<small class="text-muted" id="itemName_' . $i . '" style="font-size: 0.65rem;" title=""></small>';
 													echo '</div>';
 													echo '</div>';
 												}
@@ -448,30 +440,24 @@ if (isset($is_edit) and $is_edit != 'no') {
 										</div>
 									</div>
 
-
-
-									<div class="mb-3">
-										<div class="mb-2">
-											<!-- <input class="form-check-input" type="checkbox" id="enablePinnanyCodes"> -->
-											<!-- <label class="form-check-label" for="enablePinnanyCodes"> -->
-												Pinnany Codes
-											<!-- </label> -->
-										</div>
-
-										<div class="teachersTextBox">
-											<div class="row" id="pinnanyCodesContainer">
+									<!-- Row 4: Pinnany Codes (Next Separate Row - 3 per row) -->
+									<div class="row mb-3">
+										<div class="col-12">
+											<label class="form-label fw-bold text-muted small text-uppercase mb-1">Pinnany Codes (Max 3)</label>
+											<div class="row g-2" id="pinnanyCodesContainer">
 												<?php
 												for ($i = 1; $i <= 3; $i++) {
-													echo '<div class="col-sm-4 col-xl-2 col-md-4 mb-2">';
-													echo '<div class="input-group">';
+													echo '<div class="col-4 mb-2">';
+													echo '<div class="position-relative">';
 													echo form_input(
 														"txtPinnanyCode_" . $i,
 														'',
-														'class="form-control pinnany-code-input" id="txtPinnanyCode_' . $i . '" onKeyUp="javascript:change_text_max_to_focus(\'txtPinnanyCode_' . $i . '\',\'txtPinnanyCode_' . ($i + 1) . '\',this);" maxlength="4" placeholder="" '
+														'class="form-control pinnany-code-input text-center fw-bold pe-4" id="txtPinnanyCode_' . $i . '" onkeypress="javascript:return numbersonly(this, event, false);" onKeyUp="javascript:change_text_max_to_focus(\'txtPinnanyCode_' . $i . '\',\'txtPinnanyCode_' . ($i + 1) . '\',this); checkPinnanyTypeIcon(' . $i . ');" oninput="checkPinnanyTypeIcon(' . $i . ');" onchange="validateItemCodeFinal(' . $i . ', true);" onblur="validateItemCodeFinal(' . $i . ', true);" maxlength="4" placeholder="Pinnany ' . $i . '"'
 													);
+													echo '<span id="pinnanyTypeIcon_' . $i . '" class="position-absolute top-50 end-0 translate-middle-y me-2 d-flex align-items-center" style="display: none; pointer-events: none; z-index: 5;"></span>';
 													echo '</div>';
-													echo '<div class="pinnany-details" id="pinnanyDetails_' . $i . '" style="display: none; margin-top: 5px; padding: 5px; background-color: #f8f9fa; border-radius: 4px;">';
-													echo '<small class="text-muted" id="pinnanyName_' . $i . '"></small>';
+													echo '<div class="pinnany-details" id="pinnanyDetails_' . $i . '" style="display: none; margin-top: 3px; padding: 2px 4px; background-color: #f8f9fa; border-radius: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">';
+													echo '<small class="text-muted" id="pinnanyName_' . $i . '" style="font-size: 0.65rem;" title=""></small>';
 													echo '</div>';
 													echo '</div>';
 												}
@@ -480,37 +466,41 @@ if (isset($is_edit) and $is_edit != 'no') {
 										</div>
 									</div>
 
-									<!-- Photo Upload -->
-									<div class="mb-3">
-										<label for="userfile" class="form-label">Photo Upload</label>
-										<?php echo form_upload("userfile", '', 'class="form-control" id="userfile" accept="image/*" onchange="previewPhoto(this)"'); ?>
-										<div id="photoPreviewContainer" style="margin-top: 10px;">
-											<div id="photoPreview" class="text-center">
-												<img id="currentPhoto" src="" alt="" class="img-thumbnail"
-													style="max-width: 150px; max-height: 150px; display: none;" />
-												<div id="noPhotoMessage" class="text-muted">No photo uploaded</div>
-												<button type="button" id="removePhotoBtn"
-													class="btn btn-sm btn-outline-danger mt-2"
-													onclick="removeCurrentPhoto()" style="display: none;">Remove
-													Photo</button>
+									<!-- Row 5: Photo Upload (Preview 90x90) -->
+									<div class="row align-items-center g-3 mb-2">
+										<div class="col-md-8">
+											<label for="userfile" class="form-label fw-bold text-muted small text-uppercase">Photo Upload</label>
+											<?php echo form_upload("userfile", '', 'class="form-control" id="userfile" accept="image/*" onchange="previewPhoto(this)"'); ?>
+											<small class="text-muted d-block mt-1">Allowed formats: JPG, PNG, GIF (Max size: 1MB)</small>
+										</div>
+										<div class="col-md-4 text-center">
+											<label class="form-label fw-bold text-muted small text-uppercase d-block">Photo Preview</label>
+											<div id="photoPreview" class="d-flex align-items-center justify-content-center border rounded shadow-sm mx-auto" style="width: 90px; height: 90px; background-color: #f8f9fa; overflow: hidden;">
+												<img id="currentPhoto" src="" alt="Photo" class="img-thumbnail p-0"
+													style="width: 90px; height: 90px; object-fit: cover; display: none;" />
+												<div id="noPhotoMessage" class="text-muted" style="font-size: 0.75rem;">No photo</div>
 											</div>
 										</div>
 									</div>
+
 								</div>
 							</div>
 						</div>
 
-						<!-- Right Column: Class-based Items (col-4) -->
-						<div class="col-md-4">
-							<div class="card border-0">
-								<div class="card-body">
-									<h6 class="card-title mb-3">Available Items</h6>
-									<div id="availableItemsContainer" style="max-height: 600px; overflow-y: auto;">
-										<div class="text-center text-muted" id="noItemsMessage">
-											<p>Please select a class and gender to view available items.</p>
+						<!-- Right Column: Class-based Items (col-md-4) -->
+						<div class="col-md-4 d-flex flex-column">
+							<div class="card border-0 bg-light rounded-3 shadow-2xs w-100 flex-grow-1 h-100">
+								<div class="card-body p-3 d-flex flex-column">
+									<h6 class="card-title fw-bold text-primary mb-2 d-flex align-items-center gap-1">
+										<i class="bi bi-grid-fill fs-6"></i> Available Items
+									</h6>
+									<div id="availableItemsContainer" class="flex-grow-1 w-100" style="min-height: 380px; height: 100%; overflow-y: auto;">
+										<div class="text-center text-muted py-4" id="noItemsMessage">
+											<i class="bi bi-info-circle fs-4 text-secondary mb-2 d-block"></i>
+											<p style="font-size: 0.85rem;" class="mb-0">Please select a class to view available items.</p>
 										</div>
 										<div id="itemsListContainer" style="display: none;">
-											<!-- Items will be loaded here dynamically -->
+											<!-- Items loaded here dynamically -->
 										</div>
 									</div>
 								</div>
@@ -518,13 +508,7 @@ if (isset($is_edit) and $is_edit != 'no') {
 						</div>
 					</div>
 
-					<!-- Hidden form fields for bank details -->
-					<div style="width:0px;height:0px;overflow:hidden;">
-						<?php echo form_dropdown("txtBank", $bank_details, '', 'id="txtBank" class="input-xlarge"'); ?>
-						<?php echo form_input("txtBranch", '', 'class="input-xlarge" id="txtBranch" onkeyup="javascript:this.value=this.value.toUpperCase();"'); ?>
-						<?php echo form_input("txtAccNo", '', 'class="input-xlarge" id="txtAccNo" onkeypress="javascript:return numbersonly(this, event, false);" onCopy="return false" onDrag="return false" onDrop="return false" onPaste="return false" minlength="9"'); ?>
-						<?php echo form_input("txtIfscCode", '', 'class="input-xlarge" id="txtIfscCode" onkeyup="javascript:this.value=this.value.toUpperCase();" maxlength="11"'); ?>
-					</div>
+
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
@@ -538,6 +522,30 @@ if (isset($is_edit) and $is_edit != 'no') {
 
 
 	<style>
+		@keyframes toastSlideInRight {
+			from {
+				transform: translateX(100%);
+				opacity: 0;
+			}
+			to {
+				transform: translateX(0);
+				opacity: 1;
+			}
+		}
+		.toast-slide-in {
+			animation: toastSlideInRight 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+		}
+
+		.hover-item-card {
+			cursor: pointer;
+		}
+		.hover-item-card:hover {
+			border-color: #0d6efd !important;
+			background-color: #f0f7ff !important;
+			box-shadow: 0 4px 12px rgba(13, 110, 253, 0.12) !important;
+			transform: translateY(-1px);
+		}
+
 		/* Hide any remaining modal backdrops */
 		.modal-backdrop {
 			display: none !important;
@@ -547,7 +555,7 @@ if (isset($is_edit) and $is_edit != 'no') {
 
 		/* Ensure body doesn't have modal-open class issues */
 		body.modal-open {
-			overflow: auto !important;
+			overflow: hidden !important;
 			padding-right: 0 !important;
 		}
 
@@ -579,9 +587,9 @@ if (isset($is_edit) and $is_edit != 'no') {
 
 		/* Modal header styling */
 		.modal-header {
-			border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
 			border-radius: 12px 12px 0 0 !important;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+			background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%) !important;
 			color: white !important;
 			padding: 1rem 1.5rem !important;
 		}
@@ -592,32 +600,33 @@ if (isset($is_edit) and $is_edit != 'no') {
 		}
 
 		.modal-header .btn-close {
-			background: rgba(255, 255, 255, 0.2) !important;
+			background-color: rgba(255, 255, 255, 0.25) !important;
 			border-radius: 50% !important;
 			width: 32px !important;
 			height: 32px !important;
-			opacity: 0.8 !important;
+			opacity: 1 !important;
+			padding: 6px !important;
 			transition: all 0.2s ease !important;
 		}
 
 		.modal-header .btn-close:hover {
-			background: rgba(255, 255, 255, 0.3) !important;
+			background-color: rgba(255, 255, 255, 0.5) !important;
 			opacity: 1 !important;
-			transform: rotate(90deg) !important;
+			transform: scale(1.1) !important;
 		}
 
 		/* Modal body styling */
 		.modal-body {
-			padding: 2rem !important;
-			background: rgba(255, 255, 255, 0.95) !important;
+			padding: 1.5rem !important;
+			background: rgba(255, 255, 255, 0.98) !important;
 			border-radius: 0 0 12px 12px !important;
 		}
 
 		/* Modal footer styling */
 		.modal-footer {
-			border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
-			padding: 1.5rem 2rem !important;
-			background: rgba(248, 250, 252, 0.8) !important;
+			border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+			padding: 1.25rem 1.5rem !important;
+			background: #f8fafc !important;
 			border-radius: 0 0 12px 12px !important;
 		}
 
@@ -632,13 +641,13 @@ if (isset($is_edit) and $is_edit != 'no') {
 		}
 
 		.modal-footer .btn-primary {
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+			background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%) !important;
 			color: white !important;
 		}
 
 		.modal-footer .btn-primary:hover {
 			transform: translateY(-2px) !important;
-			box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+			box-shadow: 0 4px 12px rgba(13, 110, 253, 0.35) !important;
 		}
 
 		.modal-footer .btn-secondary {
@@ -648,7 +657,59 @@ if (isset($is_edit) and $is_edit != 'no') {
 
 		.modal-footer .btn-secondary:hover {
 			transform: translateY(-2px) !important;
-			box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4) !important;
+			box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3) !important;
+		}
+
+		/* Avatar & Participant styling */
+		.participant-avatar-img {
+			transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+			cursor: pointer;
+		}
+		.participant-avatar-img:hover {
+			transform: scale(1.3);
+			box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2) !important;
+			z-index: 10;
+		}
+
+		.custom-participant-table tbody tr {
+			transition: background-color 0.15s ease;
+			border-bottom: 1px solid #f1f5f9;
+		}
+		.custom-participant-table tbody tr:hover {
+			background-color: #f8fafc !important;
+		}
+
+		.shadow-2xs {
+			box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+		}
+
+		/* Modern Table Pagination Styles */
+		.pagination .page-item .page-link {
+			border-radius: 8px !important;
+			margin: 0 2px;
+			border: 1px solid #e2e8f0;
+			color: #475569;
+			font-weight: 500;
+			font-size: 0.85rem;
+			padding: 0.35rem 0.75rem;
+			transition: all 0.2s ease;
+		}
+		.pagination .page-item.active .page-link {
+			background: linear-gradient(135deg, #0d6efd, #0b5ed7) !important;
+			border-color: #0d6efd !important;
+			color: #ffffff !important;
+			box-shadow: 0 2px 6px rgba(13, 110, 253, 0.3) !important;
+		}
+		.pagination .page-item:not(.active):not(.disabled) .page-link:hover {
+			background-color: #f1f5f9 !important;
+			color: #0d6efd !important;
+			border-color: #cbd5e1;
+		}
+		.pagination .page-item.disabled .page-link {
+			background-color: #f8fafc !important;
+			color: #94a3b8 !important;
+			border-color: #e2e8f0 !important;
+			cursor: not-allowed;
 		}
 
 		/* Form control enhancements */
@@ -728,7 +789,87 @@ if (isset($is_edit) and $is_edit != 'no') {
 			height: 1rem !important;
 		}
 
+		#participantModal .modal-body {
+			padding: 0.75rem !important;
+			overflow-y: hidden !important;
+		}
+
+		#participantModal .card-body {
+			padding: 0.75rem !important;
+		}
+
+		#participantModal .form-control,
+		#participantModal .form-select {
+			font-size: 0.85rem !important;
+			padding: 0.35rem 0.65rem !important;
+		}
+
+		#participantModal .form-label {
+			font-size: 0.85rem !important;
+			margin-bottom: 0.25rem !important;
+		}
+
+		#participantModal .row.mb-3 {
+			margin-bottom: 0.75rem !important;
+		}
+
+		#participantModal .item-code-input,
+		#participantModal .pinnany-code-input {
+			font-size: 0.85rem !important;
+			padding: 0.35rem 0.5rem !important;
+			text-align: center !important;
+		}
+
+		#participantModal .input-group .btn {
+			padding: 0.35rem 0.65rem !important;
+			font-size: 0.85rem !important;
+		}
+
+		#participantModal .item-details,
+		#participantModal .pinnany-details {
+			min-height: 28px !important;
+			padding: 3px 6px !important;
+			font-size: 0.75rem !important;
+			line-height: 1.2 !important;
+		}
+
+		#availableItemsContainer {
+			max-height: 38vh !important;
+			overflow-y: auto !important;
+			padding-right: 5px !important;
+		}
+
 		/* Responsive adjustments */
+		@media (min-width: 1200px) {
+			#participantModal .modal-dialog {
+				max-width: 970px !important;
+				height: 90vh !important;
+				margin: 5vh auto !important;
+			}
+			#participantModal .modal-content {
+				height: 100% !important;
+				display: flex !important;
+				flex-direction: column !important;
+			}
+			#participantModal .modal-body {
+				flex: 1 1 auto !important;
+				overflow-y: hidden !important;
+			}
+			#participantModal .card {
+				height: 100% !important;
+			}
+			#participantModal .card-body {
+				height: 100% !important;
+				display: flex !important;
+				flex-direction: column !important;
+			}
+			#availableItemsContainer {
+				flex: 1 1 auto !important;
+				max-height: calc(90vh - 180px) !important;
+				overflow-y: auto !important;
+			}
+		}
+
 		@media (max-width: 1200px) {
 			.modal-xl {
 				max-width: 95% !important;
@@ -815,15 +956,15 @@ if (isset($is_edit) and $is_edit != 'no') {
 		}
 
 		.disabled-item {
-			background-color: #fff8f8 !important;
-			border: 2px solid #dc3545 !important;
-			opacity: 0.7 !important;
+			background-color: #f4faf4 !important;
+			border: 2px solid #28a745 !important;
+			opacity: 0.8 !important;
 			cursor: not-allowed !important;
 		}
 
 		.items-container {
-			max-height: 500px !important;
-			overflow-y: auto !important;
+			max-height: none !important;
+			overflow-y: visible !important;
 			padding: 5px !important;
 		}
 
@@ -876,54 +1017,599 @@ if (isset($is_edit) and $is_edit != 'no') {
 			document.body.style.overflow = '';
 			document.body.style.paddingRight = '';
 		};
+	</script>
 
-		window.loadItemsByClass = function() {
-			if (typeof $ === 'undefined') return;
-			var txtClass = $('#txtClass'), txtGender = $('#txtGender'), availableItemsContainer = $('#availableItemsContainer');
-			if (txtClass.length === 0 || txtGender.length === 0 || availableItemsContainer.length === 0) return;
-			var selectedClass = txtClass.val(), selectedGender = txtGender.val(), schoolCode = $('#hidSchoolId').val(), participantId = $('#hidADNO').val();
-			if (!selectedClass) { availableItemsContainer.html('<div class="text-center text-muted"><p>Please select a class to view available items.</p></div>'); return; }
-			availableItemsContainer.html('<div class="text-center"><div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div><p>Loading items...</p></div>');
-			$.ajax({ url: '<?php echo base_url(); ?>schools/registration/get_items_by_class', type: 'POST', data: { class: selectedClass, gender: selectedGender, school_code: schoolCode, participant_id: participantId }, dataType: 'json',
-				success: function (response) {
-					if (response.error) { availableItemsContainer.html('<div class="alert alert-danger"><p>' + response.error + '</p></div>'); return; }
-					var items = response.items || [], selectedItems = response.selected_items || [], itemsHtml = '';
-					if (items.length === 0) { itemsHtml = '<div class="text-center text-muted"><p>No items available.</p></div>'; }
-					else {
-						var groupedItems = {};
-						items.forEach(function (item) { if (!groupedItems[item.fest_name]) groupedItems[item.fest_name] = []; groupedItems[item.fest_name].push(item); });
-						itemsHtml = '<div class="items-container">';
-						for (var festName in groupedItems) { if (groupedItems.hasOwnProperty(festName)) {
-							itemsHtml += '<div class="festival-group mb-3"><h6 class="festival-title text-primary mb-2">' + festName + '</h6><div class="list-group">';
-							groupedItems[festName].forEach(function (item) {
-								var isSelected = selectedItems.includes(item.item_code), disabledClass = isSelected ? 'disabled-item' : 'available-item', cursor = isSelected ? 'not-allowed' : 'pointer';
-								var itemTypeBadge = item.item_type === 'G' ? '<span class="badge bg-primary">Group</span>' : '<span class="badge bg-success">Single</span>';
-								var genderBadge = item.gender === 'B' ? '<span class="badge bg-info">Boys</span>' : item.gender === 'G' ? '<span class="badge bg-warning">Girls</span>' : '<span class="badge bg-secondary">Common</span>';
-								itemsHtml += '<div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center item-selectable ' + disabledClass + '" data-item-code="' + item.item_code + '" data-item-name="' + item.item_name + '" data-item-type="' + item.item_type + '" style="cursor: ' + cursor + '; margin-bottom: 5px; border-radius: 8px; position: relative;">';
-								itemsHtml += '<div style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%);"><span style="color: ' + (isSelected ? '#dc3545' : '#28a745') + '; font-size: 12px;">●</span></div>';
-								itemsHtml += '<div style="margin-left: 20px;"><strong>' + item.item_code + '</strong> - ' + item.item_name + '<br><small class="text-muted">Festival: ' + item.fest_name + '</small></div>';
-								itemsHtml += '<div>' + itemTypeBadge + ' ' + genderBadge + (isSelected ? ' <span class="badge bg-danger">Selected</span>' : '') + '</div></div>';
-							});
-							itemsHtml += '</div></div>';
-						}}
-						itemsHtml += '</div>';
-					}
-					availableItemsContainer.html(itemsHtml);
-					$('.item-selectable.available-item').off('click').on('click', function () {
-						var itemCode = $(this).data('item-code'), itemName = $(this).data('item-name'), itemType = $(this).data('item-type');
-						if (!itemCode || !itemName) return;
-						var emptyInput = $('.item-code-input').filter(function () { return $(this).val() === ''; }).first();
-						if (emptyInput.length > 0) {
-							emptyInput.val(itemCode);
-							var fieldNumber = emptyInput.attr('id').replace('txtItemCode_', ''), detailDiv = $('#itemDetails_' + fieldNumber);
-							if (detailDiv.length > 0) { detailDiv.find('#itemName_' + fieldNumber).text(itemName + ' (' + itemType + ')'); detailDiv.show(); }
-						} else { alert('All item code fields are filled.'); }
-					});
-					$('.item-selectable.disabled-item').off('click').on('click', function () { alert('This item is already selected by another participant.'); });
-				},
-				error: function (xhr, status, error) { availableItemsContainer.html('<div class="alert alert-danger"><p>Error loading items.</p></div>'); }
+<?php
+$db = \Config\Database::connect();
+$raw_items = !empty($all_festival_items) ? $all_festival_items : [];
+if (empty($raw_items)) {
+	$raw_items = $db->table('item_master IM')
+		->select('IM.item_code, IM.item_name, IM.item_type, IM.gender as item_gender, IM.max_participants, IM.max_pinnani as max_pinnany, FM.fest_id, FM.fest_name, FM.class_start, FM.class_end')
+		->join('festival_master FM', 'IM.fest_id = FM.fest_id')
+		->orderBy('FM.fest_id', 'ASC')
+		->orderBy('IM.item_code', 'ASC')
+		->get()->getResultArray();
+}
+
+$target_sch = !empty($school_details[0]['school_code']) ? $school_details[0]['school_code'] : $active_code;
+$registered_school_items = [];
+if (!empty($target_sch)) {
+	$registered_school_items = $db->table('participant_item_details PD')
+		->select('PD.item_code, IM.item_type, IM.max_participants, PD.admn_no')
+		->join('item_master IM', 'IM.item_code = PD.item_code', 'left')
+		->where('PD.school_code', $target_sch)
+		->get()->getResultArray();
+}
+?>
+<script>
+window.allFestivalItems = <?php echo json_encode($raw_items); ?>;
+window.schoolRegisteredItems = <?php echo json_encode($registered_school_items); ?>;
+window.loadedItemsMap = {};
+
+if (Array.isArray(window.allFestivalItems)) {
+	window.allFestivalItems.forEach(function(item) {
+		item.gender = (item.gender || item.item_gender || 'C').toUpperCase();
+		item.item_gender = item.gender;
+		item.item_type = (item.item_type || 'S').toUpperCase();
+		item.max_participants = parseInt(item.max_participants, 10) || (item.item_type === 'G' ? 7 : 1);
+		item.max_pinnani = parseInt(item.max_pinnani || item.max_pinnany, 10) || 0;
+		item.fest_name = item.fest_name || 'General';
+		item.class_start = parseInt(item.class_start, 10) || 1;
+		item.class_end = parseInt(item.class_end, 10) || 12;
+
+		window.loadedItemsMap[item.item_code] = item;
+		window.loadedItemsMap[String(parseInt(item.item_code, 10))] = item;
+	});
+}
+
+window.getItemSchoolCount = function(itemCode, excludeAdmnNo) {
+	var count = 0;
+	if (Array.isArray(window.schoolRegisteredItems)) {
+		var codeNum = parseInt(itemCode, 10);
+		window.schoolRegisteredItems.forEach(function(reg) {
+			var isSameCode = (String(reg.item_code).trim() === String(itemCode).trim()) || (parseInt(reg.item_code, 10) === codeNum);
+			if (isSameCode) {
+				if (!excludeAdmnNo || String(reg.admn_no).trim() !== String(excludeAdmnNo).trim()) {
+					count++;
+				}
+			}
+		});
+	}
+	return count;
+};
+
+window.getSingleUserIconHtml = function() {
+	return '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="#198754" viewBox="0 0 16 16" title="Single Item"><path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/></svg>';
+};
+
+window.getGroupUserIconHtml = function() {
+	return '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#0d6efd" viewBox="0 0 16 16" title="Group Item"><path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"/></svg>';
+};
+
+window.updateItemCodeIcon = function(index, itemType, itemName) {
+	var iconSpan = document.getElementById('itemTypeIcon_' + index);
+	var detailDiv = document.getElementById('itemDetails_' + index);
+	var nameSpan = document.getElementById('itemName_' + index);
+	if (iconSpan) {
+		if (itemType === 'G') {
+			iconSpan.innerHTML = window.getGroupUserIconHtml();
+			iconSpan.style.display = 'inline-flex';
+		} else if (itemType === 'S' || itemType === 'P') {
+			iconSpan.innerHTML = window.getSingleUserIconHtml();
+			iconSpan.style.display = 'inline-flex';
+		} else {
+			iconSpan.innerHTML = '';
+			iconSpan.style.display = 'none';
+		}
+	}
+	if (itemName && detailDiv && nameSpan) {
+		nameSpan.innerText = itemName + ' (' + (itemType || 'S') + ')';
+		nameSpan.title = itemName;
+		detailDiv.style.display = 'block';
+	}
+};
+
+window.updatePinnanyCodeIcon = function(index, itemType, itemName) {
+	var iconSpan = document.getElementById('pinnanyTypeIcon_' + index);
+	var detailDiv = document.getElementById('pinnanyDetails_' + index);
+	var nameSpan = document.getElementById('pinnanyName_' + index);
+	if (iconSpan) {
+		if (itemType === 'G') {
+			iconSpan.innerHTML = window.getGroupUserIconHtml();
+			iconSpan.style.display = 'inline-flex';
+		} else if (itemType === 'S' || itemType === 'P') {
+			iconSpan.innerHTML = window.getSingleUserIconHtml();
+			iconSpan.style.display = 'inline-flex';
+		} else {
+			iconSpan.innerHTML = '';
+			iconSpan.style.display = 'none';
+		}
+	}
+	if (itemName && detailDiv && nameSpan) {
+		nameSpan.innerText = itemName + ' (' + (itemType || 'P') + ')';
+		nameSpan.title = itemName;
+		detailDiv.style.display = 'block';
+	}
+};
+
+window.showWarningToast = function(title, message) {
+	var toastContainer = document.getElementById('appToastContainer');
+	if (!toastContainer) {
+		toastContainer = document.createElement('div');
+		toastContainer.id = 'appToastContainer';
+		toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+		toastContainer.style.zIndex = '999999';
+		document.body.appendChild(toastContainer);
+	}
+
+	var toastId = 'toast_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+	var toastHtml = '<div id="' + toastId + '" class="toast align-items-center bg-white border-start border-4 border-warning shadow-lg show mb-2 toast-slide-in" role="alert" aria-live="assertive" aria-atomic="true" style="min-width: 320px; max-width: 400px; border-radius: 8px;">' +
+		'<div class="d-flex p-3 align-items-start gap-2">' +
+		'<div class="fs-4 text-warning d-flex align-items-center flex-shrink-0"><i class="bi bi-exclamation-triangle-fill"></i></div>' +
+		'<div class="flex-grow-1">' +
+		'<div class="fw-bold text-dark fs-6 mb-1">' + (title || 'Warning') + '</div>' +
+		'<div class="text-secondary small lh-sm">' + (message || '') + '</div>' +
+		'</div>' +
+		'<button type="button" class="btn-close ms-2 mt-1 flex-shrink-0" data-bs-dismiss="toast" aria-label="Close" onclick="var el = document.getElementById(\'' + toastId + '\'); if(el) el.remove();"></button>' +
+		'</div>' +
+		'</div>';
+	toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+
+	// Auto-remove after 4.5 seconds
+	setTimeout(function() {
+		var el = document.getElementById(toastId);
+		if (el) {
+			el.classList.remove('show');
+			el.style.opacity = '0';
+			el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+			el.style.transform = 'translateX(20px)';
+			setTimeout(function() {
+				if (el && el.parentNode) el.remove();
+			}, 400);
+		}
+	}, 4500);
+};
+
+window.validateItemCodeFinal = function(index, isPinnany) {
+	var prefix = isPinnany ? 'txtPinnanyCode_' : 'txtItemCode_';
+	var iconPrefix = isPinnany ? 'pinnanyTypeIcon_' : 'itemTypeIcon_';
+	var detailPrefix = isPinnany ? 'pinnanyDetails_' : 'itemDetails_';
+	var namePrefix = isPinnany ? 'pinnanyName_' : 'itemName_';
+
+	var inputEl = document.getElementById(prefix + index);
+	if (!inputEl) return;
+	var val = inputEl.value.trim();
+	var iconSpan = document.getElementById(iconPrefix + index);
+	var detailDiv = document.getElementById(detailPrefix + index);
+	var nameSpan = document.getElementById(namePrefix + index);
+
+	if (!val) {
+		if (iconSpan) { iconSpan.style.display = 'none'; iconSpan.innerHTML = ''; }
+		if (detailDiv) detailDiv.style.display = 'none';
+		if (nameSpan) nameSpan.innerText = '';
+		inputEl.classList.remove('is-invalid');
+		inputEl.style.borderColor = '';
+		inputEl.style.boxShadow = '';
+		return;
+	}
+
+	var txtClass = document.getElementById('txtClass');
+	var txtGender = document.getElementById('txtGender');
+	var selectedClass = txtClass ? txtClass.value.trim() : '';
+	var selectedGender = txtGender ? txtGender.value.trim() : '';
+
+	if (!selectedClass) {
+		inputEl.classList.add('is-invalid');
+		inputEl.style.borderColor = '#dc3545';
+		inputEl.style.boxShadow = '0 0 0 0.25rem rgba(220, 53, 69, 0.25)';
+		inputEl.value = '';
+		if (iconSpan) { iconSpan.style.display = 'none'; iconSpan.innerHTML = ''; }
+		if (detailDiv) detailDiv.style.display = 'none';
+		if (nameSpan) nameSpan.innerText = '';
+
+		window.showWarningToast(
+			'Class Not Selected',
+			'Please select a Student Class before entering item codes.'
+		);
+
+		setTimeout(function() {
+			inputEl.classList.remove('is-invalid');
+			inputEl.style.borderColor = '';
+			inputEl.style.boxShadow = '';
+		}, 2500);
+		return;
+	}
+
+	var classNum = parseInt(selectedClass, 10);
+	var itemCodeNum = parseInt(val, 10);
+
+	var found = null;
+	if (Array.isArray(window.allFestivalItems)) {
+		found = window.allFestivalItems.find(function(it) {
+			return String(it.item_code) === String(val) || parseInt(it.item_code, 10) === itemCodeNum;
+		});
+	}
+
+	if (!found) {
+		inputEl.classList.add('is-invalid');
+		inputEl.style.borderColor = '#dc3545';
+		inputEl.style.boxShadow = '0 0 0 0.25rem rgba(220, 53, 69, 0.25)';
+		inputEl.value = '';
+		if (iconSpan) { iconSpan.style.display = 'none'; iconSpan.innerHTML = ''; }
+		if (detailDiv) detailDiv.style.display = 'none';
+		if (nameSpan) nameSpan.innerText = '';
+
+		window.showWarningToast(
+			'Invalid Item Code',
+			'Item code "' + val + '" does not exist in festival master.'
+		);
+
+		setTimeout(function() {
+			inputEl.classList.remove('is-invalid');
+			inputEl.style.borderColor = '';
+			inputEl.style.boxShadow = '';
+		}, 2500);
+		return;
+	}
+
+	var cStart = parseInt(found.class_start, 10);
+	var cEnd = parseInt(found.class_end, 10);
+	var matchesClass = classNum >= cStart && classNum <= cEnd;
+
+	if (!matchesClass) {
+		inputEl.classList.add('is-invalid');
+		inputEl.style.borderColor = '#dc3545';
+		inputEl.style.boxShadow = '0 0 0 0.25rem rgba(220, 53, 69, 0.25)';
+		inputEl.value = '';
+		if (iconSpan) { iconSpan.style.display = 'none'; iconSpan.innerHTML = ''; }
+		if (detailDiv) detailDiv.style.display = 'none';
+		if (nameSpan) nameSpan.innerText = '';
+
+		window.showWarningToast(
+			'Invalid Item Category',
+			'Item ' + val + ' (' + found.item_name + ') is only for Classes ' + cStart + ' to ' + cEnd + ', not Class ' + selectedClass + '.'
+		);
+
+		setTimeout(function() {
+			inputEl.classList.remove('is-invalid');
+			inputEl.style.borderColor = '';
+			inputEl.style.boxShadow = '';
+		}, 2500);
+		return;
+	}
+
+	var itemGender = (found.gender || found.item_gender || 'C').toUpperCase();
+	if (selectedGender && selectedGender !== 'C' && itemGender !== 'C' && itemGender !== selectedGender) {
+		inputEl.classList.add('is-invalid');
+		inputEl.style.borderColor = '#dc3545';
+		inputEl.style.boxShadow = '0 0 0 0.25rem rgba(220, 53, 69, 0.25)';
+		inputEl.value = '';
+		if (iconSpan) { iconSpan.style.display = 'none'; iconSpan.innerHTML = ''; }
+		if (detailDiv) detailDiv.style.display = 'none';
+		if (nameSpan) nameSpan.innerText = '';
+
+		var genderName = itemGender === 'B' ? 'Boys' : 'Girls';
+		window.showWarningToast(
+			'Invalid Gender for Item',
+			'Item ' + val + ' (' + found.item_name + ') is restricted to ' + genderName + ' only.'
+		);
+
+		setTimeout(function() {
+			inputEl.classList.remove('is-invalid');
+			inputEl.style.borderColor = '';
+			inputEl.style.boxShadow = '';
+		}, 2500);
+		return;
+	}
+
+	// Check 4: Duplicate item code within current modal form slots
+	var duplicateFound = false;
+	for (var f = 1; f <= 5; f++) {
+		if (!isPinnany && f === index) continue;
+		var inpOther = document.getElementById('txtItemCode_' + f);
+		if (inpOther && inpOther.value.trim() !== '') {
+			var otherVal = inpOther.value.trim();
+			if (otherVal === val || parseInt(otherVal, 10) === itemCodeNum) {
+				duplicateFound = true;
+				break;
+			}
+		}
+	}
+	for (var p = 1; p <= 3; p++) {
+		if (isPinnany && p === index) continue;
+		var inPOther = document.getElementById('txtPinnanyCode_' + p);
+		if (inPOther && inPOther.value.trim() !== '') {
+			var otherPVal = inPOther.value.trim();
+			if (otherPVal === val || parseInt(otherPVal, 10) === itemCodeNum) {
+				duplicateFound = true;
+				break;
+			}
+		}
+	}
+
+	if (duplicateFound) {
+		inputEl.classList.add('is-invalid');
+		inputEl.style.borderColor = '#dc3545';
+		inputEl.style.boxShadow = '0 0 0 0.25rem rgba(220, 53, 69, 0.25)';
+		inputEl.value = '';
+		if (iconSpan) { iconSpan.style.display = 'none'; iconSpan.innerHTML = ''; }
+		if (detailDiv) detailDiv.style.display = 'none';
+		if (nameSpan) nameSpan.innerText = '';
+
+		window.showWarningToast(
+			'Duplicate Item',
+			'Item ' + val + ' (' + found.item_name + ') has already been entered in another slot.'
+		);
+
+		setTimeout(function() {
+			inputEl.classList.remove('is-invalid');
+			inputEl.style.borderColor = '';
+			inputEl.style.boxShadow = '';
+		}, 2500);
+		return;
+	}
+
+	// Check 5: Max participants limit check based on item_master.max_participants
+	var currentAdmnNo = (jQuery('#hidADNO').val() || '').trim();
+	var maxParts = parseInt(found.max_participants, 10) || (found.item_type === 'G' ? 7 : 1);
+	var schoolCount = typeof window.getItemSchoolCount === 'function' ? window.getItemSchoolCount(val, currentAdmnNo) : 0;
+
+	if (schoolCount >= maxParts) {
+		inputEl.classList.add('is-invalid');
+		inputEl.style.borderColor = '#dc3545';
+		inputEl.style.boxShadow = '0 0 0 0.25rem rgba(220, 53, 69, 0.25)';
+		inputEl.value = '';
+		if (iconSpan) { iconSpan.style.display = 'none'; iconSpan.innerHTML = ''; }
+		if (detailDiv) detailDiv.style.display = 'none';
+		if (nameSpan) nameSpan.innerText = '';
+
+		var limitMsg = (found.item_type === 'S')
+			? 'Single Item ' + val + ' (' + found.item_name + ') is already registered by another participant in this school.'
+			: 'Group Item ' + val + ' (' + found.item_name + ') has reached the maximum allowed limit of ' + maxParts + ' participants for this school.';
+
+		window.showWarningToast(
+			'Maximum Limit Reached',
+			limitMsg
+		);
+
+		setTimeout(function() {
+			inputEl.classList.remove('is-invalid');
+			inputEl.style.borderColor = '';
+			inputEl.style.boxShadow = '';
+		}, 2500);
+		return;
+	}
+
+	inputEl.classList.remove('is-invalid');
+	inputEl.style.borderColor = '#198754';
+	inputEl.style.boxShadow = '';
+	setTimeout(function() { if (inputEl.style.borderColor === 'rgb(25, 135, 84)') inputEl.style.borderColor = ''; }, 1200);
+
+	window.loadedItemsMap[val] = found;
+	if (isPinnany) {
+		window.updatePinnanyCodeIcon(index, found.item_type, found.item_name);
+	} else {
+		window.updateItemCodeIcon(index, found.item_type, found.item_name);
+	}
+
+	// Dynamically refresh available items so this assigned item is hidden
+	if (typeof window.loadItemsByClass === 'function') {
+		window.loadItemsByClass();
+	}
+};
+
+window.checkItemTypeIcon = function(index) {
+	var inputEl = document.getElementById('txtItemCode_' + index);
+	var val = inputEl ? inputEl.value.trim() : '';
+	if (!val) {
+		window.validateItemCodeFinal(index, false);
+		return;
+	}
+	if (val.length >= 3) {
+		window.validateItemCodeFinal(index, false);
+	} else {
+		var iconSpan = document.getElementById('itemTypeIcon_' + index);
+		var detailDiv = document.getElementById('itemDetails_' + index);
+		var nameSpan = document.getElementById('itemName_' + index);
+		if (iconSpan) { iconSpan.style.display = 'none'; iconSpan.innerHTML = ''; }
+		if (detailDiv) detailDiv.style.display = 'none';
+		if (nameSpan) nameSpan.innerText = '';
+	}
+};
+
+window.checkPinnanyTypeIcon = function(index) {
+	var inputEl = document.getElementById('txtPinnanyCode_' + index);
+	var val = inputEl ? inputEl.value.trim() : '';
+	if (!val) {
+		window.validateItemCodeFinal(index, true);
+		return;
+	}
+	if (val.length >= 3) {
+		window.validateItemCodeFinal(index, true);
+	} else {
+		var iconSpan = document.getElementById('pinnanyTypeIcon_' + index);
+		var detailDiv = document.getElementById('pinnanyDetails_' + index);
+		var nameSpan = document.getElementById('pinnanyName_' + index);
+		if (iconSpan) { iconSpan.style.display = 'none'; iconSpan.innerHTML = ''; }
+		if (detailDiv) detailDiv.style.display = 'none';
+		if (nameSpan) nameSpan.innerText = '';
+	}
+};
+
+window.loadItemsByClass = function() {
+	if (window._loadingItemsByClass) return;
+	window._loadingItemsByClass = true;
+	try {
+	var txtClass = document.getElementById('txtClass');
+	var txtGender = document.getElementById('txtGender');
+	var availableItemsContainer = document.getElementById('availableItemsContainer');
+
+	if (!txtClass || !availableItemsContainer) return;
+	var selectedClass = (txtClass.value || '').trim();
+	var selectedGender = txtGender ? (txtGender.value || '').trim().toUpperCase() : '';
+
+	if (!selectedClass) {
+		availableItemsContainer.innerHTML = '<div class="text-center text-muted py-4" id="noItemsMessage"><i class="bi bi-info-circle fs-4 text-secondary mb-2 d-block"></i><p style="font-size: 0.85rem;" class="mb-0">Please select a class to view available items.</p></div>';
+		return;
+	}
+
+	var classNum = parseInt(selectedClass, 10);
+	var hidAdnoEl = document.getElementById('hidADNO');
+	var currentAdmnNo = (hidAdnoEl ? hidAdnoEl.value : '').trim();
+
+	// 1. Items currently filled in THIS modal form inputs (slots 1..5 and pinnany 1..3)
+	var currentFormChosen = {};
+	for (var f = 1; f <= 5; f++) {
+		var inp = document.getElementById('txtItemCode_' + f);
+		if (inp && inp.value.trim() !== '') {
+			var code = inp.value.trim();
+			currentFormChosen[code] = true;
+			currentFormChosen[String(parseInt(code, 10))] = true;
+		}
+	}
+	for (var p = 1; p <= 3; p++) {
+		var inP = document.getElementById('txtPinnanyCode_' + p);
+		if (inP && inP.value.trim() !== '') {
+			var pCode = inP.value.trim();
+			currentFormChosen[pCode] = true;
+			currentFormChosen[String(parseInt(pCode, 10))] = true;
+		}
+	}
+
+	// Filter items for the selected class category
+	var items = [];
+	if (Array.isArray(window.allFestivalItems) && window.allFestivalItems.length > 0) {
+		items = window.allFestivalItems.filter(function(it) {
+			var cStart = parseInt(it.class_start, 10);
+			var cEnd = parseInt(it.class_end, 10);
+
+			// Class category matching
+			var matchesClass = false;
+			if (!isNaN(cStart) && !isNaN(cEnd)) {
+				matchesClass = (classNum >= cStart && classNum <= cEnd);
+			} else {
+				if (classNum <= 4) matchesClass = (parseInt(it.item_code, 10) >= 100 && parseInt(it.item_code, 10) < 300);
+				else if (classNum <= 7) matchesClass = (parseInt(it.item_code, 10) >= 300 && parseInt(it.item_code, 10) < 500);
+				else if (classNum <= 10) matchesClass = (parseInt(it.item_code, 10) >= 500 && parseInt(it.item_code, 10) < 700);
+				else matchesClass = (parseInt(it.item_code, 10) >= 700);
+			}
+			if (!matchesClass) return false;
+
+			// Gender matching
+			var itmGender = (it.gender || it.item_gender || 'C').toUpperCase();
+			if (selectedGender && selectedGender !== 'C') {
+				if (itmGender !== selectedGender && itmGender !== 'C') return false;
+			}
+
+			// Rule 1: Hide if already chosen in this participant's current form slots
+			var codeStr = String(it.item_code);
+			var codeInt = String(parseInt(it.item_code, 10));
+			if (currentFormChosen[codeStr] || currentFormChosen[codeInt]) {
+				return false;
+			}
+
+			// Rule 2: Hide if registered count has reached max_participants quota for this school
+			var maxParts = parseInt(it.max_participants, 10) || (it.item_type === 'G' ? 7 : 1);
+			var schoolCount = typeof window.getItemSchoolCount === 'function' ? window.getItemSchoolCount(it.item_code, currentAdmnNo) : 0;
+			if (schoolCount >= maxParts) {
+				return false;
+			}
+
+			return true;
+		});
+	}
+
+	if (items.length === 0) {
+		availableItemsContainer.innerHTML = '<div class="text-center text-muted py-4"><i class="bi bi-check2-all text-success fs-3 mb-2 d-block"></i><p class="mb-0 small text-muted">All available items for Class ' + selectedClass + ' have been assigned.</p></div>';
+		return;
+	}
+
+	var groupedItems = {};
+	items.forEach(function (item) {
+		window.loadedItemsMap[item.item_code] = item;
+		window.loadedItemsMap[String(parseInt(item.item_code, 10))] = item;
+		var fest = item.fest_name || 'Category Items';
+		if (!groupedItems[fest]) groupedItems[fest] = [];
+		groupedItems[fest].push(item);
+	});
+
+	// Update icons for any existing item values in inputs
+	for (var k = 1; k <= 5; k++) {
+		if (typeof window.checkItemTypeIcon === 'function') window.checkItemTypeIcon(k);
+	}
+	for (var p = 1; p <= 3; p++) {
+		if (typeof window.checkPinnanyTypeIcon === 'function') window.checkPinnanyTypeIcon(p);
+	}
+
+	var itemsHtml = '<div class="items-container w-100">';
+	for (var festName in groupedItems) {
+		if (groupedItems.hasOwnProperty(festName)) {
+			itemsHtml += '<div class="festival-group mb-3">' +
+				'<div class="festival-title text-primary fw-bold mb-2 pb-1 border-bottom small d-flex align-items-center justify-content-between">' +
+				'<span><i class="bi bi-bookmark-star-fill text-primary me-1" style="font-size: 0.75rem;"></i> ' + festName + '</span>' +
+				'<span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" style="font-size: 0.68rem;">' + groupedItems[festName].length + ' items</span>' +
+				'</div>' +
+				'<div class="d-flex flex-column gap-2 w-100">';
+
+			groupedItems[festName].forEach(function (item) {
+				itemsHtml += '<div class="p-2 px-3 rounded-3 border bg-white border-light-subtle shadow-2xs hover-item-card item-selectable" data-item-code="' + item.item_code + '" data-item-name="' + item.item_name + '" data-item-type="' + item.item_type + '" style="cursor: pointer; transition: all 0.15s ease-in-out; width: 100%;">' +
+					'<div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem;" title="' + item.item_code + ' - ' + item.item_name + '">' +
+					'<span class="text-primary me-1">' + item.item_code + '</span> - ' + item.item_name +
+					'</div>' +
+					'</div>';
 			});
-		};
+			itemsHtml += '</div></div>';
+		}
+	}
+	itemsHtml += '</div>';
+
+	availableItemsContainer.innerHTML = itemsHtml;
+
+	// Attach click event listeners to add item directly
+	var selectableItems = availableItemsContainer.querySelectorAll('.item-selectable');
+	selectableItems.forEach(function(elem) {
+		elem.addEventListener('click', function(e) {
+			e.preventDefault();
+			var itemCode = this.getAttribute('data-item-code');
+			var itemName = this.getAttribute('data-item-name');
+			var itemType = this.getAttribute('data-item-type');
+			if (!itemCode || !itemName) return;
+
+			var emptyInput = null;
+			var fieldNumber = 0;
+			for (var f = 1; f <= 5; f++) {
+				var inp = document.getElementById('txtItemCode_' + f);
+				if (inp && inp.value.trim() === '') {
+					emptyInput = inp;
+					fieldNumber = f;
+					break;
+				}
+			}
+
+			if (emptyInput && fieldNumber > 0) {
+				emptyInput.value = itemCode;
+				if (typeof window.validateItemCodeFinal === 'function') {
+					window.validateItemCodeFinal(fieldNumber, false);
+				} else if (typeof window.updateItemCodeIcon === 'function') {
+					window.updateItemCodeIcon(fieldNumber, itemType, itemName);
+				}
+				// Re-render available items so this chosen item is instantly hidden from the list
+				window.loadItemsByClass();
+			} else {
+				if (typeof Swal !== 'undefined') {
+					Swal.fire({ icon: 'warning', title: 'Oops!', text: 'All 5 item slots are filled. Clear a slot to add another item.' });
+				} else if (typeof swal !== 'undefined') {
+					swal("Oops!", "All 5 item slots are filled. Clear a slot to add another item.", "warning");
+				} else {
+					alert("All 5 item slots are filled.");
+				}
+			}
+		});
+	});
+	} finally {
+		window._loadingItemsByClass = false;
+	}
+};
 
 		// School Details Validation Function
 		function fncCheckSchoolDeatils() {
@@ -1056,116 +1742,43 @@ if (isset($is_edit) and $is_edit != 'no') {
 
 		// Enhanced visibility management function
 		function updateVisibility() {
-			// Get fresh references to elements
-			var schoolCodeInputElement = document.getElementById('txtSchoolCode');
+			var isAdmin = <?php echo (!empty($is_admin)) ? 'true' : 'false'; ?>;
 			var schoolDetailsSection = document.getElementById('schoolDetailsSection');
+			var registeredParticipantsWrapper = document.getElementById('registeredParticipantsWrapper');
+			var schoolDetailsToggleBtnText = document.getElementById('schoolDetailsToggleBtnText');
 			var addParticipantBtn = document.getElementById('addParticipantBtn');
-			var schoolProfileBtnText = document.getElementById('schoolProfileBtnText');
-			var reportBtn = document.getElementById('reportBtn');
 
-			var currentSchoolCode = schoolCodeInputElement ? schoolCodeInputElement.value.trim() : '';
-			var sessionSchoolCode = '<?php echo !empty($school_details) && !empty($school_details[0]['school_code']) ? $school_details[0]['school_code'] : ''; ?>';
-			var confirmStatus = '<?php echo !empty($school_details) && !empty($school_details[0]['is_finalize']) ? $school_details[0]['is_finalize'] : 'N'; ?>';
-			var schoolShow = '<?php echo isset($school_show) ? $school_show : ''; ?>';
+			var currentSchoolCode = '<?php echo esc($active_code); ?>';
+			var hasSchoolCode = (currentSchoolCode !== '' && currentSchoolCode !== '0');
 
-			var hasSchoolCode = currentSchoolCode !== '' || sessionSchoolCode !== '';
-			var isConfirmed = confirmStatus === 'Y' || confirmStatus === 'Yes' || confirmStatus === '1' || confirmStatus === 'true';
-			var isEditing = schoolShow === 'edit';
-
-
-
-
-
-
-
-
-
-
-			// RULE 1: School Code not contain then Add Participant button hide and show School Details
-			if (!hasSchoolCode) {
-				// No school code - Show School Details, Hide Add Participant button, Hide Report button
-				if (schoolDetailsSection) {
-					schoolDetailsSection.style.display = 'block';
-
-				}
-				if (addParticipantBtn) {
-					addParticipantBtn.style.display = 'none';
-
-				}
-				if (reportBtn) {
-					reportBtn.style.display = 'none';
-
-				}
-				if (schoolProfileBtnText) {
-					schoolProfileBtnText.textContent = 'Hide School Details';
-
-				}
+			if (!isAdmin) {
+				// School User: Always hide school details, always show registered participants, show Add Participant button
+				if (schoolDetailsSection) schoolDetailsSection.style.display = 'none';
+				if (registeredParticipantsWrapper) registeredParticipantsWrapper.style.display = 'block';
+				if (addParticipantBtn) addParticipantBtn.style.display = 'inline-block';
+				return;
 			}
-			// RULE 2: Confirm Status is Yes or True then not show Add Participant Button
-			else if (isConfirmed) {
-				// Confirmed - Hide Add Participant button and School Details section, Show Report button
-				if (schoolDetailsSection) {
-					schoolDetailsSection.style.display = 'none';
 
-				}
-				if (addParticipantBtn) {
-					addParticipantBtn.style.display = 'none';
-
-				}
-				if (reportBtn) {
-					reportBtn.style.display = 'inline-block';
-
-				}
-				if (schoolProfileBtnText) {
-					schoolProfileBtnText.textContent = 'School Profile';
-
-				}
+			// Admin Users (IT Master, State Admin, District Admin, Sub District Admin):
+			// Only show Add Participant button if a school is loaded
+			if (addParticipantBtn) {
+				addParticipantBtn.style.display = hasSchoolCode ? 'inline-block' : 'none';
 			}
-			// RULE 3: Edit button show then show Add Participant Button
-			else if (isEditing) {
-				// Editing - Show School Details, Add Participant button, and Report button
-				if (schoolDetailsSection) {
-					schoolDetailsSection.style.display = 'block';
 
-				}
-				if (addParticipantBtn) {
-					addParticipantBtn.style.display = 'inline-block';
-
-				}
-				if (reportBtn) {
-					reportBtn.style.display = 'inline-block';
-
-				}
-				if (schoolProfileBtnText) {
-					schoolProfileBtnText.textContent = 'Hide School Details';
-
-				}
-			}
-			// Default case: Has school code, not confirmed, not editing
-			else {
-				// Has school code - Hide School Details, Show Add Participant button and Report button
-				if (schoolDetailsSection) {
-					schoolDetailsSection.style.display = 'none';
-
-				}
-				if (addParticipantBtn) {
-					addParticipantBtn.style.display = 'inline-block';
-
-				}
-				if (reportBtn) {
-					reportBtn.style.display = 'inline-block';
-
-				}
-				if (schoolProfileBtnText) {
-					schoolProfileBtnText.textContent = 'School Profile';
-
-				}
+			// When a school is loaded (hasSchoolCode), do NOT show/expand school details on page load or reload
+			if (hasSchoolCode) {
+				if (schoolDetailsSection) schoolDetailsSection.style.display = 'none';
+				if (registeredParticipantsWrapper) registeredParticipantsWrapper.style.display = 'block';
+				if (schoolDetailsToggleBtnText) schoolDetailsToggleBtnText.textContent = 'School Details';
+			} else {
+				if (schoolDetailsSection) schoolDetailsSection.style.display = 'block';
+				if (registeredParticipantsWrapper) registeredParticipantsWrapper.style.display = 'none';
+				if (schoolDetailsToggleBtnText) schoolDetailsToggleBtnText.textContent = 'Hide School Details';
 			}
 		}
 
 		// Initialize the visibility state
 		function initializeVisibility() {
-
 			updateVisibility();
 		}
 
@@ -1174,72 +1787,337 @@ if (isset($is_edit) and $is_edit != 'no') {
 			updateVisibility();
 		}
 
-		// Function to toggle School Profile section
-		function toggleSchoolProfile() {
-			var schoolDetailsSection = document.getElementById('schoolDetailsSection');
-			var schoolProfileBtnText = document.getElementById('schoolProfileBtnText');
+		// Toggle School Details & Registered Participants Visibility
+		function toggleSchoolDetailsSection() {
+			var sec = document.getElementById('schoolDetailsSection');
+			var part = document.getElementById('registeredParticipantsWrapper');
+			var btnText = document.getElementById('schoolDetailsToggleBtnText');
+			if (!sec) return;
+			var isHidden = (sec.style.display === 'none' || sec.style.display === '');
+			if (isHidden) {
+				sec.style.display = 'block';
+				if (part) part.style.display = 'none';
+				if (btnText) btnText.textContent = 'Hide School Details';
+			} else {
+				sec.style.display = 'none';
+				if (part) part.style.display = 'block';
+				if (btnText) btnText.textContent = 'School Details';
+			}
+		}
 
-			if (schoolDetailsSection) {
-				var isVisible = schoolDetailsSection.style.display === 'block';
+		function showSchoolDetailsSection() {
+			var sec = document.getElementById('schoolDetailsSection');
+			var part = document.getElementById('registeredParticipantsWrapper');
+			var btnText = document.getElementById('schoolDetailsToggleBtnText');
+			if (sec) sec.style.display = 'block';
+			if (part) part.style.display = 'none';
+			if (btnText) btnText.textContent = 'Hide School Details';
+		}
 
+		function hideSchoolDetailsSection() {
+			var sec = document.getElementById('schoolDetailsSection');
+			var part = document.getElementById('registeredParticipantsWrapper');
+			var btnText = document.getElementById('schoolDetailsToggleBtnText');
+			if (sec) sec.style.display = 'none';
+			if (part) part.style.display = 'block';
+			if (btnText) btnText.textContent = 'School Details';
+		}
 
-				// RULE 4: School Profile Button click then show/hide School Details div
-				if (isVisible) {
-					// Currently visible - hide it
-					schoolDetailsSection.style.display = 'none';
+		function handleSchoolSelect(code) {
+			if (!code || code === '0' || code === 0) return;
+			loadSchoolByCode(code);
+		}
 
-					if (schoolProfileBtnText) {
-						schoolProfileBtnText.textContent = 'School Profile';
-
-					}
-				} else {
-					// Currently hidden - show it
-					schoolDetailsSection.style.display = 'block';
-
-					if (schoolProfileBtnText) {
-						schoolProfileBtnText.textContent = 'Hide School Details';
-
+		function extractSchoolCode(val) {
+			if (!val) return '';
+			val = String(val).trim();
+			
+			// 1. Direct number check (e.g. "12001")
+			if (/^\d+$/.test(val)) {
+				return val;
+			}
+			
+			// 2. Starts with digits (e.g. "12001 - GHSS Example")
+			var match = val.match(/^(\d+)/);
+			if (match && match[1]) {
+				return match[1];
+			}
+			
+			// 3. Search in SUBDISTRICT_SCHOOLS_LIST by name or code
+			if (typeof SUBDISTRICT_SCHOOLS_LIST !== 'undefined' && Array.isArray(SUBDISTRICT_SCHOOLS_LIST)) {
+				var lowerVal = val.toLowerCase();
+				for (var i = 0; i < SUBDISTRICT_SCHOOLS_LIST.length; i++) {
+					var item = SUBDISTRICT_SCHOOLS_LIST[i];
+					if (item.code === val || item.name.toLowerCase().indexOf(lowerVal) !== -1) {
+						return item.code;
 					}
 				}
-
-				// Update Add Participant button visibility based on current state
-				updateVisibility();
-
-			} else {
-				console.error('❌ School Details Section NOT FOUND!');
 			}
+			
+			// 4. Search in datalist options
+			var list = document.getElementById('schoolOptionsList');
+			if (list && list.options) {
+				var lowerVal2 = val.toLowerCase();
+				for (var j = 0; j < list.options.length; j++) {
+					var opt = list.options[j];
+					var optVal = (opt.value || '').trim();
+					var optText = (opt.text || opt.innerText || '').trim();
+					if (optVal.toLowerCase().indexOf(lowerVal2) !== -1) {
+						var m = optVal.match(/^(\d+)/);
+						if (m && m[1]) return m[1];
+					}
+					if (optText.toLowerCase().indexOf(lowerVal2) !== -1) {
+						var m2 = optText.match(/^(\d+)/);
+						if (m2 && m2[1]) return m2[1];
+					}
+				}
+			}
+			return '';
+		}
+
+		var _fetchSchoolTimer = null;
+		function fetchSchoolDataAjax(code) {
+			if (!code || code === '0' || !/^\d+$/.test(code)) return;
+			
+			clearTimeout(_fetchSchoolTimer);
+			_fetchSchoolTimer = setTimeout(function() {
+				var url = '<?php echo base_url("schools/registration/fetch_school_data_json"); ?>';
+				jQuery.ajax({
+					url: url,
+					type: 'POST',
+					data: { code: code },
+					dataType: 'json',
+					success: function(resp) {
+						if (resp && resp.status === 'success' && resp.data) {
+							populateSchoolForm(resp.data);
+						}
+					},
+					error: function(err) {
+						console.warn('AJAX fetch school details notice:', err);
+					}
+				});
+			}, 200);
+		}
+
+		function populateSchoolForm(data) {
+			if (!data) return;
+			
+			var schoolCode = data.school_code || '';
+			var hidSchoolId = document.getElementById('formSchoolHidSchoolId');
+			if (hidSchoolId) hidSchoolId.value = schoolCode;
+			
+			var pageHidSchoolId = document.getElementById('hidSchoolId');
+			if (pageHidSchoolId) pageHidSchoolId.value = schoolCode;
+			
+			var txtSchoolName = document.getElementById('txtSchoolName');
+			if (txtSchoolName) txtSchoolName.value = data.school_name || 'Not Found';
+			
+			var txtSchoolType = document.getElementById('txtSchoolType');
+			if (txtSchoolType) txtSchoolType.value = data.school_type_text || (data.school_type === 'G' ? 'Government (Govt)' : (data.school_type === 'A' ? 'Aided' : (data.school_type === 'U' ? 'Unaided / Private' : '-')));
+			
+			var txtSchoolEmail = document.getElementById('txtSchoolEmail');
+			if (txtSchoolEmail) txtSchoolEmail.value = data.school_email || '';
+			
+			var txtSchoolPhone = document.getElementById('txtSchoolPhone');
+			if (txtSchoolPhone) txtSchoolPhone.value = data.school_phone || '';
+			
+			var txtStandardFrom = document.getElementById('txtStandardFrom');
+			if (txtStandardFrom) {
+				txtStandardFrom.value = data.class_start || '1';
+			}
+			
+			var txtStandardTo = document.getElementById('txtStandardTo');
+			if (txtStandardTo) {
+				txtStandardTo.value = data.class_end || '10';
+			}
+			
+			var txtPrincipal = document.getElementById('txtPrincipal');
+			if (txtPrincipal) txtPrincipal.value = data.principal_name || '';
+			
+			var txtPrincipalPhone = document.getElementById('txtPrincipalPhone');
+			if (txtPrincipalPhone) txtPrincipalPhone.value = data.principal_phone || '';
+			
+			var txtHeadmaster = document.getElementById('txtHeadmaster');
+			if (txtHeadmaster) txtHeadmaster.value = data.hm_name || '';
+			
+			var txtHeadmasterPhone = document.getElementById('txtHeadmasterPhone');
+			if (txtHeadmasterPhone) txtHeadmasterPhone.value = data.hm_phone || '';
+			
+			populateTeachersList(data.teachers || '');
+			
+			var txtTotalLP = document.getElementById('txtTotalLP');
+			if (txtTotalLP) txtTotalLP.value = data.strength_lp || '';
+			
+			var txtTotalUP = document.getElementById('txtTotalUP');
+			if (txtTotalUP) txtTotalUP.value = data.strength_up || '';
+			
+			var txtTotalHS = document.getElementById('txtTotalHS');
+			if (txtTotalHS) txtTotalHS.value = data.strength_hs || '';
+			
+			var txtTotalHSS = document.getElementById('txtTotalHSS');
+			if (txtTotalHSS) txtTotalHSS.value = data.strength_hss || '';
+			
+			var txtTotalVHSS = document.getElementById('txtTotalVHSS');
+			if (txtTotalVHSS) txtTotalVHSS.value = data.strength_vhss || '';
+			
+			var txtTotal = document.getElementById('txtTotal');
+			if (txtTotal) txtTotal.value = data.total_strength || '';
+			
+			if (typeof fncShowHideStd === 'function') fncShowHideStd();
+			if (typeof addTotal === 'function') addTotal();
+			
+			var badge = document.getElementById('activeSchoolBadge');
+			if (badge && schoolCode) {
+				badge.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Active: ' + schoolCode;
+				badge.className = 'badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill fs-7 fw-semibold';
+			}
+		}
+
+		function populateTeachersList(teachersStr) {
+			var container = document.getElementById('teachersRow');
+			var hidTeachers = document.getElementById('hidTeachers');
+			if (!container) return;
+			
+			var existingRows = container.querySelectorAll('.teachersTextBox');
+			existingRows.forEach(function(row) { row.remove(); });
+			
+			var teacherPairs = teachersStr ? teachersStr.split('#@#').filter(function(t) { return t.trim() !== ''; }) : [];
+			
+			if (teacherPairs.length === 0) {
+				createTeacherRow(1, '', '', false);
+				if (hidTeachers) hidTeachers.value = 1;
+			} else {
+				teacherPairs.forEach(function(pair, index) {
+					var info = pair.split('#$#');
+					var name = info[0] || '';
+					var phone = info[1] || '';
+					var idx = index + 1;
+					createTeacherRow(idx, name, phone, idx > 1);
+				});
+				if (hidTeachers) hidTeachers.value = teacherPairs.length;
+			}
+		}
+
+		function createTeacherRow(id, name, phone, canRemove) {
+			var porow = document.createElement('div');
+			porow.className = 'row mb-2 teachersTextBox';
+			porow.id = 'teacherRow_' + id;
+			
+			var col1 = document.createElement('div');
+			col1.className = 'col-md-6 mb-2';
+			col1.innerHTML = '<label class="form-label fw-bold text-muted small text-uppercase">Team Manager ' + id + '</label>' +
+				'<input type="text" name="txtTeacher_' + id + '" id="txtTeacher_' + id + '" class="form-control" placeholder="Enter teacher name" value="' + (name || '').replace(/"/g, '&quot;') + '" onkeyup="this.value=this.value.toUpperCase();">';
+				
+			var col2 = document.createElement('div');
+			col2.className = 'col-md-6 mb-2';
+			var removeBtnHtml = canRemove ? '<button type="button" class="btn btn-outline-danger" onclick="this.closest(\'.teachersTextBox\').remove();" title="Remove">✕</button>' : '';
+			col2.innerHTML = '<label class="form-label fw-bold text-muted small text-uppercase">Phone</label>' +
+				'<div class="input-group">' +
+					'<input type="text" name="txtPhone_' + id + '" id="txtPhone_' + id + '" class="form-control" placeholder="Phone number" maxlength="11" value="' + (phone || '').replace(/"/g, '&quot;') + '" onkeypress="return numbersonly(this, event, false);">' +
+					removeBtnHtml +
+				'</div>';
+				
+			porow.appendChild(col1);
+			porow.appendChild(col2);
+			
+			var addBtnDiv = document.getElementById('teachersAddBtnDiv');
+			var container = document.getElementById('teachersRow');
+			if (addBtnDiv && container) {
+				container.insertBefore(porow, addBtnDiv);
+			} else if (container) {
+				container.appendChild(porow);
+			}
+		}
+
+		function handleSchoolSearchInput(val) {
+			if (!val) return;
+			var code = extractSchoolCode(val);
+			if (code && code !== '0' && /^\d+$/.test(code)) {
+				// Automatically fetch and populate form inputs!
+				fetchSchoolDataAjax(code);
+				
+				// If user selected full suggestion containing dash
+				if (val.indexOf(' - ') > -1) {
+					var current = '<?php echo esc($active_code); ?>';
+					if (code !== current) {
+						loadSchoolByCode(code);
+					}
+				}
+			}
+		}
+
+		function loadSchoolFromSearch() {
+			var input = document.getElementById('txtSearchSchool');
+			var val = input ? input.value.trim() : '';
+			if (!val) {
+				swal('Missing Information', 'Please enter a School Code or search a School Name.', 'warning');
+				return;
+			}
+			var code = extractSchoolCode(val);
+			if (!code || code === '0' || !/^\d+$/.test(code)) {
+				swal('Invalid School', 'Could not resolve a matching School Code. Please enter a valid numeric School Code.', 'warning');
+				return;
+			}
+			loadSchoolByCode(code);
+		}
+
+		function loadSchoolByCode(code) {
+			if (!code) {
+				var input = document.getElementById('txtSearchSchool');
+				if (input) code = extractSchoolCode(input.value.trim());
+			}
+			if (!code || code === '0' || !/^\d+$/.test(code)) {
+				swal('Missing Information', 'Please enter a valid School Code.', 'warning');
+				return;
+			}
+			var btn = document.getElementById('btnLoadSchool');
+			if (btn) {
+				btn.disabled = true;
+				btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Loading...';
+			}
+			window.location.href = '<?php echo base_url("schools/school_entry"); ?>?school_code=' + encodeURIComponent(code);
+		}
+
+		function saveSchoolDetailsWithSpinner() {
+			var txtStandardFrom = document.getElementById('txtStandardFrom');
+			var txtStandardTo = document.getElementById('txtStandardTo');
+			var formSchool = document.getElementById('formSchool');
+			var hidSchoolId = document.getElementById('formSchoolHidSchoolId');
+
+			if (!hidSchoolId || !hidSchoolId.value.trim() || hidSchoolId.value === '0') {
+				var searchInput = document.getElementById('txtSearchSchool');
+				var code = searchInput ? extractSchoolCode(searchInput.value.trim()) : '';
+				if (code && code !== '0' && /^\d+$/.test(code)) {
+					if (hidSchoolId) hidSchoolId.value = code;
+				} else {
+					swal("Missing Information", "Please search or enter a valid School Code first.", "warning");
+					return false;
+				}
+			}
+
+			if (typeof fncCheckSchoolDeatils === 'function' && !fncCheckSchoolDeatils()) {
+				return false;
+			}
+
+			var btn = document.getElementById('btnSaveSchoolDetails');
+			if (btn) {
+				btn.disabled = true;
+				btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Saving School Details...';
+			}
+
+			if (formSchool) {
+				formSchool.submit();
+			}
+			return true;
 		}
 
 		// Function to handle school code input fetch (when school details are loaded via AJAX)
 		function fetch_school_details() {
-			// Update visibility after school details are fetched
-			setTimeout(function () {
-				updateVisibility();
-			}, 100);
-		}
-
-		// Override the fncEditSchoolDeatils function to ensure proper visibility
-		var originalEditFunction = window.fncEditSchoolDeatils;
-		window.fncEditSchoolDeatils = function () {
-
-
-			// Call original function if it exists
-			if (originalEditFunction && typeof originalEditFunction === 'function') {
-				originalEditFunction();
-			} else {
-				// Fallback to original behavior
-				var formSchool = document.getElementById('formSchool');
-				if (formSchool) {
-					formSchool.action = (typeof path !== 'undefined' ? path : '') + 'schools/registration/edit_school_details';
-					formSchool.submit();
-				}
+			var code = document.getElementById('txtSchoolCode') ? document.getElementById('txtSchoolCode').value : '';
+			if (code) {
+				loadSchoolByCode(code);
 			}
-
-			// Update visibility after edit mode is activated
-			setTimeout(function () {
-				updateVisibility();
-			}, 100);
-		};
+		}
 
 		// Enhanced initialization with multiple fallback methods
 		function initializePage() {
@@ -1317,36 +2195,7 @@ if (isset($is_edit) and $is_edit != 'no') {
 			}, 500);
 		});
 
-		// Override the confirm_school_data function to ensure proper Add Participant button handling
-		var originalConfirmFunction = window.confirm_school_data;
-		window.confirm_school_data = function () {
-			// RULE 2 & 5: Confirm Status is Yes then hide Add Participant Button and School Details Edit Button
-
-			// Call original function if it exists
-			if (originalConfirmFunction && typeof originalConfirmFunction === 'function') {
-				originalConfirmFunction();
-			} else {
-				// Fallback to default confirmation behavior
-				if (confirm('Are you sure you want to confirm this school data? This action cannot be undone.')) {
-					// Submit the finalize form
-					var formFinalize = document.getElementById('formFinalize');
-					if (formFinalize) {
-						formFinalize.submit();
-					}
-				}
-			}
-
-			// Update visibility after confirmation
-			setTimeout(function () {
-				updateVisibility();
-			}, 100);
-		};
-
-		// Force cache refresh and reinitialize
-		function forceReinitialize() {
-
-			// Force immediate initialization
-			initializePage();
+		initializePage();
 
 			// Additional forced visibility check using the unified function
 			setTimeout(function () {
@@ -1357,7 +2206,7 @@ if (isset($is_edit) and $is_edit != 'no') {
 
 
 				return 'Force reinitialization completed - check console logs';
-			}
+			});
 
 			// Add a test function for debugging (can be called from browser console)
 			window.testSchoolProfileToggle = function () {
@@ -1453,74 +2302,36 @@ if (isset($is_edit) and $is_edit != 'no') {
 
 			<?php if (isset($is_edit) and $is_edit != 'no') { ?>
 
-				// Modal backdrop fix - ensure proper cleanup
+				// Modal events and cleanup
 				document.addEventListener('DOMContentLoaded', function () {
 					var participantModal = document.getElementById('participantModal');
 
 					if (participantModal) {
-						// Handle modal hide event to ensure backdrop is properly removed
+						// Handle modal hidden event to ensure backdrop is properly removed
 						participantModal.addEventListener('hidden.bs.modal', function () {
-							setTimeout(function () {
-								forceRemoveModalBackdrop();
-							}, 50);
+							forceRemoveModalBackdrop();
 						});
 
-						// Handle modal hide event with slight delay to ensure cleanup
-						participantModal.addEventListener('hide.bs.modal', function () {
-							setTimeout(function () {
-								forceRemoveModalBackdrop();
-							}, 50);
-						});
-
-						// Handle modal show event
-						participantModal.addEventListener('show.bs.modal', function () {
-						});
-
-						// Handle modal shown event
+						// Handle modal shown event to load items and refresh photos
 						participantModal.addEventListener('shown.bs.modal', function () {
+							if (typeof refreshModalPhoto === 'function') {
+								refreshModalPhoto();
+							}
+							if (typeof window.loadItemsByClass === 'function') {
+								window.loadItemsByClass();
+							}
 						});
 					}
 
-					// Start monitoring for backdrop elements
-					startBackdropMonitor();
-
-					// Add photo refresh when modal is shown
-					participantModal.addEventListener('show.bs.modal', function () {
-						setTimeout(function () {
-							refreshModalPhoto();
-						}, 100);
-					});
-				});
-
-
-
-				// Monitor for backdrop elements and remove them
-				function startBackdropMonitor() {
-					var monitorInterval;
-
-					// Check every 100ms for backdrops when modal is not visible
-					monitorInterval = setInterval(function () {
-						var participantModal = document.getElementById('participantModal');
-						if (participantModal) {
-							var modal = bootstrap.Modal.getInstance(participantModal);
-							var isModalVisible = modal && modal._isShown;
-
-							if (!isModalVisible) {
-								var backdrops = document.querySelectorAll('.modal-backdrop');
-								if (backdrops.length > 0) {
-									forceRemoveModalBackdrop();
-								}
+					// Bind class and gender change events cleanly using standard event delegation
+					document.addEventListener('change', function (e) {
+						if (e.target && (e.target.id === 'txtClass' || e.target.id === 'txtGender')) {
+							if (typeof window.loadItemsByClass === 'function') {
+								window.loadItemsByClass();
 							}
 						}
-					}, 100);
-
-					// Stop monitoring after 30 seconds
-					setTimeout(function () {
-						if (monitorInterval) {
-							clearInterval(monitorInterval);
-						}
-					}, 30000);
-				}
+					});
+				});
 
 				// Function to properly close modal with backdrop cleanup
 				function closeParticipantModal() {
@@ -1548,17 +2359,17 @@ if (isset($is_edit) and $is_edit != 'no') {
 
 			function loadSchoolList() {
 				// Fetch list of schools for duplication
-				$.ajax({
+				jQuery.ajax({
 					url: '<?php echo base_url(); ?>schools/registration/get_school_list',
 					type: 'GET',
 					dataType: 'json',
 					success: function (response) {
-						var schoolSelect = $('#duplicateSchoolSelect');
+						var schoolSelect = jQuery('#duplicateSchoolSelect');
 						schoolSelect.empty();
 						schoolSelect.append('<option value="">-- Select a School --</option>');
 
 						if (response.schools && response.schools.length > 0) {
-							$.each(response.schools, function (index, school) {
+							jQuery.each(response.schools, function (index, school) {
 								schoolSelect.append('<option value="' + school.school_code + '">' +
 									school.school_code + ' - ' + school.school_name + '</option>');
 							});
@@ -1573,15 +2384,15 @@ if (isset($is_edit) and $is_edit != 'no') {
 			}
 
 			function loadSchoolData() {
-				var schoolCode = $('#duplicateSchoolSelect').val();
+				var schoolCode = jQuery('#duplicateSchoolSelect').val();
 				if (!schoolCode) {
-					$('#duplicatePreview').hide();
-					$('#duplicateBtn').hide();
+					jQuery('#duplicatePreview').hide();
+					jQuery('#duplicateBtn').hide();
 					return;
 				}
 
 				// Fetch school data for preview
-				$.ajax({
+				jQuery.ajax({
 					url: '<?php echo base_url(); ?>schools/registration/get_school_data',
 					type: 'POST',
 					data: { school_code: schoolCode },
@@ -1591,23 +2402,23 @@ if (isset($is_edit) and $is_edit != 'no') {
 							var school = response.school;
 
 							// Populate preview table
-							$('#previewSchoolCode').text(school.school_code || '');
-							$('#previewSchoolName').text(school.school_name || '');
-							$('#previewEmail').text(school.school_email || '');
+							jQuery('#previewSchoolCode').text(school.school_code || '');
+							jQuery('#previewSchoolName').text(school.school_name || '');
+							jQuery('#previewEmail').text(school.school_email || '');
 
 							var schoolType = '';
 							if (school.school_type == 'G') schoolType = 'Government';
 							else if (school.school_type == 'A') schoolType = 'Aided';
 							else if (school.school_type == 'U') schoolType = 'Unaided';
-							$('#previewSchoolType').text(schoolType);
+							jQuery('#previewSchoolType').text(schoolType);
 
-							$('#previewStandardFrom').text(school.class_start || '');
-							$('#previewStandardTo').text(school.class_end || '');
-							$('#previewPrincipal').text(school.principal_name || '');
-							$('#previewHeadmaster').text(school.hm_name || '');
+							jQuery('#previewStandardFrom').text(school.class_start || '');
+							jQuery('#previewStandardTo').text(school.class_end || '');
+							jQuery('#previewPrincipal').text(school.principal_name || '');
+							jQuery('#previewHeadmaster').text(school.hm_name || '');
 
-							$('#duplicatePreview').show();
-							$('#duplicateBtn').show();
+							jQuery('#duplicatePreview').show();
+							jQuery('#duplicateBtn').show();
 						}
 					},
 					error: function () {
@@ -1618,13 +2429,13 @@ if (isset($is_edit) and $is_edit != 'no') {
 
 			// Function to handle item code input changes (used for manual entry validation)
 			function handleItemCodeChange(input) {
-				var inputElement = $(input);
+				var inputElement = jQuery(input);
 				if (inputElement.length === 0) {
 					console.error('Input element not found');
 					return;
 				}
 
-				var itemCode = inputElement.val();
+				var itemCode = inputElement.val().trim();
 				var inputId = inputElement.attr('id');
 
 				if (!inputId) {
@@ -1634,37 +2445,118 @@ if (isset($is_edit) and $is_edit != 'no') {
 
 				var fieldNumber = inputId.replace('txtItemCode_', '');
 
-				if (itemCode.length === 4) {
-					// Fetch item details
-					$.ajax({
+				if (itemCode.length === 3 || itemCode.length === 4) {
+					// 1. Check if the entered code is already selected in the school
+					var enteredCodeInt = parseInt(itemCode);
+					var enteredCodeStr = itemCode;
+					if (window.currentlySelectedItems && 
+						(window.currentlySelectedItems.includes(enteredCodeInt) || 
+						 window.currentlySelectedItems.includes(enteredCodeStr))) {
+						
+						swal({
+							title: "Oops!",
+							text: "This item has already been assigned. Please try another one.",
+							icon: "error",
+							button: "OK",
+						}).then(function() {
+							inputElement.val('');
+							var detailDiv = jQuery('#itemDetails_' + fieldNumber);
+							if (detailDiv.length > 0) {
+								detailDiv.hide();
+							}
+							setTimeout(function() {
+								inputElement.focus();
+							}, 50);
+						});
+						return;
+					}
+
+					// 2. Check if this item code is duplicate across the current participant's inputs (optional but good practice)
+					var isDuplicateInForm = false;
+					jQuery('.item-code-input').not(inputElement).each(function () {
+						if (jQuery(this).val().trim() === itemCode) {
+							isDuplicateInForm = true;
+						}
+					});
+
+					if (isDuplicateInForm) {
+						swal({
+							title: "Oops!",
+							text: "You have already selected this item for this participant.",
+							icon: "warning",
+							button: "OK",
+						}).then(function() {
+							inputElement.val('');
+							var detailDiv = jQuery('#itemDetails_' + fieldNumber);
+							if (detailDiv.length > 0) {
+								detailDiv.hide();
+							}
+							setTimeout(function() {
+								inputElement.focus();
+							}, 50);
+						});
+						return;
+					}
+
+					// 3. Fetch item details from the server to check validity
+					jQuery.ajax({
 						url: '<?php echo base_url(); ?>schools/registration/get_item_details',
 						type: 'POST',
 						data: { item_code: itemCode },
 						dataType: 'json',
 						success: function (response) {
-							var detailDiv = $('#itemDetails_' + fieldNumber);
+							var detailDiv = jQuery('#itemDetails_' + fieldNumber);
 							if (detailDiv.length > 0) {
 								if (response.item) {
+									// Also verify category range check using festival_master data from the response!
+									var participantClass = parseInt(jQuery('#txtClass').val());
+									var classStart = parseInt(response.item.class_start);
+									var classEnd = parseInt(response.item.class_end);
+									
+									if (participantClass < classStart || participantClass > classEnd) {
+										swal({
+											title: "Oops!",
+											text: "This item is not available for class " + participantClass + " (available for classes " + classStart + "-" + classEnd + ").",
+											icon: "error",
+											button: "OK",
+										}).then(function() {
+											inputElement.val('');
+											detailDiv.hide();
+											setTimeout(function() {
+												inputElement.focus();
+											}, 50);
+										});
+										return;
+									}
+
 									detailDiv.find('#itemName_' + fieldNumber).text(response.item.item_name + ' (' + response.item.item_type + ')');
 									detailDiv.show();
 								} else {
 									detailDiv.hide();
-									alert('Invalid item code: ' + itemCode);
-									inputElement.val('');
+									swal({
+										title: "Oops!",
+										text: "Invalid item code: " + itemCode,
+										icon: "error",
+										button: "OK",
+									}).then(function() {
+										inputElement.val('');
+										setTimeout(function() {
+											inputElement.focus();
+										}, 50);
+									});
 								}
 							}
 						},
 						error: function (xhr, status, error) {
 							console.error('Error validating item code:', error);
-							var detailDiv = $('#itemDetails_' + fieldNumber);
+							var detailDiv = jQuery('#itemDetails_' + fieldNumber);
 							if (detailDiv.length > 0) {
 								detailDiv.hide();
 							}
-							alert('Error validating item code');
 						}
 					});
 				} else {
-					var detailDiv = $('#itemDetails_' + fieldNumber);
+					var detailDiv = jQuery('#itemDetails_' + fieldNumber);
 					if (detailDiv.length > 0) {
 						detailDiv.hide();
 					}
@@ -1672,76 +2564,107 @@ if (isset($is_edit) and $is_edit != 'no') {
 			}
 
 			// Function to clear item selection
-			function clearItemSelection(inputId) {
-				var input = $('#' + inputId);
-				if (input.length === 0) {
-					console.error('Input element not found:', inputId);
-					return;
-				}
+			window.clearItemSelection = function(inputId) {
+				var input = document.getElementById(inputId);
+				if (!input) return;
 
-				input.val('');
-				input.prop('disabled', false);
-				input.css('background-color', '');
+				input.value = '';
+				input.disabled = false;
+				input.style.backgroundColor = '';
 
 				var fieldNumber = inputId.replace('txtItemCode_', '');
-				var detailDiv = $('#itemDetails_' + fieldNumber);
-				if (detailDiv.length > 0) {
-					detailDiv.hide();
+				var detailDiv = document.getElementById('itemDetails_' + fieldNumber);
+				if (detailDiv) detailDiv.style.display = 'none';
+				var iconSpan = document.getElementById('itemTypeIcon_' + fieldNumber);
+				if (iconSpan) { iconSpan.style.display = 'none'; iconSpan.innerHTML = ''; }
+				var nameSpan = document.getElementById('itemName_' + fieldNumber);
+				if (nameSpan) nameSpan.innerText = '';
+
+				if (typeof window.loadItemsByClass === 'function') {
+					window.loadItemsByClass();
 				}
-			}
+			};
 
 			// Function to clear all item selections
-			function clearAllItemSelections() {
-				$('.item-code-input').each(function () {
-					$(this).val('');
-					$(this).prop('disabled', false);
-					$(this).css('background-color', '');
-					var fieldNumber = $(this).attr('id').replace('txtItemCode_', '');
-					$('#itemDetails_' + fieldNumber).hide();
-				});
-			}
+			window.clearAllItemSelections = function() {
+				for (var i = 1; i <= 5; i++) {
+					window.clearItemSelection('txtItemCode_' + i);
+				}
+				for (var p = 1; p <= 3; p++) {
+					var pInput = document.getElementById('txtPinnanyCode_' + p);
+					if (pInput) pInput.value = '';
+					var pDetail = document.getElementById('pinnanyDetails_' + p);
+					if (pDetail) pDetail.style.display = 'none';
+					var pIcon = document.getElementById('pinnanyTypeIcon_' + p);
+					if (pIcon) { pIcon.style.display = 'none'; pIcon.innerHTML = ''; }
+					var pName = document.getElementById('pinnanyName_' + p);
+					if (pName) pName.innerText = '';
+				}
+				if (typeof window.loadItemsByClass === 'function') {
+					window.loadItemsByClass();
+				}
+			};
 
 			// Enhanced clearForm function
-			function clearForm() {
-				$('#txtADNO').val('');
-				$('#txtParticipantName').val('');
-				$('#txtClass').val('');
-				$('#txtGender').val('');
-				$('#userfile').val('');
+			window.clearForm = function() {
+				var txtADNO = document.getElementById('txtADNO');
+				var txtParticipantName = document.getElementById('txtParticipantName');
+				var txtClass = document.getElementById('txtClass');
+				var txtGender = document.getElementById('txtGender');
+				var userfile = document.getElementById('userfile');
+				var hidADNO = document.getElementById('hidADNO');
+
+				if (txtADNO) txtADNO.value = '';
+				if (txtParticipantName) txtParticipantName.value = '';
+				if (txtClass) txtClass.value = '';
+				if (txtGender) txtGender.value = '';
+				if (userfile) userfile.value = '';
+				if (hidADNO) hidADNO.value = '';
 
 				// Reset photo preview
-				removeCurrentPhoto();
+				if (typeof removeCurrentPhoto === 'function') {
+					removeCurrentPhoto();
+				}
 
 				// Clear all item selections
-				clearAllItemSelections();
+				if (typeof window.clearAllItemSelections === 'function') {
+					window.clearAllItemSelections();
+				}
+
+				// Reset modal title and button for add
+				var modalLabel = document.getElementById('participantModalLabel');
+				if (modalLabel) modalLabel.innerText = 'Add Participant';
+				var saveBtn = document.getElementById('save_participant_btn');
+				if (saveBtn) {
+					saveBtn.innerText = 'Save Participant';
+					saveBtn.disabled = false;
+					saveBtn.setAttribute('onclick', 'fncSaveParticipant()');
+				}
 
 				// Clear available items
-				$('#availableItemsContainer').html('<div class="text-center text-muted"><p>Please select a class and gender to view available items.</p></div>');
-
-				// Clear participant ID
-				$('#hidADNO').val('');
-
-				// Clear pinnany codes inputs
-				$('.pinnany-code-input').val('');
-			}
+				var availableItemsContainer = document.getElementById('availableItemsContainer');
+				if (availableItemsContainer) {
+					availableItemsContainer.innerHTML = '<div class="text-center text-muted py-4"><i class="bi bi-info-circle fs-4 text-secondary mb-2 d-block"></i><p style="font-size: 0.85rem;" class="mb-0">Please select a class to view available items.</p></div>';
+				}
+			};
 
 			// Initialize item code input handlers when document is ready
-			$(document).ready(function () {
+			jQuery(document).ready(function () {
 				// Add change handlers to item code inputs
-				$('.item-code-input').each(function () {
-					if ($(this).length > 0) {
-						$(this).on('input', function () {
+				jQuery('.item-code-input').each(function () {
+					if (jQuery(this).length > 0) {
+						jQuery(this).on('input', function () {
 							handleItemCodeChange(this);
 						});
 					}
 				});
 
 				// Add clear buttons to item inputs
-				$('.item-code-input').each(function () {
-					if ($(this).length > 0) {
-						var inputId = $(this).attr('id');
+				jQuery('.item-code-input').each(function () {
+					if (jQuery(this).length > 0) {
+						var inputId = jQuery(this).attr('id');
 						if (inputId) {
-							$(this).after('<button type="button" class="btn btn-outline-danger btn-sm ms-1" onclick="clearItemSelection(\'' + inputId + '\')" title="Clear selection"><i class="fas fa-times"></i></button>');
+							jQuery(this).after('<button type="button" class="btn btn-outline-danger btn-sm" onclick="clearItemSelection(\'' + inputId + '\')" title="Clear selection"><i class="fas fa-times"></i></button>');
 						}
 					}
 				});
@@ -1833,99 +2756,224 @@ if (isset($is_edit) and $is_edit != 'no') {
 			}
 
 			// Override the editParticipant function to set participant ID
-			var originalEditParticipant = window.editParticipant;
-			window.editParticipant = function (admnNo) {
-
-				// Set the participant ID for item selection
-				var hidADNO = $('#hidADNO');
-				if (hidADNO.length > 0) {
-					hidADNO.val(admnNo);
+			// Enhanced editParticipant function with button spinner
+			window.editParticipant = function (admnNo, btn) {
+				if (!admnNo) {
+					console.error('Admission number is missing in editParticipant');
+					return;
 				}
+				var originalHtml = '';
+				if (btn) {
+					originalHtml = btn.innerHTML;
+					btn.disabled = true;
+					btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" style="width: 14px; height: 14px;"></span>';
+				}
+				var restoreBtn = function() {
+					if (btn) {
+						btn.disabled = false;
+						btn.innerHTML = originalHtml || '<i class="bi bi-pencil-fill fs-7"></i>';
+					}
+				};
 
-				// Call original function if it exists
-				if (originalEditParticipant && typeof originalEditParticipant === 'function') {
-					originalEditParticipant(admnNo);
-				} else {
-					// Fallback to default behavior
-					var hidSchoolId = $('#hidSchoolId');
-					if (hidSchoolId.length === 0) {
+				var hidADNO = document.getElementById('hidADNO');
+				if (hidADNO) hidADNO.value = admnNo;
 
+				var schCode = (document.getElementById('hidSchoolId') ? document.getElementById('hidSchoolId').value : '') ||
+				              (document.getElementById('formSchoolHidSchoolId') ? document.getElementById('formSchoolHidSchoolId').value : '') ||
+				              '<?php echo esc($active_code ?? ''); ?>';
+
+				var requestUrl = '<?php echo base_url('schools/registration/get_participant_data'); ?>';
+				var formData = new FormData();
+				formData.append('hidSchoolId', schCode);
+				formData.append('hidADNO', admnNo);
+
+				fetch(requestUrl, {
+					method: 'POST',
+					body: formData
+				})
+				.then(function (res) {
+					if (!res.ok) {
+						throw new Error('HTTP ' + res.status);
+					}
+					return res.json();
+				})
+				.then(function (response) {
+					restoreBtn();
+					if (response.error) {
+						if (typeof Swal !== 'undefined') {
+							Swal.fire({ icon: 'error', title: 'Error', text: response.error });
+						} else if (typeof swal !== 'undefined') {
+							swal("Oops!", response.error, "error");
+						} else {
+							alert(response.error);
+						}
 						return;
 					}
 
-					$.ajax({
-						url: '<?php echo base_url(); ?>schools/registration/get_participant_data',
-						type: 'POST',
-						data: {
-							hidSchoolId: hidSchoolId.val(),
-							hidADNO: admnNo
-						},
-						dataType: 'json',
-						success: function (response) {
-							if (response.error) {
-								alert(response.error);
-							} else {
-								// Populate form fields safely
-								var txtADNO = $('#txtADNO');
-								var txtParticipantName = $('#txtParticipantName');
-								var txtClass = $('#txtClass');
-								var txtGender = $('#txtGender');
+					var txtADNO = document.getElementById('txtADNO');
+					var txtParticipantName = document.getElementById('txtParticipantName');
+					var txtClass = document.getElementById('txtClass');
+					var txtGender = document.getElementById('txtGender');
 
-								if (txtADNO.length > 0) txtADNO.val(response.admn_no);
-								if (txtParticipantName.length > 0) txtParticipantName.val(response.participant_name);
-								if (txtClass.length > 0) txtClass.val(response.class);
-								if (txtGender.length > 0) txtGender.val(response.gender);
+					if (txtADNO) txtADNO.value = response.admn_no || '';
+					if (txtParticipantName) txtParticipantName.value = response.participant_name || '';
+					if (txtClass) txtClass.value = response.class || '';
+					if (txtGender) txtGender.value = response.gender || '';
 
-								// Load photo immediately
-								if (response.photo_url && response.photo_url !== 'false' && response.photo_url !== 'null') {
-									loadModalPhoto(response.photo_url);
-								} else {
-									removeCurrentPhoto();
-								}
+					if (response.photo_url && response.photo_url !== 'false' && response.photo_url !== 'null') {
+						if (typeof loadModalPhoto === 'function') {
+							loadModalPhoto(response.photo_url);
+						}
+					} else {
+						if (typeof removeCurrentPhoto === 'function') {
+							removeCurrentPhoto();
+						}
+					}
 
-								// Load items for the selected class
-								loadItemsByClass();
+					// Clear item inputs first
+					for (var c = 1; c <= 5; c++) {
+						var inpC = document.getElementById('txtItemCode_' + c);
+						if (inpC) inpC.value = '';
+						var dC = document.getElementById('itemDetails_' + c);
+						if (dC) dC.style.display = 'none';
+						var iC = document.getElementById('itemTypeIcon_' + c);
+						if (iC) { iC.style.display = 'none'; iC.innerHTML = ''; }
+						var nC = document.getElementById('itemName_' + c);
+						if (nC) nC.innerText = '';
+					}
+					for (var p = 1; p <= 3; p++) {
+						var inP = document.getElementById('txtPinnanyCode_' + p);
+						if (inP) inP.value = '';
+						var dP = document.getElementById('pinnanyDetails_' + p);
+						if (dP) dP.style.display = 'none';
+						var iP = document.getElementById('pinnanyTypeIcon_' + p);
+						if (iP) { iP.style.display = 'none'; iP.innerHTML = ''; }
+						var nP = document.getElementById('pinnanyName_' + p);
+						if (nP) nP.innerText = '';
+					}
 
-								// Populate item codes if any
-								if (response.items && Array.isArray(response.items)) {
-									for (var i = 0; i < response.items.length; i++) {
-										var item = response.items[i];
-										var inputId = 'txtItemCode_' + (i + 1);
-										var inputElement = $('#' + inputId);
-
-										if (inputElement.length > 0) {
-											inputElement.val(item.item_code);
-
-											// Show item details
-											var detailDiv = $('#itemDetails_' + (i + 1));
-											if (detailDiv.length > 0) {
-												detailDiv.find('#itemName_' + (i + 1)).text(item.item_name + ' (' + item.item_type + ')');
-												detailDiv.show();
-											}
-
-											// Disable the input
-											//inputElement.prop('disabled', true);
-											//inputElement.css('background-color', '#e9ecef');
+					// Populate item codes from response
+					if (response.items && Array.isArray(response.items)) {
+						var regularIdx = 1;
+						var pinnanyIdx = 1;
+						for (var i = 0; i < response.items.length; i++) {
+							var item = response.items[i];
+							if (item.item_type === 'P' || item.is_pinnany === 'Y') {
+								if (pinnanyIdx <= 3) {
+									var pInput = document.getElementById('txtPinnanyCode_' + pinnanyIdx);
+									if (pInput && item && item.item_code) {
+										pInput.value = item.item_code;
+										if (typeof window.updatePinnanyCodeIcon === 'function') {
+											window.updatePinnanyCodeIcon(pinnanyIdx, item.item_type || 'P', item.item_name || '');
 										}
 									}
+									pinnanyIdx++;
 								}
-
-								// Open the modal and refresh photo after shown
-								var modalEl = document.getElementById('participantModal');
-								var participantModal = new bootstrap.Modal(modalEl);
-								modalEl.addEventListener('shown.bs.modal', function () {
-									if (response.photo_url && response.photo_url !== 'false' && response.photo_url !== 'null') {
-										loadModalPhoto(response.photo_url);
+							} else {
+								if (regularIdx <= 5) {
+									var inputElement = document.getElementById('txtItemCode_' + regularIdx);
+									if (inputElement && item && item.item_code) {
+										inputElement.value = item.item_code;
+										if (typeof window.updateItemCodeIcon === 'function') {
+											window.updateItemCodeIcon(regularIdx, item.item_type || 'S', item.item_name || '');
+										}
 									}
-								}, { once: true });
-								participantModal.show();
+									regularIdx++;
+								}
 							}
-						},
-						error: function (xhr, status, error) {
+						}
+					}
 
-							alert('Error loading participant data');
+					// Re-render available items so current assigned items are excluded
+					if (typeof window.loadItemsByClass === 'function') {
+						window.loadItemsByClass();
+					}
+
+					// Set modal title and button for edit
+					var modalLabel = document.getElementById('participantModalLabel');
+					if (modalLabel) modalLabel.innerText = 'Edit Participant';
+					var saveBtn = document.getElementById('save_participant_btn');
+					if (saveBtn) {
+						saveBtn.innerText = 'Update Participant';
+						saveBtn.disabled = false;
+						saveBtn.setAttribute('onclick', 'fncUpdateParticipant(\'' + admnNo + '\')');
+					}
+
+					var modalEl = document.getElementById('participantModal');
+					if (modalEl) {
+						if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+							var participantModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+							participantModal.show();
+						} else if (typeof window.jQuery !== 'undefined' && typeof window.jQuery(modalEl).modal === 'function') {
+							window.jQuery(modalEl).modal('show');
+						} else {
+							modalEl.style.display = 'block';
+							modalEl.classList.add('show');
+							document.body.classList.add('modal-open');
+						}
+					} else {
+						console.error('Participant modal element not found!');
+					}
+				})
+				.catch(function (err) {
+					restoreBtn();
+					console.error('Error loading participant data:', err);
+					if (typeof Swal !== 'undefined') {
+						Swal.fire({ icon: 'error', title: 'Error', text: 'Error loading participant data. Please try again.' });
+					} else {
+						alert('Error loading participant data');
+					}
+				});
+			};
+
+			// Enhanced deleteParticipant function with button & dialog spinner
+			window.deleteParticipant = function (admnNo, btn) {
+				var hidSchoolId = jQuery('#hidSchoolId').val() || '<?php echo esc($active_code); ?>';
+				if (typeof Swal !== 'undefined') {
+					Swal.fire({
+						title: 'Delete Participant?',
+						text: 'Are you sure you want to delete this participant (AD No: ' + admnNo + ')?',
+						icon: 'warning',
+						showCancelButton: true,
+						confirmButtonColor: '#dc3545',
+						cancelButtonColor: '#6c757d',
+						confirmButtonText: '<i class="bi bi-trash3-fill me-1"></i> Yes, Delete',
+						cancelButtonText: 'Cancel'
+					}).then((result) => {
+						if (result.isConfirmed) {
+							if (btn) {
+								btn.disabled = true;
+								btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" style="width: 14px; height: 14px;"></span>';
+							}
+							Swal.fire({
+								title: 'Deleting...',
+								text: 'Deleting participant. Please wait...',
+								allowOutsideClick: false,
+								didOpen: () => { Swal.showLoading(); }
+							});
+							var hidADNO = document.getElementById('hidADNO');
+							if (hidADNO) hidADNO.value = admnNo;
+							var formParticipant = document.getElementById('formParticipant');
+							if (formParticipant) {
+								formParticipant.action = '<?php echo base_url(); ?>schools/registration/delete_participant_details';
+								formParticipant.submit();
+							}
 						}
 					});
+				} else {
+					if (confirm('Are you sure you want to delete participant ' + admnNo + '?')) {
+						if (btn) {
+							btn.disabled = true;
+							btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" style="width: 14px; height: 14px;"></span>';
+						}
+						var hidADNO = document.getElementById('hidADNO');
+						if (hidADNO) hidADNO.value = admnNo;
+						var formParticipant = document.getElementById('formParticipant');
+						if (formParticipant) {
+							formParticipant.action = '<?php echo base_url(); ?>schools/registration/delete_participant_details';
+							formParticipant.submit();
+						}
+					}
 				}
 			};
 
@@ -1935,120 +2983,212 @@ if (isset($is_edit) and $is_edit != 'no') {
 
 
 <?php
-$show_participants = (@$school_show == 'show');
+$show_participants_initial = !empty($active_code) || empty($initial_show_school_details);
 ?>
 
-<div style="display:<?php echo $show_participants ? 'block' : 'none'; ?>">
+<div id="registeredParticipantsWrapper" style="display:<?php echo $show_participants_initial ? 'block' : 'none'; ?>;">
 	<div class="row justify-content-center">
-		<div class="col-md-12 col-sm-12 col-xl-12">
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title">
-						Participants
-					</h5>
+		<div class="col-12">
+			<div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden" style="border: 1px solid #e2e8f0 !important;">
+				<div class="card-header bg-white py-3 px-4 border-0 d-flex flex-wrap justify-content-between align-items-center gap-2" style="background: linear-gradient(135deg, #f8fafc, #ffffff) !important; border-bottom: 1px solid #edf2f7 !important;">
+					<div class="d-flex align-items-center gap-2">
+						<i class="bi bi-person-lines-fill text-primary fs-5"></i>
+						<h5 class="fw-bold mb-0 text-dark">Registered Participants</h5>
+					</div>
+					<div class="d-flex align-items-center gap-2">
+						<span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-2 fw-semibold fs-7">
+							Total: <?php echo !empty($participant_details) ? count($participant_details) : 0; ?> Students
+						</span>
+					</div>
+				</div>
 
-					<?php if (!empty($participant_details) && count($participant_details) > 0): ?>
+				<?php if (!empty($participant_details) && count($participant_details) > 0): ?>
+					<!-- Top Search & Filter Bar -->
+					<div class="p-3 bg-light bg-opacity-50 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-3">
+						<div class="d-flex align-items-center gap-2">
+							<label class="text-muted small fw-semibold mb-0" for="participantsPageSize">Show</label>
+							<select class="form-select form-select-sm rounded-3 shadow-2xs" id="participantsPageSize" style="width: 85px;">
+								<option value="5">5</option>
+								<option value="10" selected>10</option>
+								<option value="25">25</option>
+								<option value="50">50</option>
+								<option value="all">All</option>
+							</select>
+							<span class="text-muted small">entries per page</span>
+						</div>
+						<div class="d-flex align-items-center gap-2">
+							<div class="input-group input-group-sm shadow-2xs" style="min-width: 260px;">
+								<span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+								<input type="text" class="form-control border-start-0 border-end-0 ps-0" id="participantsSearch" placeholder="Search student name, AD No, items...">
+								<button class="btn btn-white bg-white border border-start-0 text-muted" type="button" onclick="document.getElementById('participantsSearch').value=''; document.getElementById('participantsSearch').dispatchEvent(new Event('input'));" title="Clear"><i class="bi bi-x-circle"></i></button>
+							</div>
+						</div>
+					</div>
+
+					<div class="card-body p-0">
 						<div class="table-responsive">
-							<table class="table table-striped table-hover table-bordered">
-								<thead class="table-dark">
-									<tr>
-										<th width="5%">#</th>
-										<th width="6%">AD No.</th>
-										<th width="8%">Photo</th>
-										<th width="6%">Reg No.</th>
-										<th width="18%">Name</th>
-										<th width="5%">Class</th>
-										<th width="7%">Gender</th>
-										<th width="25%">Items</th>
+							<table class="table table-hover align-middle mb-0 custom-participant-table" id="participantsTable">
+								<thead>
+									<tr class="text-uppercase text-secondary fw-semibold border-bottom" style="font-size: 12px; letter-spacing: 0.5px; background-color: #f8fafc;">
+										<th class="py-3 px-3 text-center sortable" data-sort="number" style="width: 50px; cursor: pointer;">
+											<span>#</span> <span class="sort-icon text-muted">⇅</span>
+										</th>
+										<th class="py-3 px-3 text-center sortable" data-sort="number" style="width: 100px; cursor: pointer;">
+											<span>AD No.</span> <span class="sort-icon text-muted">⇅</span>
+										</th>
+										<th class="py-3 px-3 text-center" style="width: 70px;">Photo</th>
+										<th class="py-3 px-3 text-center sortable" data-sort="number" style="width: 100px; cursor: pointer;">
+											<span>Reg No.</span> <span class="sort-icon text-muted">⇅</span>
+										</th>
+										<th class="py-3 px-3 sortable" data-sort="string" style="cursor: pointer;">
+											<span>Student Name</span> <span class="sort-icon text-muted">⇅</span>
+										</th>
+										<th class="py-3 px-3 text-center sortable" data-sort="class" style="width: 90px; cursor: pointer;">
+											<span>Class</span> <span class="sort-icon text-muted">⇅</span>
+										</th>
+										<th class="py-3 px-3 text-center sortable" data-sort="string" style="width: 95px; cursor: pointer;">
+											<span>Gender</span> <span class="sort-icon text-muted">⇅</span>
+										</th>
+										<th class="py-3 px-3 sortable" data-sort="string" style="cursor: pointer;">
+											<span>Registered Items</span> <span class="sort-icon text-muted">⇅</span>
+										</th>
 										<?php if (isset($is_edit) and $is_edit != 'no') { ?>
-											<th width="10%">Actions</th>
+											<th class="py-3 px-3 text-center" style="width: 100px;">Actions</th>
 										<?php } ?>
 									</tr>
 								</thead>
 								<tbody>
 									<?php
+									$db = \Config\Database::connect();
 									$count = 1;
 									for ($j = 0; $j < count($participant_details); $j++) {
-										$items = $this->Registration_Model->get_participant_item_details($participant_details[$j]['participant_id'], $participant_details[$j]['admn_no']);
-										$photo_url = $participant_photos[$participant_details[$j]['admn_no']];
-										$classname = ($j % 2 == 0) ? 'table_row_second' : 'table_row_first'
-											?>
-										<tr>
-											<td class="text-center"><?php echo $count; ?></td>
-											<td class="text-center"><?php echo $participant_details[$j]['admn_no'] ?></td>
-											<td class="text-center">
-												<?php
-												$photo_display_url = $photo_url ? $photo_url : base_url('photos/img_user_nophoto.png');
-												?>
-												<img src="<?php echo $photo_display_url; ?>" width="45" height="45"
-													class="img-thumbnail participant-photo"
-													alt="<?php echo $photo_url ? 'Photo' : 'No photo'; ?>"
-													onerror="this.src='<?php echo base_url('photos/img_user_nophoto.png'); ?>'"
-													data-admn-no="<?php echo $participant_details[$j]['admn_no']; ?>"
-													data-school-code="<?php echo $school_details[0]['school_code']; ?>"
-													loading="lazy" />
+										$target_sch = !empty($school_details[0]['school_code']) ? $school_details[0]['school_code'] : $active_code;
+										$items = $db->table('participant_item_details PD')
+											->select('PD.*, IM.item_name')
+											->join('item_master IM', 'IM.item_code = PD.item_code')
+											->where('PD.school_code', $target_sch)
+											->where('PD.participant_id', $participant_details[$j]['participant_id'])
+											->where('PD.admn_no', $participant_details[$j]['admn_no'])
+											->get()->getResultArray();
+										$photo_url = $participant_photos[$participant_details[$j]['admn_no']] ?? null;
+										$photo_display_url = $photo_url ? $photo_url : base_url('photos/img_user_nophoto.png');
+									?>
+										<tr class="align-middle">
+											<td class="text-center text-muted fw-semibold py-3"><?php echo $count; ?></td>
+											<td class="text-center fw-bold text-dark font-monospace"><?php echo $participant_details[$j]['admn_no'] ?></td>
+											<td class="text-center py-2">
+												<div class="d-flex justify-content-center">
+													<img src="<?php echo $photo_display_url; ?>" 
+														class="rounded-circle shadow-sm participant-photo participant-avatar-img"
+														style="width: 46px; height: 46px; object-fit: cover; border: 2px solid #ffffff; box-shadow: 0 3px 8px rgba(0,0,0,0.12);"
+														alt="<?php echo $photo_url ? 'Photo' : 'No photo'; ?>"
+														onerror="this.src='<?php echo base_url('photos/img_user_nophoto.png'); ?>'"
+														data-admn-no="<?php echo $participant_details[$j]['admn_no']; ?>"
+														data-school-code="<?php echo $school_details[0]['school_code'] ?? $active_code; ?>"
+														loading="lazy" />
+												</div>
 											</td>
-											<td class="text-center"><?php echo $participant_details[$j]['participant_id'] ?>
+											<td class="text-center fw-semibold text-secondary font-monospace"><?php echo $participant_details[$j]['participant_id'] ?></td>
+											<td class="py-3">
+												<div class="fw-bold text-dark fs-6"><?php echo esc($participant_details[$j]['participant_name']); ?></div>
 											</td>
-											<td><?php echo $participant_details[$j]['participant_name'] ?></td>
-											<td class="text-center"><?php echo $participant_details[$j]['class'] ?></td>
 											<td class="text-center">
-												<?php echo ($participant_details[$j]['gender'] == 'B') ? 'Boy' : 'Girl'; ?>
+												<span class="badge bg-secondary-subtle text-secondary-emphasis rounded-3 px-2 py-1 fw-bold fs-7">
+													Std <?php echo $participant_details[$j]['class']; ?>
+												</span>
+											</td>
+											<td class="text-center">
+												<?php if ($participant_details[$j]['gender'] == 'B'): ?>
+													<span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2 py-1 d-inline-flex align-items-center gap-1">
+														<i class="bi bi-gender-male"></i> Boy
+													</span>
+												<?php else: ?>
+													<span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-1 d-inline-flex align-items-center gap-1">
+														<i class="bi bi-gender-female"></i> Girl
+													</span>
+												<?php endif; ?>
 											</td>
 											<td>
-												<?php
-												$item_codes = [];
-												for ($k = 0; $k < 5; $k++) {
-													if (@$items[$k]['item_code']) {
-														$badge_class = (@$items[$k]['spo_id'] != 0) ? 'bg-danger' : 'bg-secondary';
-														$item_codes[] = '<span class="badge ' . $badge_class . '" title="' . (@$items[$k]['item_name']) . '">' . @$items[$k]['item_code'] . '(' . @$items[$k]['item_type'] . ')</span>';
+												<div class="d-flex flex-wrap gap-1">
+													<?php
+													$has_any_item = false;
+													for ($k = 0; $k < count($items); $k++) {
+														if (!empty($items[$k]['item_code'])) {
+															$has_any_item = true;
+															$type = $items[$k]['item_type'] ?? '';
+															$code = $items[$k]['item_code'];
+															$name = esc($items[$k]['item_name'] ?? '');
+															if ($type == 'G') {
+																echo '<span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle rounded-pill px-2 py-1 d-inline-flex align-items-center gap-1 shadow-2xs" title="' . $name . '"><i class="bi bi-people-fill text-primary"></i> ' . $code . ' (G)</span>';
+															} elseif ($type == 'P') {
+																echo '<span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2 py-1 d-inline-flex align-items-center gap-1 shadow-2xs" title="' . $name . '"><i class="bi bi-music-note-beamed text-warning"></i> ' . $code . ' (P)</span>';
+															} else {
+																echo '<span class="badge bg-success-subtle text-success-emphasis border border-success-subtle rounded-pill px-2 py-1 d-inline-flex align-items-center gap-1 shadow-2xs" title="' . $name . '"><i class="bi bi-person-fill text-success"></i> ' . $code . ' (S)</span>';
+															}
+														}
 													}
-												}
-												echo implode(' ', $item_codes);
-												?>
+													if (!$has_any_item) {
+														echo '<span class="text-muted small fst-italic">No items</span>';
+													}
+													?>
+												</div>
 											</td>
 											<?php if (isset($is_edit) and $is_edit != 'no') { ?>
-												<td class="text-center">
-													<a href="javascript:void(0)"
-														onClick="javascript:editParticipant('<?php echo $participant_details[$j]['admn_no'] ?>')"
-														class="btn btn-sm me-1" title="Edit">
-														<img src="<?php echo base_url(); ?>images/edit.png" alt="Edit" width="16"
-															height="16">
-													</a>
-													<a href="javascript:void(0)"
-														onClick="javascript:deleteParticipant('<?php echo $participant_details[$j]['admn_no'] ?>')"
-														class="btn btn-sm" title="Delete">
-														<img src="<?php echo base_url(); ?>images/delete.png" alt="Delete"
-															width="16" height="16">
-													</a>
+												<td class="text-center py-3">
+													<div class="d-flex justify-content-center gap-2">
+														<button type="button"
+															onClick="javascript:editParticipant('<?php echo $participant_details[$j]['admn_no'] ?>', this)"
+															class="btn btn-sm btn-outline-primary rounded-circle shadow-sm d-inline-flex align-items-center justify-content-center p-0"
+															style="width: 34px; height: 34px;" title="Edit Participant">
+															<i class="bi bi-pencil-fill fs-7"></i>
+														</button>
+														<button type="button"
+															onClick="javascript:deleteParticipant('<?php echo $participant_details[$j]['admn_no'] ?>', this)"
+															class="btn btn-sm btn-outline-danger rounded-circle shadow-sm d-inline-flex align-items-center justify-content-center p-0"
+															style="width: 34px; height: 34px;" title="Delete Participant">
+															<i class="bi bi-trash3-fill fs-7"></i>
+														</button>
+													</div>
 												</td>
 											<?php } ?>
 										</tr>
-										<?php
+									<?php
 										$count++;
 									}
 									?>
 								</tbody>
 							</table>
 						</div>
-					<?php else: ?>
+					</div>
+
+					<!-- Bottom Pagination Bar -->
+					<div class="card-footer bg-white py-3 px-4 border-0 d-flex flex-wrap justify-content-between align-items-center gap-2" style="border-top: 1px solid #edf2f7 !important;">
+						<div class="text-muted small" id="participantsInfo">
+							Showing 1 to <?php echo min(5, count($participant_details)); ?> of <?php echo count($participant_details); ?> entries
+						</div>
+						<nav aria-label="Participant Table Pagination">
+							<ul class="pagination pagination-sm mb-0 gap-1" id="participantsPagination">
+								<!-- Dynamic Page Numbers -->
+							</ul>
+						</nav>
+					</div>
+				<?php else: ?>
+					<div class="card-body p-0">
 						<div class="text-center py-5">
-							<div class="empty-state-container">
-								<div class="empty-state-icon mb-3" style="font-size: 4rem; opacity: 0.3;">
-									<i class="fas fa-users"></i>
+							<div class="empty-state-container py-4">
+								<div class="empty-state-icon mb-3 bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 72px; height: 72px;">
+									<i class="bi bi-people fs-2"></i>
 								</div>
-								<h5 class="text-muted">No participants found</h5>
-								<p class="text-muted mb-4">Start by adding your first participant to the system.</p>
-								<?php if (!empty($school_details) && !empty($school_details[0]['school_code'])): ?>
-									<button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal"
-										data-bs-target="#participantModal" onclick="clearForm()">
-										<i class="fas fa-plus"></i> Add Participant
-									</button>
-								<?php endif; ?>
+								<h5 class="fw-bold text-dark mb-1">No Participants Registered Yet</h5>
+								<p class="text-muted mb-3 small" style="max-width: 360px; margin: 0 auto;">Start registering your students by clicking the Add Participant button below.</p>
+								<button type="button" class="btn btn-success rounded-pill px-4 py-2 fw-semibold shadow-sm" data-bs-toggle="modal"
+									data-bs-target="#participantModal" onclick="clearForm()">
+									<i class="bi bi-plus-circle-fill me-1"></i> Add Participant
+								</button>
 							</div>
 						</div>
-					<?php endif; ?>
-				</div>
+					</div>
+				<?php endif; ?>
 			</div>
 		</div>
 	</div>
@@ -2058,55 +3198,86 @@ $show_participants = (@$school_show == 'show');
 echo form_close();
 ?>
 
-
-
 <?php
 if (!empty(@$group_details['group_array'])) {
 	if (count(@$group_details['group_array']) > 0) {
 
 		echo form_open('schools/registration/update_group_captain', array('id' => 'formGroupLeader'));
 		?>
-		<div
-			style="display:<?php echo (count(@$group_details['group_array']) > 0 && @$school_show == 'show') ? 'block' : 'none'; ?>; padding:10px 0 10px; 0">
-			<?php
-
-			?>
+		<div style="display:<?php echo (count(@$group_details['group_array']) > 0 && @$school_show == 'show') ? 'block' : 'none'; ?>;" class="mb-4">
 			<div class="row justify-content-center">
-				<div class="col-md-12 col-sm-12 col-xl-12">
-					<div class="card">
-						<div class="card-body">
-							<h5 class="card-title"> Captains List</h5>
+				<div class="col-12">
+					<div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="border: 1px solid #e2e8f0 !important;">
+						<div class="card-header bg-white py-3 px-4 border-0 d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #f8fafc, #ffffff) !important; border-bottom: 1px solid #edf2f7 !important;">
+							<div class="d-flex align-items-center gap-2">
+								<i class="bi bi-award-fill text-warning fs-5"></i>
+								<h5 class="fw-bold mb-0 text-dark">Captains List</h5>
+							</div>
+							<span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-1 fw-semibold">
+								Total: <?php echo count($group_details['group_array'] ?? []); ?> Groups
+							</span>
+						</div>
 
-							<div class="table-responsive-sm">
-								<table width="100%" border="0" cellspacing="0" cellpadding="4" align="center">
-									<tr>
-										<th>Item Code - Item Names</th>
-										<th>Participants</th>
-									</tr>
+						<!-- Top Filter & Search Bar for Captains -->
+						<div class="p-3 bg-light bg-opacity-50 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-3">
+							<div class="d-flex align-items-center gap-2">
+								<label class="text-muted small fw-semibold mb-0" for="captainsPageSize">Show</label>
+								<select class="form-select form-select-sm rounded-3 shadow-2xs" id="captainsPageSize" style="width: 85px;">
+									<option value="5" selected>5</option>
+									<option value="10">10</option>
+									<option value="25">25</option>
+									<option value="all">All</option>
+								</select>
+								<span class="text-muted small">entries per page</span>
+							</div>
+							<div class="d-flex align-items-center gap-2">
+								<div class="input-group input-group-sm shadow-2xs" style="min-width: 260px;">
+									<span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+									<input type="text" class="form-control border-start-0 border-end-0 ps-0" id="captainsSearch" placeholder="Search item code, name, captain...">
+									<button class="btn btn-white bg-white border border-start-0 text-muted" type="button" onclick="document.getElementById('captainsSearch').value=''; document.getElementById('captainsSearch').dispatchEvent(new Event('input'));" title="Clear"><i class="bi bi-x-circle"></i></button>
+								</div>
+							</div>
+						</div>
+
+						<div class="card-body p-0">
+							<div class="table-responsive">
+								<table class="table table-hover align-middle mb-0" id="captainsTable">
+									<thead style="background-color: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+										<tr class="text-uppercase text-secondary fw-semibold border-bottom" style="font-size: 12px; letter-spacing: 0.5px;">
+											<th class="py-3 px-3 text-center sortable" data-sort="number" style="width: 60px; cursor: pointer;">
+												<span>#</span> <span class="sort-icon text-muted">⇅</span>
+											</th>
+											<th class="py-3 px-3 sortable" data-sort="string" style="width: 45%; cursor: pointer;">
+												<span>Item Code & Name</span> <span class="sort-icon text-muted">⇅</span>
+											</th>
+											<th class="py-3 px-3 sortable" data-sort="select" style="cursor: pointer;">
+												<span>Assigned Captain</span> <span class="sort-icon text-muted">⇅</span>
+											</th>
+										</tr>
+									</thead>
+									<tbody>
 									<?php
 									$count = 1;
-									$group_array = $group_details['group_array'];
-									$group_leader = $group_details['group_leader'];
-									$group_participant_array = $group_details['group_participant_array'];
+									$group_array = $group_details['group_array'] ?? [];
+									$group_leader = $group_details['group_leader'] ?? [];
+									$group_participant_array = $group_details['group_participant_array'] ?? [];
 									foreach ($group_array as $groups) {
-										$classname = ($j % 2 == 0) ? 'table_row_second' : 'table_row_first'
-											?>
+										?>
 										<tr>
-											<td width="30%" class="<?php echo $classname ?>">
-												<?php echo $groups['item_code'] . ' - ' . $groups['item_name'] ?>
-												<input type="hidden" name="hidGrpItemCode_<?php echo $count ?>"
-													id="hidGrpItemCode_<?php echo $count ?>"
-													value="<?php echo $groups['item_code'] ?>">
+											<td class="text-center text-muted fw-semibold py-3"><?php echo $count; ?></td>
+											<td class="py-3 px-3 fw-bold text-dark">
+												<span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2 py-1 me-2"><?php echo $groups['item_code']; ?></span>
+												<?php echo esc($groups['item_name']); ?>
+												<input type="hidden" name="hidGrpItemCode_<?php echo $count ?>" id="hidGrpItemCode_<?php echo $count ?>" value="<?php echo $groups['item_code'] ?>">
 											</td>
-											<td width="70%" class="<?php echo $classname ?>">
+											<td class="py-3 px-3">
 												<?php
 												if (isset($is_edit) and $is_edit != 'no') {
 													print (form_dropdown(
 														'cmbGrpParticipant_' . $count,
-														$group_participant_array[$groups['item_code']],
+														$group_participant_array[$groups['item_code']] ?? [],
 														@$group_leader[$groups['item_code']],
-														'id="cmbGrpParticipant_"' . $count . '
-                                class="form-control" onChange="javascript:$(\'divCaptainSubmit\').style.display = \'block\'"'
+														'id="cmbGrpParticipant_' . $count . '" class="form-select form-select-sm rounded-3 shadow-sm" onChange="javascript:$(\'divCaptainSubmit\').style.display = \'block\'"'
 													));
 												} else {
 													print (@$group_participant_array[$groups['item_code']][@$group_leader[$groups['item_code']]]);
@@ -2118,32 +3289,36 @@ if (!empty(@$group_details['group_array'])) {
 										$count++;
 									}
 									?>
-									<input type="hidden" name="hidGrpCount" id="hidGrpCount" value="<?php echo $count ?>">
-									<tr>
-										<td align="center" colspan="4">
-											<div id="divCaptainSubmit" style="display:none">
-												<?php
-												if (isset($is_edit) and $is_edit != 'no') {
-													echo form_submit('group_submit', 'Submit', 'class="btn btn-primary"');
-												}
-												?>
-											</div>
-										</td>
-									</tr>
-
+									</tbody>
 								</table>
+								<input type="hidden" name="hidGrpCount" id="hidGrpCount" value="<?php echo $count ?>">
+								<div id="divCaptainSubmit" style="display:none;" class="p-3 text-center bg-light border-top">
+									<?php
+									if (isset($is_edit) and $is_edit != 'no') {
+										echo '<button type="submit" name="group_submit" id="btnSaveCaptains" class="btn btn-primary px-4 rounded-pill shadow-sm fw-semibold" onclick="this.disabled=true; this.innerHTML=\'<span class=\\\'spinner-border spinner-border-sm me-2\\\' role=\\\'status\\\'></span>Saving Captains...\'; this.form.submit();"><i class="bi bi-check2-circle me-1"></i> Save Captains</button>';
+									}
+									?>
+								</div>
 							</div>
+						</div>
+
+						<!-- Bottom Pagination Bar for Captains -->
+						<div class="card-footer bg-white py-3 px-4 border-0 d-flex flex-wrap justify-content-between align-items-center gap-2" style="border-top: 1px solid #edf2f7 !important;">
+							<div class="text-muted small" id="captainsInfo">
+								Showing 1 to <?php echo min(5, count($group_details['group_array'] ?? [])); ?> of <?php echo count($group_details['group_array'] ?? []); ?> entries
+							</div>
+							<nav aria-label="Captains Table Pagination">
+								<ul class="pagination pagination-sm mb-0 gap-1" id="captainsPagination">
+									<!-- Dynamic Page Numbers -->
+								</ul>
+							</nav>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-		<?php
-
-		?>
-		</div>
 		<input type="hidden" name="hidSchoolId" id="hidSchoolId" value="<?php echo (@$school_details[0]['school_code']) ?
-			@$school_details[0]['school_code'] : @$this->input->post('hidSchoolId'); ?>">
+			@$school_details[0]['school_code'] : (service('request')->getPost('hidSchoolId') ?: ''); ?>">
 		<?php
 		echo form_close();
 	}
@@ -2151,129 +3326,206 @@ if (!empty(@$group_details['group_array'])) {
 ?>
 
 <?php
-
 if (!empty(@$participant_item_list)) {
-
 	if (count(@$participant_item_list) > 0) { ?>
-		<div
-			style="display:<?php echo (@$school_show == 'show' && !empty($participant_details) && count($participant_details) > 0) ? 'block' : 'none'; ?>; padding:10px 0 10px; 0">
-			<?php
-
-			?>
-
+		<div style="display:<?php echo (@$school_show == 'show' && !empty($participant_details) && count($participant_details) > 0) ? 'block' : 'none'; ?>;" class="mb-4">
 			<div class="row justify-content-center">
-				<div class="col-md-12 col-sm-12 col-xl-12">
-					<div class="card">
-						<div class="card-body">
-							<h5 class="card-title"> Item wise Participants</h5>
+				<div class="col-12">
+					<div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="border: 1px solid #e2e8f0 !important;">
+						<div class="card-header bg-white py-3 px-4 border-0 d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #f8fafc, #ffffff) !important; border-bottom: 1px solid #edf2f7 !important;">
+							<div class="d-flex align-items-center gap-2">
+								<i class="bi bi-grid-3x3-gap-fill text-primary fs-5"></i>
+								<h5 class="fw-bold mb-0 text-dark">Item wise Participants Summary</h5>
+							</div>
+							<span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill px-3 py-1 fw-semibold">
+								Total: <?php echo count($participant_item_list); ?> Items
+							</span>
+						</div>
 
-							<div class="table-responsive-sm">
-								<table width="100%" border="0" cellspacing="0" cellpadding="4" align="center">
+						<!-- Top Filter & Search Bar for Item-wise Summary -->
+						<div class="p-3 bg-light bg-opacity-50 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-3">
+							<div class="d-flex align-items-center gap-2">
+								<label class="text-muted small fw-semibold mb-0" for="itemsSummaryPageSize">Show</label>
+								<select class="form-select form-select-sm rounded-3 shadow-2xs" id="itemsSummaryPageSize" style="width: 85px;">
+									<option value="5">5</option>
+									<option value="10" selected>10</option>
+									<option value="25">25</option>
+									<option value="50">50</option>
+									<option value="all">All</option>
+								</select>
+								<span class="text-muted small">entries per page</span>
+							</div>
+							<div class="d-flex align-items-center gap-2">
+								<div class="input-group input-group-sm shadow-2xs" style="min-width: 260px;">
+									<span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+									<input type="text" class="form-control border-start-0 border-end-0 ps-0" id="itemsSummarySearch" placeholder="Search item code, name, captain...">
+									<button class="btn btn-white bg-white border border-start-0 text-muted" type="button" onclick="document.getElementById('itemsSummarySearch').value=''; document.getElementById('itemsSummarySearch').dispatchEvent(new Event('input'));" title="Clear"><i class="bi bi-x-circle"></i></button>
+								</div>
+							</div>
+						</div>
 
-									<tr>
-										<th align="center" width="5%">SL No</th>
-										<th width="10%">Item Code</th>
-										<th width="20%">Item Name</th>
-										<th align="center" width="15%">No of Participants</th>
-										<th align="center" width="10%">No of Pinnany</th>
-
-										<th width="20%">Name of Participant</th>
-									</tr>
+						<div class="card-body p-0">
+							<div class="table-responsive">
+								<table class="table table-hover align-middle mb-0" id="itemsSummaryTable">
+									<thead style="background-color: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+										<tr class="text-uppercase text-secondary fw-semibold border-bottom" style="font-size: 12px; letter-spacing: 0.5px;">
+											<th class="py-3 px-3 text-center sortable" data-sort="number" style="width: 50px; cursor: pointer;">
+												<span>#</span> <span class="sort-icon text-muted">⇅</span>
+											</th>
+											<th class="py-3 px-3 text-center sortable" data-sort="number" style="width: 100px; cursor: pointer;">
+												<span>Item Code</span> <span class="sort-icon text-muted">⇅</span>
+											</th>
+											<th class="py-3 px-3 sortable" data-sort="string" style="cursor: pointer;">
+												<span>Item Name</span> <span class="sort-icon text-muted">⇅</span>
+											</th>
+											<th class="py-3 px-3 text-center sortable" data-sort="number" style="width: 120px; cursor: pointer;">
+												<span>Participants</span> <span class="sort-icon text-muted">⇅</span>
+											</th>
+											<th class="py-3 px-3 text-center sortable" data-sort="number" style="width: 110px; cursor: pointer;">
+												<span>Pinnany</span> <span class="sort-icon text-muted">⇅</span>
+											</th>
+											<th class="py-3 px-3 sortable" data-sort="string" style="cursor: pointer;">
+												<span>Captain Name</span> <span class="sort-icon text-muted">⇅</span>
+											</th>
+										</tr>
+									</thead>
+									<tbody>
 									<?php
 									$count = 0;
 									foreach ($participant_item_list as $item_list) {
 										$count++;
-										$class_name = ($count % 2 == 0) ? 'table_row_second' : 'table_row_first';
 										?>
 										<tr>
-											<td align="center" class="<?php echo $class_name; ?>"><?php echo $count; ?></td>
-											<td class="<?php echo $class_name; ?>"><?php echo $item_list['item_code'] ?></td>
-											<td class="<?php echo $class_name; ?>"><?php echo $item_list['item_name'] ?></td>
-											<td align="center" class="<?php echo $class_name; ?>">
-												<?php echo $item_list['cnt_participant'] ?>
+											<td class="text-center text-muted fw-semibold py-3"><?php echo $count; ?></td>
+											<td class="text-center"><span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2 py-1 fw-bold"><?php echo $item_list['item_code'] ?></span></td>
+											<td class="fw-bold text-dark py-3"><?php echo esc($item_list['item_name']) ?></td>
+											<td class="text-center">
+												<span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 fw-bold">
+													<?php echo $item_list['cnt_participant'] ?>
+												</span>
 											</td>
-											<td align="center" class="<?php echo $class_name; ?>">
-												<?php echo $item_list['cnt_pinnany'] ?>
+											<td class="text-center">
+												<span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3 py-1 fw-bold">
+													<?php echo $item_list['cnt_pinnany'] ?>
+												</span>
 											</td>
-											<td class="<?php echo $class_name; ?>"><?php echo @$item_list['captian'] ?></td>
+											<td class="fw-semibold text-secondary"><?php echo !empty($item_list['captian']) ? esc($item_list['captian']) : '<span class="text-muted small fst-italic">-</span>'; ?></td>
 										</tr>
 										<?php
 									}
 									?>
-
+									</tbody>
 								</table>
-								<!-- </div> -->
-								<?php
-
-								?>
 							</div>
 						</div>
-					</div>
-				</div>
-			</div>
-		<?php }
-}
-?>
 
-
-
-
-	<?php
-	echo form_open('schools/registration/finalize_data', array('id' => 'formFinalize'));
-	?>
-	<div
-		style="display:<?php echo (@$school_show == 'show' && !empty($participant_details)) ? 'block' : 'none'; ?>; padding:10px 0 10px; 0">
-		<?php
-
-		?>
-		<div class="row justify-content-center">
-			<div class="col-md-12 col-sm-12 col-xl-12">
-				<div class="card">
-					<div class="card-body">
-						<h5 class="card-title"> Report</h5>
-
-						<div class="table-responsive-sm">
-							<table>
-
-								<tr>
-
-									<td>
-										<?php
-										if (isset($is_edit) and $is_edit != 'no' and @$school_details[0]['is_create_report'] == 'Y') {
-											?>
-
-											<label style="color:#990000"><strong>Warning: Once confirmed the entry details
-													cannot be modified. Before confirming ensure the report has been
-													certified by the Headmaster/Principal.</strong></label><br />
-
-											<?php
-											echo form_button('finalize_submit', 'Confirm', 'onClick="javascript:confirm_school_data();" class="btn btn-success mt-3"');
-										}
-										?>
-										<!--<button type="button" class="btn btn-primary mt-3 me-2" onclick="openPdfReport()" id="pdfReportBtn">-->
-										<!--	<i class="fas fa-file-pdf"></i> PDF Report-->
-										<!--</button>-->
-										<button type="button" class="btn btn-info mt-3" onclick="openHtmlReport()"
-											id="htmlReportBtn">
-											<i class="fas fa-file-alt"></i> HTML Report
-										</button>
-									</td>
-								</tr>
-
-							</table>
-							<?php
-
-							?>
+						<!-- Bottom Pagination Bar for Item-wise Summary -->
+						<div class="card-footer bg-white py-3 px-4 border-0 d-flex flex-wrap justify-content-between align-items-center gap-2" style="border-top: 1px solid #edf2f7 !important;">
+							<div class="text-muted small" id="itemsSummaryInfo">
+								Showing 1 to <?php echo min(5, count($participant_item_list)); ?> of <?php echo count($participant_item_list); ?> entries
+							</div>
+							<nav aria-label="Items Summary Table Pagination">
+								<ul class="pagination pagination-sm mb-0 gap-1" id="itemsSummaryPagination">
+									<!-- Dynamic Page Numbers -->
+								</ul>
+							</nav>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
+	<?php }
+}
+?>
+
+	<?php
+	echo form_open('schools/registration/finalize_data', array('id' => 'formFinalize'));
+	?>
+	<div style="display:<?php echo (@$school_show == 'show' && !empty($participant_details)) ? 'block' : 'none'; ?>;" class="mb-4" id="schoolConfirmationWrapper">
+		<div class="row justify-content-center">
+			<div class="col-12">
+				<div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="border: 1px solid #e2e8f0 !important;">
+					<div class="card-header bg-white py-3 px-4 border-0 d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #f8fafc, #ffffff) !important; border-bottom: 1px solid #edf2f7 !important;">
+						<div class="d-flex align-items-center gap-2">
+							<i class="bi bi-shield-check text-success fs-4"></i>
+							<div>
+								<h5 class="fw-bold mb-0 text-dark">Verification, Report & Final Confirmation</h5>
+								<small class="text-muted">Generate official PDF report and permanently finalize school registrations</small>
+							</div>
+						</div>
+					</div>
+					<div class="card-body p-4" id="schoolConfirmationArea">
+						<?php if (@$school_details[0]['is_finalize'] == 'Y'): ?>
+							<!-- ALREADY FINALIZED STATE -->
+							<div class="alert alert-success border-0 shadow-sm rounded-3 d-flex align-items-center gap-3 mb-3 p-3">
+								<i class="bi bi-lock-fill fs-2 text-success"></i>
+								<div>
+									<h6 class="fw-bold mb-1 text-success">Registration Finalized & Permanently Locked</h6>
+									<p class="mb-0 small text-muted">All participant details for this school have been officially verified and locked. No further modifications, additions, or deletions can be made.</p>
+								</div>
+							</div>
+							<div class="d-flex flex-wrap gap-2 align-items-center">
+								<button type="button" class="btn btn-danger px-4 py-2 rounded-pill shadow-sm fw-semibold text-white d-inline-flex align-items-center gap-2" onclick="openPdfReport()" id="pdfReportBtn">
+									<i class="bi bi-file-earmark-pdf-fill"></i> Download PDF Report
+								</button>
+							</div>
+						<?php else: ?>
+							<!-- ACTIVE CONFIRMATION FLOW -->
+							<?php $hasReport = (@$school_details[0]['is_create_report'] == 'Y'); ?>
+							
+							<div class="mb-3 d-flex flex-wrap gap-2 align-items-center justify-content-between bg-light p-3 rounded-3 border">
+								<div>
+									<span class="fw-semibold text-dark d-block">Step 1: Download & Verify Official PDF Report</span>
+									<small class="text-muted">Take the PDF report, verify with the Headmaster/Principal, and ensure all participant and item entries are accurate.</small>
+								</div>
+								<button type="button" class="btn btn-danger px-4 py-2 rounded-pill shadow-sm fw-semibold text-white d-inline-flex align-items-center gap-2" onclick="openPdfReport()" id="pdfReportBtn">
+									<i class="bi bi-file-earmark-pdf-fill fs-6"></i> PDF Report
+								</button>
+							</div>
+
+							<div id="reportTakeNotice" style="display: <?php echo $hasReport ? 'none' : 'block'; ?>;" class="alert alert-info border-0 rounded-3 small mb-3">
+								<i class="bi bi-info-circle-fill me-2"></i> Please click the <strong>PDF Report</strong> button above to download your registration report. Once the PDF report is generated, the final confirmation option will unlock.
+							</div>
+
+							<div id="confirmControlsArea" style="display: <?php echo $hasReport ? 'block' : 'none'; ?>;">
+								<div class="alert alert-warning border-0 shadow-sm rounded-3 d-flex align-items-start gap-3 mb-3 p-3">
+									<i class="bi bi-exclamation-triangle-fill fs-4 text-warning flex-shrink-0 mt-1"></i>
+									<div>
+										<strong class="text-dark">Crucial Warning:</strong>
+										<div class="text-dark small mt-1">
+											Once confirmed, the registration details for this school will be <strong>permanently locked</strong> in the database. No further edits, additions, or cancellations will be permitted.
+										</div>
+									</div>
+								</div>
+
+								<!-- Modern Declaration Checkbox -->
+								<div class="card bg-light border-0 rounded-3 p-3 mb-3" style="border: 1.5px solid #cbd5e1 !important; background-color: #f8fafc !important;">
+									<div class="form-check d-flex align-items-start gap-2 m-0">
+										<input class="form-check-input mt-1 flex-shrink-0" type="checkbox" id="chkFinalConfirm" onchange="toggleConfirmButton(this)" style="cursor: pointer; width: 1.25rem; height: 1.25rem;">
+										<label class="form-check-label text-dark fw-medium" for="chkFinalConfirm" style="cursor: pointer; font-size: 0.93rem; line-height: 1.5;">
+											I solemnly declare and confirm that all participant details, admission numbers, class entries, and item codes registered for our school have been thoroughly verified and found to be 100% accurate. I have completed all registrations and understand that finalizing will <strong>permanently lock</strong> all data.
+										</label>
+									</div>
+								</div>
+
+								<!-- Finalize Confirm Button -->
+								<div class="d-flex flex-wrap gap-2 align-items-center">
+									<button type="button" class="btn btn-success px-4 py-2 rounded-pill shadow-sm fw-semibold d-inline-flex align-items-center gap-2" id="btnFinalConfirm" onclick="confirm_school_data()" disabled>
+										<i class="bi bi-shield-lock-fill fs-6"></i> Confirm & Finalize Registration
+									</button>
+								</div>
+							</div>
+						<?php endif; ?>
+					</div>
+				</div>
+			</div>
+		</div>
 		<input type="hidden" name="hidSchoolId" id="hidSchoolId"
-			value="<?php echo (@$school_details[0]['school_code']) ? @$school_details[0]['school_code'] : @$this->input->post('hidSchoolId'); ?>">
-		<?php
-		echo form_close();
-		?>
+			value="<?php echo (@$school_details[0]['school_code']) ? @$school_details[0]['school_code'] : (service('request')->getPost('hidSchoolId') ?: ''); ?>">
+	</div>
+	<?php
+	echo form_close();
+	?>
 	</div>
 	<?php if (@$error_msg) { ?>
 		<script language="JavaScript">
@@ -2285,23 +3537,442 @@ if (!empty(@$participant_item_list)) {
 	<script>
 			window.openPdfReport = function () {
 				var schoolCode = document.getElementById('hidSchoolId');
-				if (!schoolCode || !schoolCode.value) {
-					alert('Please select a school first');
+				var codeVal = (schoolCode && schoolCode.value) ? schoolCode.value : '<?php echo esc($active_code); ?>';
+				if (!codeVal) {
+					if (typeof Swal !== 'undefined') {
+						Swal.fire({ icon: 'warning', title: 'Select School', text: 'Please select a school first' });
+					} else {
+						alert('Please select a school first');
+					}
 					return;
 				}
-				window.open('<?php echo base_url(); ?>schools/registration_report/pdf_report?school_id=' + schoolCode.value, '_blank');
-			};
 
-			window.openHtmlReport = function () {
-				var schoolCode = document.getElementById('hidSchoolId');
-				if (!schoolCode || !schoolCode.value) {
-					alert('Please select a school first');
-					return;
+				var btn = document.getElementById('pdfReportBtn');
+				if (btn) {
+					var origContent = btn.innerHTML;
+					btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span> Generating PDF...';
+					setTimeout(function() {
+						if (btn) btn.innerHTML = origContent;
+					}, 2500);
 				}
-				window.open('<?php echo base_url(); ?>schools/registration_report/html_report?school_id=' + schoolCode.value, '_blank');
+
+				window.open('<?php echo base_url('schools/registration_report/pdf_report'); ?>?school_id=' + encodeURIComponent(codeVal), '_blank');
+
+				// Immediately unlock the confirmation section in UI
+				var notice = document.getElementById('reportTakeNotice');
+				if (notice) notice.style.display = 'none';
+				var controls = document.getElementById('confirmControlsArea');
+				if (controls) controls.style.display = 'block';
 			};
 
-			
+			window.toggleConfirmButton = function(checkbox) {
+				var btn = document.getElementById('btnFinalConfirm');
+				if (btn) {
+					btn.disabled = !checkbox.checked;
+				}
+			};
 
-		
+			window.confirm_school_data = function () {
+				var chk = document.getElementById('chkFinalConfirm');
+				if (chk && !chk.checked) {
+					if (typeof Swal !== 'undefined') {
+						Swal.fire({
+							icon: 'warning',
+							title: 'Declaration Required',
+							text: 'Please check the declaration checkbox to confirm you have verified all registration details before finalizing.',
+							confirmButtonColor: '#0d6efd'
+						});
+					} else {
+						alert('Please check the declaration checkbox to confirm you have verified all registration details.');
+					}
+					return false;
+				}
+
+				var schoolCode = document.getElementById('hidSchoolId') ? document.getElementById('hidSchoolId').value : '<?php echo esc($active_code); ?>';
+
+				if (typeof Swal !== 'undefined') {
+					// Step 1 SweetAlert - Warning & Confirmation of Completion
+					Swal.fire({
+						title: 'Confirm Final Registration?',
+						html: 'Are you sure you have completed all participant registrations?<br><br><div class="alert alert-warning text-start small mb-0"><i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> <strong>Important Notice:</strong> Once confirmed, your school registration data will be <b>permanently locked</b>. You will no longer be able to add, edit, or delete participants.</div>',
+						icon: 'warning',
+						showCancelButton: true,
+						confirmButtonColor: '#0d6efd',
+						cancelButtonColor: '#6c757d',
+						confirmButtonText: '<i class="bi bi-arrow-right-circle me-1"></i> Yes, Proceed to Lock',
+						cancelButtonText: 'No, Let me review again',
+						reverseButtons: true
+					}).then((result1) => {
+						if (result1.isConfirmed) {
+							// Step 2 SweetAlert - Final Safety Verification
+							Swal.fire({
+								title: 'Final Safety Verification!',
+								html: 'This action <b>CANNOT BE UNDONE</b>.<br><br>Do you solemnly certify that all registration entries are 100% complete and wish to <b>permanently lock and finalize</b> registration for School <b>' + schoolCode + '</b>?',
+								icon: 'error',
+								showCancelButton: true,
+								confirmButtonColor: '#198754',
+								cancelButtonColor: '#dc3545',
+								confirmButtonText: '<i class="bi bi-shield-lock-fill me-1"></i> Yes, Permanently Finalize & Lock',
+								cancelButtonText: 'Cancel & Go Back',
+								reverseButtons: true
+							}).then((result2) => {
+								if (result2.isConfirmed) {
+									Swal.fire({
+										title: 'Finalizing Registration...',
+										html: 'Locking registration details for School ' + schoolCode + '. Please wait...',
+										allowOutsideClick: false,
+										allowEscapeKey: false,
+										didOpen: () => {
+											Swal.showLoading();
+										}
+									});
+									document.getElementById('formFinalize').submit();
+								}
+							});
+						}
+					});
+				} else {
+					if (confirm('Step 1 of 2: Are you sure you have completed all participant registrations? Once confirmed, registration details will be permanently locked.')) {
+						if (confirm('Step 2 of 2: FINAL WARNING: This action CANNOT be undone. Do you really want to permanently finalize and lock registration for School ' + schoolCode + '?')) {
+							document.getElementById('formFinalize').submit();
+						}
+					}
+				}
+			};
+
+			// Universal Client-side Enhanced DataTable Engine: Sort, Filter, and Pagination
+			window.initTablePagination = function(options) {
+				var tableId = options.tableId;
+				var pageSizeSelectId = options.pageSizeSelectId;
+				var searchInputId = options.searchInputId;
+				var paginationUlId = options.paginationUlId;
+				var infoSpanId = options.infoSpanId;
+				var initialPageSize = options.defaultPageSize || 10;
+
+				var table = document.getElementById(tableId);
+				if (!table) return null;
+
+				var tbody = table.querySelector('tbody');
+				if (!tbody) return null;
+
+				var allRows = Array.from(tbody.querySelectorAll('tr'));
+				if (allRows.length === 0) return null;
+
+				var currentPage = 1;
+				var currentSize = initialPageSize;
+				var currentFilter = '';
+				var currentSortCol = -1;
+				var currentSortDir = 'asc';
+
+				// Extract value from a table cell according to data-sort type
+				function getCellValue(cell, sortType) {
+					if (!cell) return '';
+					if (sortType === 'select') {
+						var sel = cell.querySelector('select');
+						if (sel && sel.selectedIndex >= 0) {
+							return sel.options[sel.selectedIndex].text.trim().toLowerCase();
+						}
+						return (cell.innerText || cell.textContent || '').trim().toLowerCase();
+					}
+					if (sortType === 'number') {
+						var num = parseFloat((cell.innerText || cell.textContent || '').replace(/[^0-9.-]/g, ''));
+						return isNaN(num) ? 0 : num;
+					}
+					if (sortType === 'class') {
+						var std = parseInt((cell.innerText || cell.textContent || '').replace(/[^0-9]/g, ''), 10);
+						return isNaN(std) ? 0 : std;
+					}
+					return (cell.innerText || cell.textContent || '').trim().toLowerCase();
+				}
+
+				function getFilteredRows() {
+					if (!currentFilter) return allRows.slice();
+					var q = currentFilter.toLowerCase().trim();
+					return allRows.filter(function(row) {
+						var text = (row.innerText || row.textContent || '').toLowerCase();
+						var selects = row.querySelectorAll('select');
+						for (var s = 0; s < selects.length; s++) {
+							if (selects[s].selectedIndex >= 0) {
+								text += ' ' + selects[s].options[selects[s].selectedIndex].text.toLowerCase();
+							}
+						}
+						return text.indexOf(q) > -1;
+					});
+				}
+
+				function sortRows(rowsList) {
+					if (currentSortCol < 0) return rowsList;
+					var headerTh = table.querySelectorAll('thead th')[currentSortCol];
+					var sortType = headerTh ? (headerTh.getAttribute('data-sort') || 'string') : 'string';
+
+					return rowsList.sort(function(a, b) {
+						var cellA = a.cells[currentSortCol];
+						var cellB = b.cells[currentSortCol];
+						var valA = getCellValue(cellA, sortType);
+						var valB = getCellValue(cellB, sortType);
+
+						if (valA < valB) return currentSortDir === 'asc' ? -1 : 1;
+						if (valA > valB) return currentSortDir === 'asc' ? 1 : -1;
+						return 0;
+					});
+				}
+
+				function render() {
+					var filtered = getFilteredRows();
+					filtered = sortRows(filtered);
+					var totalFiltered = filtered.length;
+					var limit = (currentSize === 'all') ? totalFiltered : parseInt(currentSize, 10);
+					var totalPages = (limit >= totalFiltered || limit === 0) ? 1 : Math.ceil(totalFiltered / limit);
+
+					if (currentPage > totalPages) currentPage = totalPages;
+					if (currentPage < 1) currentPage = 1;
+
+					var startIdx = (currentPage - 1) * limit;
+					var endIdx = (currentSize === 'all') ? totalFiltered : startIdx + limit;
+
+					// Hide all rows
+					allRows.forEach(function(row) {
+						row.style.display = 'none';
+					});
+
+					// Show and re-number current page slice
+					for (var i = startIdx; i < Math.min(endIdx, totalFiltered); i++) {
+						var row = filtered[i];
+						row.style.display = '';
+						var firstTh = table.querySelector('thead th');
+						if (firstTh && firstTh.innerText.trim().indexOf('#') > -1) {
+							row.cells[0].innerText = (i + 1);
+						}
+						tbody.appendChild(row);
+					}
+
+					// Update info text
+					var infoEl = document.getElementById(infoSpanId);
+					if (infoEl) {
+						if (totalFiltered === 0) {
+							infoEl.innerHTML = '<span class="text-muted">No matching records found</span>';
+						} else {
+							var actualStart = startIdx + 1;
+							var actualEnd = Math.min(endIdx, totalFiltered);
+							var text = 'Showing <span class="fw-bold text-dark">' + actualStart + '</span> to <span class="fw-bold text-dark">' + actualEnd + '</span> of <span class="fw-bold text-dark">' + totalFiltered + '</span> entries';
+							if (totalFiltered < allRows.length) {
+								text += ' <span class="text-muted small fst-italic">(filtered from ' + allRows.length + ' total)</span>';
+							}
+							infoEl.innerHTML = text;
+						}
+					}
+
+					// Render Pagination controls
+					var paginationUl = document.getElementById(paginationUlId);
+					if (paginationUl) {
+						paginationUl.innerHTML = '';
+
+						// Prev button
+						var prevLi = document.createElement('li');
+						prevLi.className = 'page-item ' + (currentPage === 1 ? 'disabled' : '');
+						var prevLink = document.createElement('a');
+						prevLink.className = 'page-link rounded-3 px-3 shadow-2xs';
+						prevLink.href = 'javascript:void(0)';
+						prevLink.setAttribute('aria-label', 'Previous');
+						prevLink.innerHTML = '<i class="bi bi-chevron-left"></i>';
+						if (currentPage > 1) {
+							prevLink.addEventListener('click', function(e) {
+								e.preventDefault();
+								currentPage--;
+								render();
+							});
+						}
+						prevLi.appendChild(prevLink);
+						paginationUl.appendChild(prevLi);
+
+						// Page numbers
+						var maxVisible = 5;
+						var startPage = Math.max(1, currentPage - 2);
+						var endPage = Math.min(totalPages, startPage + maxVisible - 1);
+						if (endPage - startPage < maxVisible - 1) {
+							startPage = Math.max(1, endPage - maxVisible + 1);
+						}
+
+						if (startPage > 1) {
+							var firstLi = document.createElement('li');
+							firstLi.className = 'page-item';
+							var firstLink = document.createElement('a');
+							firstLink.className = 'page-link rounded-3 px-3 shadow-2xs';
+							firstLink.href = 'javascript:void(0)';
+							firstLink.innerText = '1';
+							firstLink.addEventListener('click', function(e) {
+								e.preventDefault();
+								currentPage = 1;
+								render();
+							});
+							firstLi.appendChild(firstLink);
+							paginationUl.appendChild(firstLi);
+
+							if (startPage > 2) {
+								var dotsLi = document.createElement('li');
+								dotsLi.className = 'page-item disabled';
+								dotsLi.innerHTML = '<span class="page-link border-0">...</span>';
+								paginationUl.appendChild(dotsLi);
+							}
+						}
+
+						for (var p = startPage; p <= endPage; p++) {
+							(function(pageNumber) {
+								var pageLi = document.createElement('li');
+								pageLi.className = 'page-item ' + (pageNumber === currentPage ? 'active' : '');
+								var pageLink = document.createElement('a');
+								pageLink.className = 'page-link rounded-3 px-3 shadow-2xs ' + (pageNumber === currentPage ? 'fw-bold text-white' : '');
+								pageLink.href = 'javascript:void(0)';
+								pageLink.innerText = pageNumber;
+								pageLink.addEventListener('click', function(e) {
+									e.preventDefault();
+									currentPage = pageNumber;
+									render();
+								});
+								pageLi.appendChild(pageLink);
+								paginationUl.appendChild(pageLi);
+							})(p);
+						}
+
+						if (endPage < totalPages) {
+							if (endPage < totalPages - 1) {
+								var dotsLi2 = document.createElement('li');
+								dotsLi2.className = 'page-item disabled';
+								dotsLi2.innerHTML = '<span class="page-link border-0">...</span>';
+								paginationUl.appendChild(dotsLi2);
+							}
+							var lastLi = document.createElement('li');
+							lastLi.className = 'page-item';
+							var lastLink = document.createElement('a');
+							lastLink.className = 'page-link rounded-3 px-3 shadow-2xs';
+							lastLink.href = 'javascript:void(0)';
+							lastLink.innerText = totalPages;
+							lastLink.addEventListener('click', function(e) {
+								e.preventDefault();
+								currentPage = totalPages;
+								render();
+							});
+							lastLi.appendChild(lastLink);
+							paginationUl.appendChild(lastLi);
+						}
+
+						// Next button
+						var nextLi = document.createElement('li');
+						nextLi.className = 'page-item ' + (currentPage === totalPages || totalPages === 0 ? 'disabled' : '');
+						var nextLink = document.createElement('a');
+						nextLink.className = 'page-link rounded-3 px-3 shadow-2xs';
+						nextLink.href = 'javascript:void(0)';
+						nextLink.setAttribute('aria-label', 'Next');
+						nextLink.innerHTML = '<i class="bi bi-chevron-right"></i>';
+						if (currentPage < totalPages) {
+							nextLink.addEventListener('click', function(e) {
+								e.preventDefault();
+								currentPage++;
+								render();
+							});
+						}
+						nextLi.appendChild(nextLink);
+						paginationUl.appendChild(nextLi);
+					}
+				}
+
+				// Bind sortable headers
+				var headers = table.querySelectorAll('thead th');
+				headers.forEach(function(th, colIdx) {
+					if (th.classList.contains('sortable')) {
+						th.addEventListener('click', function() {
+							if (currentSortCol === colIdx) {
+								currentSortDir = (currentSortDir === 'asc') ? 'desc' : 'asc';
+							} else {
+								currentSortCol = colIdx;
+								currentSortDir = 'asc';
+							}
+
+							// Update all header icons in this table
+							headers.forEach(function(h, idx) {
+								var icon = h.querySelector('.sort-icon');
+								if (icon) {
+									if (idx === colIdx) {
+										icon.innerHTML = (currentSortDir === 'asc') ? '▲' : '▼';
+										icon.className = 'sort-icon text-primary fw-bold';
+									} else {
+										icon.innerHTML = '⇅';
+										icon.className = 'sort-icon text-muted';
+									}
+								}
+							});
+
+							render();
+						});
+					}
+				});
+
+				// Bind search input
+				var searchEl = document.getElementById(searchInputId);
+				if (searchEl) {
+					searchEl.addEventListener('input', function() {
+						currentFilter = this.value;
+						currentPage = 1;
+						render();
+					});
+				}
+
+				// Bind page size select
+				var sizeEl = document.getElementById(pageSizeSelectId);
+				if (sizeEl) {
+					sizeEl.addEventListener('change', function() {
+						currentSize = this.value;
+						currentPage = 1;
+						render();
+					});
+				}
+
+				// Run initial render
+				render();
+
+				return {
+					refresh: function() {
+						allRows = Array.from(tbody.querySelectorAll('tr'));
+						render();
+					}
+				};
+			};
+
+			// Automatically initialize paginators when document is ready
+			(function setupAllPaginators() {
+				function initAll() {
+					window.participantsPager = window.initTablePagination({
+						tableId: 'participantsTable',
+						pageSizeSelectId: 'participantsPageSize',
+						searchInputId: 'participantsSearch',
+						paginationUlId: 'participantsPagination',
+						infoSpanId: 'participantsInfo',
+						defaultPageSize: 10
+					});
+
+					window.captainsPager = window.initTablePagination({
+						tableId: 'captainsTable',
+						pageSizeSelectId: 'captainsPageSize',
+						searchInputId: 'captainsSearch',
+						paginationUlId: 'captainsPagination',
+						infoSpanId: 'captainsInfo',
+						defaultPageSize: 10
+					});
+
+					window.itemsSummaryPager = window.initTablePagination({
+						tableId: 'itemsSummaryTable',
+						pageSizeSelectId: 'itemsSummaryPageSize',
+						searchInputId: 'itemsSummarySearch',
+						paginationUlId: 'itemsSummaryPagination',
+						infoSpanId: 'itemsSummaryInfo',
+						defaultPageSize: 10
+					});
+				}
+
+				if (document.readyState === 'loading') {
+					document.addEventListener('DOMContentLoaded', initAll);
+				} else {
+					initAll();
+				}
+			})();
 	</script>

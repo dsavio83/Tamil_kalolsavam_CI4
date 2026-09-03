@@ -1,67 +1,117 @@
 function fncUpdateKalolsavam($kalolsavam_type, id)
 {
+    var nameEl = document.getElementById('txtKalolsavamName');
+    var yearEl = document.getElementById('txtKalolsavamYear');
+    var venueEl = document.getElementById('txtKalolsavamVenue');
+    var formEl = document.getElementById('formKalolsavam');
+
     if ($kalolsavam_type == 'state')
     {
-        if (!trim($('txtKalolsavamName').value))
+        if (nameEl && !nameEl.value.trim())
         {
-            swal("Oops!", "Please Enter a Kalolsavam Name", "error");
-            $('txtKalolsavamName').value = '';
-            $('txtKalolsavamName').focus();
+            if (typeof Swal !== 'undefined') {
+                Swal.fire("Required Field", "Please enter Kalolsavam Name", "warning");
+            } else {
+                alert("Please enter Kalolsavam Name");
+            }
+            nameEl.focus();
             return false;
         }
-        if (!trim($('txtKalolsavamYear').value))
+        if (yearEl && !yearEl.value.trim())
         {
-            swal("Oops!", "Please Enter Kalolsavam Year", "error");
-            $('txtKalolsavamYear').value = '';
-            $('txtKalolsavamYear').focus();
+            if (typeof Swal !== 'undefined') {
+                Swal.fire("Required Field", "Please enter Kalolsavam Year", "warning");
+            } else {
+                alert("Please enter Kalolsavam Year");
+            }
+            yearEl.focus();
             return false;
         }
     }
-    if (!$('txtKalolsavamVenue').value)
+    if (venueEl && !venueEl.value.trim())
     {
-        swal("Oops!", "Please Enter a Venu", "error");
-        $('txtKalolsavamVenue').value = '';
-        $('txtKalolsavamVenue').focus();
+        if (typeof Swal !== 'undefined') {
+            Swal.fire("Required Field", "Please enter Venue", "warning");
+        } else {
+            alert("Please enter Venue");
+        }
+        venueEl.focus();
         return false;
     }
-    $('formKalolsavam').action = path + 'admin/kalolsavam/update_kalolsavam';
-    $('formKalolsavam').submit();
+    if (formEl) {
+        formEl.action = path + 'admin/kalolsavam/update_kalolsavam';
+        formEl.submit();
+    }
     return true;
 }
+
 function fncEditKalolsavam(id)
 {
-    $('sel_kalolsavam_id').value = id;
-    $('list_formKalolsavam').action = path + 'admin/kalolsavam/edit_kalolsavam';
-    $('list_formKalolsavam').submit();
+    var selIdEl = document.getElementById('sel_kalolsavam_id');
+    var formEl = document.getElementById('list_formKalolsavam');
+    if (selIdEl && formEl) {
+        selIdEl.value = id;
+        formEl.action = path + 'admin/kalolsavam/edit_kalolsavam';
+        formEl.submit();
+    }
 }
+
 function fncCancelKalolsavam()
 {
-    window.open(path + 'admin/kalolsavam', '_parent');
+    var formCard = document.getElementById('formCard');
+    var kalolsavamList = document.getElementById('kalolsavamList');
+    if (formCard) {
+        formCard.style.display = 'none';
+        if (kalolsavamList) {
+            kalolsavamList.style.display = 'block';
+            kalolsavamList.scrollIntoView({ behavior: 'smooth' });
+        }
+    } else {
+        window.location.href = path + 'admin/kalolsavam';
+    }
 }
+
 function fncSaveKalolsavam()
 {
-    if (!trim($('txtKalolsavamName').value))
+    var nameEl = document.getElementById('txtKalolsavamName');
+    var yearEl = document.getElementById('txtKalolsavamYear');
+    var venueEl = document.getElementById('txtKalolsavamVenue');
+    var formEl = document.getElementById('formKalolsavam');
+
+    if (nameEl && !nameEl.value.trim())
     {
-        swal("Oops!", "Please Enter a Kalolsavam Name", "error");
-        $('txtKalolsavamName').value = '';
-        $('txtKalolsavamName').focus();
+        if (typeof Swal !== 'undefined') {
+            Swal.fire("Required Field", "Please enter Kalolsavam Name", "warning");
+        } else {
+            alert("Please enter Kalolsavam Name");
+        }
+        nameEl.focus();
         return false;
     }
-    if (!trim($('txtKalolsavamYear').value))
+    if (yearEl && !yearEl.value.trim())
     {
-        swal("Oops!", "Please Enter Kalolsavam Year", "error");
-        $('txtKalolsavamYear').value = '';
-        $('txtKalolsavamYear').focus();
+        if (typeof Swal !== 'undefined') {
+            Swal.fire("Required Field", "Please enter Kalolsavam Year", "warning");
+        } else {
+            alert("Please enter Kalolsavam Year");
+        }
+        yearEl.focus();
         return false;
     }
-    if (!$('txtKalolsavamVenue').value)
+    if (venueEl && !venueEl.value.trim())
     {
-        swal("Oops!", "Please Enter a Venu", "error");
-        $('txtKalolsavamVenue').value = '';
-        $('txtKalolsavamVenue').focus();
+        if (typeof Swal !== 'undefined') {
+            Swal.fire("Required Field", "Please enter Venue", "warning");
+        } else {
+            alert("Please enter Venue");
+        }
+        venueEl.focus();
         return false;
     }
-    $('formKalolsavam').submit();
+    if (formEl) {
+        formEl.action = path + 'admin/kalolsavam/add_kalolsavam';
+        formEl.submit();
+    }
     return true;
 }
 function fncListSubDistrictDetails(id)
@@ -124,39 +174,71 @@ function fncrestoreKalolsavamdatabase() {
 }
 
 function fnc_change_confirmation_status(schoolName, schoolCode, elementId) {
-    
+    Swal.fire({
+        title: 'Reset Confirmation Status?',
+        text: "Do you really want to reset the confirmation status of " + schoolName + "?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Reset',
+        cancelButtonText: 'Cancel'
+    }).then(function(result) {
+        if (result.isConfirmed) {
+            // Show loading state
+            Swal.fire({
+                title: 'Resetting...',
+                text: 'Please wait...',
+                allowOutsideClick: false,
+                didOpen: function() {
+                    Swal.showLoading();
+                }
+            });
 
-    // Make AJAX call to reset confirmation status using Prototype.js
-    new Ajax.Request(path + 'ajax/loadajax/change_confirmation_status', {
-        method: 'post',
-        parameters: {
-            school_code: schoolCode
-        },
-        onSuccess: function(response) {
-            
+            new Ajax.Request(path + 'ajax/loadajax/change_confirmation_status', {
+                method: 'post',
+                parameters: {
+                    school_code: schoolCode
+                },
+                onSuccess: function(response) {
+                    var responseText = response.responseText.trim();
+                    if (responseText === 'No') {
+                        // Update the UI to show "No" (unconfirmed)
+                        var element = $(elementId);
+                        if (element) {
+                            element.innerHTML = 'No';
+                        }
 
-            // Always treat as success since controller returns 'No' for all cases
-            
+                        // Hide the reset button since it's now reset to "No"
+                        var resetBtn = $('reset_' + schoolCode);
+                        if (resetBtn) {
+                            resetBtn.style.display = 'none';
+                        }
 
-            // Update the UI to show "No" (unconfirmed)
-            var element = $(elementId);
-            if (element) {
-                element.innerHTML = 'No';
-                
-            }
-
-            // Hide the reset button since it's now reset to "No"
-            var resetBtn = $('reset_' + schoolCode);
-            if (resetBtn) {
-                resetBtn.style.display = 'none';
-                
-            }
-
-            
-        },
-        onFailure: function(xhr) {
-            
-            alert('Error occurred while resetting. Please try again.');
+                        Swal.fire({
+                            title: 'Success!',
+                            text: 'Confirmation status has been reset successfully.',
+                            icon: 'success',
+                            confirmButtonColor: '#28a745'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Failed!',
+                            text: 'Failed to reset: ' + responseText,
+                            icon: 'error',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    }
+                },
+                onFailure: function(xhr) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'An error occurred during reset. Please try again.',
+                        icon: 'error',
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            });
         }
     });
 }

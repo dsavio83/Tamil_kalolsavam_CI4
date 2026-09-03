@@ -1,0 +1,28 @@
+{
+  "name": "tk25",
+  "version": "1.0.0",
+  "description": "",
+  "main": "entry_main.js",
+  "directories": {
+    "doc": "doc",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dsavio83/Tamil_kalolsavam_CI4.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/dsavio83/Tamil_kalolsavam_CI4/issues"
+  },
+  "homepage": "https://github.com/dsavio83/Tamil_kalolsavam_CI4#readme",
+  "dependencies": {
+    "playwright": "^1.62.1"
+  }
+}

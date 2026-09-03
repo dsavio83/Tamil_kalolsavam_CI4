@@ -1,0 +1,218 @@
+================================================================================
+   RESULT REPORT (முடிவு அறிக்கை) — மேலான ஆய்வு அறிக்கை
+   திட்டம் : C:\xampp\htdocs\tk25  (CodeIgniter 4, MySQL: tk2025)
+   தேதி    : 2026-09-03
+--------------------------------------------------------------------------------
+  நோக்கம்: "Result Report" மெனுவின் 11 பக்கங்கள் ஒவ்வொன்றும்
+  controller -> model -> view -> PDF வரை சரியாக உருவாக்கப்படுகிறதா என
+  சரிபார்க்க. வழித்தடங்கள் (routes), DB கேள்விகள், மேலும் data இருப்பு
+  ஆகியவற்றை உறுதி செய்தல்.
+================================================================================
+
+--------------------------------------------------------------------------------
+1. 11 பக்கங்களின் வரைபடம் (மெனு -> முறை -> view)
+--------------------------------------------------------------------------------
+மெனு வரையறை: app\Views\menu_left.php (வரிகள் 483-608)
+மெனு உரிமைகள்(permissions): 44, 46
+
+(1) Confidential Result Report (ரகசிய முடிவு)
+    -> report/timefestreport/timefest_result_confidential  (Timefestreport)
+    -> view: timeoffest.php + timeoffestview.php
+    -> PDF: report/timefestreportpdf/confidential
+       * single-item: timefest_result_confidential.php
+       * ALL       : timefest_result_confidential_all.php
+
+(2) Item Wise Point (பொருள் வாரி புள்ளி)
+    -> report/afterresultreport/school_wise_result_interface
+    -> view: school_wise_result_interface.php
+    -> PDF: afterresultreportpdf/school_wise_result
+       -> model school_wise_result -> rpt_school_wise_point.php
+
+(3) Item Code Wise Result (பொருள் குறி வாரி முடிவு)
+    -> report/afterresultreport/item_code_reports
+    -> view: item_code_reports.php
+    -> PDF: afterresultreportpdf/item_code_reports
+       -> model itemcode_report -> report/publishresult/itemcode_report.php
+
+(4) School Wise Point Report (பள்ளி வாரி புள்ளி)
+    -> report/afterresultreportpdf/school_wise_result_all  (target=_blank)
+       -> model school_wise_result_all (+ school_wise_gradedetails,
+          count_of_items, count_of_items_total)
+       -> rpt_all_school_point.php
+
+(5) Grade Wise (School) (தர வாரி - பள்ளி)
+    -> report/resultindex/gradewise_interface -> report/publishresult/gradewise.php
+    -> PDF: resultindex/gradewise_report
+       -> model gradewise_report -> gradewisereport.php
+
+(6) Rank Wise (தரவரிசை வாரி)
+    -> report/resultindex/rankwise_result -> rankwise.php
+    -> PDF: resultindex/rankwise_report
+       -> model rankwise_report -> rankwise_report.php
+
+(7) Grade Wise (தர வாரி)
+    -> report/resultindex/gradewise_result -> gradewiseresult.php
+    -> PDF: resultindex/grade_report
+       -> model gradewiseparticip_report -> gradewise_report.php
+
+(8) All Result (அனைத்து முடிவு)
+    -> report/afterresultreportpdf/total_points
+       -> model total_points -> rpt_total_points.php
+
+(9) Report for Press (பத்திரிகைக்கான அறிக்கை)
+    -> report/afterresultreportpdf/report_press
+       -> model report_press -> rpt_report_press.php (is_printed=1)
+
+(10) Time wise Report (நேர வாரி)
+    -> report/resultindex/report_press_timewise
+    -> view: timewise_report_index.php
+       * Time Window -> afterresultreportpdf/time_wise_result_report
+                       -> model timewise -> timewise_result.php
+       * Result Number -> afterresultreportpdf/numwise_timeresult_report
+                       -> model numwise -> result_numwise_report.php
+
+(11) Status of Kalolsavam (கலோற்சவ நிலை)
+    -> report/afterresultreport/status_of_kalolsavam_interface
+    -> view: status_of_kalolsavam_interface.php
+    -> PDF: afterresultreportpdf/status_of_kalolsavam1
+       -> rpt_status_of_kalolsavam1.php (+ rpt_status_of_kalolsavam.php)
+
+வழித்தடங்கள்: app\Config\Routes.php — "RESULT REPORT SUITE" (வரி ~318+)  அனைத்தும்
+இருப்பதாக உறுதி (routes). கட்டுப்படுத்திகள்(controllers):
+Afterresultreport.php, Afterresultreportpdf.php, Resultindex.php,
+Timefestreport.php, Timefestreportpdf.php — model/library சரியாக load.
+(வேறு file: app\Controllers\report\  மற்றும் app\Controllers\report\publishresult\)
+
+--------------------------------------------------------------------------------
+2. DB அடுக்கு மற்றும் செயல்முறை குறிப்பு
+--------------------------------------------------------------------------------
+- Active config: app\Config\Database.php (db=tk2025, root, password இல்லை;
+  .env இல் DB set செய்யப்படவில்லை).
+- BaseModel -> app\Libraries\CiDatabase (வரி 32): இணைப்பின்போது
+  "SET SESSION sql_mode = ..." மூலம் ONLY_FULL_GROUP_BY-ஐ முடக்குகிறது.
+  => Direct mysqli சோதனைகளில் இந்த sql_mode-ஐ நீக்கி சோதிக்க வேண்டும்.
+- அனைத்து view-களும் HTML2PDF அடிப்படை (page backtop/header/footer).
+- report_header.php / report_footer.php அனைத்து PDF-களிலும் சேர்க்கப்படுகின்றன.
+  report_header.php General_Model->get_fest_master_details() சார்ந்தது
+  (அனைத்து PDF-களும் இதை load செய்ய வேண்டும்).
+
+--------------------------------------------------------------------------------
+3. தரவுக் கணக்கெடுப்பு (உண்மையான எண்ணிக்கைகள்)
+--------------------------------------------------------------------------------
+result_master           = 11
+school_point_details    = 11
+participant_details     = 16
+item_master             = 40
+school_master           = 93
+festival_master         = 4
+result_time             = 2
+stage_item_master       = 14
+item_absentee_master    = 0
+result_publish          = 0
+participant_item_details= 26
+special_order_master    = 16  (is_publish: 1-8=Y, 9-16=N)
+
+result_master மாதிரி (items 151-154, fest 1 "LP Tamil Kalaivizha"):
+  item 151: 1003(A,R1), 1004(A,R2), 1001(B,R3)
+  item 152: 1032(A,R1), 1002(A,R2), 1005(B,R3)
+  item 153: 1008(A,R1), 1033(A,R2), 1009(B,R3)
+  item 154: 1034(A,R1), 1012(A,R2)
+  (அனைத்தும் is_finish='Y', point 5/3/1)
+
+participant_item_details: அனைத்து வரிசைகளிலும் spo_id=0; மேலும் 151-154
+item-களுக்காக ranked பங்கேற்பாளர்களின் registration வரிசைகள் இல்லை
+(அவர்களின் item_code வேறு: 355,357,354,153,155,158,159,353,551, முதலியன).
+
+result_time: result_no=1 (item 901, 2022-10-06), result_no=2 (item 601, 2022-10-07)
+
+--------------------------------------------------------------------------------
+4. முடிவு (சரிபார்ப்பு முடிவு) — 11 பக்கங்கள்
+--------------------------------------------------------------------------------
+குறியீடு:  [வி/சரி] = சரியாக தரவு தருகிறது (OK)
+          [0-வரிசை/data-gap] = கேள்வி சொல்வது சரி ஆனால் தற்போதைய test DB-இல்
+                               தரவு இல்லாததால் காலியாக உள்ளது
+          [BUG] = உண்மையான குறியீட்டு குறைபாடு (கண்டறியப்பட்டது)
+
+(1) Confidential (single):  [0-வரிசை/data-gap]
+      timeoffest_result -> INNER JOIN participant_item_details
+      (Timefest_model.php:19) — நீக்கினால் 3 சரியான வரிசைகள்.
+      தற்போது redirect('test/nodata').
+
+(1b) Confidential (ALL):   [BUG + data-gap]
+      - fetch_fest_all_result INNER JOIN participant_item_details
+        (Timefest_model.php:72) — நீக்கினால் 8 வரிசைகள். [data-gap]
+      - VIEW BUG (திருத்தப்பட்டது): timefest_result_confidential_all.php-இல்
+        $retdat (வரையறுக்கப்படாதது) -> $festresult[$j] என மாற்றப்பட்டது.
+
+(2) Item Wise Point:       [வி/சரி] 5 வரிசைகள்
+(3) Item Code Wise:        [0-வரிசை/data-gap] + BUG(join-condition)
+      - result_master INNER JOIN participant_item_details
+        (Resultindex_Model.php:232) [data-gap]
+      - line 240 join: sp.spo_id=p.spo_id AND sp.is_publish='N'
+        or sp.is_publish IS NULL — 괄호( ) இல்லை -> precedence பிழை,
+        தரவு இருந்தால் duplicate வரிசைகள் உருவாகும் [BUG, மாற்றப்படவில்லை]
+(4) School Wise Point:     [வி/சரி] (2 பள்ளிகள் + grade details/counts)
+(5) Grade Wise (School):   [0-வரிசை/data-gap] INNER JOIN participant_item_details
+      (Resultindex_Model.php:91)
+(6) Rank Wise:             [0-வரிசை/data-gap] INNER JOIN participant_item_details
+      (Resultindex_Model.php:129)
+(7) Grade Wise:            [0-வரிசை/data-gap] INNER JOIN participant_item_details
+      (Resultindex_Model.php:153)
+(8) All Result:            [வி/சரி] 10 வரிசைகள்
+(9) Report for Press:      [வி/சரி] 10 வரிசைகள் (is_printed=1)
+(10) Time wise / Result No:[0-வரிசை/data-gap]
+      result_time items 601/901 finish ஆன result_master(151-154)-இல் இல்லை
+(11) Status of Kalolsavam: [வி/சரி] 3 / 11 / 4(fest=1) வரிசைகள்
+
+--------------------------------------------------------------------------------
+5. கண்டறியப்பட்ட BUG-கள் (code defects)
+--------------------------------------------------------------------------------
+BUG-1 (திருத்தப்பட்டது) — ALL confidential view-இல் $retdat வரையறை இல்லை
+  கோப்பு: app\Views\report\timeof_fest_reportpdf\timefest_result_confidential_all.php
+          (முன்பு வரிகள் 86-90)
+  பழையது: $festName = $retdat[0]['fest_name']; ... $retdat[0]['item_name']
+  புதியது: $festresult[$j]['fest_name']; ... $festresult[$j]['item_code/item_name']
+  காரணம்: Timefestreportpdf::confidential() ALL பிரிவில் (வரி 149-151)
+          $this->Contents-இல் 'retdat' சேர்க்கப்படவில்லை; view-இல் $retdat
+          வரையறுக்கப்படாதது. HEADER சரியாகத் தோன்றவில்லை.
+
+BUG-2 (திருத்தப்பட்டது) — timefestall.php-இல் $retdat வரையறை இல்லை
+  கோப்பு: app\Views\report\timeof_fest_reportpdf\timefestall.php (வரி 73)
+  பழையது: if(($retdat[$j]['is_publish']!='N') && ($retdat[$j]['grade']...))
+  புதியது: $festresult[$j] ...
+  காரணம்: datewisepart()/common_report() ALL பிரிவில் 'retdat' இல்லை.
+          இதனால் அனைத்து வரிசைகளும் (rows) தவிர்க்கப்பட்டன.
+
+BUG-3 (முன்மொழியப்பட்டது; நிரலாக்க மாற்றம் செய்யப்படவில்லை)
+  itemcode_report join-condition precedence (Resultindex_Model.php:240)
+    sp.spo_id = p.spo_id AND sp.is_publish='N' OR sp.is_publish IS NULL
+  AND முன் OR-க்கு முன் செயல்படுவதால் இந்த OR உலகளாவியதாகும்.
+  சரி: sp.spo_id = p.spo_id AND (sp.is_publish='N' OR sp.is_publish IS NULL)
+
+--------------------------------------------------------------------------------
+6. முடிவெடுக்கப்பட்ட முடிவுகள் (decisions)
+--------------------------------------------------------------------------------
+- தற்போதைய test DB-இல் participant_item_details பதிவுகள் (registrations)
+  ranked finish ஆன item-களுக்கு (151-154) இல்லாததால் 0-வரிசை பக்கங்கள்
+  "தரவு குறைபாடு" (data gap) எனத் தீர்மானிக்கப்பட்டது. கேள்வி (join)
+  தர்க்கம் சரியானது; real/production DB-இல் இவை தரவு கிடைக்கும்.
+  => JOIN-களை மாற்றவில்லை (பயனர் தேர்வு: "Treat as data gap").
+
+- ONLY_FULL_GROUP_BY பிழைகள் app-ஐச் சேர்ந்தவை அல்ல (CiDatabase முடக்குகிறது).
+
+--------------------------------------------------------------------------------
+7. அடுத்த படிகள் (further investigation recommendations)
+--------------------------------------------------------------------------------
+1) Confidential single-item & ALL: INNER JOIN->LEFT JOIN ஆக்கினால் test DB-இலும்
+   தரவு தோன்றும். (தேவைப்பட்டால் மட்டும் — தற்போது data-gap என வகைப்படுத்தப்பட்டுள்ளது)
+2) itemcode_report line 240 precedence பிழையை சரிசெய்ய (BUG-3).
+3) timewise/numwise: result_time-இல் உள்ள item (601,901) உண்மையான finish
+   result_master-இல் வரும்போது test.
+4) result_time confirm_date 2022 vs result_master start_time 2026 — தேதி
+   ஒத்திசைவு சரிபார்க்க.
+5) report_header.php முழுவதும் General_Model->get_fest_master_details() சார்ந்து
+   இருப்பதால், ஒவ்வொரு PDF-கட்டுப்படுத்தியிலும் General_Model load
+   உறுதி செய்ய வேண்டும்.
+================================================================================
+   இந்த அறிக்கை முடிவு.
+================================================================================

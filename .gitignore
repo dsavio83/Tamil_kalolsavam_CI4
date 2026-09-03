@@ -23,6 +23,9 @@ application/logs/*
 /uploads
 /dbBackup
 
+# Automation artifacts (may contain environment-local test data)
+/.automation/
+
 /index.php
 /photos
 /uploads/*

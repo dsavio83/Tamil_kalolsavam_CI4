@@ -620,8 +620,9 @@ var Enumerable = {
     collect: function (iterator, context) {
         iterator = iterator || Prototype.K;
         var results = [];
+        var self = this;
         this.each(function (value, index) {
-            results.push(iterator.call(context, value, index));
+            results.push(iterator.call(context, value, index, self));
         });
         return results;
     },
@@ -806,6 +807,18 @@ if (Prototype.Browser.WebKit) {
 
 Array.from = $A;
 
+var _nativeArrayMethods = {
+    map: Array.prototype.map,
+    filter: Array.prototype.filter,
+    reduce: Array.prototype.reduce,
+    reduceRight: Array.prototype.reduceRight,
+    forEach: Array.prototype.forEach,
+    every: Array.prototype.every,
+    some: Array.prototype.some,
+    indexOf: Array.prototype.indexOf,
+    lastIndexOf: Array.prototype.lastIndexOf
+};
+
 Object.extend(Array.prototype, Enumerable);
 
 if (!Array.prototype._reverse)
@@ -846,7 +859,7 @@ Object.extend(Array.prototype, {
     reverse: function (inline) {
         return (inline !== false ? this : this.toArray())._reverse();
     },
-    reduce: function () {
+    reduce: _nativeArrayMethods.reduce || function () {
         return this.length > 1 ? this : this[0];
     },
     uniq: function (sorted) {
@@ -882,6 +895,12 @@ Object.extend(Array.prototype, {
         return '[' + results.join(', ') + ']';
     }
 });
+
+for (var _m in _nativeArrayMethods) {
+    if (_nativeArrayMethods[_m]) {
+        Array.prototype[_m] = _nativeArrayMethods[_m];
+    }
+}
 
 // use native browser JS 1.6 implementation if available
 if (Object.isFunction(Array.prototype.forEach))

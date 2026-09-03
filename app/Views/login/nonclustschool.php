@@ -8,6 +8,16 @@
 echo form_open('', array('id' => 'noncluster'));
 ?>
 <input type="hidden" name="hidSchoolId" id="hidSchoolId" value="1">
+<!-- Back button -->
+<?php if ((int)$this->session->get('USER_TYPE') != 5) { ?>
+<div class="row mt-3 mb-3">
+    <div class="col-12">
+        <a href="<?php echo base_url('welcome/cluster_details?sel_sub_district_id=' . urlencode(isset($sub_district_code) ? $sub_district_code : '')); ?>" class="btn btn-primary">
+            <i class="bi bi-arrow-return-left"></i> Back
+        </a>
+    </div>
+</div>
+<?php } ?>
 <div class="row justify-content-center mt-3">
     <div class="col-12">
         <div class="card">
@@ -64,7 +74,7 @@ echo form_open('', array('id' => 'noncluster'));
                                         ?>
                                             <button type="button" id="reset_<?php echo $val[$j]['school_code']; ?>"
                                                 onClick="fnc_change_confirmation_status('<?php echo addslashes($val[$j]['school_name']) . ' - ' . $val[$j]['school_code']; ?>', '<?php echo $val[$j]['school_code']; ?>', '<?php echo 'confirm_' . ($j + 1); ?>'); return false;"
-                                                style="color: #007bff; cursor: pointer; font-weight: bold; background: none; border: none; text-decoration: underline;"
+                                                style="color: #dc3545; cursor: pointer; font-weight: bold; background: none; border: none; text-decoration: underline;"
                                                 title="Reset confirmation status for <?php echo $val[$j]['school_name']; ?>">
                                                 Reset
                                             </button>
@@ -114,7 +124,7 @@ echo form_open('', array('id' => 'noncluster'));
                                                 ?>
                                                     <button type="button" id="reset_nonschool_<?php echo $nonschool[$k]['school_code']; ?>"
                                                         onClick="fnc_change_confirmation_status('<?php echo addslashes($nonschool[$k]['school_name']) . ' - ' . $nonschool[$k]['school_code']; ?>', '<?php echo $nonschool[$k]['school_code']; ?>', '<?php echo 'confirm_' . ($k + 1); ?>'); return false;"
-                                                        style="color: #007bff; cursor: pointer; font-weight: bold; background: none; border: none; text-decoration: underline;"
+                                                        style="color: #dc3545; cursor: pointer; font-weight: bold; background: none; border: none; text-decoration: underline;"
                                                         title="Reset confirmation status for <?php echo $nonschool[$k]['school_name']; ?>">
                                                         Reset
                                                     </button>

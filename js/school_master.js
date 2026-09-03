@@ -1,100 +1,237 @@
 // JavaScript Document
+
+function forceRemoveModalBackdrop() {
+    var backdrops = document.querySelectorAll('.modal-backdrop');
+    for (var i = 0; i < backdrops.length; i++) {
+        backdrops[i].remove();
+    }
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+}
+
+(function () {
+    document.addEventListener('hidden.bs.modal', function (event) {
+        if (event.target && event.target.id === 'schoolMasterModal') {
+            forceRemoveModalBackdrop();
+        }
+    });
+})();
+
+function schoolMasterLoadingHtml() {
+    return '<div class="text-center py-5" id="schoolMasterLoading">' +
+        '<div class="spinner-border text-primary" role="status" style="width:3rem;height:3rem;">' +
+        '<span class="visually-hidden">Loading...</span></div>' +
+        '<p class="text-muted mt-3 mb-0">Loading school details...</p>' +
+        '</div>';
+}
+
+function loadSchoolMasterModal(userId) {
+    if (loadSchoolMasterModal._busy) {
+        return;
+    }
+    loadSchoolMasterModal._busy = true;
+
+    var params = 'UserIdty=' + encodeURIComponent(userId ? userId : '');
+    var modalEl = document.getElementById('schoolMasterModal');
+    if (!modalEl) {
+        loadSchoolMasterModal._busy = false;
+        return;
+    }
+
+    var targetContent = modalEl.querySelector('.modal-content');
+    var targetBody = modalEl.querySelector('.modal-body');
+    if (!targetContent || !targetBody) {
+        loadSchoolMasterModal._busy = false;
+        return;
+    }
+
+    targetBody.innerHTML = schoolMasterLoadingHtml();
+    forceRemoveModalBackdrop();
+    var existing = bootstrap.Modal.getInstance(modalEl);
+    if (!existing) {
+        existing = new bootstrap.Modal(modalEl);
+    }
+    existing.show();
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', path + 'schools/school_master/edit_school_detials', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState !== 4) {
+            return;
+        }
+        loadSchoolMasterModal._busy = false;
+
+        var hideModal = function () {
+            var inst = bootstrap.Modal.getInstance(modalEl);
+            if (inst) {
+                inst.hide();
+            }
+            forceRemoveModalBackdrop();
+        };
+
+        if (xhr.status !== 200) {
+            hideModal();
+            swal('Oops!', 'Unable to load the school form. Please try again.', 'error');
+            return;
+        }
+        var resp = null;
+        try {
+            resp = JSON.parse(xhr.responseText);
+        } catch (e) {
+            resp = null;
+        }
+        if (!resp || !resp.success || !resp.html) {
+            hideModal();
+            swal('Oops!', resp && resp.message ? resp.message : 'Invalid server response.', 'error');
+            return;
+        }
+
+        var temp = document.createElement('div');
+        temp.innerHTML = resp.html.trim();
+        var contentEl = temp.querySelector('.modal-content');
+        var respBody = contentEl ? contentEl.querySelector('.modal-body') : null;
+        if (!respBody) {
+            hideModal();
+            swal('Oops!', 'Invalid server response.', 'error');
+            return;
+        }
+
+        targetBody.innerHTML = respBody.innerHTML;
+        forceRemoveModalBackdrop();
+
+        if (modalEl.classList.contains('show')) {
+            if (!bootstrap.Modal.getInstance(modalEl)) {
+                existing = new bootstrap.Modal(modalEl);
+            }
+            existing.show();
+        }
+    };
+    xhr.send(params);
+}
+
+function showAddSchoolModal() {
+    loadSchoolMasterModal('');
+}
+
 function fncAddSchool(usertype)
 {
-    if (!document.getElementById('txtSchoolName').value)
+    var schoolName = document.getElementById('txtSchoolName');
+    if (!schoolName || !schoolName.value.trim())
     {
-        swal("Oops!", "Please Enter School name", "error");
-        //alert("Please Enter School name");
-        document.getElementById('txtSchoolName').focus();
+        swal("Missing Information", "Please enter the school name.", "warning");
+        if (schoolName) schoolName.focus();
         return false;
     }
 
-    if (document.getElementById('cmbSchoolType').value == 0)
+    var schoolType = document.getElementById('cmbSchoolType');
+    if (!schoolType || schoolType.value == 0 || schoolType.value == '')
     {
-        swal("Oops!", "Please select School type", "error");
-        //alert("Please select School type");
-        document.getElementById('cmbSchoolType').focus();
+        swal("Missing Information", "Please select a school management type.", "warning");
+        if (schoolType) schoolType.focus();
         return false;
     }
 
     if (usertype < 2) {
-        if (document.getElementById('cmbDistrict').value == 0)
+        var dist = document.getElementById('cmbDistrict');
+        if (dist && (dist.value == 0 || dist.value == ''))
         {
-            swal("Oops!", "select District", "error");
-            //alert("select District");
-            document.getElementById('cmbDistrict').focus();
+            swal("Missing Information", "Please select a revenue district.", "warning");
+            dist.focus();
             return false;
         }
     }
     if (usertype < 3) {
-        if (document.getElementById('cmbEduDistrict').value == 0)
+        var eduDist = document.getElementById('cmbEduDistrict');
+        if (eduDist && (eduDist.value == 0 || eduDist.value == ''))
         {
-            swal("Oops!", "select Education District", "error");
-            //alert("select Education District");
-            document.getElementById('cmbEduDistrict').focus();
+            swal("Missing Information", "Please select an education district.", "warning");
+            eduDist.focus();
             return false;
         }
 
-        if (document.getElementById('cmbSubDistrict').value == 0)
+        var subDist = document.getElementById('cmbSubDistrict');
+        if (subDist && (subDist.value == 0 || subDist.value == ''))
         {
-            swal("Oops!", "select Sub-District", "error");
-            //alert("select Sub-District");
-            document.getElementById('cmbSubDistrict').focus();
+            swal("Missing Information", "Please select a sub-district.", "warning");
+            subDist.focus();
             return false;
         }
+    }
 
+    var btn = document.getElementById('btnAddSchool') || document.getElementById('btnUpdateSchool') || document.querySelector('#formUser button[type="submit"]') || document.querySelector('#formUser button[type="button"]');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Updating School...';
+    }
 
+    var formUser = document.getElementById('formUser');
+    if (formUser) {
+        formUser.submit();
     }
     return true;
-
 }
 
 function fncUpdateSchool(userId, usertype) {
-    if (!document.getElementById('txtSchoolName').value)
+    var schoolName = document.getElementById('txtSchoolName');
+    if (!schoolName || !schoolName.value.trim())
     {
-        swal("Oops!", "xxxx", "error");
-    //alert("Please Enter School name");
-        document.getElementById('txtSchoolName').focus();
+        swal("Missing Information", "Please enter the school name.", "warning");
+        if (schoolName) schoolName.focus();
         return false;
     }
 
-    if (document.getElementById('cmbSchoolType').value == 0)
+    var schoolType = document.getElementById('cmbSchoolType');
+    if (!schoolType || schoolType.value == 0 || schoolType.value == '')
     {
-        swal("Oops!", "xxxx", "error");
-    //alert("Please select School type");
-        document.getElementById('cmbSchoolType').focus();
+        swal("Missing Information", "Please select a school management type.", "warning");
+        if (schoolType) schoolType.focus();
         return false;
     }
+
     if (usertype < 2) {
-
-        if (document.getElementById('cmbDistrict').value == 0)
+        var dist = document.getElementById('cmbDistrict');
+        if (dist && (dist.value == 0 || dist.value == ''))
         {
-            swal("Oops!", "xxxx", "error");
-    //alert("select District");
-            document.getElementById('cmbDistrict').focus();
+            swal("Missing Information", "Please select a revenue district.", "warning");
+            dist.focus();
             return false;
         }
     }
     if (usertype < 3) {
-        if (document.getElementById('cmbEduDistrict').value == 0)
+        var eduDist = document.getElementById('cmbEduDistrict');
+        if (eduDist && (eduDist.value == 0 || eduDist.value == ''))
         {
-            swal("Oops!", "xxxx", "error");
-    //alert("select Education District");
-            document.getElementById('cmbEduDistrict').focus();
+            swal("Missing Information", "Please select an education district.", "warning");
+            eduDist.focus();
             return false;
         }
 
-        if (document.getElementById('cmbSubDistrict').value == 0)
+        var subDist = document.getElementById('cmbSubDistrict');
+        if (subDist && (subDist.value == 0 || subDist.value == ''))
         {
-            swal("Oops!", "xxxx", "error");
-    //alert("select Sub-District");
-            document.getElementById('cmbSubDistrict').focus();
+            swal("Missing Information", "Please select a sub-district.", "warning");
+            subDist.focus();
             return false;
         }
     }
-    $('hidUserId').value = userId;
-    $('formUser').action = path + 'schools/school_master/update_school_detials';
-    $('formUser').submit();
+
+    var btn = document.getElementById('btnUpdateSchool') || document.getElementById('btnAddSchool') || document.querySelector('#formUser button[type="button"]') || document.querySelector('#formUser button[type="submit"]');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Updating School...';
+    }
+
+    var hidUserId = document.getElementById('hidUserId');
+    if (hidUserId) hidUserId.value = userId;
+
+    var formUser = document.getElementById('formUser');
+    if (formUser) {
+        formUser.action = path + 'schools/school_master/update_school_detials';
+        formUser.submit();
+    }
 }
 
 
@@ -108,16 +245,24 @@ function deleteUser(userId) {
 }
 
 function editUser(userId) {
-    $('UserIdty').value = userId;
-    $('editUser').action = path + 'schools/school_master/edit_school_detials';
-    $('editUser').submit();
+    loadSchoolMasterModal(userId);
+    return false;
 }
 
 
 function cancel()
 {
-    $('formUser').action = path + 'schools/school_master/';
-    $('formUser').submit();
+    var modalEl = document.getElementById('schoolMasterModal');
+    if (modalEl) {
+        var modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) {
+            modal.hide();
+            forceRemoveModalBackdrop();
+        } else {
+            forceRemoveModalBackdrop();
+        }
+    }
+    return false;
 }
 
 function loadEduDistrict()

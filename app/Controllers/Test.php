@@ -10,53 +10,141 @@ class Test  extends \App\Controllers\BaseController {
     }
 
     function index() {
-        //echo substr(fncUuid (), 0, 8);
-
-        /* $isHTTPS = (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on");
-          $port = (isset($_SERVER["SERVER_PORT"]) && ((!$isHTTPS && $_SERVER["SERVER_PORT"] != "80") || ($isHTTPS && $_SERVER["SERVER_PORT"] != "443")));
-          $port = ($port) ? ':'.$_SERVER["SERVER_PORT"] : '';
-          $url = ($isHTTPS ? 'https://' : 'http://').$_SERVER["SERVER_NAME"].$port.dirname($_SERVER['PHP_SELF']);
-          echo $url; */
-
-
-        $this->load->library('_fpdf/fpdf');
-
-        $this->fpdf->Open();
-
-        /* $this->fpdf->AddPage();
-          $this->fpdf->SetFont('Arial','B',14);
-          $this->fpdf->SetY(30);
-          $this->fpdf->Cell(40,10,'Hello World!');
-          $this->fpdf->Output('output.pdf','D'); */
-
-        $this->fpdf->AddPage();
-        $this->fpdf->SetFont('Arial', 'B', 9);
-        $this->fpdf->Line(5, 5, 5, 200);
-        $this->fpdf->Line(5, 5, 185, 5);
-        for ($i = 5; $i < 190; $i = $i + 10) {
-            for ($j = 5; $j < 250; $j = $j + 10) {
-                $this->fpdf->SetXY($i, $j);
-                $this->fpdf->SetFont('Arial', '', 5);
-                $this->fpdf->Write(0, "(" . $i . ", " . $j . ")");
-                $this->fpdf->Line($i, $j, $i, 200);
-                $this->fpdf->Line($i, $j, 185, $j);
+        $orientation = strtoupper(trim((string)($this->request->getGet('orientation') ?: ($_GET['orientation'] ?? ''))));
+        if ($orientation !== 'P' && $orientation !== 'L') {
+            $sub_dist_code = $this->session->get('SUB_DISTRICT');
+            $dist_code = $this->session->get('DISTRICT');
+            if ($sub_dist_code && $dist_code) {
+                $this->load->model('certificate/Certificate_Model');
+                $tpl = $this->Certificate_Model->get_certificate_details($dist_code, $sub_dist_code);
+                $orientation = (!empty($tpl[0]['page_style']) && $tpl[0]['page_style'] === 'P') ? 'P' : 'L';
+            } else {
+                $orientation = 'L';
             }
         }
 
-        $this->fpdf->Output('output.pdf', 'I');
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        http_response_code(200);
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: inline; filename="test_grid_' . strtolower($orientation) . '.pdf"');
+
+        $this->load->library('_fpdf/fpdf');
+        $this->fpdf->Open();
+        $this->fpdf->AddPage($orientation, 'A4');
+        $this->fpdf->SetAutoPageBreak(false);
+
+        if ($orientation === 'L') {
+            // A4 Landscape: 297mm width x 210mm height
+            $maxX = 290;
+            $maxY = 200;
+            $step = 10;
+
+            $this->fpdf->SetDrawColor(160, 160, 160);
+            $this->fpdf->Rect(5, 5, $maxX - 5, $maxY - 5);
+
+            $this->fpdf->SetFont('Arial', 'B', 8);
+            $this->fpdf->SetTextColor(100, 100, 100);
+            $this->fpdf->Text(8, 4, "A4 LANDSCAPE COORDINATE GRID (297 x 210 mm) - Calibration Units in mm");
+
+            for ($x = 10; $x < $maxX; $x += $step) {
+                if ($x % 50 === 0) {
+                    $this->fpdf->SetDrawColor(120, 120, 120);
+                    $this->fpdf->SetLineWidth(0.3);
+                } else {
+                    $this->fpdf->SetDrawColor(215, 215, 215);
+                    $this->fpdf->SetLineWidth(0.1);
+                }
+                $this->fpdf->Line($x, 5, $x, $maxY);
+            }
+
+            for ($y = 10; $y < $maxY; $y += $step) {
+                if ($y % 50 === 0) {
+                    $this->fpdf->SetDrawColor(120, 120, 120);
+                    $this->fpdf->SetLineWidth(0.3);
+                } else {
+                    $this->fpdf->SetDrawColor(215, 215, 215);
+                    $this->fpdf->SetLineWidth(0.1);
+                }
+                $this->fpdf->Line(5, $y, $maxX, $y);
+            }
+
+            $this->fpdf->SetTextColor(50, 50, 50);
+            $this->fpdf->SetFont('Arial', '', 4.5);
+            for ($x = 10; $x < $maxX; $x += 20) {
+                for ($y = 10; $y < $maxY; $y += 10) {
+                    $this->fpdf->SetXY($x + 0.5, $y + 0.5);
+                    $this->fpdf->Write(0, "$x,$y");
+                }
+            }
+        } else {
+            // A4 Portrait: 210mm width x 297mm height
+            $maxX = 200;
+            $maxY = 285;
+            $step = 10;
+
+            $this->fpdf->SetDrawColor(160, 160, 160);
+            $this->fpdf->Rect(5, 5, $maxX - 5, $maxY - 5);
+
+            $this->fpdf->SetFont('Arial', 'B', 8);
+            $this->fpdf->SetTextColor(100, 100, 100);
+            $this->fpdf->Text(8, 4, "A4 PORTRAIT COORDINATE GRID (210 x 297 mm) - Calibration Units in mm");
+
+            for ($x = 10; $x < $maxX; $x += $step) {
+                if ($x % 50 === 0) {
+                    $this->fpdf->SetDrawColor(120, 120, 120);
+                    $this->fpdf->SetLineWidth(0.3);
+                } else {
+                    $this->fpdf->SetDrawColor(215, 215, 215);
+                    $this->fpdf->SetLineWidth(0.1);
+                }
+                $this->fpdf->Line($x, 5, $x, $maxY);
+            }
+
+            for ($y = 10; $y < $maxY; $y += $step) {
+                if ($y % 50 === 0) {
+                    $this->fpdf->SetDrawColor(120, 120, 120);
+                    $this->fpdf->SetLineWidth(0.3);
+                } else {
+                    $this->fpdf->SetDrawColor(215, 215, 215);
+                    $this->fpdf->SetLineWidth(0.1);
+                }
+                $this->fpdf->Line(5, $y, $maxX, $y);
+            }
+
+            $this->fpdf->SetTextColor(50, 50, 50);
+            $this->fpdf->SetFont('Arial', '', 4.5);
+            for ($x = 10; $x < $maxX; $x += 20) {
+                for ($y = 10; $y < $maxY; $y += 10) {
+                    $this->fpdf->SetXY($x + 0.5, $y + 0.5);
+                    $this->fpdf->Write(0, "$x,$y");
+                }
+            }
+        }
+
+        $this->fpdf->Output('test_grid_' . strtolower($orientation) . '.pdf', 'I');
+        exit;
     }
 
     function nodata() {
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: inline; filename="No_Data.pdf"');
 
         $this->load->library('_fpdf/fpdf');
 
         $this->fpdf->Open();
 
         $this->fpdf->AddPage();
-        $this->fpdf->SetFont('Arial', 'B', 18);
-        $this->fpdf->SetY(30);
-        $this->fpdf->Cell(350, 100, 'No Data!');
-        $this->fpdf->Output('output.pdf', 'I');
+        $this->fpdf->SetFont('Arial', 'B', 16);
+        $this->fpdf->SetY(40);
+        $this->fpdf->Cell(190, 15, 'No Data Found!', 0, 1, 'C');
+        $this->fpdf->Output('No_Data.pdf', 'I');
+        exit;
     }
 
     function backup() {

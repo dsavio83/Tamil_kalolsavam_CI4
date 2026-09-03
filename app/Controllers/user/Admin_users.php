@@ -19,25 +19,22 @@ class Admin_Users extends \App\Controllers\BaseController {
         }
     }
 
-    function index() {
+function index() {
         if (!isset($this->Content) || !is_array($this->Content)) {
             $this->Content = array();
         }
 
         $this->Content['states'] = $this->General_Model->prepare_select_box_data('rev_district_master', 'rev_district_code, rev_district_name', '', 'Select District', 'rev_district_code');
         $this->Content['user_types'] = $this->General_Model->prepare_select_box_data('user_types', 'user_type_id, type_name', 'user_type_id NOT IN (4,5)', '-- Select User Type --', 'user_type_id');
-        $this->template->write_view('content', 'user/add_admin_users', $this->Content);
         $this->Content['retvalue'] = $this->Admin_Users_Model->exist_admin_details();
-        if (count($this->Content['retvalue']) > 0 || isset($_POST['filter'])) {
-            if (isset($_POST['cmbSubDistrictFilter']) && trim($_POST['cmbSubDistrictFilter']) != 0) {
-                $this->Content['sub_districts'] = $this->General_Model->get_subdistrict_details_combo(trim($_POST['cmbDistrictFilter']));
-            }
-            if (isset($_POST['cmbSchoolFilter']) && trim($_POST['cmbSchoolFilter']) != 0) {
-                $this->Content['schools'] = $this->General_Model->get_school_details_combo(trim($_POST['cmbSubDistrictFilter']));
-            }
-
-            $this->template->write_view('content', 'user/admin_users', $this->Content);
+        if (isset($_POST['cmbSubDistrictFilter']) && trim($_POST['cmbSubDistrictFilter']) != 0) {
+            $this->Content['sub_districts'] = $this->General_Model->get_subdistrict_details_combo(trim($_POST['cmbDistrictFilter']));
         }
+        if (isset($_POST['cmbSchoolFilter']) && trim($_POST['cmbSubDistrictFilter']) != 0) {
+            $this->Content['schools'] = $this->General_Model->get_school_details_combo(trim($_POST['cmbSubDistrictFilter']));
+        }
+
+        $this->template->write_view('content', 'user/admin_users', $this->Content);
         $this->template->load();
     }
 

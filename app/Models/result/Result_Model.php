@@ -12,8 +12,14 @@ class Result_Model extends \App\Models\BaseModel {
 
     function get_item_details_result($item_code) {
 
+        if (empty($item_code)) {
+            return false;
+        }
+
         $this->db->select('SM.*, IM.*, (SELECT COUNT(PID.participant_id)
-                        FROM participant_item_details PID WHERE PID.item_code=' . $item_code . ' AND PID.is_captain=\'Y\' ) AS total_participants ', FALSE);
+                        FROM participant_item_details PID WHERE PID.item_code = :pid_item_code: AND PID.is_captain = :pid_captain: ) AS total_participants ', FALSE);
+        $this->db->bind('pid_item_code', $item_code);
+        $this->db->bind('pid_captain', 'Y');
         $this->db->from('item_master AS IM');
         $this->db->join('stage_item_master AS SM', 'IM.item_code = SM.item_code');
         $this->db->where('IM.item_code', $item_code);
@@ -485,7 +491,7 @@ class Result_Model extends \App\Models\BaseModel {
                 $this->db->join("participant_item_details PID", "PID.parent_admn_no=RM.admn_no AND PID.school_code=RM.school_code
                             AND PID.item_code=RM.item_code");
                 $this->db->join("special_order_master SOM", "SOM.spo_id=PID.spo_id", "LEFT");
-                $this->db->groupBy('PID.participant_id');
+                $this->db->groupBy('PID.participant_id, RM.item_code, RM.school_code, PID.admn_no, RM.grade, RM.rank, PID.parent_admn_no, SOM.is_publish');
 
 
                 $cirtificate_array_master = $this->db->get();

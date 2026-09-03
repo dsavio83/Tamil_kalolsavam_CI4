@@ -1,36 +1,40 @@
 
 <style type="text/css">
-    <!--
     .style1 {
-        font-size: 15px;
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
+        font-size: 14px;
         font-weight: bold;
-        color: #0d6efd;
+        color: #000000;
     }
-    .style2{
+    .style2 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
         font-size: 11px;
         font-weight: bold;
-        color:#000000;
+        color: #000000;
     }
-    .style4{
+    .style4 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
         font-size: 8px;
         font-weight: bold;
-        color:#000000;
+        color: #000000;
     }
-    .style8{
+    .style8 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
         font-size: 8px;
-        color:#CC3300;
+        color: #000000;
     }
     .style9 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
         font-size: 20px;
         font-weight: bold;
-        color: #0d6efd;
+        color: #000000;
     }
-    .style10{
+    .style10 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
         font-size: 12px;
         font-weight: bold;
-        color: #0d6efd;
+        color: #000000;
     }
-    -->
 </style>
 
 <page backtop="30mm" backbottom="20mm ">

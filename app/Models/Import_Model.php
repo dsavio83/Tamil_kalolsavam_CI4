@@ -372,7 +372,7 @@ class Import_Model extends \App\Models\BaseModel {
         fwrite($handle, $return);
         fclose($handle);
         mysqli_query($link,'REPAIR TABLE `result_master`');
-        return true;
+        return $return;
     }
 
     function restore_Database($fileName) {

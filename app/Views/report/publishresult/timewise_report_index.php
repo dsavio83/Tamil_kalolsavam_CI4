@@ -1,82 +1,97 @@
-<div class="pagetitle">
-    <h1>Result Report</h1>
-    <nav>
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="<?php echo base_url(); ?>welcome" title="Home">Home</a></li>
-        <li class="breadcrumb-item active">Time Wise Result Published</li>
+<div class="pagetitle mb-4">
+  <h1 class="h3 fw-bold text-dark d-flex align-items-center gap-2">
+    <i class="bi bi-clock-history text-primary"></i> Time wise Report
+  </h1>
+  <nav>
+    <ol class="breadcrumb mb-0">
+      <li class="breadcrumb-item"><a href="<?php echo base_url(); ?>welcome" class="text-decoration-none">Home</a></li>
+      <li class="breadcrumb-item">Result Reports</li>
+      <li class="breadcrumb-item active">Time wise &amp; Result Number Reports</li>
     </ol>
-    </nav>
+  </nav>
 </div>
 
-<?php
-echo form_open('report/afterresultreportpdf/time_wise_result_report', array('id' => 'rankwise', 'target' => '_blank'));
+<div class="row g-4">
+  <!-- Card 1: Time Window Filter -->
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
+      <div class="card-header bg-primary text-white py-3 px-4 border-0 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+          <div class="bg-white bg-opacity-25 rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+            <i class="bi bi-calendar2-range-fill text-white fs-5"></i>
+          </div>
+          <div>
+            <h5 class="card-title mb-0 text-white fw-bold fs-6">Time Window Filter</h5>
+            <small class="text-white-50">Results finalized within date/time interval</small>
+          </div>
+        </div>
+        <span class="badge bg-white text-primary fw-bold shadow-sm px-2.5 py-1.5 rounded-pill small">
+          <i class="bi bi-printer-fill me-1"></i> PDF
+        </span>
+      </div>
 
-$rank[1] = 1;
-$rank[2] = 2;
-$rank[3] = 3;
-$rank['ALL'] = 'All Rank';
-/* $cur_date	=	date('Y-m-d');
-  $date_array[$cur_date]	=	date('j M Y',strtotime($cur_date)); */
-//echo "<br /><br /><br /><br />-------".$date_array;
-?>
-<table width="100%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top:15px;">
-    <tr>
-        <th colspan="6" align="left">Select Date &amp; Time</th>
-    </tr>
-    <tr>
-        <td width="4%" class="">&nbsp;</td>
-        <td align="left" width="25%" class="table_row_first">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;From Date : </td>
-        <td align="left" width="18%" class="table_row_first"><?php echo form_dropdown('txtfromDate', $date_array, '', 'id="txtfromDate" class="form-control"'); ?></td>
-        <td align="left" width="18%" class="table_row_first">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;From Time : </td>
-        <td align="left" width="35%" class="table_row_first">	
+      <div class="card-body p-4 d-flex flex-column justify-content-between">
+        <?php echo form_open('report/afterresultreportpdf/time_wise_result_report', array('id' => 'formTimeWise', 'target' => '_blank', 'class' => 'needs-validation')); ?>
+        
+        <?php
+        $time_hours = [
+          '1' => '1:00', '2' => '2:00', '3' => '3:00', '4' => '4:00',
+          '5' => '5:00', '6' => '6:00', '7' => '7:00', '8' => '8:00',
+          '9' => '9:00', '10' => '10:00', '11' => '11:00', '12' => '12:00'
+        ];
+        $time_ampm = ['AM' => 'AM', 'PM' => 'PM'];
+        ?>
 
-            <?php
-            $time_array_from = array('1' => '1:00', '2' => '2:00', '3' => '3:00', '4' => '4:00', '5' => '5:00', '6' => '6:00', '7' => '7:00', '8' => '8:00', '9' => '9:00', '10' => '10:00', '11' => '11:00', '12' => '12:00');
-            echo form_dropdown('txtfromTime', $time_array_from, '', 'id="txtfromTime"');
+        <!-- From Date & Time -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold text-dark small mb-2 d-flex align-items-center gap-1.5">
+            <i class="bi bi-calendar-event text-primary"></i>
+            <span>From Date &amp; Time</span>
+          </label>
+          <div class="row g-2">
+            <div class="col-6">
+              <?php echo form_dropdown('txtfromDate', $date_array, '', 'id="txtfromDate" class="form-select py-2 fs-6" required'); ?>
+            </div>
+            <div class="col-3">
+              <?php echo form_dropdown('txtfromTime', $time_hours, '9', 'id="txtfromTime" class="form-select py-2 fs-6"'); ?>
+            </div>
+            <div class="col-3">
+              <?php echo form_dropdown('txtfromampm', $time_ampm, 'AM', 'id="txtfromampm" class="form-select py-2 fs-6"'); ?>
+            </div>
+          </div>
+        </div>
 
-            $ampm_array_from = array('AM' => 'AM', 'PM' => 'PM');
-            echo form_dropdown('txtfromampm', $ampm_array_from, '', 'id="txtfromampm"');
-            ?>
+        <!-- To Date & Time -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold text-dark small mb-2 d-flex align-items-center gap-1.5">
+            <i class="bi bi-calendar-check text-primary"></i>
+            <span>To Date &amp; Time</span>
+          </label>
+          <div class="row g-2">
+            <div class="col-6">
+              <?php echo form_dropdown('txttoDate', $date_array, '', 'id="txttoDate" class="form-select py-2 fs-6" required'); ?>
+            </div>
+            <div class="col-3">
+              <?php echo form_dropdown('txttoTime', $time_hours, '5', 'id="txttoTime" class="form-select py-2 fs-6"'); ?>
+            </div>
+            <div class="col-3">
+              <?php echo form_dropdown('txttoampm', $time_ampm, 'PM', 'id="txttoampm" class="form-select py-2 fs-6"'); ?>
+            </div>
+          </div>
+          <div class="form-text mt-2 text-muted small">
+            <i class="bi bi-info-circle text-primary me-1"></i> Finalized results published within this window will be included.
+          </div>
+        </div>
 
-        </td>
-    </tr>
-    <tr>
-        <td>&nbsp;</td>
-        <td align="left" width="25%" class="table_row_first">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To Date : </td>
+        <div class="pt-3 border-top mt-auto text-end">
+          <button type="submit" name="btnSubmit" id="btnSubmitTime" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold shadow-sm d-inline-flex align-items-center gap-2">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+            <span>Generate Time Report</span>
+          </button>
+        </div>
 
-        <td align="left" width="18%" class="table_row_first"><?php echo form_dropdown('txttoDate', $date_array, '', 'id="txttoDate" class="form-control"'); ?></td>
-        <td align="left" width="18%" class="table_row_first">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To Time : </td>
-
-        <td align="left" width="35%" class="table_row_first">
-            <?php
-            $time_array_to = array('1' => '1:00', '2' => '2:00', '3' => '3:00', '4' => '4:00', '5' => '5:00', '6' => '6:00', '7' => '7:00', '8' => '8:00', '9' => '9:00', '10' => '10:00', '11' => '11:00', '12' => '12:00');
-            echo form_dropdown('txttoTime', $time_array_to, '', 'id="txttoTime"');
-
-            $ampm_array_to = array('AM' => 'AM', 'PM' => 'PM');
-            echo form_dropdown('txttoampm', $ampm_array_to, '', 'id="txttoampm"');
-            ?>
-        </td>
-    </tr>
-    <tr>
-        <td>&nbsp;</td>
-        <td align="left" width="25%" class="table_row_first">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-        <td align="left" width="18%" class="table_row_first"><form name="form1" method="post" action="">
-                <label>
-                    <input type="submit" class="btn btn-primary" name="btnSubmit" id="btnSubmit" value="View report" >
-                </label>
-            </form>    </td>
-        <td width="18%" class="table_row_first">&nbsp;</td>
-        <td width="35%" class="table_row_first">&nbsp;</td>
-    </tr>
-
-    <tr>
-        <td align="center" colspan="5">&nbsp;</td>
-    </tr>
-</table>
-<input type="hidden" name="hidUserId" id="hidUserId" />
-
-<?php
-//itemwise_report_interface
-echo form_close();
-
-?>
+        <input type="hidden" name="hidUserId" id="hidUserId" value="<?php echo htmlspecialchars((string)$this->session->get('USERID')); ?>" />
+        <?php echo form_close(); ?>
+      </div>
+    </div>
+  </div>

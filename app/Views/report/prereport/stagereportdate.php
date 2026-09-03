@@ -1,64 +1,71 @@
- <div class="pagetitle">
-      <h1>Stage Report</h1>
+<div class="pagetitle mb-4">
+  <h1 class="h3 fw-bold text-dark d-flex align-items-center gap-2">
+    <i class="bi bi-calendar-range-fill text-primary"></i> Stage Report - Date Wise
+  </h1>
   <nav>
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item">
-        <a href="<?php echo base_url(); ?> welcome" title="Home">Home</a></li>
-      <li class="breadcrumb-item active">Stage Report</li>
+    <ol class="breadcrumb mb-0">
+      <li class="breadcrumb-item"><a href="<?php echo base_url(); ?>welcome" class="text-decoration-none">Home</a></li>
+      <li class="breadcrumb-item">Reports</li>
+      <li class="breadcrumb-item active">Stage Report (Date Wise)</li>
     </ol>
   </nav>
 </div>
 
- <div align="center" class="heading_gray">
-    <h3></h3>
+<!-- Tab Navigation between Stage Reports -->
+<div class="row justify-content-center mb-4">
+  <div class="col-md-8 col-lg-6 col-xl-5">
+    <div class="nav nav-pills nav-fill bg-white p-1 rounded-pill shadow-sm border">
+      <a class="nav-link active rounded-pill fw-semibold py-2 px-3 d-flex align-items-center justify-content-center gap-2" href="<?php echo base_url(); ?>report/prereport/stagereportdate">
+        <i class="bi bi-calendar-range-fill"></i>
+        <span>Date Wise</span>
+      </a>
+      <a class="nav-link rounded-pill text-secondary fw-semibold py-2 px-3 d-flex align-items-center justify-content-center gap-2" href="<?php echo base_url(); ?>report/prereport/stagereport_all">
+        <i class="bi bi-diagram-3-fill"></i>
+        <span>All Stages &amp; Abstract</span>
+      </a>
+    </div>
+  </div>
 </div>
-<br />
-<?php
-echo form_open('report/prereportpdf/stagereportdate', array('id' => 'formStageReport', 'target' => '_blank'));
 
-?>
-<form name="form1" method="post" action="">
 <div class="row justify-content-center">
-        <div class="col-md-12 col-sm-12 col-xl-12">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Stage Report - Date wise</h5>
-    <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top:15px;">
-        
-        <tr>
-            <td align="left" width="27%">
-                Stage Name 
-            </td>
-            <td align="left" width="55%"><div id="cmbitem"><?php echo form_dropdown("cmbstage", $stage, '', 'class="form-control" id="cmbstage" '); ?></div>
-            </td>
-            
-        </tr>
-        <tr>
-            
-            <td align="left">Date </td>
-            <td align="left"> <?php echo form_dropdown("txtDate", @$date_array, (@$date != '') ? $date : '', 'class="form-control" id="txtDate"'); ?>
-                    <!--<input class="form-control date_field" type="text" onfocus="displayCalendar(document.formAllotment.txtDate,'yyyy-mm-dd',this)" name="txtDate" id="txtDate" value="<?php echo @$date; ?>" readonly="readonly">-->
-                        <!--<input class="form-control date_field" type="text"   onFocus="javascript:vDateType='3'" onBlur="DateFormat(this,this.value,event,true,'3')" onKeyDown="DateFormat(this,this.value,event,false,'3')" onKeyUp="DateFormat(this,this.value,event,false,'3')" maxlength="10"  name="txtDate" id="txtDate" value="<?php //echo $start_date;    ?>">-->
-                    <!--<img src="<?php echo image_url(); ?>calender.png" onclick="displayCalendar(document.formAllotment.txtDate,'yyyy-mm-dd',this)" width="16" height="16" style="cursor:pointer" />
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-->
-        </tr>
-        <tr class="text-center">
-            <td colspan="2">
-                <label>
-                    <input type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-primary mt-3" value="View report">
-                </label>       
-            </td>
-        </tr>
+  <div class="col-md-8 col-lg-6 col-xl-5">
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-header bg-primary text-white py-3 px-4 rounded-top-4">
+        <h5 class="card-title mb-0 text-white fw-bold d-flex align-items-center gap-2">
+          <i class="bi bi-file-earmark-pdf-fill"></i> Stage Report (Date Wise)
+        </h5>
+      </div>
 
-    </table>
-    <input type="hidden" name="stagename" id="stagename" />
-</form>
-</div>
-</div>
-</div>
-</div>
-<?php
-//itemwise_report_interface
+      <div class="card-body p-4">
+        <?php echo form_open('report/prereportpdf/stagereportdate', array('id' => 'formStageReport', 'target' => '_blank', 'class' => 'no-global-loader')); ?>
 
-echo form_close();
-?>
+        <div class="mb-3">
+          <label for="cmbstage" class="form-label fw-semibold text-dark small mb-1">
+            Select Stage Name <span class="text-danger">*</span>
+          </label>
+          <?php echo form_dropdown("cmbstage", $stage, '', 'class="form-select form-select-lg py-2" id="cmbstage" required'); ?>
+        </div>
+
+        <div class="mb-4">
+          <label for="txtDate" class="form-label fw-semibold text-dark small mb-1">
+            Select Festival Date <span class="text-danger">*</span>
+          </label>
+          <?php echo form_dropdown("txtDate", @$date_array, (@$date != '') ? $date : 'ALL', 'class="form-select form-select-lg py-2" id="txtDate" required'); ?>
+        </div>
+
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-primary rounded-pill py-2.5 fw-semibold shadow-sm d-flex align-items-center justify-content-center gap-2">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+            <span>Generate PDF Report</span>
+          </button>
+          <a href="<?php echo base_url(); ?>report/prereportpdf/stagereport_all" target="_blank" class="btn btn-outline-secondary rounded-pill py-2 fw-semibold d-flex align-items-center justify-content-center gap-2">
+            <i class="bi bi-diagram-3-fill"></i>
+            <span>View Stage Report - All Stages (PDF)</span>
+          </a>
+        </div>
+
+        <?php echo form_close(); ?>
+      </div>
+    </div>
+  </div>
+</div>

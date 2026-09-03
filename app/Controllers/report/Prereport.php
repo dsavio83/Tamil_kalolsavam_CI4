@@ -2,6 +2,8 @@
 
 namespace App\Controllers\Report;
 
+use HTML2PDF;
+
 
 class Prereport  extends \App\Controllers\BaseController {
 
@@ -39,19 +41,13 @@ class Prereport  extends \App\Controllers\BaseController {
         }
         $this->Contents = array();
         $this->template->write('title', '');
-        //$this->Contents['retdat'] = $this->Prereport_Model->list_school_details();
+        $retdat = $this->Prereport_Model->list_school_details();
         $fest = $this->General_Model->prepare_select_box_data('festival_master', 'fest_id,fest_name', '', 'All Festival', 'fest_id');
+        $this->Contents['retdat'] = $retdat;
         $this->Contents['pfest'] = $fest;
-        $this->template->write_view('content', 'report/prereport/list_participants', $this->Contents);
-
-
-
-        $this->Contents = array();
-        //$fest['ALL']='All Festival';
         $this->Contents['fest'] = $fest;
-
+        $this->template->write_view('content', 'report/prereport/list_participants', $this->Contents);
         $this->template->write_view('content', 'report/prereport/team_manager_all', $this->Contents);
-
         $this->template->load();
     }
 
@@ -80,6 +76,7 @@ class Prereport  extends \App\Controllers\BaseController {
     }
 
     function four_reports() {
+        $this->template->write('title', 'Stage Reports');
         $fest = $this->General_Model->prepare_select_box_data('festival_master', 'fest_id,fest_name', '', 'Select Festival', 'fest_id');
         $this->Contents = array();
         $this->Contents['fest'] = $fest;
@@ -93,27 +90,19 @@ class Prereport  extends \App\Controllers\BaseController {
             $this->template->load();
             return;
         }
+        $this->template->write('title', 'Stage Reports');
         $fest = $this->General_Model->prepare_select_box_data('festival_master', 'fest_id,fest_name', '', 'Select Festival', 'fest_id');
-        $this->Contents = array();
-        $this->Contents['fest'] = $fest;
-
-        $this->Contents['fest'] = $fest;
-        $this->template->write_view('content', 'report/prereport/callsheet_first', $this->Contents);
-        $this->Contents = array();
-        $this->template->write('title', '');
-        $fest = $this->General_Model->prepare_select_box_data('festival_master', 'fest_id,fest_name', '', 'Select Festival', 'fest_id');
-        $this->Contents = array();
-        $this->Contents['fest'] = $fest;
-        //print_r($fest);
-        $this->template->write_view('content', 'report/prereport/callsheet_all', $this->Contents);
-        $stage = $this->General_Model->prepare_select_box_data('stage_master', 'stage_id,stage_name', '', '', 'stage_id');
-        $this->Contents = array();
+        $stage = $this->General_Model->prepare_select_box_data('stage_master', 'stage_id,stage_name', '', 'Select Stage', 'stage_id');
         $stage['All'] = 'All Stages';
-        $this->Contents['stage'] = $stage;
         $date_array = $this->General_Model->get_fest_date_array();
         $date_array['All'] = 'All Dates';
-        $this->Contents['date_array'] = $date_array;
-        $this->template->write_view('content', 'report/prereport/call_date_stage', $this->Contents);
+
+        $data = array(
+            'fest'       => $fest,
+            'stage'      => $stage,
+            'date_array' => $date_array,
+        );
+        $this->template->write_view('content', 'report/prereport/callsheet_first', $data);
         $this->template->load();
     }
 
@@ -136,11 +125,9 @@ class Prereport  extends \App\Controllers\BaseController {
         }
         $this->Contents = array();
         $this->template->write('title', '');
-        //$this->Contents['retdat'] = $this->Prereport_Model->list_school_details();
+        $this->Contents['retdat'] = $this->Prereport_Model->list_school_details();
         $this->template->write_view('content', 'report/prereport/participant_cardindex', $this->Contents);
-
         $this->template->write_view('content', 'report/prereport/participant_regno', $this->Contents);
-
         $this->template->load();
     } 
 
@@ -152,15 +139,11 @@ class Prereport  extends \App\Controllers\BaseController {
         }
         $this->Contents = array();
         $this->template->write('title', '');
-        //$this->Contents['retdat'] = $this->Prereport_Model->list_school_details();
+        $this->Contents['retdat'] = $this->Prereport_Model->list_school_details();
         $sub_dist_array = $this->General_Model->prepare_select_box_data('sub_district_master', 'sub_district_code,sub_district_name', array('rev_district_code' => $this->session->get('DISTRICT')), '', 'sub_district_code');
         $this->Contents['sub_dist_array'] = $sub_dist_array;
-        //$this->Contents['retdat'] = $this->Prereport_Model->list_school_details();
         $this->template->write_view('content', 'report/prereport/participant_cardindex_school_photo', $this->Contents);
-        //$this->template->write_view('content', 'report/prereport/participant_cardindex_photo', $this->Contents);
-
         $this->template->write_view('content', 'report/prereport/participant_regno_photo', $this->Contents);
-
         $this->template->load();
     }
 
@@ -172,14 +155,11 @@ class Prereport  extends \App\Controllers\BaseController {
         }
         $this->Contents = array();
         $this->template->write('title', '');
-        //$this->Contents['retdat'] = $this->Prereport_Model->list_school_details();
+        $this->Contents['retdat'] = $this->Prereport_Model->list_school_details();
         $dist_array = $this->General_Model->prepare_select_box_data('rev_district_master', 'rev_district_code,rev_district_name', '', '', 'rev_district_code');
         $this->Contents['dist_array'] = $dist_array;
         $this->template->write_view('content', 'report/prereport/participant_cardindex_schoolwithphoto', $this->Contents);
-        //$this->template->write_view('content', 'report/prereport/participant_cardindexwithphoto', $this->Contents);
-
         $this->template->write_view('content', 'report/prereport/participant_regnowithphoto', $this->Contents);
-
         $this->template->load();
     }
 
@@ -271,25 +251,19 @@ class Prereport  extends \App\Controllers\BaseController {
             $this->template->load();
             return;
         }
+        $this->template->write('title', 'Stage Reports');
         $fest = $this->General_Model->prepare_select_box_data('festival_master', 'fest_id,fest_name', '', 'Select Festival', 'fest_id');
-        $this->Contents['fest'] = $fest;
-        $this->template->write_view('content', 'report/prereport/score_sheet_interface', $this->Contents);
-
-
-        $this->Contents = array();
-        $this->template->write('title', '');
-        $this->Contents['retdat'] = $this->Prereport_Model->festval_details();
-        $this->template->write_view('content', 'report/prereport/scoresheet_fest', $this->Contents);
-        $stage = $this->General_Model->prepare_select_box_data('stage_master', 'stage_id,stage_name', '', '', 'stage_id');
-        $this->Contents = array();
+        $stage = $this->General_Model->prepare_select_box_data('stage_master', 'stage_id,stage_name', '', 'Select Stage', 'stage_id');
         $stage['All'] = 'All Stages';
-        $this->Contents['stage'] = $stage;
         $date_array = $this->General_Model->get_fest_date_array();
         $date_array['All'] = 'All Dates';
-        $this->Contents['date_array'] = $date_array;
-        $this->template->write_view('content', 'report/prereport/score_date_stage', $this->Contents);
 
-
+        $data = array(
+            'fest'       => $fest,
+            'stage'      => $stage,
+            'date_array' => $date_array,
+        );
+        $this->template->write_view('content', 'report/prereport/score_sheet_interface', $data);
         $this->template->load();
     }
 
@@ -308,25 +282,19 @@ class Prereport  extends \App\Controllers\BaseController {
             $this->template->load();
             return;
         }
+        $this->template->write('title', 'Stage Reports');
         $fest = $this->General_Model->prepare_select_box_data('festival_master', 'fest_id,fest_name', '', 'Select Festival', 'fest_id');
-        $this->Contents = array();
-        $this->Contents['fest'] = $fest;
-        $this->template->write_view('content', 'report/prereport/tabulation_report_interface1', $this->Contents);
-        // $this->template->load();
-
-        $fest = $this->General_Model->prepare_select_box_data('festival_master', 'fest_id,fest_name', '', 'Select Festival', 'fest_id');
-        $this->Contents = array();
-        $this->Contents['fest'] = $fest;
-        $this->template->write_view('content', 'report/prereport/tabulation_report_interface', $this->Contents);
-        //$this->template->load();
-        $stage = $this->General_Model->prepare_select_box_data('stage_master', 'stage_id,stage_name', '', '', 'stage_id');
-        $this->Contents = array();
+        $stage = $this->General_Model->prepare_select_box_data('stage_master', 'stage_id,stage_name', '', 'Select Stage', 'stage_id');
         $stage['All'] = 'All Stages';
-        $this->Contents['stage'] = $stage;
         $date_array = $this->General_Model->get_fest_date_array();
         $date_array['All'] = 'All Dates';
-        $this->Contents['date_array'] = $date_array;
-        $this->template->write_view('content', 'report/prereport/tabulation_date_stage', $this->Contents);
+
+        $data = array(
+            'fest'       => $fest,
+            'stage'      => $stage,
+            'date_array' => $date_array,
+        );
+        $this->template->write_view('content', 'report/prereport/tabulation_report_interface', $data);
         $this->template->load();
     }
 
@@ -342,14 +310,14 @@ class Prereport  extends \App\Controllers\BaseController {
         $this->Contents['retdata'] = $retdata;
         $this->Contents['retdata1'] = $retdata1;
         if (count($retdata) > 0) {
-            $this->template->write_view('content', 'report/prereport/rpt_tabulation_sheet', $this->Contents);
-            //$this->Contents['itemdet']= $this->Itemreports_Model->Eventname($itemcode);
             $content = $this->load->view('report/prereport/rpt_tabulation_sheet', $this->Contents, true);
             $html2pdf = new HTML2PDF('P', 'A4', 'en');
             $html2pdf->pdf->SetDisplayMode('fullpage');
             $html2pdf->WriteHTML($content, '');
             $html2pdf->Output('Tabulation_sheet.pdf', 'I');
-            $this->template->load();
+            exit;
+        } else {
+            redirect('test/nodata');
         }
     }
 
@@ -367,13 +335,16 @@ class Prereport  extends \App\Controllers\BaseController {
         $this->template->write('title', '');
         $festival = $this->input->post('cmbFestType');
         $this->Contents['retvalue'] = $this->Prereport_Model->tabulation_info($festival);
-        $this->template->write_view('content', 'report/prereport/rpt_tabulation_sheet1', $this->Contents);
-        $content = $this->load->view('report/prereport/rpt_tabulation_sheet1', $this->Contents, true);
-        $html2pdf = new HTML2PDF('P', 'A4', 'en');
-        $html2pdf->pdf->SetDisplayMode('fullpage');
-        $html2pdf->WriteHTML($content, '');
-        $html2pdf->Output('Tabulation_sheet.pdf', 'I');
-        $this->template->load();
+        if (count($this->Contents['retvalue']) > 0) {
+            $content = $this->load->view('report/prereport/rpt_tabulation_sheet1', $this->Contents, true);
+            $html2pdf = new HTML2PDF('P', 'A4', 'en');
+            $html2pdf->pdf->SetDisplayMode('fullpage');
+            $html2pdf->WriteHTML($content, '');
+            $html2pdf->Output('Tabulation_sheet.pdf', 'I');
+            exit;
+        } else {
+            redirect('test/nodata');
+        }
     }
 
     function timesheetinterface() {//ratheesh
@@ -382,26 +353,20 @@ class Prereport  extends \App\Controllers\BaseController {
             $this->template->load();
             return;
         }
+        $this->template->write('title', 'Stage Reports');
         $this->load->model('staticreport/Itemreports_Model');
         $fest = $this->General_Model->prepare_select_box_data('festival_master', 'fest_id,fest_name', '', 'Select Festival', 'fest_id');
-        $this->Contents = array();
-        $this->Contents['fest'] = $fest;
-        $this->template->write_view('content', 'report/prereport/timesheet', $this->Contents);
-        $fest = $this->General_Model->prepare_select_box_data('festival_master', 'fest_id,fest_name', '', 'Select Festival', 'fest_id');
-        $this->Contents = array();
-        $this->Contents['fest'] = $fest;
-        $date_array = $this->General_Model->get_fest_date_array();
-        $date_array['All'] = 'All Dates';
-        $this->Contents['date_array'] = $date_array;
-        $this->template->write_view('content', 'report/prereport/timesheet_date', $this->Contents);
-        $stage = $this->General_Model->prepare_select_box_data('stage_master', 'stage_id,stage_name', '', '', 'stage_id');
-        $this->Contents = array();
+        $stage = $this->General_Model->prepare_select_box_data('stage_master', 'stage_id,stage_name', '', 'Select Stage', 'stage_id');
         $stage['All'] = 'All Stages';
-        $this->Contents['stage'] = $stage;
         $date_array = $this->General_Model->get_fest_date_array();
         $date_array['All'] = 'All Dates';
-        $this->Contents['date_array'] = $date_array;
-        $this->template->write_view('content', 'report/prereport/time_date_stage', $this->Contents);
+
+        $data = array(
+            'fest'       => $fest,
+            'stage'      => $stage,
+            'date_array' => $date_array,
+        );
+        $this->template->write_view('content', 'report/prereport/timesheet', $data);
         $this->template->load();
     }
 
@@ -445,15 +410,6 @@ class Prereport  extends \App\Controllers\BaseController {
         $this->Contents['date_array'] = $date_array;
 
         $this->template->write_view('content', 'report/prereport/stagereportdate', $this->Contents);
-
-        $this->Contents = array();
-        $this->template->write('title', '');
-        $fest = $this->General_Model->prepare_select_box_data('festival_master', 'fest_id,fest_name', '', 'Select Fest');
-        $this->Contents = array();
-        $this->Contents['fest'] = $fest;
-        //print_r($fest);
-        $this->template->write_view('content', 'report/prereport/stagereport_all', $this->Contents);
-
         $this->template->load();
     }
 
@@ -510,11 +466,31 @@ class Prereport  extends \App\Controllers\BaseController {
         }
 
         $fest = $this->General_Model->prepare_select_box_data('festival_master', 'fest_id,fest_name', '', 'Select Festival', 'fest_id');
-
         $fest['ALL'] = 'All Festival';
+
+        $selected_fest = $this->input->post('cmbFestType') ?? $this->input->get('fest') ?? 'ALL';
+        if (empty($selected_fest) || $selected_fest === '0') {
+            $selected_fest = 'ALL';
+        }
+
+        if ($selected_fest === 'ALL') {
+            $allot_data = $this->Prereport_Model->stageallot_duration_all();
+        } else {
+            $allot_data = $this->Prereport_Model->stageallot_duration($selected_fest);
+        }
+
+        if ($this->request->isAJAX() || $this->input->get('ajax') == '1') {
+            return $this->response->setJSON([
+                'status' => 'success',
+                'selected_fest' => $selected_fest,
+                'data' => $allot_data
+            ]);
+        }
 
         $this->Contents = array();
         $this->Contents['fest'] = $fest;
+        $this->Contents['selected_fest'] = $selected_fest;
+        $this->Contents['allot_data'] = $allot_data;
         $this->template->write_view('content', 'report/prereport/stageallot_duration', $this->Contents);
         $this->template->load();
     }

@@ -7,8 +7,11 @@
 * Author:  Olivier PLATHEY                                                     *
 *******************************************************************************/
 
-define('FPDF_VERSION','1.6');
+if (!defined('FPDF_VERSION')) {
+    define('FPDF_VERSION','1.6');
+}
 
+if (!class_exists('FPDF', false) && !class_exists('Fpdf', false)) {
 class FPDF
 {
 var $page;               //current page number
@@ -503,7 +506,7 @@ function SetFont($family, $style='', $size=0)
 	//Select a font; size given in points
 	global $fpdf_charwidths;
 
-	$family=strtolower($family);
+	$family=strtolower(trim($family, "'\" "));
 	if($family=='')
 		$family=$this->FontFamily;
 	if($family=='arial')
@@ -548,7 +551,33 @@ function SetFont($family, $style='', $size=0)
 			$this->fonts[$fontkey]=array('i'=>$i, 'type'=>'core', 'name'=>$name, 'up'=>-100, 'ut'=>50, 'cw'=>$cw);
 		}
 		else
-			$this->Error('Undefined font: '.$family.' '.$style);
+		{
+			// Check if custom font file exists in font directory
+			$clean_name = str_replace(array(' ', '-', '_'), '', $family);
+			$fontpath = $this->_getfontpath();
+			$style_file = $clean_name . strtolower($style) . '.php';
+			$reg_file = $clean_name . '.php';
+
+			if (file_exists($fontpath . $style_file)) {
+				$this->AddFont($family, $style, $style_file);
+			} elseif (file_exists($fontpath . $reg_file)) {
+				$this->AddFont($family, $style, $reg_file);
+			} else {
+				// Graceful fallback to helvetica so PDF rendering never crashes
+				$family = 'helvetica';
+				$fontkey = $family . $style;
+				if (!isset($this->fonts[$fontkey])) {
+					if (!isset($fpdf_charwidths[$fontkey])) {
+						$file = $family . strtolower($style);
+						include($fontpath . $file . '.php');
+					}
+					$i = count($this->fonts) + 1;
+					$name = $this->CoreFonts[$fontkey];
+					$cw = $fpdf_charwidths[$fontkey];
+					$this->fonts[$fontkey] = array('i' => $i, 'type' => 'core', 'name' => $name, 'up' => -100, 'ut' => 50, 'cw' => $cw);
+				}
+			}
+		}
 	}
 	//Select it
 	$this->FontFamily=$family;
@@ -1232,22 +1261,64 @@ function _parsejpg($file)
 function _parsepng($file)
 {
 	//Extract info from a PNG file
-	$f=fopen($file,'rb');
+	$f=@fopen($file,'rb');
 	if(!$f)
 		$this->Error('Can\'t open image file: '.$file);
 	//Check signature
 	if($this->_readstream($f,8)!=chr(137).'PNG'.chr(13).chr(10).chr(26).chr(10))
+	{
+		fclose($f);
 		$this->Error('Not a PNG file: '.$file);
+	}
 	//Read header chunk
 	$this->_readstream($f,4);
 	if($this->_readstream($f,4)!='IHDR')
+	{
+		fclose($f);
 		$this->Error('Incorrect PNG file: '.$file);
+	}
 	$w=$this->_readint($f);
 	$h=$this->_readint($f);
 	$bpc=ord($this->_readstream($f,1));
-	if($bpc>8)
-		$this->Error('16-bit depth not supported: '.$file);
 	$ct=ord($this->_readstream($f,1));
+	$cm=ord($this->_readstream($f,1));
+	$fm=ord($this->_readstream($f,1));
+	$im=ord($this->_readstream($f,1));
+
+	// If PNG has alpha channel, 16-bit depth, interlacing, or unsupported format:
+	// Automatically convert via GD to RGB JPEG so PDF generation never fails on PNGs
+	if($ct==4 || $ct==6 || $bpc>8 || $cm!=0 || $fm!=0 || $im!=0)
+	{
+		fclose($f);
+		if(function_exists('imagecreatefrompng') && function_exists('imagejpeg'))
+		{
+			$src_im = @imagecreatefrompng($file);
+			if($src_im !== false)
+			{
+				$tw = imagesx($src_im);
+				$th = imagesy($src_im);
+				$bg_im = imagecreatetruecolor($tw, $th);
+				$white = imagecolorallocate($bg_im, 255, 255, 255);
+				imagefill($bg_im, 0, 0, $white);
+				imagecopy($bg_im, $src_im, 0, 0, 0, 0, $tw, $th);
+				$tmp_jpg = tempnam(sys_get_temp_dir(), 'fpdf_png_');
+				imagejpeg($bg_im, $tmp_jpg, 95);
+				imagedestroy($src_im);
+				imagedestroy($bg_im);
+				$jpg_info = $this->_parsejpg($tmp_jpg);
+				@unlink($tmp_jpg);
+				return $jpg_info;
+			}
+		}
+		if($ct==4 || $ct==6)
+			$this->Error('Alpha channel not supported: '.$file);
+		if($bpc>8)
+			$this->Error('16-bit depth not supported: '.$file);
+		if($im!=0)
+			$this->Error('Interlacing not supported: '.$file);
+		$this->Error('Unsupported PNG file: '.$file);
+	}
+
 	if($ct==0)
 		$colspace='DeviceGray';
 	elseif($ct==2)
@@ -1256,12 +1327,7 @@ function _parsepng($file)
 		$colspace='Indexed';
 	else
 		$this->Error('Alpha channel not supported: '.$file);
-	if(ord($this->_readstream($f,1))!=0)
-		$this->Error('Unknown compression method: '.$file);
-	if(ord($this->_readstream($f,1))!=0)
-		$this->Error('Unknown filter method: '.$file);
-	if(ord($this->_readstream($f,1))!=0)
-		$this->Error('Interlacing not supported: '.$file);
+
 	$this->_readstream($f,4);
 	$parms='/DecodeParms <</Predictor 15 /Colors '.($ct==2 ? 3 : 1).' /BitsPerComponent '.$bpc.' /Columns '.$w.'>>';
 	//Scan chunks looking for palette, transparency and image data
@@ -1729,6 +1795,7 @@ function _enddoc()
 	$this->state=3;
 }
 //End of class
+}
 }
 
 //Handle special IE contype request

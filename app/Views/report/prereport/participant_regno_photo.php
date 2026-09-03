@@ -1,55 +1,60 @@
-<!-- <div class="pagetitle">
-      <h1>PreFest Report</h1>
-      <nav>
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="<?php echo base_url(); ?>welcome" title="Home">Home</a></li>
-          <li class="breadcrumb-item active">Participant Card (Single)</li>
-        </ol>
-      </nav>
-</div> -->
+  <!-- Card 2: Single/Multi Photo Card by Register Number -->
+  <div class="col-md-12 col-xl-6">
+    <div class="card border-0 shadow-sm rounded-4 h-100 d-flex flex-column overflow-hidden">
+      
+      <!-- Card Header -->
+      <div class="card-header text-white py-3 px-4 border-0 d-flex align-items-center justify-content-between" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;">
+        <div class="d-flex align-items-center gap-2">
+          <div class="bg-white bg-opacity-25 rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+            <i class="bi bi-person-bounding-box text-white fs-5"></i>
+          </div>
+          <div>
+            <h5 class="card-title mb-0 text-white fw-bold fs-6">Photo Cards by Reg. No.</h5>
+            <small class="text-white-50">Generate photo cards for up to 3 register numbers</small>
+          </div>
+        </div>
+        <span class="badge bg-white text-dark fw-bold shadow-sm px-2.5 py-1.5 rounded-pill small">
+          <i class="bi bi-printer me-1"></i> PDF
+        </span>
+      </div>
 
-<br />
-<?php
-echo form_open('report/prereportpdf/participant_regno_photo', array('id' => 'part_reg', 'target' => '_blank'));
- 
+      <!-- Card Body -->
+      <div class="card-body p-4 d-flex flex-column flex-grow-1">
+        <?php echo form_open('report/prereportpdf/participant_regno_photo', array('id' => 'part_reg_photo', 'target' => '_blank', 'class' => 'no-global-loader d-flex flex-column flex-grow-1')); ?>
+        
+        <div class="mb-4">
+          <label class="form-label fw-semibold text-dark small mb-1.5 d-flex align-items-center gap-1.5">
+            <i class="bi bi-123 text-primary"></i>
+            <span>Register Number(s)</span>
+            <span class="text-danger">*</span>
+          </label>
+          <div class="row g-2">
+            <div class="col-12 col-sm-4">
+              <input type="text" name="regno" id="regno" class="form-control py-2 fs-6" placeholder="Reg. No 1 *" onkeypress="javascript:return numbersonly(this, event, false);" required />
+            </div>
+            <div class="col-12 col-sm-4">
+              <input type="text" name="regno1" id="regno1" class="form-control py-2 fs-6" placeholder="Reg. No 2 (Optional)" onkeypress="javascript:return numbersonly(this, event, false);" />
+            </div>
+            <div class="col-12 col-sm-4">
+              <input type="text" name="regno2" id="regno2" class="form-control py-2 fs-6" placeholder="Reg. No 3 (Optional)" onkeypress="javascript:return numbersonly(this, event, false);" />
+            </div>
+          </div>
+          <small class="text-muted mt-2 d-block" style="font-size: 0.78rem;">
+            <i class="bi bi-info-circle text-primary me-1"></i> Enter primary student register number. Optionally enter 2 more to print 3 cards together.
+          </small>
+        </div>
 
-for ($j = 0; $j < count($retdat); $j++) {
-    $dat[$retdat[$j]['school_code']] = $retdat[$j]['school_name'];
-}
-?>
+        <!-- Submit Button -->
+        <div class="mt-auto pt-3">
+          <button type="submit" class="btn btn-dark w-100 rounded-pill py-2.5 fw-semibold shadow-sm d-flex align-items-center justify-content-center gap-2" style="background-color: #1e293b; border-color: #1e293b;">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+            <span>Generate Photo Card(s) (PDF)</span>
+          </button>
+        </div>
 
-<input type="hidden" name="hiddtext"  value="">
-<div class="row">
-    <div class="col-12"> <h5 class="card-title"> Participants Cards - Reg No Wise</h5></div>
+        <?php echo form_close(); ?>
+      </div>
+
+    </div>
+  </div>
 </div>
-
-<div class="row">
-    <div class="col-xl-3 col-md-4 col-sm-12 col-lg-12">
-        Enter Register Number
-    </div>
-    <div class="col-xl-3 col-md-3 col-sm-12 col-lg-12 mt-2">
-        <?php echo form_input("regno", '', 
-            'class="form-control" id="regno" onkeypress="javascript:return numbersonly(this, 
-            event, false);" '); ?>
-    </div>
-
-    <div class="col-xl-3 col-md-3 col-sm-12 col-lg-12 mt-2">
-    <?php echo form_input("regno1", '', 'class="form-control" id="regno1" 
-        onkeypress="javascript:return numbersonly(this, event, false);" '); ?>
-    </div>
-
-    <div class="col-xl-3 col-md-3 col-sm-12 col-lg-12 mt-2">
-        <?php echo form_input("regno2", '', 'class="form-control" id="regno2" 
-        onkeypress="javascript:return numbersonly(this, event, false);" '); ?>
-    </div>
-</div>
-
-<div class="row text-center mb-2">
-    <div class="col mt-3">
-    <?php echo form_submit('Card', 'Card','class="btn btn-primary mt-3"'); ?>
-</div>
-
-<?php
-echo form_close();
- 
-?>

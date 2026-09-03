@@ -1,25 +1,25 @@
 <style type="text/css">
-    <!--
     .style1 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
         font-size: 14px;
         font-weight: bold;
         color: #0d6efd;
     }
-    .style2{
-        font-size: 12px;
-        color:#000000;
+    .style2 {
+        font-size: 10px;
+        color: #000000;
     }
-    .style3{ 
-        font-size: 11px;
+    .style3 { 
+        font-size: 10px;
         font-weight: bold;
-        color:#000000;
+        color: #000000;
     }
-    .style6{
-        font-size: 12px;
+    .style6 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
+        font-size: 14px;
         font-weight: bold;
-        color:#000000;
+        color: #000000;
     }
-    -->
 </style>
 <style>
     @media print
@@ -28,35 +28,34 @@
     }
 </style>
 <?php
-$prevschoolcode = "";
-$prev_festid = "";
-$j = 0;
-$arraypoint = array();
+$grade = $grade ?? $gradewise ?? [];
+if (!empty($grade)) {
+    $prevschoolcode = "";
+    $prev_festid = "";
+    $j = 0;
+    $arraypoint = array();
 
-foreach ($grade as $value) {
+    foreach ($grade as $value) {
+        if (($value['is_publish'] ?? '') != 'N') {
+            if ($prevschoolcode != $value['school_code']) {
+                $count = 0;
+                $prev_festid = "";
+                $prevschoolcode = $value['school_code'];
 
-    if ($value['is_publish'] != 'N') {
-
-        if ($prevschoolcode != $value['school_code']) {
-            $count = 0;
-            $prev_festid = "";
-            $prevschoolcode = $value['school_code'];
-
-            if ($j != 0) {
-
-                $tot_point = 0;
-                $tot_point = array_sum($arraypoint);
-                $arraypoint = array();
+                if ($j != 0) {
+                    $tot_point = 0;
+                    $tot_point = array_sum($arraypoint);
+                    $arraypoint = array();
+                    ?>
+                    <tr>
+                        <td colspan="5" align="right" class="style3"  style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">Total Point</td>
+                        <td align="center" class="style3" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;"><?php echo $tot_point; ?></td>
+                    </tr>
+                    <?php
+                    print("</table></page>");
+                }
+                $j++;
                 ?>
-                <tr>
-                    <td colspan="5" align="right" class="style3"  style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">Total Point</td>
-                    <td align="center" class="style3" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;"><?php echo $tot_point; ?></td>
-                </tr>
-
-                <?php
-                print("</table></page>");
-            }
-            ?>
 
 
             <page backtop="20mm" backbottom="20mm " >
@@ -80,7 +79,7 @@ foreach ($grade as $value) {
 
                 <table width="91%" align="center" border="1" cellpadding="0" cellspacing="0" >
                     <tr>
-                        <td colspan="6" align="center" class="style6" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;"><?php echo $value['school_name'] . ' (' . $value['school_code'] . ')'; ?></td>
+                        <td colspan="6" align="center" class="style6" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;"><?php echo ($value['school_name'] ?? '') . ' (' . ($value['school_code'] ?? '') . ')'; ?></td>
                     </tr>
                     <?php
                 }
@@ -101,7 +100,7 @@ foreach ($grade as $value) {
                     }
                     ?>
                     <tr>
-                        <td bgcolor="#EEEEEE" colspan="6" align="center" class="style2"  style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;">Festival :<?php echo $value['fest_name']; ?></td>
+                        <td bgcolor="#EEEEEE" colspan="6" align="center" class="style2"  style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;">Festival :<?php echo $value['fest_name'] ?? ''; ?></td>
                     </tr>
 
                     <tr>
@@ -117,11 +116,11 @@ foreach ($grade as $value) {
 
                     <?php
                 }
-                array_push($arraypoint, $value['point']);
+                array_push($arraypoint, $value['point'] ?? 0);
 
                 $count++;
                 $j++;
-                if ($value['rank'] == 0)
+                if (($value['rank'] ?? 0) == 0)
                     $rank = "--";
                 else
                     $rank = $value['rank'];
@@ -129,11 +128,11 @@ foreach ($grade as $value) {
 
                 <tr> 
                     <td width="38"  class="style2" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $count; ?></td>
-                    <td width="200" class="style2" align="left" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $value['item_code'] . '-' . $value['item_name']; ?></td>
-                    <td width="276" class="style2" align="left" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $value['participant_name']; ?></td>
+                    <td width="200" class="style2" align="left" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo ($value['item_code'] ?? '') . '-' . ($value['item_name'] ?? ''); ?></td>
+                    <td width="276" class="style2" align="left" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $value['participant_name'] ?? ''; ?></td>
                     <td width="52" class="style2" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $rank; ?> </td>
-                    <td width="46" class="style2" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $value['grade']; ?></td>
-                    <td width="50" class="style2" align="center" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;"><?php echo $value['point']; ?></td>
+                    <td width="46" class="style2" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $value['grade'] ?? ''; ?></td>
+                    <td width="50" class="style2" align="center" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;"><?php echo $value['point'] ?? ''; ?></td>
                 </tr>
 
                 <?php
@@ -150,3 +149,4 @@ foreach ($grade as $value) {
         </tr>
     </table>
 </page>
+<?php } ?>

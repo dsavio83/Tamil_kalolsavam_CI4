@@ -1,0 +1,388 @@
+<?php
+$participants = $participants ?? [];
+$orders = $orders ?? [];
+$bank_details = $bank_details ?? [];
+$participant_details = $participant_details ?? [];
+?>
+<style>
+    .hidden-row {
+        display: none;
+    }
+</style>
+<div id="divEntryForm">
+    <div class="pagetitle">
+      <h1>Registration</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="<?php echo base_url(); ?>welcome" title="Home">Home</a></li>
+          <li class="breadcrumb-item active">Special Order Entry</li>
+        </ol>
+      </nav>
+    </div>
+
+    <?php
+    echo form_open('schools/special_order_entry', array('id' => 'formSchool')); ?>
+    <input type="hidden" name="hidTeachers" id="hidTeachers" value="1">
+    <div class="row justify-content-center">
+    <div class="col-xl-12 col-md-12 col-sm-12 col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                
+                 <h5 class="card-title"> Special Order Entry</h5>
+                
+                <table>
+                   
+                    <div class="row">
+                        <div class="col-xl-6 col-md-12 col-sm-12 col-lg-12">
+                            School Code :
+                        </div>
+                        
+                        <div class="col-xl-6 col-md-12 col-sm-12 col-lg-12">
+                               <div id="divSchoolCode">
+                                <?php
+                                echo form_input("txtSchoolCode", (string) (@$school_details[0]['school_code'] ?? ''), 
+                                'class="form-control" id="txtSchoolCode" maxlength = "6" 
+                                onkeypress="javascript:return numbersonly(this, event, false);" 
+                                onBlur="javascript:fetch_special_order_school_details()"');  ?>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-xl-6 col-md-12 col-sm-12 col-lg-12">
+                            School Name :
+                        </div>
+                        
+                        <div class="col-xl-6 col-md-12 col-sm-12 col-lg-12">
+                            <?php @print($school_details[0]['school_name']) ?>
+                        </div>
+                        
+                    </div>
+            
+            
+    </table>
+    <input type="hidden" class="form-control" name="hidSchoolId" id="hidSchoolId" value="<?php echo (@$school_details[0]['school_code']) ? @$school_details[0]['school_code'] : @$this->input->post('hidSchoolId'); ?>">
+    <?php
+    
+    echo form_close();
+    ?>
+
+    <?php
+    echo "<div style='height:10px;'></div><div class='clear_both'></div>";
+    echo form_open('schools/special_order_entry/save_participant', array('id' => 'formParticipant'));
+    ?>
+    <div id="divAddParticipants" style="display:<?php echo (@$school_show == 'show') ? 'block' : 'none'; ?>">
+        <?php
+        
+        if (isset($save_update) and count($save_update) > 0) {
+            foreach ($save_update as $err) {
+                print($err . '<br>');
+            }
+        }
+        ?>
+        <table>
+            <tr>
+                <th colspan="4" align="left">Participants</th>
+            </tr>
+            <tr>
+                <td align="left" width="20%" class="table_row_first">Participant</td>
+                <td align="left" width="80%" colspan="3" class="table_row_first">
+                    <?php
+                    echo form_dropdown("cmbParticipant", $participants, @$selected_user[0]['rev_district_code'], 'id="cmbParticipant" class="form-control"  ');
+                    ?>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <?php
+                    $checked = !empty(@$selected_participant[0]['admn_no']);
+                    echo form_checkbox("chkAddParticipant", 'YES', $checked, 'id="chkAddParticipant" onClick="javascript:add_special_order_participant()" ');
+                    echo form_label("Add Participant", "chkAddParticipant");
+                    ?>
+                </td>
+               
+            </tr>
+            <tr>
+                <td align="left" width="20%" class="table_row_first">Special Order</td>
+                <td align="left" width="30%" colspan="3"class="table_row_first">
+                    <?php
+                    echo form_dropdown("cmbOrder", $orders, @$selected_participant[0]['spo_id'], 'id="cmbOrder" class="form-control" ');
+                    ?>
+                </td>
+                
+            </tr>
+            <tr>
+                <td colspan="4" style="padding:0; margin:0">
+                   <?php
+                          if(!empty(@$selected_participant)){
+                                if( count(@$selected_participant) > 0){
+                                    $disblock = "block";  
+                                } else {
+                                    $disblock = "none";  
+                                }
+                          } else {
+                              $disblock = "none";
+                          }
+                   ?>
+                    <div id="newEntry" style="display:<?php echo $disblock; ?>">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab">
+                            <tr>
+                                <td align="left" width="20%" class="table_row_first">Admission No.</td>
+                                <td align="left" width="30%" class="table_row_first"><?php echo form_input("txtADNO", (string) (@$selected_participant[0]['admn_no'] ?? ''), 'class="form-control mb-3" id="txtADNO" maxlength="5" onkeyup="javascript:this.value=this.value.toUpperCase();"'); ?></td>
+                                <td align="left" colspan="2" class="table_row_first">&nbsp;</td>
+                           
+                                <td align="left" width="20%" class="table_row_first">Name</td>
+                                <td align="left" width="30%" class="table_row_first"><?php echo form_input("txtParticipantName", (string) (@$selected_participant[0]['participant_name'] ?? ''), 'class="form-control mb-3" id="txtParticipantName"  onkeyup="javascript:this.value=this.value.toUpperCase();"'); ?></td>
+                                <td align="left" colspan="2" class="table_row_first">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td align="left" width="20%" class="table_row_first">Class</td>
+                                <td align="left" width="30%" class="table_row_first">
+                                    <?php
+                                    $class_array = array();
+                                    for ($i = @$school_details[0]['class_start']; $i <= @$school_details[0]['class_end']; $i++) {
+                                        $class_array[$i] = $i;
+                                    }
+                                    echo form_dropdown("txtClass", $class_array, @$selected_participant[0]['class'], 'id="txtClass"  class="form-control"');
+                                    ?>
+                                </td>
+                                <td align="left" colspan="2" class="table_row_first">&nbsp;</td>
+                            
+                                <td align="left" width="20%" class="table_row_first">Gender</td>
+                                <td align="left" width="30%" class="table_row_first">
+                                    <?php echo form_dropdown("txtGender", array('B' => 'Boy', 'G' => 'Girl'), @$selected_participant[0]['gender'], 'id="txtGender" class="form-control mb-3"'); ?>
+                                </td>
+                                <td align="left" colspan="2" class="table_row_first">&nbsp;</td>
+                            </tr>
+                            <tr class="hidden-row">
+                                <td align="left" width="20%" class="table_row_first">Bank Name</td>
+                                <td align="left" width="30%" class="table_row_first">
+                                    <?php echo form_dropdown("txtBank", $bank_details, @$selected_participant[0]['bank_id'], 'id="txtBank" class="form-control mb-3"'); ?>
+                                </td>
+                                <td align="left" width="20%" class="table_row_first">Branch Name</td>
+                                <td align="left" width="30%" class="table_row_first">
+                                    <?php echo form_input("txtBranch", (string) (@$selected_participant[0]['branch_name'] ?? ''), 
+                                    'class="form-control mb-3" id="txtBranch"  onkeyup="javascript:this.value=this.value.toUpperCase();"'); ?>
+                                </td>
+                            </tr>
+                            <tr class="hidden-row">
+                                <td align="left" width="20%" class="table_row_first">Account No.</td>
+                                <td align="left" width="30%" class="table_row_first">
+                                    <?php echo form_input("txtAccNo", (string) (@$selected_participant[0]['account_no'] ?? ''), 
+                                    'class="form-control mb-3" id="txtAccNo" onkeypress="javascript:return numbersonly(this, event, false);" onCopy="return false" onDrag="return false" onDrop="return false" onPaste="return false" minlength="9" '); ?>
+                                </td>
+                                <td align="left" width="20%" class="table_row_first">IFSC Code</td>
+                                <td align="left" width="30%" class="table_row_first">
+                                    <?php echo form_input("txtIfscCode", (string) (@$selected_participant[0]['ifsc_code'] ?? ''), 
+                                    'class="form-control mb-3" id="txtIfscCode"  onkeyup="javascript:this.value=this.value.toUpperCase();"  maxlength="11" '); ?>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="left" width="20%" class="table_row_first">Item code<br></td>
+                <td align="left" width="80%" colspan="3" class="table_row_first">
+                    <?php
+                    
+                    echo '<div class="clear_both"></div><div class="teachersTextBox">';
+                    echo '<div style="margin-left:5px; float:left"><br>' . form_input("txtItemCode_1", (string) (@$selected_participant[0]['item_code'] ?? ''), 
+                    'class="form-control mb-3" maxlength="4" id="txtItemCode_1" onkeypress="javascript:return numbersonly(this, event, false);"') . '</div>';
+                    
+                    echo '<div style="margin-left:5px; float:left"> Captain Admission No : ';
+                    
+                    echo form_input("txtCaptionAdNo", (string) (@$selected_participant[0]['parent_admn_no'] ?? ''), 
+                    'class="form-control mb-3" maxlength="6" id="txtCaptionAdNo" onkeyup="javascript:this.value=this.value.toUpperCase();"') . '</div>';
+                    ?>
+                    &nbsp; &nbsp; &nbsp;
+                    <?php
+                    $checked = '';
+                    if (@$selected_participant[0]['item_type'] == 'P') {
+                        $checked = 'TRUE';
+                    }
+                    echo form_checkbox("chkIsPinnany", 'YES', $checked, 'id="chkIsPinnany"');
+                    echo form_label("Is Pinnany", "chkIsPinnany");
+                    ?>
+                </td>
+
+            </tr>
+            <tr>
+                <td align="left" width="20%" class="table_row_first">Remarks</td>
+                <td align="left" width="30%" class="table_row_first">
+                    <?php
+                    echo form_textarea("txtRemarks", (string) ($selected_participant[0]['spo_remarks'] ?? ''), 'id="txtRemarks" style="width:450px; height:100px;" class="form-control mb-3"');
+                    ?>
+                </td>
+                <td align="left" colspan="2" class="table_row_first">&nbsp;</td>
+            </tr>
+            <tr class="mb-3">
+                <td align="center" colspan="2">
+                    <?php 
+                       if(!empty($selected_participant)){
+                           if(count(@$selected_participant) > 0 ){
+                            echo form_button('update_participant', 'Update Details', 'id="update_participant" onClick="javascript:fncUpdateParticipant(\'' . $selected_participant[0]['admn_no'] . '\')"') . '&nbsp;&nbsp;' . form_button('Cancel', 'Cancel', 'onClick="javascript:fncCancelSpecialOrderParticipant()" class="btn btn-danger"') ; 
+                           } else {
+                               echo form_button('save_participant', 'Save Details', 'id="update_participant" onClick="javascript:fncSaveSpecialOrderParticipant()" class="btn btn-primary "');
+                           }
+                       }  else {
+                            echo form_button('save_participant', 'Save Details', 'id="update_participant" onClick="javascript:fncSaveSpecialOrderParticipant()" class="btn btn-primary"');
+                       }
+                       ?>
+                </td>
+            </tr>
+        </table>
+        <input type="hidden" name="hidSchoolId" id="hidSchoolId" value="<?php echo (@$school_details[0]['school_code']) ? @$school_details[0]['school_code'] : @$this->input->post('hidSchoolId'); ?>">
+        <input type="hidden" name="hidADNO" id="hidADNO" value="">
+        <input type="hidden" name="hidItemId" id="hidItemId" value="">
+        <?php
+        
+        ?>
+    </div>
+    <br />
+         <?php
+               if(!empty(@$participant_details)){
+
+                     if(count(@$participant_details)>0){
+                        $disblock = "block";
+                     } else {
+                        $disblock = "none";
+                     }
+
+               } else {
+                    $disblock = "none";
+               }
+         ?>
+
+    <div style="display:<?php echo $disblock; ?>">
+        <?php
+        
+        ?>
+        <table width="100%" border="1" bgcolor="#FFFFFF" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top:15px;">
+            <tr>
+                <th align="left" width="4%">Sl No</th>
+                <th align="left" width="20%">Item</th>
+                <th align="left" width="10%">Captain</th>
+                <th align="left" width="6%">AD No.</th>
+                <th align="left" width="6%">Reg No.</th>
+                <th align="left" width="25%">Name of participant</th>
+                <th align="center" width="4%">Class</th>
+                <th align="center" width="4%">B/G</th>
+                <th align="left" width="28%">Order</th>
+                <?php if (isset($is_edit) and $is_edit != 'no') { ?>
+                                <!--<th align="center" width="16%">Edit </th>-->
+                    <th align="center" width="8%">Delete</th>
+                <?php } ?>
+            </tr>
+            <?php
+            $count = 1;
+            $prev_item_code = '';
+            $prev_parent_adno = '';
+            for ($j = 0; $j < count($participant_details); $j++) {
+                //$items	=	$this->Registration_Model->get_participant_item_details($participant_details[$j]['participant_id'], $participant_details[$j]['admn_no']);
+                $classname = ($j % 2 == 0) ? '' : '';
+                $item_rowspan = 1;
+                $caption_rowspan = 1;
+                $captain_set = false;
+                if ($prev_parent_adno != $participant_details[$j]['parent_admn_no'] or $prev_item_code != $participant_details[$j]['item_code']) {
+                    $caption_rowspan = get_array_double_val_count($participant_details, 'parent_admn_no', $participant_details[$j]['parent_admn_no'], 'item_code', $participant_details[$j]['item_code']);
+                    $prev_parent_adno = $participant_details[$j]['parent_admn_no'];
+                    $captain_set = true;
+                }
+                ?>
+                <tr>
+                    <?php if ($captain_set) { ?>
+                        <td align="left" rowspan="<?php echo $caption_rowspan ?>"  class="<?php echo $classname ?>"><?php echo $count; ?></td>
+                        <?php
+                        $count++;
+                    }
+                    ?>
+                    <?php
+                    if ($prev_item_code != $participant_details[$j]['item_code']) {
+                        $item_rowspan = get_array_val_count($participant_details, 'item_code', $participant_details[$j]['item_code']);
+                        $prev_item_code = $participant_details[$j]['item_code'];
+                        ?>
+                        <td align="left" rowspan="<?php echo $item_rowspan ?>" class="<?php echo $classname ?>" ><?php echo @$participant_details[$j]['item_code'] . ' - ' . @$participant_details[$j]['item_name']; ?></td>
+                        <?php
+                    }
+                    ?> 
+                    <?php if ($captain_set) { ?>
+                        <td align="left" rowspan="<?php echo $caption_rowspan ?>" class="<?php echo $classname ?>"><?php echo $participant_details[$j]['parent_admn_no'] ?></td>
+                    <?php } ?>
+                    <td align="left" class="<?php echo $classname ?>"><?php echo $participant_details[$j]['admn_no'] ?></td>
+                    <td align="left" class="<?php echo $classname ?>"><?php echo $participant_details[$j]['participant_id'] ?></td>
+                    <td align="left" class="<?php echo $classname ?>"><?php echo $participant_details[$j]['participant_name'] ?></td>
+                    <td align="center" class="<?php echo $classname ?>"><?php echo $participant_details[$j]['class'] ?></td>
+                    <td align="center" class="<?php echo $classname ?>"><?php echo $participant_details[$j]['gender'] ?></td>
+                    <td align="left" class="<?php echo $classname ?>"><?php echo $participant_details[$j]['spo_title'] ?></td>
+                    <?php if (isset($is_edit) and $is_edit != 'no') { ?>
+                                                <!--<td align="center" class="<?php echo $classname ?>">
+                                                        <a href="javascript:void(0)" onClick="javascript:editSpecialOrderParticipant('<?php echo $participant_details[$j]['pi_id'] ?>')">
+                                                                <img src="<?php echo base_url(false) ?>images/edit.png" border="0">
+                                                        </a>
+                                                </td>-->
+                        <?php if ($captain_set) { ?>
+                            <td align="center" class="<?php echo $classname ?>" rowspan="<?php echo $caption_rowspan ?>"> 
+                                <a href="javascript:void(0)" onClick="javascript:deleteSpecialOrderParticipant('<?php echo $participant_details[$j]['parent_admn_no'] ?>', '<?php echo $participant_details[$j]['item_code'] ?>')">
+                                    <img src="<?php echo base_url(false) ?>images/delete.png" border="0">
+                                </a>
+                            </td>
+                            <?php
+                            $captain_set = false;
+                        }
+                        ?>
+                    <?php } ?>
+                </tr>	
+                <?php
+                //$count++;
+            }
+            ?>
+
+
+
+
+
+
+
+            <?php
+            /* $count	=	1;
+              for($j = 0; $j < count($participant_details); $j++){
+              //$items	=	$this->Registration_Model->get_participant_item_details($participant_details[$j]['participant_id'], $participant_details[$j]['admn_no']);
+              $classname	=	($j%2 == 0)? 'table_row_second' : 'table_row_first'
+              ?>
+              <tr>
+              <td align="left" class="<?php echo $classname?>"><?php echo $count;?></td>
+              <td align="left" class="<?php echo $classname?>"><?php echo $participant_details[$j]['admn_no']?></td>
+              <td align="left" class="<?php echo $classname?>"><?php echo $participant_details[$j]['participant_name']?></td>
+              <td align="left" class="<?php echo $classname?>"><?php echo $participant_details[$j]['class']?></td>
+              <td align="left" class="<?php echo $classname?>"><?php echo ($participant_details[$j]['gender'] == 'B') ? 'Boy' : 'Girl';?></td>
+              <td align="center" class="<?php echo $classname?>" ><label style="cursor:pointer" title="<?php echo (@$participant_details[$j]['item_name']) ? @$participant_details[$j]['item_name'] :'';?>"><?php echo (@$participant_details[$j]['item_code']) ? @$participant_details[$j]['item_code'] :'';?></label></td>
+              <td align="left" class="<?php echo $classname?>"><?php echo $participant_details[$j]['spo_title']?></td>
+              <?php if (isset($is_edit) and $is_edit != 'no'){?>
+              <!--<td align="center" class="<?php echo $classname?>">
+              <a href="javascript:void(0)" onClick="javascript:editSpecialOrderParticipant('<?php echo $participant_details[$j]['pi_id']?>')">
+              <img src="<?php echo base_url(false)?>images/edit.png" border="0">
+              </a>
+              </td>
+              <td align="center" class="<?php echo $classname?>">
+              <a href="javascript:void(0)" onClick="javascript:deleteSpecialOrderParticipant('<?php echo $participant_details[$j]['pi_id']?>')">
+              <img src="<?php echo base_url(false)?>images/delete.png" border="0">
+              </a>
+              </td>-->
+              <?php }?>
+              </tr>
+              <?php
+              $count++;
+              } */
+            ?>
+
+
+
+
+        </table>
+    </div></div></div></div></div></div>
+        <?php
+        
+        ?>
+    </div>
+
+    <?php
+    echo form_close();
+    ?>

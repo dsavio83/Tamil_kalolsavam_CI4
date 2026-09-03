@@ -1,0 +1,1 @@
+mysql: [ERROR] unknown option '--skip-tabular'.

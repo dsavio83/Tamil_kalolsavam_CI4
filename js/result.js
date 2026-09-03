@@ -1,9 +1,35 @@
 // JavaScript Document
+function showItemSpinner() {
+    var spin = document.getElementById('itemCodeSpinner');
+    if (spin) {
+        spin.classList.remove('d-none');
+        spin.classList.add('d-inline-flex');
+    }
+}
+
+function hideItemSpinner() {
+    var spin = document.getElementById('itemCodeSpinner');
+    if (spin) {
+        spin.classList.remove('d-inline-flex');
+        spin.classList.add('d-none');
+    }
+}
+
+function onItemCodeInput(el) {
+    if (el && el.value.length === 3) {
+        showItemSpinner();
+        fetch_item_details_result();
+    } else {
+        hideItemSpinner();
+    }
+}
+
 function fetch_item_details_result()
 {
     var itemCodeEl = document.getElementById('txtItemCode');
-    if (itemCodeEl && itemCodeEl.value.length <= 4) {
-        var item_code = itemCodeEl.value;
+    if (itemCodeEl && itemCodeEl.value.trim() !== '') {
+        var item_code = itemCodeEl.value.trim();
+        showItemSpinner();
         
         // Use modern fetch API if available, fallback to Ajax
         if (typeof fetch !== 'undefined') {
@@ -14,13 +40,25 @@ function fetch_item_details_result()
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.text())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Server error: ' + response.status);
+                }
+                return response.text();
+            })
             .then(data => {
                 var divEl = document.getElementById('divEntryForm');
-                if (divEl) divEl.innerHTML = data;
+                if (divEl) {
+                    divEl.outerHTML = data;
+                    var codeNoEl = document.getElementById('txt_code_no');
+                    if (codeNoEl) {
+                        codeNoEl.focus();
+                    }
+                }
             })
             .catch(error => {
                 console.error('Error:', error);
+                hideItemSpinner();
             });
         } else if (typeof Ajax !== 'undefined') {
             var oOptions = {
@@ -28,16 +66,24 @@ function fetch_item_details_result()
                 parameters: {'code': item_code},
                 onFailure: function (oXHR, oJson) {
                     console.error("An error occurred: " + oXHR.status);
+                    hideItemSpinner();
                 },
                 onSuccess: function (transport) {
                     var response = transport.responseText;
                     var divEl = document.getElementById('divEntryForm');
-                    if (divEl) divEl.innerHTML = response;
+                    if (divEl) {
+                        divEl.outerHTML = response;
+                        var codeNoEl = document.getElementById('txt_code_no');
+                        if (codeNoEl) {
+                            codeNoEl.focus();
+                        }
+                    }
                 }
             };
             var oRequest = new Ajax.Updater({}, path + "result/resultentry/get_item_details_result", oOptions);
         }
     } else {
+        hideItemSpinner();
         return false;
     }
 }
@@ -181,29 +227,111 @@ function getItemResult(itemcode)
 }
 function resetResultConfirmation(itemcode, message, element_id)
 {
-    //swal("Oops!", "---" + itemcode + "----" + message + "----" + element_id, "error");
-        //alert('---'+itemcode+'----'+message+'----'+element_id);
-    message = 'Do you really want to reset the Result confirmation status of ' + message;
-    if (confirm(message))
-    {
-        ajax_loder2(element_id);
-        var oOptions = {
-            method: "post",
-            parameters: {'item_code': itemcode},
-            onFailure: function (oXHR, oJson) {
-                //swal("Oops!", "An error occurred: " + oXHR.status, "error");
-                //alert("An error occurred: " + oXHR.status);
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: 'Reset Confirmation?',
+            html: 'Are you sure you want to reset confirmation for <br><span class="badge bg-primary fs-6 mt-2 py-2 px-3">' + message + '</span>?<br><br><small class="text-muted">This will reopen result entry and mark edits for this event.</small>',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '<i class="bi bi-arrow-counterclockwise me-1"></i> Yes, Reset Confirmation',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true,
+            showClass: {
+                popup: 'animate__animated animate__bounceIn'
             },
-            onSuccess: function (transport) {
-                
-                var response = transport.responseText;
-                $(element_id).innerHTML = '';
-                $(element_id + '_dis').innerHTML = response;
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutUp animate__faster'
+            },
+            customClass: {
+                popup: 'rounded-4 shadow-lg border-0 p-4',
+                confirmButton: 'btn btn-danger rounded-pill px-4 py-2 fw-bold shadow-sm',
+                cancelButton: 'btn btn-light rounded-pill px-4 py-2 fw-semibold text-secondary'
+            },
+            buttonsStyling: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Resetting Status...',
+                    text: 'Please wait while confirmation status is being reset.',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                var formData = new FormData();
+                formData.append('item_code', itemcode);
+
+                fetch(path + "ajax/loadajax/reset_result_confirmation_status", {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.text())
+                .then(data => {
+                    if (data.trim() === 'No') {
+                        var btnEl = document.getElementById(element_id);
+                        var disEl = document.getElementById(element_id + '_dis');
+                        if (btnEl) btnEl.innerHTML = '<span class="text-muted">-</span>';
+                        if (disEl) disEl.innerHTML = '<span class="badge bg-secondary bg-opacity-75 rounded-pill px-2.5 py-1">Pending</span>';
+
+                        Swal.fire({
+                            title: 'Reset Completed!',
+                            html: 'Result confirmation for <strong>' + message + '</strong> has been reset successfully.',
+                            icon: 'success',
+                            timer: 2200,
+                            showConfirmButton: false,
+                            showClass: {
+                                popup: 'animate__animated animate__zoomIn'
+                            },
+                            hideClass: {
+                                popup: 'animate__animated animate__zoomOut animate__faster'
+                            },
+                            customClass: {
+                                popup: 'rounded-4 shadow-lg border-0'
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Unable to reset confirmation status. Please try again.',
+                            icon: 'error',
+                            customClass: {
+                                popup: 'rounded-4 shadow-lg border-0'
+                            }
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'An error occurred while connecting to the server.',
+                        icon: 'error',
+                        customClass: {
+                            popup: 'rounded-4 shadow-lg border-0'
+                        }
+                    });
+                });
             }
-        };
-        var oRequest = new Ajax.Updater({
-            //success: "divCustomerInfo"
-        }, path + "ajax/loadajax/reset_result_confirmation_status", oOptions);
+        });
+    } else {
+        if (confirm('Do you really want to reset the Result confirmation status of ' + message + '?')) {
+            var formData = new FormData();
+            formData.append('item_code', itemcode);
+            fetch(path + "ajax/loadajax/reset_result_confirmation_status", {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                var btnEl = document.getElementById(element_id);
+                var disEl = document.getElementById(element_id + '_dis');
+                if (btnEl) btnEl.innerHTML = '<span class="text-muted">-</span>';
+                if (disEl) disEl.innerHTML = '<span class="badge bg-secondary bg-opacity-75 rounded-pill px-2.5 py-1">Pending</span>';
+            });
+        }
     }
 }
 

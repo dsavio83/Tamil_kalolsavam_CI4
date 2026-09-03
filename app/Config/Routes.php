@@ -439,4 +439,11 @@ $routes->post('ajax/loadajax/get_school_items', 'Ajax\Loadajax::get_school_items
 $routes->post('ajax/loadajax/get_school_captains', 'Ajax\Loadajax::get_school_captains');
 $routes->post('ajax/loadajax/get_participant_details', 'Ajax\Loadajax::get_participant_details');
 
+// ------------------------------------------------------------------
+// SECURE STATIC FILE DOWNLOADS — Task 1.2
+// Controller-based serving with filename allowlist.
+// Replaces direct doc/ static access for chittur_itemcodes.html
+// and kalolsavam.pdf. Path traversal blocked via basename check.
+// ------------------------------------------------------------------
+$routes->get('downloads/serve/(:segment)', 'Downloads::serve/$1');
 

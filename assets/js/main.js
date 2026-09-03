@@ -39,21 +39,149 @@
   }
 
   /**
-   * Sidebar toggle
+   * Classic Sidebar Toggle & Active Navigation Handling
    */
-  if (select('.toggle-sidebar-btn')) {
+  const initSidebar = () => {
+    // Toggle sidebar on header hamburger click
     on('click', '.toggle-sidebar-btn', function(e) {
-      select('body').classList.toggle('toggle-sidebar')
-    })
-  }
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      select('body').classList.toggle('toggle-sidebar');
+      if (window.innerWidth < 1200) {
+        document.documentElement.classList.toggle('toggle-sidebar', select('body').classList.contains('toggle-sidebar'));
+      }
+    });
+
+    // Close mobile sidebar on close button click (delegated capture for mobile reliability)
+    document.addEventListener('click', function(e) {
+      if (e.target && e.target.closest('.sidebar-close-btn, .sidebar-mobile-toggle-btn, .sidebar-mobile-close-icon')) {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        select('body').classList.remove('toggle-sidebar');
+        document.documentElement.classList.remove('toggle-sidebar');
+      }
+    }, true);
+
+    // Close mobile sidebar on backdrop click
+    on('click', '#sidebarBackdrop', function() {
+      select('body').classList.remove('toggle-sidebar');
+      document.documentElement.classList.remove('toggle-sidebar');
+    });
+
+    // Close mobile sidebar on link click
+    on('click', '#sidebar-nav a', function(e) {
+      if (window.innerWidth < 1200) {
+        const link = e.target.closest('a');
+        if (link && !link.hasAttribute('data-bs-toggle') && link.getAttribute('href') !== '#') {
+          select('body').classList.remove('toggle-sidebar');
+          document.documentElement.classList.remove('toggle-sidebar');
+        }
+      }
+    }, true);
+
+    // Prevent background page scrolling while mobile sidebar is open
+    document.addEventListener('touchmove', function(e) {
+      if (document.body.classList.contains('toggle-sidebar') && window.innerWidth < 1200) {
+        if (!e.target.closest('#sidebar')) {
+          e.preventDefault();
+        }
+      }
+    }, { passive: false });
+
+    // Auto-detect and highlight active page in sidebar
+    initActiveSidebarNav();
+  };
 
   /**
-   * Search bar toggle
+   * Auto-highlight active navigation item & expand parent dropdown
    */
-  if (select('.search-bar-toggle')) {
-    on('click', '.search-bar-toggle', function(e) {
-      select('.search-bar').classList.toggle('search-bar-show')
-    })
+  const initActiveSidebarNav = () => {
+    try {
+      const currentUrl = window.location.href.split('#')[0].split('?')[0].replace(/\/+$/, '').toLowerCase();
+      const currentPath = window.location.pathname.toLowerCase().replace(/\/+$/, '');
+      const navLinks = document.querySelectorAll('#sidebar-nav a');
+      let bestMatch = null;
+      let maxMatchLen = 0;
+
+      // Clean up previous active states and ensure non-accordion links stay collapsed
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (!link.hasAttribute('data-bs-toggle')) {
+          link.classList.add('collapsed');
+        }
+      });
+
+      // 1. Explicit Domain Mapping for Certificate Sub-routes
+      const pathStr = (currentPath + ' ' + currentUrl).toLowerCase();
+      if (pathStr.includes('school_wise') || pathStr.includes('schoolwise')) {
+        bestMatch = document.getElementById('menu-cert-school') || document.querySelector('a[href*="list_school_wise"]');
+      } else if (pathStr.includes('item_wise') || pathStr.includes('itemwise') || pathStr.includes('item_certificate')) {
+        bestMatch = document.getElementById('menu-cert-item') || document.querySelector('a[href*="list_item_wise"]');
+      } else if (pathStr.includes('reg_no_wise') || pathStr.includes('participant_wise') || pathStr.includes('regnowise')) {
+        bestMatch = document.getElementById('menu-cert-reg') || document.querySelector('a[href*="list_reg_no_wise"]');
+      } else if (pathStr.includes('save_certificate_template') || pathStr.includes('test_certificate') || pathStr.endsWith('/certificate/certificate') || pathStr.endsWith('/certificate/certificate/index')) {
+        bestMatch = document.getElementById('menu-cert-template') || document.querySelector('a[href*="certificate/certificate"]');
+      }
+
+      // 2. Generic URL Prefix Matching if no explicit match above
+      if (!bestMatch) {
+        navLinks.forEach(link => {
+          const href = link.getAttribute('href');
+          if (!href || href === '#' || href.startsWith('javascript:')) return;
+          
+          try {
+            const linkUrl = new URL(href, window.location.origin);
+            const linkCleanUrl = linkUrl.href.split('#')[0].split('?')[0].replace(/\/+$/, '').toLowerCase();
+            const linkPath = linkUrl.pathname.toLowerCase().replace(/\/+$/, '');
+
+            // Skip matching the general template link against other certificate actions
+            if ((linkCleanUrl.endsWith('/certificate/certificate') || linkCleanUrl.endsWith('/certificate/certificate/index')) && 
+                (currentPath.includes('item') || currentPath.includes('school') || currentPath.includes('reg_no'))) {
+              return;
+            }
+            
+            if (linkCleanUrl && (currentUrl === linkCleanUrl || currentUrl.startsWith(linkCleanUrl + '/'))) {
+              if (linkCleanUrl.length > maxMatchLen) {
+                maxMatchLen = linkCleanUrl.length;
+                bestMatch = link;
+              }
+            } else if (linkPath && (currentPath === linkPath || currentPath.startsWith(linkPath + '/'))) {
+              if (linkPath.length > maxMatchLen) {
+                maxMatchLen = linkPath.length;
+                bestMatch = link;
+              }
+            }
+          } catch (err) {}
+        });
+      }
+
+      if (bestMatch) {
+        bestMatch.classList.add('active');
+        bestMatch.classList.remove('collapsed');
+        
+        // If it is inside a submenu accordion
+        const parentContent = bestMatch.closest('.nav-content');
+        if (parentContent) {
+          parentContent.classList.add('show');
+          const toggleLink = document.querySelector(`[data-bs-target="#${parentContent.id}"]`);
+          if (toggleLink) {
+            toggleLink.classList.remove('collapsed');
+            toggleLink.classList.add('active');
+            toggleLink.setAttribute('aria-expanded', 'true');
+          }
+        }
+      }
+    } catch (e) {}
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSidebar);
+  } else {
+    initSidebar();
   }
 
   /**

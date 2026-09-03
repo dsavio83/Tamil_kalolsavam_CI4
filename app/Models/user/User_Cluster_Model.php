@@ -64,16 +64,13 @@ class User_Cluster_Model extends \App\Models\BaseModel {
         }
     }
 
-    /** function for fetch user */
     function existing_cluster_details() {
-        /* $sessionID=$this->session->get('USERID');
-          $this->db->where('UM.created_by',$sessionID); */
         $sub_district_code = $this->session->get('SUB_DISTRICT');
         $this->db->where('UM.sub_district_code', $sub_district_code);
         $this->db->where('UM.user_type', '5');
         $this->db->from('user_master AS UM');
         $this->db->orderBy('user_name', 'ASC');
-        $this->db->select('user_id, user_name, (SELECT COUNT(uc_id) FROM user_cluster UC WHERE UC.user_id = UM.user_id) AS total ');
+        $this->db->select('user_id, user_name, is_change_password, (SELECT COUNT(uc_id) FROM user_cluster UC WHERE UC.user_id = UM.user_id) AS total, (SELECT GROUP_CONCAT(SM.school_name SEPARATOR ", ") FROM user_cluster UC INNER JOIN school_master SM ON UC.school_code = SM.school_code WHERE UC.user_id = UM.user_id) AS school_names');
         $result = $this->db->get();
         return $result->getResultArray();
     }

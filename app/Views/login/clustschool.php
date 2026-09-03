@@ -66,6 +66,17 @@ echo form_open('', array('id' => 'clustschool')); ?>
 
 <input type="hidden" name="hidSchoolId" id="hidSchoolId" value="1">
 
+<!-- Back button -->
+<?php if ((int)$this->session->get('USER_TYPE') != 5) { ?>
+<div class="row mt-3 mb-3">
+    <div class="col-12">
+        <a href="<?php echo base_url('welcome/cluster_details?sel_sub_district_id=' . urlencode(isset($sub_district_code) ? $sub_district_code : '')); ?>" class="btn btn-primary">
+            <i class="bi bi-arrow-return-left"></i> Back
+        </a>
+    </div>
+</div>
+<?php } ?>
+
 <div class="row justify-content-center">
     <div class="card">
         <div class="card-body">
@@ -410,6 +421,16 @@ echo form_open('', array('id' => 'clustschool')); ?>
         <?php } ?>
 
         <br>
+
+        <!-- DataTables initialization for class-wise table -->
+        <script>
+        $(document).ready(function() {
+            $('.table-custom').DataTable({
+                "pageLength": 10,
+                "order": [[0, "asc"]]
+            });
+        });
+        </script>
 
         <!-- <button type="button" class="btn btn-outline-secondary" href="javascript:void(0)" onClick="javascript:goschooldet('<?php echo $school[$j]['school_code'] ?>')" style="width:120px; height:75px;">
                 Registration

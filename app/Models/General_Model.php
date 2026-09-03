@@ -174,54 +174,73 @@ class General_Model extends \App\Models\BaseModel {
     }
 
     public function upload_logo_image($file_input_name, $image_name, $kalolsavam_type) {
-        if ($kalolsavam_type == 'state')
-            $upload_path = $this->config->item('base_path') . 'uploads/state/';
-        else if ($kalolsavam_type == 'dist')
-            $upload_path = $this->config->item('base_path') . 'uploads/district/';
-        else if ($kalolsavam_type == 'sub_dist')
-            $upload_path = $this->config->item('base_path') . 'uploads/sub_district/';
-
-        $config['upload_path'] = $upload_path;
-        $ext = @end(explode('.', $_FILES[$file_input_name]['name']));
-        $config['file_name'] = $image_name . '.' . $ext;
-
-        $config['allowed_types'] = 'gif|jpg|png|jpeg';
-        $config['overwrite'] = TRUE;
-        /* $config['max_size']			= '2000';
-          $config['max_width']  		= '500';
-          $config['max_height']  		= '500'; */
-        $this->load->library('upload', $config);
-        if (!$this->upload->do_upload($file_input_name)) {
-            return FALSE;
+        $base_dir = defined('FCPATH') ? FCPATH . 'uploads/' : (ROOTPATH . 'public/uploads/');
+        if ($kalolsavam_type == 'state') {
+            $upload_path = $base_dir . 'state/';
+        } else if ($kalolsavam_type == 'dist' || $kalolsavam_type == 'district') {
+            $upload_path = $base_dir . 'district/';
+        } else if ($kalolsavam_type == 'sub_dist' || $kalolsavam_type == 'sub_district') {
+            $upload_path = $base_dir . 'sub_district/';
         } else {
-            $image_name = $image_name . '.' . $ext;
-            $config['image_library'] = 'gd2';
-            $config['source_image'] = $upload_path . $image_name;
-            $config['create_thumb'] = TRUE;
-            $config['maintain_ratio'] = TRUE;
-            $config['new_image'] = 'thumb_' . $image_name;
-            $config['thumb_marker'] = '';
-            $config['width'] = 75;
-            $config['height'] = 75;
-
-            $this->load->library('image_lib', $config);
-            if ($this->image_lib->resize())
-                return $image_name;
-            else
-                FALSE;
+            $upload_path = $base_dir . 'state/';
         }
+
+        if (!is_dir($upload_path)) {
+            @mkdir($upload_path, 0777, true);
+        }
+
+        if (empty($_FILES[$file_input_name]['name']) || empty($_FILES[$file_input_name]['tmp_name'])) {
+            return false;
+        }
+
+        $orig_name = $_FILES[$file_input_name]['name'];
+        $tmp_name  = $_FILES[$file_input_name]['tmp_name'];
+
+        if (!is_uploaded_file($tmp_name)) {
+            return false;
+        }
+
+        $ext = strtolower(pathinfo($orig_name, PATHINFO_EXTENSION) ?: 'png');
+        $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        if (!in_array($ext, $allowed)) {
+            return false;
+        }
+
+        $target_file_name = $image_name . '.' . $ext;
+        $target_path = $upload_path . $target_file_name;
+        $thumb_path  = $upload_path . 'thumb_' . $target_file_name;
+
+        if (move_uploaded_file($tmp_name, $target_path)) {
+            try {
+                \Config\Services::image()
+                    ->withFile($target_path)
+                    ->resize(75, 75, true, 'auto')
+                    ->save($thumb_path);
+            } catch (\Throwable $e) {
+                @copy($target_path, $thumb_path);
+            }
+            return $target_file_name;
+        }
+        return false;
     }
 
-    function unlink_kalolsavam_logo($prev_image_name, $prev_image_type) {
-        if ($kalolsavam_type == 'state')
-            $upload_path = $this->config->item('base_path') . 'uploads/state/';
-        else if ($kalolsavam_type == 'dist')
-            $upload_path = $this->config->item('base_path') . 'uploads/district/';
-        else if ($kalolsavam_type == 'sub_dist')
-            $upload_path = $this->config->item('base_path') . 'uploads/sub_district/';
+    function unlink_kalolsavam_logo($prev_image_name, $prev_image_type = 'state') {
+        if (empty($prev_image_name)) {
+            return;
+        }
+        $base_dir = defined('FCPATH') ? FCPATH . 'uploads/' : (ROOTPATH . 'public/uploads/');
+        if ($prev_image_type == 'state') {
+            $upload_path = $base_dir . 'state/';
+        } else if ($prev_image_type == 'dist' || $prev_image_type == 'district') {
+            $upload_path = $base_dir . 'district/';
+        } else if ($prev_image_type == 'sub_dist' || $prev_image_type == 'sub_district') {
+            $upload_path = $base_dir . 'sub_district/';
+        } else {
+            $upload_path = $base_dir . 'state/';
+        }
 
         if (file_exists($upload_path . $prev_image_name)) {
-            @unlink(upload_path . $prev_image_name);
+            @unlink($upload_path . $prev_image_name);
         }
         if (file_exists($upload_path . 'thumb_' . $prev_image_name)) {
             @unlink($upload_path . 'thumb_' . $prev_image_name);
@@ -283,19 +302,19 @@ class General_Model extends \App\Models\BaseModel {
     }
 
     function upload_kalolsavam_csv_data($file_input_name, $file_name) {
-        $upload_path = $this->config->item('base_path') . 'uploads/csv/';
-        $config['upload_path'] = $upload_path;
-        $ext = @end(explode('.', $_FILES[$file_input_name]['name']));
-
-        $config['file_name'] = $file_name . '.' . $ext;
-        $config['allowed_types'] = 'csv';
-        $config['overwrite'] = TRUE;
-        $this->load->library('upload', $config);
-        if (!$this->upload->do_upload($file_input_name)) {
-            return FALSE;
-        } else {
-            return $config['file_name'];
+        $base_dir = defined('FCPATH') ? FCPATH . 'uploads/csv/' : (ROOTPATH . 'public/uploads/csv/');
+        if (!is_dir($base_dir)) {
+            @mkdir($base_dir, 0777, true);
         }
+        if (empty($_FILES[$file_input_name]['name']) || empty($_FILES[$file_input_name]['tmp_name']) || !is_uploaded_file($_FILES[$file_input_name]['tmp_name'])) {
+            return false;
+        }
+        $ext = strtolower(pathinfo($_FILES[$file_input_name]['name'], PATHINFO_EXTENSION) ?: 'csv');
+        $target_file_name = $file_name . '.' . $ext;
+        if (move_uploaded_file($_FILES[$file_input_name]['tmp_name'], $base_dir . $target_file_name)) {
+            return $target_file_name;
+        }
+        return false;
     }
 
     function is_certificate_template_set() {
@@ -318,13 +337,10 @@ class General_Model extends \App\Models\BaseModel {
         $participant_item_details = $this->db->get('participant_item_details');
         $participant_item = $participant_item_details->getNumRows();
 
-        
         $this->db->select('item_code');
         $this->db->groupBy('item_code');
         $stage_item_master = $this->db->get('stage_item_master');
         $stage_item = $stage_item_master->getNumRows();
-        /* echo "<br><br> Part Item : ".$participant_item;
-          echo "<br><br> Stage Item  : ".$stage_item; */
 
         if ($participant_item > $stage_item) {
             return false;
@@ -351,35 +367,34 @@ class General_Model extends \App\Models\BaseModel {
     }
 
     function get_result_date_array() {
+        $date_array = array();
         $this->db->distinct('confirm_date');
         $this->db->select('confirm_date');
         $this->db->orderBy('confirm_date', 'DESC');
         $result_time_master = $this->db->get('result_time');
         if ($result_time_master->getNumRows() > 0) {
-            $date_array = array();
             foreach ($result_time_master->getResultArray() as $date_time) {
                 $start_date = $date_time['confirm_date'];
                 $date_array[$start_date] = date('j M Y', strtotime($start_date));
             }
         }
         return $date_array;
-
-        //}
     }
 
     function restore_database($file_input_name, $file_name) {
-        $upload_path = $this->config->item('base_path') . 'uploads/csv/';
-        $config['upload_path'] = $upload_path;
-        $ext = @end(explode('.', $_FILES[$file_input_name]['name']));
-        $config['file_name'] = $file_name . '.' . $ext;
-        $config['allowed_types'] = 'csv|sql';
-        $config['overwrite'] = TRUE;
-        $this->load->library('upload', $config);
-        if (!$this->upload->do_upload($file_input_name)) {
-            return FALSE;
-        } else {
-            return $config['file_name'];
+        $base_dir = defined('FCPATH') ? FCPATH . 'uploads/csv/' : (ROOTPATH . 'public/uploads/csv/');
+        if (!is_dir($base_dir)) {
+            @mkdir($base_dir, 0777, true);
         }
+        if (empty($_FILES[$file_input_name]['name']) || empty($_FILES[$file_input_name]['tmp_name']) || !is_uploaded_file($_FILES[$file_input_name]['tmp_name'])) {
+            return false;
+        }
+        $ext = strtolower(pathinfo($_FILES[$file_input_name]['name'], PATHINFO_EXTENSION) ?: 'sql');
+        $target_file_name = $file_name . '.' . $ext;
+        if (move_uploaded_file($_FILES[$file_input_name]['tmp_name'], $base_dir . $target_file_name)) {
+            return $target_file_name;
+        }
+        return false;
     }
 
 }

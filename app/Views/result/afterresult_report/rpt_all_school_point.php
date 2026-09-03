@@ -1,29 +1,33 @@
- 	
-
 <style type="text/css">
-   
     .style1 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
         font-size: 14px;
         font-weight: bold;
         color: #0d6efd;
     }
     .style2 {
-        font-size:12px;
-        font-weight:bold;
-        color:#000000;
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
+        font-size: 14px;
+        font-weight: bold;
+        color: #1e293b;
     }
     .style3 {
-        font-size:11px;
-        font-weight:bold;
-        color:#000000;
+        font-size: 10px;
+        font-weight: bold;
+        color: #000000;
     }
     .style4 {
-        font-size:12px;
-        color:#000000;
+        font-size: 10px;
+        color: #000000;
     }
-
 </style>
 <?php
+$retvalue = $retvalue ?? [];
+$completed = $completed ?? [];
+$totalitems = $totalitems ?? [];
+$grade = $grade ?? [];
+$itemcomp = $itemcomp ?? [];
+
 $previd = "";
 $j = 0;
 
@@ -36,12 +40,9 @@ foreach ($retvalue AS $data) {
 
         if ($j != 0) {
             $ct = 0;
-            for ($j = 0; $j < count($itemcomp); $j++) {
-                if ($itemcomp[$j]['fest_id'] == $previd_temp) {
+            for ($m = 0; $m < count($itemcomp); $m++) {
+                if ($itemcomp[$m]['fest_id'] == $previd_temp) {
                     $ct++;
-                    ?>
-                                                                      <!-- 	<tr><td style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'><?php //echo $ct;   ?> </td><td style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'><?php //echo $itemcomp[$j]['item_name'];   ?></td></tr>-->
-                    <?php
                 }
             }
             print("</table></page>");
@@ -154,7 +155,7 @@ foreach ($retvalue AS $data) {
                 <td class="style4" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'align="center" ><?php echo $agrade; ?></td>
                 <td class="style4" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'align="center" ><?php echo $bgrade; ?></td>
                 <td class="style4" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'align="center" ><?php echo $cgrade; ?></td>
-                <td class="style4" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'align="center" ><?php echo $data['cnt']; ?></td>
+                <td class="style4" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'align="center" ><?php echo $data['cnt'] ?? $data['point'] ?? 0; ?></td>
             </tr>
             <?php
             $agrade = 0;

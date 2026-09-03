@@ -104,6 +104,7 @@ class User_Registration extends \App\Controllers\BaseController {
             return;
         }
         $this->User_Registration_Model->delete_user_details();
+        $this->template->write('message', 'User deleted successfully');
         $this->index();
     }
 
@@ -160,6 +161,7 @@ class User_Registration extends \App\Controllers\BaseController {
             return;
         }
         $this->User_Registration_Model->delete_user_details();
+        $this->template->write('message', 'Cluster user deleted successfully');
         $this->cluster();
     }
 

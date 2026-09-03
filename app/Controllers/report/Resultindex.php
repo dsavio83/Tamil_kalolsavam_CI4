@@ -100,6 +100,11 @@ class Resultindex  extends \App\Controllers\BaseController {
     }
 
     function gradewise_interface() {
+        if ($this->Session_Model->check_user_permission(44) == false) {
+            $this->template->write('error', permission_warning());
+            $this->template->load();
+            return;
+        }
         $this->Contents = array();
         $this->template->write('title', '');
         $this->template->write_view('content', 'report/publishresult/gradewise', $this->Contents);
@@ -153,6 +158,11 @@ class Resultindex  extends \App\Controllers\BaseController {
     }
 
     function rankwise_result() {
+        if ($this->Session_Model->check_user_permission(44) == false) {
+            $this->template->write('error', permission_warning());
+            $this->template->load();
+            return;
+        }
         $this->Contents = array();
         $this->template->write('title', '');
         $fest = $this->General_Model->prepare_select_box_data('festival_master', 'fest_id,fest_name', '', 'Select Festival', 'fest_id');
@@ -182,6 +192,11 @@ class Resultindex  extends \App\Controllers\BaseController {
     }
 
     function gradewise_result() {
+        if ($this->Session_Model->check_user_permission(44) == false) {
+            $this->template->write('error', permission_warning());
+            $this->template->load();
+            return;
+        }
         $this->Contents = array();
         $this->template->write('title', '');
         $fest = $this->General_Model->prepare_select_box_data('festival_master', 'fest_id,fest_name', '', 'Select Festival', 'fest_id');
@@ -223,6 +238,11 @@ class Resultindex  extends \App\Controllers\BaseController {
     }
 
     function report_press_timewise() {
+        if ($this->Session_Model->check_user_permission(44) == false) {
+            $this->template->write('error', permission_warning());
+            $this->template->load();
+            return;
+        }
         $this->Contents = array();
         $this->template->write('title', '');
         $this->Contents['date_array'] = $this->General_Model->get_result_date_array();

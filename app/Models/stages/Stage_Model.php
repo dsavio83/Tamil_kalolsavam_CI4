@@ -47,8 +47,8 @@ class Stage_Model extends \App\Models\BaseModel {
 
     function check_stagename_exists($id = '', $stagename) {
         if ($id != '')
-            $this->db->where('stage_id != "' . $id . '"');
-        $this->db->where('stage_name = "' . $stagename . '"');
+            $this->db->where('stage_id !=', (int) $id);
+        $this->db->where('stage_name', $stagename);
         $this->db->select('stage_id');
         $this->db->from('stage_master');
         $result = $this->db->get();

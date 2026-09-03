@@ -92,3 +92,17 @@ if (!function_exists('image_url')) {
     }
 }
 
+if (!function_exists('base_url')) {
+    function base_url($relativePath = '', ?string $scheme = null): string
+    {
+        if ($relativePath === false || $relativePath === null) {
+            $relativePath = '';
+        }
+        $currentURI = service('request')->getUri();
+        if ($currentURI instanceof \CodeIgniter\HTTP\SiteURI) {
+            return $currentURI->baseUrl($relativePath, $scheme);
+        }
+        return (string) $currentURI;
+    }
+}
+

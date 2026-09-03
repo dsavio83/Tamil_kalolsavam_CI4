@@ -126,16 +126,44 @@ class Import  extends \App\Controllers\BaseController {
     }
 
     function backup_data_sql() {
-        if ($back_up = $this->Import_Model->backup_tables()) {
-          //  $message = 'Database backup done sucessfully . To view the backup ,  file look in        ' . $_SERVER['DOCUMENT_ROOT'] . '/kalolsavam_subdistrict_2022/dbBackup/';
-            $baseValue = basename(base_url()); 
-            $message = 'Database backup done sucessfully . To view the backup ,  file look in        ' .$_SERVER['DOCUMENT_ROOT'] . '/ '.$baseValue.'/dbBackup/ ';
-            $this->template->write('message', $message);
-        } else {
-            $message = 'Database backup failure . please check it';
-
-            $this->template->write('error', $message);
+        if ($this->session->get('USER_GROUP') != 'A' && $this->session->get('USER_GROUP') != 'W') {
+            redirect('welcome');
+            return;
         }
+
+        $baseValue = basename(base_url());
+        $backupDir = $_SERVER['DOCUMENT_ROOT'] . '/' . $baseValue . '/dbBackup/';
+
+        if (!is_dir($backupDir)) {
+            @mkdir($backupDir, 0777, true);
+        }
+
+        if ($this->request->getGet('do') === 'backup') {
+            $sqlContent = $this->Import_Model->backup_tables();
+
+            if ($sqlContent !== false && $sqlContent !== '') {
+                $this->load->helper('download');
+                $filename = 'kalolsavam_subdistrict_' . date('d-m-Y-h-i-s') . '.sql';
+                force_download($filename, $sqlContent);
+            } else {
+                $message = 'Database backup failure. Please check it.';
+                $this->template->write('error', $message);
+            }
+        } else {
+            $this->template->write('message', 'Backup your database as a .sql file.');
+        }
+
+        $backupFiles = glob($backupDir . '*.sql');
+        $backupFileNames = [];
+        if ($backupFiles) {
+            foreach ($backupFiles as $file) {
+                $backupFileNames[] = basename($file);
+            }
+        }
+
+        $this->Contents['backupFileNames'] = $backupFileNames;
+        $this->Contents['backupDir'] = $backupDir;
+        $this->template->write_view('content', 'import/backup_data_sql', $this->Contents);
         $this->template->write_view('menu', 'menu', '');
         $this->template->load();
     }

@@ -8,6 +8,14 @@
 echo form_open('', array('id' => 'list_district'));
 ?>
 <input type="hidden" name="sel_sub_district_id" id="sel_sub_district_id">
+<!-- Back button -->
+<div class="row mt-3 mb-3">
+    <div class="col-12">
+        <a href="<?php echo base_url('welcome/district_details'); ?>" class="btn btn-primary">
+            <i class="bi bi-arrow-return-left"></i> Back
+        </a>
+    </div>
+</div>
 <div class="row mt-3">
     <div class="col-6 p-2"> <span style="font-weight: bold; font-size: 18px;">&nbsp;&nbsp;Clusters </span></div>
     <div class="col-6 p-2" style="text-align: right;"> <span style="font-weight: bold; font-size: 18px;">Print</span>&nbsp;&nbsp;
@@ -16,8 +24,9 @@ echo form_open('', array('id' => 'list_district'));
     </div>
 </div>
 
- <div class="table-responsive-sm">
-                <table class="table table-striped">
+ <div class="table-responsive">
+                <table class="table table-striped table-bordered table-hover" id="subDistrictTable">
+                    <thead>
     <tr>
         <th width="5%" align="center">Sl No</th>
         <th width="20%" align="left">Sub-District Name</th>
@@ -27,6 +36,8 @@ echo form_open('', array('id' => 'list_district'));
         <th width="15%" align="center">Confirmed</th>
         <th width="15%" align="center">Not Confirmed</th>
     </tr>
+                    </thead>
+                    <tbody>
     <?php
     $sub_district_details1 = $sub_district_details;
     if (is_array($sub_district_details) && count($sub_district_details) > 0) {
@@ -52,7 +63,7 @@ echo form_open('', array('id' => 'list_district'));
         }
     }
     ?>
-
+                    </tbody>
 </table>
 </div>
 <!-- print content starts here----------------------------------->
@@ -98,3 +109,13 @@ echo form_open('', array('id' => 'list_district'));
 <?php
 echo form_close();
 ?>
+
+<!-- DataTables initialization -->
+<script>
+    $(document).ready(function() {
+        $('#subDistrictTable').DataTable({
+            "pageLength": 10,
+            "order": [[0, "asc"]]
+        });
+    });
+</script>

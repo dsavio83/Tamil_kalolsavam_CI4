@@ -51,6 +51,9 @@ class User_Registration_Model extends \App\Models\BaseModel {
             $this->db->where('UM.user_type', $user_type);
         }
 
+        // Add rights count for the user
+        $this->db->select('(SELECT COUNT(rf_id) FROM user_rights UR WHERE UR.user_id = UM.user_id) AS rights_count');
+
         // Add cluster school count for cluster users (user_type = 5)
         $this->db->select('(CASE WHEN UM.user_type = 5 THEN (SELECT COUNT(uc_id) FROM user_cluster UC WHERE UC.user_id = UM.user_id) ELSE 0 END) AS cluster_school_count');
 

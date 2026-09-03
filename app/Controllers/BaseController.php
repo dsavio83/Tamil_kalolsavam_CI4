@@ -20,8 +20,15 @@ use App\Libraries\CiDatabase;
  * All convenience properties are initialized in __construct() (like CI3) so
  * that ported controller constructors can use them immediately.
  */
+#[\AllowDynamicProperties]
 class BaseController extends Controller
 {
+    /** @var array */
+    public $Content = [];
+
+    /** @var array */
+    public $Contents = [];
+
     /** @var \App\Libraries\CiDatabase */
     public $db;
 
@@ -55,6 +62,7 @@ class BaseController extends Controller
     public function __construct()
     {
         // CI4's Controller has no __construct to chain to.
+        helper(['compat', 'form', 'url', 'general']);
         $connection            = \Config\Database::connect();
         $this->db              = new CiDatabase($connection);
         $this->db1             = $this->db;

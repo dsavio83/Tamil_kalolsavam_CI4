@@ -118,26 +118,30 @@ class Registration_Model extends \App\Models\BaseModel {
             $school = $school_details->getResultArray();
 
             $data = array();
-            $data['school_code'] = $school[0]['school_code'];
-            $data['class_start'] = $school[0]['class_start'];
-            $data['class_end'] = $school[0]['class_end'];
-            $data['school_phone'] = $school[0]['school_phone'];
-            $data['hm_name'] = $school[0]['hm_name'];
-            $data['hm_phone'] = $school[0]['hm_phone'];
-            $data['principal_name'] = $school[0]['principal_name'];
-            $data['principal_phone'] = $school[0]['principal_phone'];
-            $data['teachers'] = $school[0]['teachers'];
-            $data['strength_lp'] = $school[0]['strength_lp'];
-            $data['strength_up'] = $school[0]['strength_up'];
-            $data['strength_hs'] = $school[0]['strength_hs'];
-            $data['strength_hss'] = $school[0]['strength_hss'];
-            $data['strength_vhss'] = $school[0]['strength_vhss'];
-            $data['total_strength'] = $school[0]['total_strength'];
-            $data['ip'] = $this->input->ip_address();
-            $data['user_id'] = $this->session->get('USERID');
+            $data['school_code'] = (float)($school[0]['school_code'] ?? $schoolCode);
+            $data['class_start'] = (int)($school[0]['class_start'] ?? 0);
+            $data['class_end'] = (int)($school[0]['class_end'] ?? 0);
+            $data['school_phone'] = (string)($school[0]['school_phone'] ?? '');
+            $data['hm_name'] = (string)($school[0]['hm_name'] ?? '');
+            $data['hm_phone'] = (string)($school[0]['hm_phone'] ?? '');
+            $data['principal_name'] = (string)($school[0]['principal_name'] ?? '');
+            $data['principal_phone'] = (string)($school[0]['principal_phone'] ?? '');
+            $data['teachers'] = (string)($school[0]['teachers'] ?? '');
+            $data['strength_lp'] = (int)($school[0]['strength_lp'] ?? 0);
+            $data['strength_up'] = (int)($school[0]['strength_up'] ?? 0);
+            $data['strength_hs'] = (int)($school[0]['strength_hs'] ?? 0);
+            $data['strength_hss'] = (int)($school[0]['strength_hss'] ?? 0);
+            $data['strength_vhss'] = (int)($school[0]['strength_vhss'] ?? 0);
+            $data['total_strength'] = (int)($school[0]['total_strength'] ?? 0);
+            $data['ip'] = (string)(service('request')->getIPAddress() ?? '');
+            $data['user_id'] = (float)($this->session->get('USERID') ?? 0);
             $data['status'] = $status;
 
-            $this->db->insert('z_school_details_log', $data);
+            try {
+                $this->db->insert('z_school_details_log', $data);
+            } catch (\Throwable $e) {
+                log_message('error', 'z_school_details_log failed: ' . $e->getMessage());
+            }
         }
     }
 
@@ -187,13 +191,20 @@ class Registration_Model extends \App\Models\BaseModel {
 
     function save_school_details() {
         $schoolCode = $this->input->post('hidSchoolId');
+        if (empty($schoolCode) && $this->session->get('SCHOOL_CODE')) {
+            $schoolCode = $this->session->get('SCHOOL_CODE');
+        }
+
+        if (empty($schoolCode)) {
+            $return_array['error_array'] = array('Invalid School Code');
+            return $return_array;
+        }
 
         $this->db->where('school_code', $schoolCode);
         $old_school_details = $this->db->get('school_details');
         if ($old_school_details->getNumRows() > 0) {
             $this->log_school_details($schoolCode, 'O');
         }
-
 
         $this->db->where('school_code', $schoolCode);
         $this->db->where("(class < '" . (int) $this->input->post('txtStandardFrom') . "' OR class > '" . (int) $this->input->post('txtStandardTo') . "')");
@@ -205,39 +216,39 @@ class Registration_Model extends \App\Models\BaseModel {
             return $return_array;
         }
 
-
         $this->db->where('school_code', $schoolCode);
         $count = $this->db->countAllResults('school_details');
-        if ($count > 0) {
-            $this->db->where('school_code', $schoolCode);
-        } else {
-            $data['school_code'] = $schoolCode;
-        }
+        
         $teachers = '';
-        for ($i = 1; $i <= $this->input->post('hidTeachers'); $i++) {
-            if (isset($_POST['txtTeacher_' . $i]) && trim($_POST['txtTeacher_' . $i]) != '') {
-
-                $teachers .= $_POST['txtTeacher_' . $i] . '#$#' . (int) $_POST['txtPhone_' . $i] . '#@#';
+        $teachers_count = (int) ($this->input->post('hidTeachers') ?? 1);
+        for ($i = 1; $i <= $teachers_count; $i++) {
+            if (isset($_POST['txtTeacher_' . $i]) && trim((string)$_POST['txtTeacher_' . $i]) !== '') {
+                $teachers .= trim((string)$_POST['txtTeacher_' . $i]) . '#$#' . trim((string)($_POST['txtPhone_' . $i] ?? '')) . '#@#';
             }
         }
         $data['class_start'] = (int) $this->input->post('txtStandardFrom');
         $data['class_end'] = (int) $this->input->post('txtStandardTo');
-        $data['school_phone'] = $this->input->post('txtSchoolPhone');
-        $data['school_email'] = $this->input->post('txtSchoolEmail');
-        $data['hm_name'] = $this->input->post('txtHeadmaster');
-        $data['hm_phone'] = $this->input->post('txtHeadmasterPhone');
-        $data['principal_name'] = $this->input->post('txtPrincipal');
-        $data['principal_phone'] = $this->input->post('txtPrincipalPhone');
+        $data['school_phone'] = (string) ($this->input->post('txtSchoolPhone') ?? '');
+        $data['school_email'] = (string) ($this->input->post('txtSchoolEmail') ?? '');
+        $data['hm_name'] = (string) ($this->input->post('txtHeadmaster') ?? '');
+        $data['hm_phone'] = (string) ($this->input->post('txtHeadmasterPhone') ?? '');
+        $data['principal_name'] = (string) ($this->input->post('txtPrincipal') ?? '');
+        $data['principal_phone'] = (string) ($this->input->post('txtPrincipalPhone') ?? '');
         $data['teachers'] = $teachers;
-        $data['strength_lp'] = (int) $this->input->post('txtTotalLP');
-        $data['strength_up'] = (int) $this->input->post('txtTotalUP');
-        $data['strength_hs'] = (int) $this->input->post('txtTotalHS');
-        $data['strength_hss'] = (int) $this->input->post('txtTotalHSS');
-        $data['strength_vhss'] = (int) $this->input->post('txtTotalVHSS');
-        $data['total_strength'] = (int) $this->input->post('txtTotal');
+        $data['strength_lp'] = (int) ($this->input->post('txtTotalLP') ?? 0);
+        $data['strength_up'] = (int) ($this->input->post('txtTotalUP') ?? 0);
+        $data['strength_hs'] = (int) ($this->input->post('txtTotalHS') ?? 0);
+        $data['strength_hss'] = (int) ($this->input->post('txtTotalHSS') ?? 0);
+        $data['strength_vhss'] = (int) ($this->input->post('txtTotalVHSS') ?? 0);
+        $data['total_strength'] = (int) ($this->input->post('txtTotal') ?? 0);
+
         if ($count > 0) {
+            $this->db->where('school_code', $schoolCode);
             $this->db->update('school_details', $data);
         } else {
+            $data['school_code'] = $schoolCode;
+            $data['is_create_report'] = 'N';
+            $data['is_finalize'] = 'N';
             $this->db->insert('school_details', $data);
         }
         $this->log_school_details($schoolCode, 'N');

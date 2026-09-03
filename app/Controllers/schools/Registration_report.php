@@ -2,15 +2,12 @@
 
 namespace App\Controllers\Schools;
 
-
-class Registration_Report  extends \App\Controllers\BaseController {
+class Registration_Report extends \App\Controllers\BaseController {
 
     function __construct () {
 		parent::__construct ();
-        if ($this->router->method != 'html_report') {
-            $this->Session_Model->is_user_logged(true);
-            $this->load->library('html2pdf');
-        }
+        $this->Session_Model->is_user_logged(true);
+        $this->load->library('html2pdf');
     }
 
     function index() {
@@ -23,20 +20,21 @@ class Registration_Report  extends \App\Controllers\BaseController {
 
         $this->load->model('schools/Registration_Report_Model','registration_report_model');
 
-        $this->registration_report_model->set_school_details_take_report($this->input->post('hidSchoolId'));
+        $school_id = $this->input->post('hidSchoolId') ?: $this->input->get('school_id') ?: session()->get('SCHOOL_CODE');
 
-        $school_details = $this->registration_report_model->get_school_details($this->input->post('hidSchoolId'));
-        $participant_details = $this->registration_report_model->get_participant_details($this->input->post('hidSchoolId'));
-        $fees_details = $this->registration_report_model->get_fees_details($this->input->post('hidSchoolId'));
+        $this->registration_report_model->set_school_details_take_report($school_id);
 
-        //print_r($fees_details);
+        $school_details = $this->registration_report_model->get_school_details($school_id);
+        $participant_details = $this->registration_report_model->get_participant_details($school_id);
+        $fees_details = $this->registration_report_model->get_fees_details($school_id);
+
         $this->Content['school_details'] = $school_details;
         $this->Content['participant_details'] = $participant_details;
         $this->Content['fees_details'] = $fees_details;
 
         $content = $this->load->view('schools/registration_report', $this->Content, true);
 
-        $html2pdf = new HTML2PDF('P', 'A4', 'en');
+        $html2pdf = new \HTML2PDF('P', 'A4', 'en');
         $html2pdf->pdf->SetDisplayMode('fullpage');
         $html2pdf->WriteHTML($content, '');
         $html2pdf->Output('report.pdf', 'I');
@@ -49,6 +47,9 @@ class Registration_Report  extends \App\Controllers\BaseController {
         $school_id = $this->input->post('hidSchoolId');
         if (!$school_id) {
             $school_id = $this->input->get('school_id');
+        }
+        if (!$school_id) {
+            $school_id = session()->get('SCHOOL_CODE');
         }
         
         if (!$school_id) {
@@ -82,6 +83,9 @@ class Registration_Report  extends \App\Controllers\BaseController {
         if (!$school_id) {
             $school_id = $this->input->get('school_id');
         }
+        if (!$school_id) {
+            $school_id = session()->get('SCHOOL_CODE');
+        }
         
         if (!$school_id) {
             echo '<!DOCTYPE html><html><body><h3>Error: No school selected</h3></body></html>';
@@ -91,8 +95,12 @@ class Registration_Report  extends \App\Controllers\BaseController {
         $this->load->library('html2pdf');
         $this->load->model('schools/Registration_Report_Model','registration_report_model');
 
+        // Mark report as taken in school_details (is_create_report = 'Y')
+        $this->registration_report_model->set_school_details_take_report($school_id);
+
         $school_details = $this->registration_report_model->get_school_details($school_id);
         $participant_details = $this->registration_report_model->get_participant_details($school_id);
+        $fees_details = $this->registration_report_model->get_fees_details($school_id);
         
         if (empty($school_details)) {
             echo '<!DOCTYPE html><html><body><h3>Error: School not found</h3></body></html>';
@@ -101,15 +109,16 @@ class Registration_Report  extends \App\Controllers\BaseController {
         
         $data = array(
             'school_details' => $school_details,
-            'participant_details' => is_array($participant_details) ? $participant_details : array()
+            'participant_details' => is_array($participant_details) ? $participant_details : array(),
+            'fees_details' => $fees_details
         );
 
-        $content = $this->load->view('schools/registration_report_html', $data, true);
+        $content = $this->load->view('schools/registration_report', $data, true);
         
-        $html2pdf = new HTML2PDF('P', 'A4', 'en');
+        $html2pdf = new \HTML2PDF('P', 'A4', 'en');
         $html2pdf->pdf->SetDisplayMode('fullpage');
         $html2pdf->WriteHTML($content, '');
-        $html2pdf->Output('report.pdf', 'I');
+        $html2pdf->Output('registration_report_' . $school_id . '.pdf', 'I');
     }
 
 }

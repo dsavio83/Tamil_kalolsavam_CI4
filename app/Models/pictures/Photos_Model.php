@@ -43,12 +43,19 @@ function get_Photo($name, $schoolcode, $sub_district_code = null)
     if ($sub_district_code === null || $sub_district_code === '') {
         $sub_district_code = $this->session->get('SUB_DISTRICT');
     }
+    if (empty($sub_district_code) && !empty($schoolcode)) {
+        $sch = $this->db->query("SELECT sub_district_code FROM school_master WHERE school_code = '$schoolcode' LIMIT 1");
+        if (is_object($sch) && $sch->getNumRows() > 0) {
+            $row = $sch->getResultArray();
+            $sub_district_code = $row[0]['sub_district_code'];
+        }
+    }
     $dirname = "photos/" . $sub_district_code . "/" . $schoolcode . "/";
     $exts = array('jpg', 'jpeg', 'gif', 'png');
 
     foreach($exts as $ext) {
         $filepath = $dirname . $name . '.' . $ext;
-        if (file_exists(FCPATH . $filepath)) {
+        if (file_exists(ROOTPATH . $filepath)) {
             return base_url() . $filepath;
         }
     }
@@ -70,11 +77,11 @@ function get_Photo_With_Thumbnail($name, $schoolcode)
         $filepath = $dirname . $name . '.' . $ext;
         $thumbpath = $dirname . $name . '_thumb.' . $ext;
 
-        if (file_exists(FCPATH . $filepath)) {
+        if (file_exists(ROOTPATH . $filepath)) {
             $photo_data['full'] = base_url() . $filepath;
         }
 
-        if (file_exists(FCPATH . $thumbpath)) {
+        if (file_exists(ROOTPATH . $thumbpath)) {
             $photo_data['thumbnail'] = base_url() . $thumbpath;
         }
 
@@ -95,7 +102,7 @@ function photo_exists($name, $schoolcode)
     $exts = array('jpg', 'jpeg', 'gif', 'png');
 
     foreach($exts as $ext) {
-        if (file_exists(FCPATH . $dirname . $name . '.' . $ext)) {
+        if (file_exists(ROOTPATH . $dirname . $name . '.' . $ext)) {
             return true;
         }
     }
@@ -112,8 +119,8 @@ function delete_photo_files($name, $schoolcode)
     $deleted = false;
 
     foreach($exts as $ext) {
-        $filepath = FCPATH . $dirname . $name . '.' . $ext;
-        $thumbpath = FCPATH . $dirname . $name . '_thumb.' . $ext;
+        $filepath = ROOTPATH . $dirname . $name . '.' . $ext;
+        $thumbpath = ROOTPATH . $dirname . $name . '_thumb.' . $ext;
 
         if (file_exists($filepath)) {
             unlink($filepath);
@@ -268,7 +275,7 @@ $exts = array('jpg', 'jpeg', 'gif', 'png');
 
 foreach($exts as $ext) {
     $filepath = $dirname . $img . '.' . $ext;
-    if (file_exists(FCPATH . $filepath)) {
+    if (file_exists(ROOTPATH . $filepath)) {
         $PhotoReturn['pic'][$regno] = base_url() . $filepath;
         break;
     } else {

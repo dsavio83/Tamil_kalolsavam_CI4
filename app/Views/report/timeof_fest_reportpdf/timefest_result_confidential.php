@@ -1,52 +1,58 @@
 <style type="text/css">
-   
     .style1 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
         font-size: 14px;
         font-weight: bold;
-        color: #0d6efd;
+        color: #000000;
     }
-    .style2{
+    .style2 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
         font-size: 11px;
-        font-weight: 100;
-        color:#000000;
+        font-weight: bold;
+        color: #000000;
     }
     .style3 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
         font-size: 10px;
-        font-weight: 100;
-        height:15px;
-        border:0 0 0.5px 0.5px 0 #000000 ; 
+        font-weight: normal;
+        height: 15px;
+        border: 0 0 0.5px 0.5px 0 #000000; 
+        color: #000000;
     }
-    .style4{
+    .style4 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
         font-size: 8px;
         font-weight: bold;
-        color:#000000;
+        color: #000000;
     }
-    .style8{
+    .style8 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
         font-size: 8px;
-        color:#CC3300;
+        color: #000000;
     }
     .style9 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
         font-size: 20px;
         font-weight: bold;
-        color: #0d6efd;
+        color: #000000;
     }
-    .style10{
+    .style10 {
+        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
         font-size: 12px;
         font-weight: bold;
-        color: #0d6efd;
+        color: #000000;
     }
-   
 </style>
 
-<page backtop="25mm" backbottom="20mm ">
+<page backtop="28mm" backbottom="20mm">
 
     <page_header>
         <?php
         $this->load->view('report/report_header');
         ?>
-        <table width="100%" border="0" align="left" cellpadding="0" cellspacing="0">
+        <table width="100%" border="0" align="left" cellpadding="0" cellspacing="0" style="color: #000000;">
             <tr>
-                <td align="left" width="400" class="style1" style="padding: 2px;">
+                <td align="left" width="400" class="style1" style="padding: 2px; color: #000000;">
     &nbsp;&nbsp;&nbsp;&nbsp;<?php
 $festName = $retdat[0]['fest_name'];
 $festName = str_replace('TAMIL KALAIVIZHA', '', $festName);
@@ -54,7 +60,7 @@ $festName = str_replace('TAMIL KALAIVIZHA', '', $festName);
 
 <?php echo $itemcode; ?> - <?php echo $retdat[0]['item_name']; ?> (<?php echo empty($festName)?"no data" :$festName;?>)
 </td>
-                <td  align="right" width="300" class="style1"  style=" padding:2px;">
+                <td  align="right" width="300" class="style1"  style="padding: 2px; color: #000000;">
 
                     <?php echo $retdat[0]['stage_name']; ?>&nbsp; on&nbsp;
                     <?php
@@ -84,7 +90,7 @@ $festName = str_replace('TAMIL KALAIVIZHA', '', $festName);
     </page_footer>
 
 
-    <table width="95%" border="1" align="center" cellpadding="0" cellspacing="0" bordercolor="#000000" style="margin-top: 8px;">
+    <table width="95%" border="1" align="center" cellpadding="0" cellspacing="0" bordercolor="#000000" style="margin-top: 5px;">
         <tr>
             <td width="20"  class="style2" rowspan="2"  align="center" style="border:0 0 0.5px 0.5px 0 #000000 ;">Sl No</td>
             <td width="20"  class="style2" align="center"rowspan="2" style="border:0 0 0.5px 0.5px 0 #000000 ;">Reg No </td>
@@ -95,7 +101,7 @@ $festName = str_replace('TAMIL KALAIVIZHA', '', $festName);
             <td width="20" class="style2" align="center" rowspan="2" style="border:0 0 0.5px 0.5px 0 #000000 ;">%</td>
             <td width="20" class="style2" align="center" rowspan="2" style="border:0 0 0.5px 0.5px 0 #000000 ;">R</td>
             <td width="20" class="style2" align="center" rowspan="2" style="border:0 0 0.5px 0.5px 0 #000000 ;">G</td>
-            <td width="20" align="center" rowspan="2" style="border:0 0 0.5px 0.5px 0 #000000 ;">P</td>
+            <td width="20" class="style2" align="center" rowspan="2" style="border:0 0 0.5px 0.5px 0 #000000 ;">P</td>
         </tr>
         <tr>
             <?php for ($k = 1; $k <= $judjes_count; $k++) { ?>

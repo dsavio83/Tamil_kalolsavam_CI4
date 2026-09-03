@@ -60,8 +60,21 @@ class Resultentry  extends \App\Controllers\BaseController {
     function get_item_details_result() {
 
         $item_id = $this->input->post('code');
+        
+        if (empty($item_id)) {
+            $this->Content['selected_item'] = false;
+            $this->Content['selected_item_list'] = array();
+            $this->Content['selected_result'] = array();
+            $this->Content['show_conirm_button'] = 'yes';
+            $this->Content['absentee_list'] = false;
+            $this->Content['add_edit'] = 'yes';
+            $this->load->view('result/resultentry', $this->Content);
+            return;
+        }
+
         $this->Content['selected_item'] = $this->Result_Model->get_item_details_result($item_id);
         $this->Content['selected_item_list'] = $this->Result_Model->get_item_result_list($item_id);
+        $this->Content['selected_result'] = array();
         if (is_array($this->Content['selected_item_list']) && count($this->Content['selected_item_list']) > 0) {
             $this->Content['show_conirm_button'] = ($this->Result_Model->check_confirm_item($item_id)) ? 'yes' : 'no';
         } else {

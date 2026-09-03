@@ -140,6 +140,9 @@ class CiLoader
         if (in_array($name, ['html2pdf', 'fpdf', '_fpdf/fpdf', 'csvreader', 'excel_reader', 'timezone'], true)) {
             $global = $this->globalClassName($name);
             if ($global !== null && class_exists($global)) {
+                if (in_array($name, ['fpdf', '_fpdf/fpdf'], true)) {
+                    $this->controller->{$short} = new $global();
+                }
                 return $this;
             }
             return $this;

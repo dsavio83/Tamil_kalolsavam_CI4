@@ -22,6 +22,7 @@ class ModelMap
         'general_model'                         => \App\Models\General_Model::class,
         'import_model'                          => \App\Models\Import_Model::class,
         'itemreport_model'                      => \App\Models\Itemreport_Model::class,
+        'item/item_master_model'                => \App\Models\Item\Item_Master_Model::class,
         'registration_model'                    => \App\Models\Registration_Model::class,
         'registration_model1'                   => \App\Models\Registration_Model1::class,
         'session_model'                         => \App\Models\Session_Model::class,
