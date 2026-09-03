@@ -340,15 +340,29 @@ $routes->match(['GET', 'POST'], 'report/timefestreportpdf/confidential', 'Report
 $routes->match(['GET', 'POST'], 'report/timefestreportpdf/common_report', 'Report\Timefestreportpdf::common_report');
 $routes->match(['GET', 'POST'], 'report/timefestreportpdf/datewisepart', 'Report\Timefestreportpdf::datewisepart');
 
-// Afterresultreport (Interfaces)
+// ------------------------------------------------------------------
+// AFTER-RESULT REPORT MODULE — Interfaces + PDF generators
+// higherlevel_result: Shows participants eligible for higher-level
+//   competitions (class > 4, grade A). Form POSTs to PDF endpoint.
+//   Uses Afterresult_model::higherlevel_result() which queries
+//   result_publish JOIN school_master, participant_details, item_master,
+//   festival_master, result_master.
+// schoolhigher_result / schoolhigher_resultall: School-wise higher-level.
+// All methods enforce login + permission 8.
+// ------------------------------------------------------------------
+
+// Afterresultreport (Interface pages — GET shows form, POST not used directly)
+$routes->match(['GET', 'POST'], 'report/afterresultreport/higherlevel_result', 'Report\Afterresultreport::higherlevel_result');
 $routes->match(['GET', 'POST'], 'report/afterresultreport/school_wise_result_interface', 'Report\Afterresultreport::school_wise_result_interface');
 $routes->match(['GET', 'POST'], 'report/afterresultreport/item_code_reports', 'Report\Afterresultreport::item_code_reports');
 $routes->match(['GET', 'POST'], 'report/afterresultreport/status_of_kalolsavam_interface', 'Report\Afterresultreport::status_of_kalolsavam_interface');
 $routes->match(['GET', 'POST'], 'report/afterresultreport/timefest_result', 'Report\Afterresultreport::timefest_result');
 $routes->match(['GET', 'POST'], 'report/afterresultreport/rankwise_participant_result', 'Report\Afterresultreport::rankwise_participant_result');
-$routes->match(['GET', 'POST'], 'report/afterresultreport/higherlevel_result', 'Report\Afterresultreport::higherlevel_result');
 
-// Afterresultreportpdf (PDF and Print Reports)
+// Afterresultreportpdf (PDF generation — POST from interface forms)
+$routes->match(['GET', 'POST'], 'report/afterresultreportpdf/higherlevel_result', 'Report\Afterresultreportpdf::higherlevel_result');
+$routes->match(['GET', 'POST'], 'report/afterresultreportpdf/schoolhigher_result', 'Report\Afterresultreportpdf::schoolhigher_result');
+$routes->match(['GET', 'POST'], 'report/afterresultreportpdf/schoolhigher_resultall', 'Report\Afterresultreportpdf::schoolhigher_resultall');
 $routes->match(['GET', 'POST'], 'report/afterresultreportpdf/school_wise_result', 'Report\Afterresultreportpdf::school_wise_result');
 $routes->match(['GET', 'POST'], 'report/afterresultreportpdf/school_wise_result_all', 'Report\Afterresultreportpdf::school_wise_result_all');
 $routes->match(['GET', 'POST'], 'report/afterresultreportpdf/allschool_points_result', 'Report\Afterresultreportpdf::allschool_points_result');
@@ -360,18 +374,18 @@ $routes->match(['GET', 'POST'], 'report/afterresultreportpdf/numwise_timeresult_
 $routes->match(['GET', 'POST'], 'report/afterresultreportpdf/status_of_kalolsavam', 'Report\Afterresultreportpdf::status_of_kalolsvam');
 $routes->match(['GET', 'POST'], 'report/afterresultreportpdf/status_of_kalolsavam1', 'Report\Afterresultreportpdf::status_of_kalolsavam1');
 $routes->match(['GET', 'POST'], 'report/afterresultreportpdf/datewisepart', 'Report\Afterresultreportpdf::datewisepart');
-$routes->match(['GET', 'POST'], 'report/afterresultreportpdf/higherlevel_result', 'Report\Afterresultreportpdf::higherlevel_result');
-$routes->match(['GET', 'POST'], 'report/afterresultreportpdf/schoolhigher_result', 'Report\Afterresultreportpdf::schoolhigher_result');
-$routes->match(['GET', 'POST'], 'report/afterresultreportpdf/schoolhigher_resultall', 'Report\Afterresultreportpdf::schoolhigher_resultall');
 
 // ------------------------------------------------------------------
-// EXPORT MODULE — Controlled Migration (2026-09-03)
-// Export menu: "Export Result Data" -> export/export_district_data. GET renders
-// the export/district_data form; POST with hidExport=TRUE streams CSV. The
-// "Export Photo" button on that page posts to welcome/export_photo (ZIP).
-// export/export_sub_district_data streams the sub-district CSV (POST only).
+// EXPORT MODULE — District & Sub-District Data Export
+// export/export_district_data: GET renders export form; POST with
+//   hidExport=TRUE streams CSV via Export_Model::get_district_export_data().
+//   Queries result_publish JOIN result_master, participant_item_details,
+//   participant_details (grade A, class > 4). Encrypted row integrity.
+// export/export_sub_district_data: POST-only CSV stream for sub-district.
+//   Includes school_master, school_details, participant_details,
+//   participant_item_details with encrypted checksums.
+// welcome/export_photo: ZIP photo export.
 // All methods enforce login + permission 8 in the Export controller.
-// Do NOT add GET to export_sub_district_data (CSV-only POST).
 // ------------------------------------------------------------------
 $routes->match(['GET', 'POST'], 'export', 'Export::index');
 $routes->match(['GET', 'POST'], 'export/export_district_data', 'Export::export_district_data');

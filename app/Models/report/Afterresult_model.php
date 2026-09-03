@@ -113,122 +113,69 @@ class Afterresult_model extends \App\Models\BaseModel {
 
     function status_of_kalolsavam($fest, $date) {
         $fest = ($fest !== 'All' && !empty($fest)) ? (int)$fest : 'All';
-        $date = $this->db->escapeString((string)$date);
-        if ($date != 'All') {
-            if ($fest != 'All') {
-                $query = "SELECT RP.item_code,IM.item_name,FM.fest_name,FM.fest_id from result_master AS RP
-	 LEFT JOIN stage_item_master AS sm ON sm.item_code = RP.item_code
-	  LEFT JOIN item_master AS IM ON IM.item_code=RP.item_code LEFT JOIN festival_master AS FM ON IM.fest_id=FM.fest_id where date(sm.start_time) = '$date' and IM.fest_id=$fest and RP.is_finish='Y' group by RP.item_code, IM.item_name, FM.fest_name, FM.fest_id order by FM.fest_id";
+        $date = ($date !== 'All' && !empty($date)) ? (string)$date : 'All';
 
-                $school_wise_result = $this->db->query($query);
-                return $school_wise_result->getResultArray();
-            } else {
-                $query = "SELECT RP.item_code,IM.item_name,FM.fest_name,FM.fest_id from result_master AS RP
-	 LEFT JOIN stage_item_master AS sm ON sm.item_code = RP.item_code
-	 LEFT JOIN item_master AS IM ON IM.item_code=RP.item_code LEFT JOIN festival_master AS FM ON IM.fest_id=FM.fest_id
-	 where date(sm.start_time) = '$date' and RP.is_finish='Y'
-	 group by RP.item_code, IM.item_name, FM.fest_name, FM.fest_id
-	  order by FM.fest_id";
+        $baseQuery = "SELECT RP.item_code, IM.item_name, FM.fest_name, FM.fest_id
+                      FROM result_master AS RP
+                      LEFT JOIN stage_item_master AS sm ON sm.item_code = RP.item_code
+                      LEFT JOIN item_master AS IM ON IM.item_code = RP.item_code
+                      LEFT JOIN festival_master AS FM ON IM.fest_id = FM.fest_id
+                      WHERE RP.is_finish = 'Y'";
 
-                $school_wise_result = $this->db->query($query);
-                return $school_wise_result->getResultArray();
-            }
-        } else {
-            if ($fest != 'All') {
-                $query = "SELECT RP.item_code,IM.item_name,FM.fest_name,FM.fest_id from result_master AS RP
-	 LEFT JOIN stage_item_master AS sm ON sm.item_code = RP.item_code
-	  LEFT JOIN item_master AS IM ON IM.item_code=RP.item_code LEFT JOIN festival_master AS FM ON IM.fest_id=FM.fest_id where IM.fest_id=$fest and RP.is_finish='Y' group by RP.item_code, IM.item_name, FM.fest_name, FM.fest_id order by FM.fest_id";
+        $params = [];
 
-                $school_wise_result = $this->db->query($query);
-                return $school_wise_result->getResultArray();
-            } else {
-                $query = "SELECT RP.item_code,IM.item_name,FM.fest_name,FM.fest_id from result_master AS RP
-	 LEFT JOIN stage_item_master AS sm ON sm.item_code = RP.item_code
-	 LEFT JOIN item_master AS IM ON IM.item_code=RP.item_code LEFT JOIN festival_master AS FM ON IM.fest_id=FM.fest_id
-	 where RP.is_finish='Y'
-	 group by RP.item_code, IM.item_name, FM.fest_name, FM.fest_id
-	  order by FM.fest_id";
-
-                $school_wise_result = $this->db->query($query);
-                return $school_wise_result->getResultArray();
-            }
+        if ($date !== 'All') {
+            $baseQuery .= " AND date(sm.start_time) = ?";
+            $params[] = $date;
         }
+        if ($fest !== 'All') {
+            $baseQuery .= " AND IM.fest_id = ?";
+            $params[] = $fest;
+        }
+
+        $baseQuery .= " GROUP BY RP.item_code, IM.item_name, FM.fest_name, FM.fest_id ORDER BY FM.fest_id";
+
+        $school_wise_result = $this->db->query($baseQuery, $params);
+        return $school_wise_result->getResultArray();
     }
 
     function status_of_kalolsavam1($fest, $festdate) {
         $fest = ($fest !== 'All' && !empty($fest)) ? (int)$fest : 'All';
-        $festdate = $this->db->escapeString((string)$festdate);
-        if ($festdate != 'All') {
-            if ($fest != 'All') {
-                $query1 = "SELECT IM.item_name, FM.fest_name, IM.item_code,FM.fest_id
-							FROM item_master AS IM
-							JOIN stage_item_master AS sm ON sm.item_code = IM.item_code
-							AND date( start_time ) = '$festdate'
-							LEFT JOIN festival_master AS FM ON IM.fest_id = FM.fest_id
-							WHERE IM.fest_id ='$fest'
-							AND IM.item_code NOT
-							IN (
-							SELECT distinct(RP.item_code)
-							FROM result_master AS RP
-							LEFT JOIN item_master AS IM ON IM.item_code = RP.item_code
-							LEFT JOIN festival_master AS FM ON IM.fest_id = FM.fest_id
-							WHERE IM.fest_id =$fest)order by FM.fest_id";
+        $festdate = ($festdate !== 'All' && !empty($festdate)) ? (string)$festdate : 'All';
 
-                $school_wise_result = $this->db->query($query1);
-                return $school_wise_result->getResultArray();
-            } else {
-                $query1 = "SELECT IM.item_name, FM.fest_name, IM.item_code, FM.fest_id
-								FROM item_master AS IM
-									JOIN stage_item_master AS sm ON sm.item_code = IM.item_code
-						AND date( start_time ) = '$festdate'
-							JOIN festival_master AS FM ON IM.fest_id = FM.fest_id
-												AND IM.item_code NOT
-								IN (
-								
-								SELECT DISTINCT (
-								rp.item_code
-								)
-								FROM result_master AS rp
-								)
-								ORDER BY FM.fest_id";
-                $school_wise_result = $this->db->query($query1);
-                return $school_wise_result->getResultArray();
-            }
-        } else {
-            if ($fest != 'All') {
-                $query1 = "SELECT IM.item_name, FM.fest_name, IM.item_code,FM.fest_id
-							FROM item_master AS IM
-							JOIN stage_item_master AS sm ON sm.item_code = IM.item_code
-							LEFT JOIN festival_master AS FM ON IM.fest_id = FM.fest_id
-							WHERE IM.fest_id ='$fest'
-							AND IM.item_code NOT
-							IN (
-							SELECT distinct(RP.item_code)
-							FROM result_master AS RP
-							LEFT JOIN item_master AS IM ON IM.item_code = RP.item_code
-							LEFT JOIN festival_master AS FM ON IM.fest_id = FM.fest_id
-							WHERE IM.fest_id =$fest)order by FM.fest_id";
+        $baseQuery = "SELECT IM.item_name, FM.fest_name, IM.item_code, FM.fest_id
+                      FROM item_master AS IM
+                      JOIN stage_item_master AS sm ON sm.item_code = IM.item_code";
 
-                $school_wise_result = $this->db->query($query1);
-                return $school_wise_result->getResultArray();
-            } else {
-                $query1 = "SELECT IM.item_name, FM.fest_name, IM.item_code, FM.fest_id
-								FROM item_master AS IM
-									JOIN stage_item_master AS sm ON sm.item_code = IM.item_code
-							JOIN festival_master AS FM ON IM.fest_id = FM.fest_id
-												AND IM.item_code NOT
-								IN (
-								
-								SELECT DISTINCT (
-								rp.item_code
-								)
-								FROM result_master AS rp
-								)
-								ORDER BY FM.fest_id";
-                $school_wise_result = $this->db->query($query1);
-                return $school_wise_result->getResultArray();
-            }
+        $params = [];
+
+        if ($festdate !== 'All') {
+            $baseQuery .= " AND date(sm.start_time) = ?";
+            $params[] = $festdate;
         }
+
+        $baseQuery .= " LEFT JOIN festival_master AS FM ON IM.fest_id = FM.fest_id";
+
+        if ($fest !== 'All') {
+            $baseQuery .= " WHERE IM.fest_id = ?";
+            $params[] = $fest;
+        }
+
+        $baseQuery .= " AND IM.item_code NOT IN (
+                            SELECT DISTINCT(RP.item_code)
+                            FROM result_master AS RP";
+
+        if ($fest !== 'All') {
+            $baseQuery .= " LEFT JOIN item_master AS IM2 ON IM2.item_code = RP.item_code
+                            LEFT JOIN festival_master AS FM2 ON IM2.fest_id = FM2.fest_id
+                            WHERE IM2.fest_id = ?";
+            $params[] = $fest;
+        }
+
+        $baseQuery .= ") ORDER BY FM.fest_id";
+
+        $school_wise_result = $this->db->query($baseQuery, $params);
+        return $school_wise_result->getResultArray();
     }
 
     function total_points() {
@@ -265,23 +212,20 @@ class Afterresult_model extends \App\Models\BaseModel {
 
     function higherlevel_result($festid, $item) {
 
-
         $this->db->select('r.item_code, r.participant_id, r.school_code, r.grade, m.school_name, p.participant_name, p.class, f.fest_name,f.fest_id, i.item_name');
         $this->db->from('result_publish AS r');
         $this->db->join('school_master AS m', 'm.school_code = r.school_code');
-        $this->db->join('participant_details AS p', "p.participant_id = r.participant_id AND class >4");
+        $this->db->join('participant_details AS p', "p.participant_id = r.participant_id AND p.class > 4");
         $this->db->join('item_master AS i', 'i.item_code = r.item_code');
         $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id');
         $this->db->join('result_master AS rm', "rm.item_code = r.item_code and rm.is_taken = 'Y' and rm.is_finish = 'Y'");
-        $this->db->where("r.is_withheld = 'N'");
+        $this->db->where("r.is_withheld", 'N');
         if ($festid != 'All')
             $this->db->where("f.fest_id", $festid);
         if ($item != 'ALL')
             $this->db->where("r.item_code", $item);
 
-        //	$this->db->where("  ");
-        $this->db->groupBy('r.item_code');
-        $this->db->groupBy('r.participant_id');
+        $this->db->groupBy('r.item_code, r.participant_id');
         $this->db->orderBy('i.fest_id');
         $this->db->orderBy('r.item_code');
 
@@ -293,11 +237,10 @@ class Afterresult_model extends \App\Models\BaseModel {
         $this->db->select('r.item_code, r.participant_id, r.school_code, r.grade, m.school_name, p.participant_name, p.class, f.fest_name,f.fest_id, i.item_name');
         $this->db->from('result_publish AS r');
         $this->db->join('school_master AS m', 'm.school_code = r.school_code');
-        $this->db->join('participant_details AS p', "p.participant_id = r.participant_id AND class >4");
+        $this->db->join('participant_details AS p', "p.participant_id = r.participant_id AND p.class > 4");
         $this->db->join('item_master AS i', 'i.item_code = r.item_code');
         $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id');
-        $this->db->where("r.is_withheld = 'N'");
-        //$this->db->where("R.is_taken ='Y' and R.is_finish = 'Y'");
+        $this->db->where("r.is_withheld", 'N');
         $this->db->where("r.school_code", $school);
         $this->db->orderBy('i.fest_id');
         $this->db->orderBy('r.item_code');
@@ -310,10 +253,10 @@ class Afterresult_model extends \App\Models\BaseModel {
         $this->db->select('r.item_code, r.participant_id, r.school_code, r.grade, m.school_name, p.participant_name, p.class, f.fest_name,f.fest_id, i.item_name');
         $this->db->from('result_publish AS r');
         $this->db->join('school_master AS m', 'm.school_code = r.school_code');
-        $this->db->join('participant_details AS p', "p.participant_id = r.participant_id AND class >4");
+        $this->db->join('participant_details AS p', "p.participant_id = r.participant_id AND p.class > 4");
         $this->db->join('item_master AS i', 'i.item_code = r.item_code');
         $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id');
-        $this->db->where("r.is_withheld = 'N'");
+        $this->db->where("r.is_withheld", 'N');
         $this->db->orderBy('i.fest_id');
         $this->db->orderBy('r.item_code');
 

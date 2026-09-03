@@ -167,7 +167,6 @@ $fest_title = @$itempart[0]['fest_name'] ? @$itempart[0]['fest_name'] : (@$singl
           </tr>
         <?php } ?>
 
-        /* 2. GROUP ITEMS */
         <?php
         for ($j = 0; $j < count($itempart); $j++) {
             $item_code = $itempart[$j]['item_code'];

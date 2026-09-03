@@ -198,9 +198,9 @@
 
           <div class="col-12 col-md-4 col-xl-3 d-flex gap-2">
             <?php if (!empty($selected_result) && count($selected_result) > 0) { ?>
-              <button type="button" onClick="javascript:fncSaveResultEntry()" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm flex-grow-1">
-                <i class="bi bi-check-lg me-1"></i> Update
-              </button>
+<button type="button" id="saveButton" onClick="javascript:fncSaveResultEntry()" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm flex-grow-1">
+                  <i class="bi bi-check-lg me-1"></i> Update
+                </button>
               <button type="button" onClick="javascript:fncCancel()" class="btn btn-outline-danger rounded-pill px-3 py-2 fw-semibold">
                 Cancel
               </button>

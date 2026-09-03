@@ -1,32 +1,89 @@
-# Add any directories, files, or patterns you don't want to be tracked by version control
-application/config/config.php
-application/config/database.php
-application/helpers/connection_helper.php
-nbproject
-composer.lock
-user_guide
-
-# IDE Files
 #-------------------------
-/nbproject/
-.idea/*
+# Environment & Secrets
+#-------------------------
+.env
+.temp-env.bat
+*.env
+*.key
+*.pem
 
+#-------------------------
+# Operating Specific Junk
+#-------------------------
 .DS_Store
-application/cache/*
-!application/cache/index.html
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
+*~
+.directory
+.Trash-*
 
-application/logs/*
-!application/logs/index.html
+#-------------------------
+# Temporary & Runtime Files (CodeIgniter 4)
+#-------------------------
+/writable/cache/*
+!/writable/cache/index.html
 
-!application/*/.htaccess
+/writable/logs/*
+!/writable/logs/index.html
 
-/uploads
-/dbBackup
+/writable/session/*
+!/writable/session/index.html
 
-# Automation artifacts (may contain environment-local test data)
-/.automation/
+/writable/uploads/*
+!/writable/uploads/index.html
 
-/index.php
-/photos
+/writable/debugbar/*
+!/writable/debugbar/index.html
+
+php_errors.log
+*.log
+
+#-------------------------
+# Application Uploads & Local Backups
+#-------------------------
 /uploads/*
+!/uploads/index.html
+/photos/*
+!/photos/index.html
+/dbBackup/
 
+#-------------------------
+# Dependencies & Package Managers
+#-------------------------
+/vendor/
+/node_modules/
+package-lock.json
+composer.lock
+
+#-------------------------
+# Test & Automation Artifacts
+#-------------------------
+/tests/coverage*
+/build/.phpunit.cache/
+/build/logs/
+/.automation/
+/.opencode/
+/.freebuff/
+/_audit/
+/_backup*/
+inspect_*.html
+*cookies*.txt
+
+#-------------------------
+# IDE / Editor Files
+#-------------------------
+.idea/
+*.iml
+/nbproject/
+.vscode/
+*.sublime-workspace
+*.sublime-project

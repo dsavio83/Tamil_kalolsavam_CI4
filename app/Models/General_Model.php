@@ -10,6 +10,9 @@ class General_Model extends \App\Models\BaseModel {
     }
 
     function get_data($table, $fields = '*', $where = array(), $order_by = '') {
+        if ($table === 'festival_master' || strpos($table, 'festival_master') !== false) {
+            $order_by = "CASE WHEN fest_name LIKE '%LP%' THEN 1 WHEN fest_name LIKE '%UP%' THEN 2 WHEN fest_name LIKE '%HSS%' THEN 4 WHEN fest_name LIKE '%HS%' THEN 3 ELSE fest_id END ASC";
+        }
         if ((is_array($where) && count($where) > 0) or ( !is_array($where) && trim($where) != ''))
             $this->db->where($where);
         if ($order_by)
@@ -52,7 +55,11 @@ class General_Model extends \App\Models\BaseModel {
         list($key, $val) = explode(',', $fields);
         $key = trim($key);
         $val = trim($val);
-        $order_by = $order_by ? $order_by : $val;
+        if ($table === 'festival_master' || strpos($table, 'festival_master') !== false) {
+            $order_by = "CASE WHEN fest_name LIKE '%LP%' THEN 1 WHEN fest_name LIKE '%UP%' THEN 2 WHEN fest_name LIKE '%HSS%' THEN 4 WHEN fest_name LIKE '%HS%' THEN 3 ELSE fest_id END ASC";
+        } else {
+            $order_by = $order_by ? $order_by : $val;
+        }
         $input_array = $this->get_data($table, $fields, $where, $order_by);
 
         $select_box_array = array();
@@ -72,7 +79,11 @@ class General_Model extends \App\Models\BaseModel {
         //$fields				= str_replace('#$#',',',$fields);
         $key = trim($key);
         $val = trim($val);
-        $order_by = $order_by ? $order_by : $val;
+        if ($table === 'festival_master' || strpos($table, 'festival_master') !== false) {
+            $order_by = "CASE WHEN fest_name LIKE '%LP%' THEN 1 WHEN fest_name LIKE '%UP%' THEN 2 WHEN fest_name LIKE '%HSS%' THEN 4 WHEN fest_name LIKE '%HS%' THEN 3 ELSE fest_id END ASC";
+        } else {
+            $order_by = $order_by ? $order_by : $val;
+        }
         $input_array = $this->get_data($table, $fields, $where, $order_by);
 
         $select_box_array = array();

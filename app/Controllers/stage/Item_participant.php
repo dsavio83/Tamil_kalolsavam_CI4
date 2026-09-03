@@ -22,7 +22,7 @@ class Item_Participant  extends \App\Controllers\BaseController {
 
         $this->Contents['fest'] = $fest;
 
-        $fest_id = ($this->input->post('cmbFestType')) ? $this->input->post('cmbFestType') : (($this->input->post('txtFestId')) ? $this->input->post('txtFestId') : '');
+        $fest_id = ($this->input->post('cmbFestType')) ? $this->input->post('cmbFestType') : (($this->input->post('txtFestId')) ? $this->input->post('txtFestId') : ($this->input->get('fest_id') ?: ''));
         $this->Contents['fest_id'] = $fest_id;
         $this->template->write_view('content', 'stage/participant_nodetails', $this->Contents);
         if ($fest_id) {

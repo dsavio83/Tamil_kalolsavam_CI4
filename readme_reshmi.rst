@@ -1,1 +1,0 @@
-Create Folders namingly dbBackup,uploads,photos inside root Application folder and  give permissions

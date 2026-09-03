@@ -23,6 +23,11 @@ class Festival_Scheduling extends \App\Controllers\BaseController {
             $this->Content = array();
         }
 
+        // Get active festival dates from sub_dist_kalolsavam_master
+        $active_dates = $this->get_active_festival_dates();
+        $this->Content['default_start_date'] = $active_dates['start_date'];
+        $this->Content['default_end_date'] = $active_dates['end_date'];
+
         // Get all festivals for dropdown
         $this->Content['festivals'] = $this->get_festivals();
         $this->Content['stages'] = $this->Stage_Model->get_stages();
@@ -36,6 +41,24 @@ class Festival_Scheduling extends \App\Controllers\BaseController {
 
         $this->template->write_view('content', 'stage/festival_scheduling', $this->Content);
         $this->template->load();
+    }
+
+    // Get active festival dates from database
+    public function get_active_festival_dates() {
+        try {
+            $sub_district = session()->get('SUB_DISTRICT') ?: 213;
+            $row = $this->db->table('sub_dist_kalolsavam_master')
+                ->where('sub_district_code', $sub_district)
+                ->where('start_date !=', '0000-00-00')
+                ->get()->getRowArray();
+            if ($row && !empty($row['start_date']) && $row['start_date'] !== '0000-00-00') {
+                return array(
+                    'start_date' => $row['start_date'],
+                    'end_date' => (!empty($row['end_date']) && $row['end_date'] !== '0000-00-00') ? $row['end_date'] : $row['start_date']
+                );
+            }
+        } catch (\Throwable $e) {}
+        return array('start_date' => '2026-10-06', 'end_date' => '2026-10-09');
     }
 
     // Get stored Gemini API key
@@ -124,8 +147,10 @@ class Festival_Scheduling extends \App\Controllers\BaseController {
         exit;
     }
 
-    // Call Google Gemini API
+    // Call Google Gemini API with robust curl and stream fallbacks
     private function call_gemini_api($api_key, $prompt) {
+        if (empty($api_key)) return false;
+
         $models = ['gemini-2.5-flash', 'gemini-1.5-flash'];
         foreach ($models as $model) {
             $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . $model . ':generateContent?key=' . urlencode($api_key);
@@ -143,25 +168,57 @@ class Festival_Scheduling extends \App\Controllers\BaseController {
                     'responseMimeType' => 'application/json'
                 )
             );
+            $json_payload = json_encode($payload);
 
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            try {
+                $response = false;
+                $http_code = 0;
 
-            $response = curl_exec($ch);
-            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
+                if (function_exists('curl_init')) {
+                    $ch = \curl_init($url);
+                    \curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    \curl_setopt($ch, CURLOPT_POST, true);
+                    \curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+                    \curl_setopt($ch, CURLOPT_POSTFIELDS, $json_payload);
+                    \curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+                    \curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
-            if ($http_code === 200 && $response) {
-                $res_data = json_decode($response, true);
-                $text = $res_data['candidates'][0]['content']['parts'][0]['text'] ?? '';
-                if (!empty($text)) {
-                    return $text;
+                    $response = \curl_exec($ch);
+                    $http_code = \curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    if (PHP_VERSION_ID < 80500 && is_resource($ch)) {
+                        @\curl_close($ch);
+                    }
+                } elseif (ini_get('allow_url_fopen')) {
+                    $opts = array(
+                        'http' => array(
+                            'method'  => 'POST',
+                            'header'  => "Content-Type: application/json\r\n",
+                            'content' => $json_payload,
+                            'timeout' => 20,
+                            'ignore_errors' => true
+                        ),
+                        'ssl' => array(
+                            'verify_peer' => false,
+                            'verify_peer_name' => false
+                        )
+                    );
+                    $context = stream_context_create($opts);
+                    $response = @file_get_contents($url, false, $context);
+                    if (isset($http_response_header) && is_array($http_response_header) && !empty($http_response_header[0])) {
+                        preg_match('{HTTP\/\S*\s(\d{3})}', $http_response_header[0], $match);
+                        $http_code = isset($match[1]) ? (int)$match[1] : 0;
+                    }
                 }
+
+                if ($http_code === 200 && $response) {
+                    $res_data = json_decode($response, true);
+                    $text = $res_data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+                    if (!empty($text)) {
+                        return $text;
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Ignore failure and try next model or fallback
             }
         }
         return false;
@@ -171,7 +228,7 @@ class Festival_Scheduling extends \App\Controllers\BaseController {
     function get_festivals() {
         $this->db->select('fest_id, fest_name');
         $this->db->from('festival_master');
-        $this->db->orderBy('fest_name');
+        $this->db->orderBy("CASE WHEN fest_name LIKE '%LP%' THEN 1 WHEN fest_name LIKE '%UP%' THEN 2 WHEN fest_name LIKE '%HSS%' THEN 4 WHEN fest_name LIKE '%HS%' THEN 3 ELSE fest_id END", 'ASC');
         return $this->db->get()->getResultArray();
     }
 
@@ -183,108 +240,147 @@ class Festival_Scheduling extends \App\Controllers\BaseController {
             return;
         }
 
-        $festivals = $this->get_festivals();
-        $fest_id = $this->input->post('fest_id') ?: $this->input->get('fest_id');
-        if (!$fest_id && !empty($festivals)) {
-            $fest_id = $festivals[0]['fest_id'];
-        }
+        try {
+            $festivals = $this->get_festivals();
+            $fest_id = $this->input->post('fest_id') ?: $this->input->get('fest_id');
+            if (!$fest_id) {
+                $fest_id = 'all';
+            }
 
-        $start_date = $this->input->post('start_date') ?: ($this->input->get('start_date') ?: '2024-10-29');
-        $end_date = $this->input->post('end_date') ?: ($this->input->get('end_date') ?: '2024-11-01');
-        $start_time = $this->input->post('start_time') ?: ($this->input->get('start_time') ?: '09:00:00');
-        $end_time = $this->input->post('end_time') ?: ($this->input->get('end_time') ?: '17:00:00');
-        $slot_duration = (int)($this->input->post('slot_duration') ?: ($this->input->get('slot_duration') ?: 60));
-        $use_ai = $this->input->post('use_ai') ?: ($this->input->get('use_ai') ?: 'Y');
+            $active_dates = $this->get_active_festival_dates();
+            $stage_type = $this->input->post('stage_type_filter') ?: ($this->input->get('stage_type_filter') ?: 'all');
+            $start_date = $this->input->post('start_date') ?: ($this->input->get('start_date') ?: $active_dates['start_date']);
+            $end_date = $this->input->post('end_date') ?: ($this->input->get('end_date') ?: $active_dates['end_date']);
+            $start_time = $this->input->post('start_time') ?: ($this->input->get('start_time') ?: '09:00:00');
+            $end_time = $this->input->post('end_time') ?: ($this->input->get('end_time') ?: '17:00:00');
+            $slot_duration = (int)($this->input->post('slot_duration') ?: ($this->input->get('slot_duration') ?: 30));
+            $use_ai = $this->input->post('use_ai') ?: ($this->input->get('use_ai') ?: 'Y');
 
-        if (!$fest_id) {
-            $this->template->write('error', 'Please select a festival');
-            $this->index();
-            return;
-        }
+            // Check if festival has items based on stage_type filter
+            $festival_items = $this->Festival_Scheduling_Model->get_festival_items($fest_id, $stage_type);
+            if (empty($festival_items)) {
+                $this->template->write('error', 'No competition items found for the selected filter (' . ($stage_type == 'on_stage' ? 'On-Stage Only' : ($stage_type == 'off_stage' ? 'Off-Stage Only' : 'All Stages')) . ').');
+                $this->index();
+                return;
+            }
 
-        // Check if festival has items
-        $festival_items = $this->Festival_Scheduling_Model->get_festival_items($fest_id);
-        if (empty($festival_items)) {
-            $this->template->write('error', 'No competition items found for the selected festival');
-            $this->index();
-            return;
-        }
+            $schedule = array();
+            $ai_used = false;
+            $gemini_key = $this->get_gemini_key();
 
-        $schedule = array();
-        $ai_used = false;
-        $gemini_key = $this->get_gemini_key();
-
-        // 1. Attempt Gemini AI scheduling if key is available and AI is requested
-        if (!empty($gemini_key) && ($use_ai === 'Y' || $use_ai === '1')) {
-            $stages = $this->Stage_Model->get_stages();
-            $clashes = $this->Festival_Scheduling_Model->detect_participant_clashes($fest_id);
-
-            $prompt = "You are an intelligent festival stage and event scheduler.\n";
-            $prompt .= "Festival ID: $fest_id\n";
-            $prompt .= "Date range: from $start_date to $end_date\n";
-            $prompt .= "Daily operational window: $start_time to $end_time\n";
-            $prompt .= "Default slot duration: $slot_duration minutes\n";
-            $prompt .= "Available stages:\n" . json_encode($stages) . "\n";
-            $prompt .= "Competition items to schedule:\n" . json_encode($festival_items) . "\n";
-            $prompt .= "Participant clashes to avoid:\n" . json_encode($clashes) . "\n";
-            $prompt .= "Return ONLY a JSON array of objects, with each object having keys: date (YYYY-MM-DD), venue (stage name or room), item_code, item_name, start_time (HH:MM:SS), duration (in minutes).\n";
-
-            $ai_result = $this->call_gemini_api($gemini_key, $prompt);
-            if ($ai_result) {
-                $parsed = json_decode($ai_result, true);
-                if (isset($parsed['schedule']) && is_array($parsed['schedule'])) {
-                    $parsed = $parsed['schedule'];
-                }
-                if (is_array($parsed) && !empty($parsed) && !empty($parsed[0]['item_code'])) {
-                    $schedule = $parsed;
-                    $ai_used = true;
+            // Fetch physical stage and room names from stage_master
+            $db_stages = $this->db->table('stage_master')->orderBy('stage_id', 'ASC')->get()->getResultArray();
+            $stage_names = array();
+            $room_names = array();
+            foreach ($db_stages as $stg) {
+                $sname = trim($stg['stage_name']);
+                if (stripos($sname, 'Room') !== false) {
+                    $room_names[] = $sname;
+                } else {
+                    $stage_names[] = $sname;
                 }
             }
-        }
+            if (empty($stage_names)) $stage_names = array('Stage 5', 'Stage 1', 'Stage 3');
+            if (empty($room_names)) $room_names = array('Room 19', 'Room 20');
 
-        // 2. Fallback to Algorithmic Engine if Gemini was not used or failed
-        if (empty($schedule)) {
-            $schedule = $this->Festival_Scheduling_Model->auto_schedule_festival($fest_id, $start_date, $end_date, $start_time, $end_time, $slot_duration);
-        }
+            // 1. Attempt Gemini AI scheduling if key is available and AI is requested
+            if (!empty($gemini_key) && ($use_ai === 'Y' || $use_ai === '1')) {
+                // Prepare item list with student participants for Gemini
+                $items_for_prompt = array();
+                foreach ($festival_items as $item) {
+                    $parts = $this->Festival_Scheduling_Model->get_item_participants($item['item_code']);
+                    $p_ids = array_column($parts, 'participant_id');
+                    $items_for_prompt[] = array(
+                        'item_code' => $item['item_code'],
+                        'item_name' => $item['item_name'],
+                        'category' => $item['fest_name'] ?? 'Kalaivizha',
+                        'item_type' => (!empty($item['item_type']) && $item['item_type'] === 'G') ? 'Group' : 'Single',
+                        'stage_type' => (!empty($item['is_off_stage']) && $item['is_off_stage'] === 'Y') ? 'Off-Stage' : 'On-Stage',
+                        'entries' => max(1, (int)($item['total_participants'] ?? 1)),
+                        'unit_time' => (int)($item['max_time'] ?: 15),
+                        'participants' => $p_ids
+                    );
+                }
 
-        if (empty($schedule)) {
-            $this->template->write('error', 'Failed to generate schedule. Please try again.');
+                $prompt = "You are an expert software architect and algorithm designer building an automatic event-scheduling engine for a school/college Fine Arts Festival (Kalaivizha).\n";
+                $prompt .= "Target Scope: " . ($fest_id === 'all' ? 'All Festivals Combined (LP, UP, HS, HSS)' : "Festival ID $fest_id") . "\n";
+                $prompt .= "Date Range: $start_date to $end_date\n";
+                $prompt .= "Daily Operational Window: $start_time to $end_time\n";
+                $prompt .= "Available Physical Stages: " . implode(', ', $stage_names) . "\n";
+                $prompt .= "Available Written Exam Rooms: " . implode(', ', $room_names) . "\n\n";
+                $prompt .= "STRICT SCHEDULING RULES:\n";
+                $prompt .= "1. Rule A (On-Stage Items): total_duration = unit_time * entries (sequential performances).\n";
+                $prompt .= "2. Rule B (Off-Stage Items): total_duration = unit_time (constant, all participants write simultaneously in rooms, do NOT multiply by entries). Schedule on Day 1 ($start_date) in Rooms.\n";
+                $prompt .= "3. Category Priority Order: LP -> UP -> HS -> HSS.\n";
+                $prompt .= "4. GROUP ITEMS PRIORITY RULE: All Group items (item_type = 'Group') MUST be scheduled on the FINAL DAY ($end_date) across available stages, so that schools and troupes only travel once. Single items are scheduled on earlier days.\n";
+                $prompt .= "5. STUDENT-LEVEL CLASH DETECTION: If two items share ANY common student, their time windows CANNOT overlap across any stage. Full time-range overlap check is required.\n\n";
+                $prompt .= "Input Items Data:\n" . json_encode($items_for_prompt) . "\n\n";
+                $prompt .= "Return ONLY a valid JSON object with key 'schedule': array of objects { date (YYYY-MM-DD), venue (stage or room name), item_code, item_name, start_time (HH:MM:SS), end_time (HH:MM:SS), duration (in minutes) }.\n";
+
+                $ai_result = $this->call_gemini_api($gemini_key, $prompt);
+                if ($ai_result) {
+                    $parsed = json_decode($ai_result, true);
+                    if (isset($parsed['schedule']) && is_array($parsed['schedule'])) {
+                        $parsed = $parsed['schedule'];
+                    }
+                    if (is_array($parsed) && !empty($parsed) && !empty($parsed[0]['item_code'])) {
+                        $schedule = $parsed;
+                        $ai_used = true;
+                    }
+                }
+            }
+
+            // 2. Fallback to Algorithmic Engine if Gemini was not used or failed
+            if (empty($schedule)) {
+                $schedule = $this->Festival_Scheduling_Model->auto_schedule_festival($fest_id, $start_date, $end_date, $start_time, $end_time, $slot_duration, $stage_type);
+            }
+
+            if (empty($schedule)) {
+                $this->template->write('error', 'Failed to generate schedule. Please try again.');
+                $this->index();
+                return;
+            }
+
+            // Save generated schedule to database (stage_item_master)
+            $saved_count = $this->Festival_Scheduling_Model->save_schedule($schedule, $fest_id);
+
+            $fest_label = ($fest_id === 'all') ? 'All Festivals' : $this->get_festival_name($fest_id);
+            $success_note = $ai_used
+                ? "Gemini AI auto-scheduled and saved {$saved_count} items across stages with zero student clashes for {$fest_label}!"
+                : "Stage schedule generated and saved successfully for {$fest_label}! Total items scheduled: {$saved_count}";
+
+            $this->template->write('message', $success_note);
+
+            // Load schedule view directly with fresh schedule from database
+            $fresh_schedule = $this->Festival_Scheduling_Model->get_festival_schedule($fest_id);
+            $schedule_by_date = array();
+            foreach ($fresh_schedule as $item) {
+                $date = date('Y-m-d', strtotime($item['start_time']));
+                $schedule_by_date[$date][] = $item;
+            }
+
+            // Generate full clash report
+            $clash_report = $this->Festival_Scheduling_Model->generate_clash_report($fresh_schedule);
+
+            $this->Content['schedule_by_date'] = $schedule_by_date;
+            $this->Content['clash_report'] = $clash_report;
+            $this->Content['fest_id'] = $fest_id;
+            $this->Content['festivals'] = $festivals;
+            $this->Content['selected_festival'] = $this->get_festival_name($fest_id);
+            $this->template->write_view('content', 'stage/schedule_view', $this->Content);
+            $this->template->load();
+        } catch (\Throwable $e) {
+            log_message('error', 'generate_schedule exception: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            $this->template->write('error', 'An error occurred while generating the schedule: ' . $e->getMessage());
             $this->index();
-            return;
         }
-
-        // Save generated schedule to database (stage_item_master)
-        $saved_count = $this->Festival_Scheduling_Model->save_schedule($schedule, $fest_id);
-
-        $success_note = $ai_used
-            ? "Gemini AI auto-scheduled and saved {$saved_count} items across stages with zero participant clashes!"
-            : "Stage schedule generated and saved successfully! Total items scheduled: {$saved_count}";
-
-        $this->template->write('message', $success_note);
-
-        // Load schedule view directly with fresh schedule from database
-        $fresh_schedule = $this->Festival_Scheduling_Model->get_festival_schedule($fest_id);
-        $schedule_by_date = array();
-        foreach ($fresh_schedule as $item) {
-            $date = date('Y-m-d', strtotime($item['start_time']));
-            $schedule_by_date[$date][] = $item;
-        }
-
-        $this->Content['schedule_by_date'] = $schedule_by_date;
-        $this->Content['fest_id'] = $fest_id;
-        $this->Content['festivals'] = $festivals;
-        $this->Content['selected_festival'] = $this->get_festival_name($fest_id);
-        $this->template->write_view('content', 'stage/schedule_view', $this->Content);
-        $this->template->load();
     }
 
     // Clear schedule for a festival
     function clear_schedule() {
         $fest_id = $this->input->post('fest_id') ?: $this->input->get('fest_id');
         if (!$fest_id) {
-            $this->template->write('error', 'Please select a festival');
-            $this->index();
-            return;
+            $fest_id = 'all';
         }
 
         $this->Festival_Scheduling_Model->clear_festival_schedule($fest_id);
@@ -296,20 +392,14 @@ class Festival_Scheduling extends \App\Controllers\BaseController {
     function view_schedule() {
         $festivals = $this->get_festivals();
         $fest_id = $this->input->post('fest_id') ?: $this->input->get('fest_id');
-        if (!$fest_id && !empty($festivals)) {
-            $fest_id = $festivals[0]['fest_id'];
-        }
-
         if (!$fest_id) {
-            $this->template->write('error', 'Please select a festival');
-            $this->index();
-            return;
+            $fest_id = 'all';
         }
 
         $schedule = $this->Festival_Scheduling_Model->get_festival_schedule($fest_id);
 
         if (empty($schedule)) {
-            $this->template->write('message', 'No schedule found for the selected festival. Please auto-schedule events first.');
+            $this->template->write('message', 'No schedule found for ' . $this->get_festival_name($fest_id) . '. Please auto-schedule events first.');
             $this->Content['fest_id'] = $fest_id;
             $this->Content['festivals'] = $festivals;
             $this->Content['selected_festival'] = $this->get_festival_name($fest_id);
@@ -325,7 +415,11 @@ class Festival_Scheduling extends \App\Controllers\BaseController {
             $schedule_by_date[$date][] = $item;
         }
 
+        // Generate full clash report
+        $clash_report = $this->Festival_Scheduling_Model->generate_clash_report($schedule);
+
         $this->Content['schedule_by_date'] = $schedule_by_date;
+        $this->Content['clash_report'] = $clash_report;
         $this->Content['fest_id'] = $fest_id;
         $this->Content['festivals'] = $festivals;
         $this->Content['selected_festival'] = $this->get_festival_name($fest_id);
@@ -333,15 +427,18 @@ class Festival_Scheduling extends \App\Controllers\BaseController {
         $this->template->load();
     }
 
-    // Get festival name by ID
+    // Get festival name by ID (supports 'all')
     function get_festival_name($fest_id) {
+        if ($fest_id === 'all' || $fest_id === '0' || empty($fest_id)) {
+            return 'All Festivals';
+        }
         try {
             $this->db->select('fest_name');
             $this->db->from('festival_master');
             $this->db->where('fest_id', $fest_id);
             $result = $this->db->get()->getRowArray();
             return $result ? $result['fest_name'] : 'Unknown Festival';
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return 'Unknown Festival';
         }
     }
@@ -369,12 +466,10 @@ class Festival_Scheduling extends \App\Controllers\BaseController {
 
     // Get schedule statistics
     function schedule_statistics() {
+        $festivals = $this->get_festivals();
         $fest_id = $this->input->post('fest_id') ?: $this->input->get('fest_id');
-
         if (!$fest_id) {
-            $this->template->write('error', 'Please select a festival');
-            $this->index();
-            return;
+            $fest_id = 'all';
         }
 
         $schedule = $this->Festival_Scheduling_Model->get_festival_schedule($fest_id);
@@ -392,8 +487,8 @@ class Festival_Scheduling extends \App\Controllers\BaseController {
         );
 
         foreach ($festival_items as $item) {
-            $stats['total_participants'] += $item['total_participants'];
-            if ($item['is_off_stage'] == 'Y') {
+            $stats['total_participants'] += (int)($item['total_participants'] ?? 0);
+            if (($item['is_off_stage'] ?? '') == 'Y') {
                 $stats['off_stage_items']++;
             } else {
                 $stats['on_stage_items']++;
@@ -404,11 +499,13 @@ class Festival_Scheduling extends \App\Controllers\BaseController {
         foreach ($schedule as $item) {
             $date = date('Y-m-d', strtotime($item['start_time']));
             $stats['schedule_by_date'][$date][] = $item;
-            $stats['venue_utilization'][$item['stage_name']][] = $item;
+            $venue_name = $item['stage_name'] ?? 'Main Stage';
+            $stats['venue_utilization'][$venue_name][] = $item;
         }
 
         $this->Content['stats'] = $stats;
         $this->Content['fest_id'] = $fest_id;
+        $this->Content['festivals'] = $festivals;
         $this->Content['selected_festival'] = $this->get_festival_name($fest_id);
 
         $this->template->write_view('content', 'stage/schedule_statistics', $this->Content);

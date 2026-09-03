@@ -37,9 +37,15 @@ class Allotmentfest_Model extends \App\Models\BaseModel {
         $timestamp = strtotime(date("Y-m-d H:i:s", strtotime($start_time)) . " + " . $total_time_in_minutes . " mins");
         $end_time = date('Y-m-d H:i:s', $timestamp);
 
-        $this->db->where('stage_id', $stage_id);
-        $this->db->where("(? BETWEEN start_time AND end_time) OR (? BETWEEN start_time AND end_time)", [$start_time, $end_time]);
-        $cnt_stage_exist = $this->db->countAllResults('cluster_master');
+        if (!empty($stage_id) && !empty($start_time) && !empty($end_time)) {
+            $esc_start = $this->db->escape($start_time);
+            $esc_end = $this->db->escape($end_time);
+            $this->db->where('stage_id', $stage_id);
+            $this->db->where("($esc_start BETWEEN start_time AND end_time OR $esc_end BETWEEN start_time AND end_time)");
+            $cnt_stage_exist = $this->db->countAllResults('cluster_master');
+        } else {
+            $cnt_stage_exist = 0;
+        }
 
         $data['stage_id'] = $stage_id;
         $data['item_code'] = $item_code;

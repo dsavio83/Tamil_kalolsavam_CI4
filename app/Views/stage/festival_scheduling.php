@@ -98,9 +98,9 @@
   </div>
 
   <div class="card-body p-4">
-    <!-- Row 1: Festival & Date Range -->
+    <!-- Row 1: Festival & Date Range with Stage Type Filter -->
     <div class="row g-3 mb-4">
-      <div class="col-12 col-lg-4">
+      <div class="col-12 col-md-6 col-lg-3">
         <label for="fest_id" class="form-label fw-bold text-dark small d-flex align-items-center gap-1">
           <i class="bi bi-trophy text-warning"></i>
           <span>Festival Category <span class="text-danger">*</span></span>
@@ -108,10 +108,10 @@
         <div class="input-group">
           <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-tags-fill"></i></span>
           <select class="form-select border-start-0 py-2 fs-6" id="fest_id" name="fest_id" required onchange="loadFestivalDates()">
-            <option value="">-- Choose Festival Category --</option>
+            <option value="all" selected>All Festivals (Cross-Festival)</option>
             <?php if(isset($festivals) && $festivals): ?>
-              <?php foreach($festivals as $idx => $festival): ?>
-                <option value="<?php echo esc($festival['fest_id']); ?>" <?php echo ($idx === 0) ? 'selected' : ''; ?>>
+              <?php foreach($festivals as $festival): ?>
+                <option value="<?php echo esc($festival['fest_id']); ?>">
                   <?php echo esc($festival['fest_name']); ?>
                 </option>
               <?php endforeach; ?>
@@ -120,25 +120,40 @@
         </div>
       </div>
 
-      <div class="col-12 col-md-6 col-lg-4">
+      <div class="col-12 col-md-6 col-lg-3">
+        <label for="stage_type_filter" class="form-label fw-bold text-dark small d-flex align-items-center gap-1">
+          <i class="bi bi-layers-half text-primary"></i>
+          <span>Stage Event Type <span class="text-danger">*</span></span>
+        </label>
+        <div class="input-group">
+          <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-funnel-fill"></i></span>
+          <select class="form-select border-start-0 py-2 fs-6" id="stage_type_filter" name="stage_type_filter">
+            <option value="all" selected>All Stages (On & Off Stage)</option>
+            <option value="on_stage">On-Stage Events Only</option>
+            <option value="off_stage">Off-Stage Events Only</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-3">
         <label for="start_date" class="form-label fw-bold text-dark small d-flex align-items-center gap-1">
           <i class="bi bi-calendar-event text-primary"></i>
           <span>Start Date <span class="text-danger">*</span></span>
         </label>
         <div class="input-group">
           <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-calendar-check"></i></span>
-          <input type="date" class="form-control border-start-0 py-2" id="start_date" name="start_date" value="2024-10-29" required>
+          <input type="date" class="form-control border-start-0 py-2" id="start_date" name="start_date" value="<?php echo esc($default_start_date ?? '2026-10-06'); ?>" required>
         </div>
       </div>
 
-      <div class="col-12 col-md-6 col-lg-4">
+      <div class="col-12 col-md-6 col-lg-3">
         <label for="end_date" class="form-label fw-bold text-dark small d-flex align-items-center gap-1">
           <i class="bi bi-calendar-event-fill text-primary"></i>
           <span>End Date <span class="text-danger">*</span></span>
         </label>
         <div class="input-group">
           <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-calendar-check-fill"></i></span>
-          <input type="date" class="form-control border-start-0 py-2" id="end_date" name="end_date" value="2024-11-01" required>
+          <input type="date" class="form-control border-start-0 py-2" id="end_date" name="end_date" value="<?php echo esc($default_end_date ?? '2026-10-09'); ?>" required>
         </div>
       </div>
     </div>
@@ -223,6 +238,11 @@
       <a href="<?php echo base_url(); ?>stage/festival_scheduling/order_of_events" class="btn btn-outline-secondary rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1">
         <i class="bi bi-list-ol"></i>
         <span>Order of Events</span>
+      </a>
+
+      <a href="<?php echo site_url('stage/item_participant/participant_nodetails?fest_id=1'); ?>" class="btn btn-outline-success rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1" title="View Stage Allotment table (Date, Time, Stage Venue)">
+        <i class="bi bi-calendar2-check"></i>
+        <span>Stage Allotments</span>
       </a>
 
       <button type="button" class="btn btn-outline-danger rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1" onclick="clearSchedule()">
@@ -389,12 +409,11 @@ function generateSchedule(e) {
         window.showGlobalLoader('Generating stage schedule with clash prevention...', true);
     }
 
-    var form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '<?php echo site_url("stage/festival_scheduling/generate_schedule"); ?>';
+    var stageType = (document.getElementById('stage_type_filter') ? document.getElementById('stage_type_filter').value : '') || 'all';
 
     var params = {
         'fest_id': festId,
+        'stage_type_filter': stageType,
         'start_date': startDate,
         'end_date': endDate,
         'start_time': startTime,
@@ -403,12 +422,38 @@ function generateSchedule(e) {
         'use_ai': 'Y'
     };
 
+    submitSchedulingPost('<?php echo site_url("stage/festival_scheduling/generate_schedule"); ?>', params);
+}
+
+// Global helper to safely submit POST forms with CSRF token
+function submitSchedulingPost(actionUrl, params) {
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = actionUrl;
+
+    // Inject CI4 CSRF token
+    var tokenName = '<?php echo csrf_token(); ?>';
+    var tokenHash = '<?php echo csrf_hash(); ?>';
+    var metaToken = document.querySelector('meta[name="csrf-token"]');
+    if (metaToken && metaToken.getAttribute('content')) {
+        tokenHash = metaToken.getAttribute('content');
+    }
+
+    var csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = tokenName;
+    csrfInput.value = tokenHash;
+    form.appendChild(csrfInput);
+
+    // Append extra parameters
     for (var key in params) {
-        var input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = params[key];
-        form.appendChild(input);
+        if (params.hasOwnProperty(key)) {
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = params[key];
+            form.appendChild(input);
+        }
     }
 
     document.body.appendChild(form);
@@ -418,7 +463,7 @@ function generateSchedule(e) {
 function resetToDefaults() {
     document.getElementById('start_time').value = '09:00:00';
     document.getElementById('end_time').value = '17:00:00';
-    document.getElementById('slot_duration').value = '60';
+    document.getElementById('slot_duration').value = '30';
 }
 
 function viewSchedule() {
@@ -428,18 +473,9 @@ function viewSchedule() {
         return;
     }
 
-    var form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '<?php echo site_url("stage/festival_scheduling/view_schedule"); ?>';
-
-    var input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'fest_id';
-    input.value = festId;
-    form.appendChild(input);
-
-    document.body.appendChild(form);
-    form.submit();
+    submitSchedulingPost('<?php echo site_url("stage/festival_scheduling/view_schedule"); ?>', {
+        'fest_id': festId
+    });
 }
 
 function analyzeClashes() {
@@ -449,18 +485,9 @@ function analyzeClashes() {
         return;
     }
 
-    var form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '<?php echo site_url("stage/festival_scheduling/analyze_clashes"); ?>';
-
-    var input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'fest_id';
-    input.value = festId;
-    form.appendChild(input);
-
-    document.body.appendChild(form);
-    form.submit();
+    submitSchedulingPost('<?php echo site_url("stage/festival_scheduling/analyze_clashes"); ?>', {
+        'fest_id': festId
+    });
 }
 
 function viewStatistics() {
@@ -470,29 +497,94 @@ function viewStatistics() {
         return;
     }
 
-    var form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '<?php echo site_url("stage/festival_scheduling/schedule_statistics"); ?>';
-
-    var input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'fest_id';
-    input.value = festId;
-    form.appendChild(input);
-
-    document.body.appendChild(form);
-    form.submit();
+    submitSchedulingPost('<?php echo site_url("stage/festival_scheduling/schedule_statistics"); ?>', {
+        'fest_id': festId
+    });
 }
 
 function clearSchedule() {
-    var festId = document.getElementById('fest_id').value;
+    var festSelect = document.getElementById('fest_id');
+    var festId = festSelect ? festSelect.value : '';
     if (!festId) {
-        alert('Please select a festival category to clear.');
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Select Festival Category',
+                text: 'Please select a festival category to clear.',
+                confirmButtonColor: '#0d6efd'
+            });
+        } else {
+            alert('Please select a festival category to clear.');
+        }
         return;
     }
 
-    if (confirm('Are you sure you want to clear the entire schedule for this festival? This cannot be undone.')) {
-        window.location.href = '<?php echo base_url("stage/festival_scheduling/clear_schedule?fest_id="); ?>' + encodeURIComponent(festId);
+    var festName = 'All Festivals';
+    if (festSelect && festSelect.selectedIndex >= 0) {
+        festName = festSelect.options[festSelect.selectedIndex].text;
+    }
+
+    var targetUrl = '<?php echo site_url("stage/festival_scheduling/clear_schedule?fest_id="); ?>' + encodeURIComponent(festId);
+
+    if (typeof Swal !== 'undefined') {
+        // Step 1: Warning & Confirmation
+        Swal.fire({
+            title: 'Clear Schedule?',
+            html: 'Are you sure you want to clear the stage schedule for <strong>' + festName + '</strong>?<br><br>' +
+                  '<div class="alert alert-warning text-start small mb-0 rounded-3">' +
+                  '<i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> ' +
+                  '<strong>Warning:</strong> This will delete all generated timetable slots, stage allotments, and venue assignments for this category.' +
+                  '</div>',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="bi bi-arrow-right-circle me-1"></i> Yes, Proceed to Clear',
+            cancelButtonText: 'No, Keep Schedule',
+            reverseButtons: true,
+            focusCancel: true
+        }).then((result1) => {
+            if (result1.isConfirmed) {
+                // Step 2: Final Safety Verification
+                Swal.fire({
+                    title: 'Final Safety Verification!',
+                    html: 'This action <strong>CANNOT BE UNDONE</strong>!<br><br>' +
+                          'Do you strictly confirm that you want to <strong>permanently wipe out</strong> the entire stage schedule for <strong>' + festName + '</strong>?<br><br>' +
+                          '<div class="alert alert-danger text-start small mb-0 rounded-3">' +
+                          '<i class="bi bi-shield-slash-fill text-danger me-1"></i> ' +
+                          'Once deleted, you will need to regenerate the timetable from scratch.' +
+                          '</div>',
+                    icon: 'error',
+                    showCancelButton: true,
+                    confirmButtonColor: '#b02a37',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="bi bi-trash3-fill me-1"></i> Yes, Permanently Clear Schedule',
+                    cancelButtonText: 'Cancel & Abort',
+                    reverseButtons: true,
+                    focusCancel: true
+                }).then((result2) => {
+                    if (result2.isConfirmed) {
+                        Swal.fire({
+                            title: 'Clearing Schedule...',
+                            html: 'Removing all stage and timetable records for <strong>' + festName + '</strong>. Please wait...',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+                        window.location.href = targetUrl;
+                    }
+                });
+            }
+        });
+    } else {
+        // Fallback standard double confirmation if SweetAlert is unavailable
+        if (confirm('Are you sure you want to clear the entire schedule for ' + festName + '?')) {
+            if (confirm('FINAL WARNING: This action CANNOT BE UNDONE. Permanently wipe out the schedule for ' + festName + '?')) {
+                window.location.href = targetUrl;
+            }
+        }
     }
 }
 
@@ -525,11 +617,23 @@ function saveGeminiKeyAjax() {
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Saving...';
 
+    var tokenName = '<?php echo csrf_token(); ?>';
+    var tokenHash = '<?php echo csrf_hash(); ?>';
+    var metaToken = document.querySelector('meta[name="csrf-token"]');
+    if (metaToken && metaToken.getAttribute('content')) {
+        tokenHash = metaToken.getAttribute('content');
+    }
+
     var formData = new FormData();
+    formData.append(tokenName, tokenHash);
     formData.append('gemini_api_key', key);
 
     fetch('<?php echo site_url("stage/festival_scheduling/save_gemini_key"); ?>', {
         method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': tokenHash,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
         body: formData
     })
     .then(function(res) { return res.json(); })
@@ -568,11 +672,23 @@ function testGeminiKeyAjax() {
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Testing...';
 
+    var tokenName = '<?php echo csrf_token(); ?>';
+    var tokenHash = '<?php echo csrf_hash(); ?>';
+    var metaToken = document.querySelector('meta[name="csrf-token"]');
+    if (metaToken && metaToken.getAttribute('content')) {
+        tokenHash = metaToken.getAttribute('content');
+    }
+
     var formData = new FormData();
+    formData.append(tokenName, tokenHash);
     formData.append('gemini_api_key', key);
 
     fetch('<?php echo site_url("stage/festival_scheduling/test_gemini_key"); ?>', {
         method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': tokenHash,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
         body: formData
     })
     .then(function(res) { return res.json(); })

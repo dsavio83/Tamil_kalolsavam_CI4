@@ -657,6 +657,23 @@ if (empty($dynamic_fest_title)) {
       });
     }
 
+    // Auto-inject CSRF hidden field into any dynamically or programmatically submitted POST form
+    if (typeof HTMLFormElement !== 'undefined' && HTMLFormElement.prototype.submit) {
+      var _origFormSubmit = HTMLFormElement.prototype.submit;
+      HTMLFormElement.prototype.submit = function() {
+        if ((this.method || '').toLowerCase() === 'post') {
+          if (!this.querySelector('input[name="csrf_test_name"]')) {
+            var inp = document.createElement('input');
+            inp.type = 'hidden';
+            inp.name = 'csrf_test_name';
+            inp.value = token;
+            this.appendChild(inp);
+          }
+        }
+        return _origFormSubmit.apply(this, arguments);
+      };
+    }
+
     // Auto-inject CSRF hidden field into all POST forms on DOMContentLoaded
     document.addEventListener('DOMContentLoaded', function() {
       var forms = document.querySelectorAll('form[method="post"], form[method="POST"]');
