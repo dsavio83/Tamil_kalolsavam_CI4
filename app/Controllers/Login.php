@@ -76,6 +76,8 @@ class Login extends \App\Controllers\BaseController {
                         $set_session_data['EDU_DISTRICT'] = '';
                     }
                     $this->Session_Model->set_session($set_session_data);
+                    // Regenerate session ID at the authentication boundary to prevent session fixation.
+                    session()->regenerate();
                     session()->setFlashdata('success', 'Logged in successfully!');
                     if ($login[0]['is_change_password'] == 'N') {
                         redirect('login/change_password/');
@@ -209,6 +211,8 @@ class Login extends \App\Controllers\BaseController {
             }
 
             $this->Session_Model->set_session($set_session_data);
+            // Regenerate session ID at the authentication boundary to prevent session fixation.
+            session()->regenerate();
             session()->setFlashdata('success', 'Logged in successfully!');
 
             $redirectUrl = base_url('welcome');
