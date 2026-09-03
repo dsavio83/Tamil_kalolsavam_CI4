@@ -214,112 +214,104 @@ $progress_pct = ($total_participants > 0) ? min(100, (int)round(($cnt_item_list 
           </div>
         </div>
 
-        <!-- Marks Entry Sub-Card (when adding/editing score) -->
+        <!-- Marks Entry Compact Single Row Console -->
         <?php if ($add_edit == 'yes' && $cnt_item_list != $total_participants) { ?>
-          <hr class="my-4 border-secondary-subtle">
+          <hr class="my-3 border-secondary-subtle">
           
-          <div class="bg-white rounded-4 p-4 border border-primary border-opacity-25 shadow-sm">
-            <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
-              <div class="d-flex align-items-center gap-2">
-                <div class="bg-primary text-white rounded-circle p-1.5 px-2">
-                  <i class="bi bi-pencil-fill small"></i>
-                </div>
-                <h6 class="fw-bold mb-0 text-dark">
+          <div class="bg-white rounded-3 p-3 border border-primary border-opacity-25 shadow-sm">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="d-flex align-items-center gap-1.5">
+                <i class="bi bi-pencil-square text-primary"></i>
+                <strong class="text-dark small">
                   <?php echo !empty($selected_result) ? 'Edit Participant Score' : 'Enter Participant Score'; ?>
-                </h6>
+                </strong>
               </div>
-              <small class="text-muted"><i class="bi bi-info-circle me-1"></i> Enter marks from judges. Total will calculate automatically.</small>
+              <small class="text-muted" style="font-size: 0.75rem;">
+                <i class="bi bi-keyboard me-1"></i> Press Enter to save
+              </small>
             </div>
 
-            <div class="row g-3">
+            <div class="d-flex align-items-end gap-2 flex-wrap flex-lg-nowrap">
               <!-- Code No -->
-              <div class="col-sm-6 col-md-3">
-                <label for="txt_code_no" class="form-label small fw-bold text-secondary mb-1">
+              <div class="flex-shrink-0" style="width: 100px;">
+                <label for="txt_code_no" class="form-label small fw-bold text-secondary mb-1" style="font-size: 0.78rem;">
                   Code No <span class="text-danger">*</span>
                 </label>
-                <div class="input-group">
-                  <span class="input-group-text bg-light border-secondary-subtle"><i class="bi bi-upc-scan text-muted"></i></span>
-                  <?php echo form_input(
-                      "txt_code_no",
-                      (string) (@$selected_result[0]['code_no'] ?? ''),
-                      'type="number" class="form-control border-secondary-subtle fw-bold" id="txt_code_no" maxlength="3" inputmode="numeric" placeholder="Code" oninput="moveFocus(this, \'txt_reg_no\', 3)"'
-                  ); ?>
-                </div>
+                <?php echo form_input(
+                    "txt_code_no",
+                    (string) (@$selected_result[0]['code_no'] ?? ''),
+                    'type="number" class="form-control form-control-sm text-center fw-bold border-secondary-subtle" id="txt_code_no" maxlength="3" inputmode="numeric" placeholder="Code" oninput="moveFocus(this, \'txt_reg_no\', 3)"'
+                ); ?>
               </div>
 
               <!-- Reg No -->
-              <div class="col-sm-6 col-md-3">
-                <label for="txt_reg_no" class="form-label small fw-bold text-secondary mb-1">
+              <div class="flex-shrink-0" style="width: 110px;">
+                <label for="txt_reg_no" class="form-label small fw-bold text-secondary mb-1" style="font-size: 0.78rem;">
                   Reg No <span class="text-danger">*</span>
                 </label>
-                <div class="input-group">
-                  <span class="input-group-text bg-light border-secondary-subtle"><i class="bi bi-person-badge text-muted"></i></span>
+                <?php echo form_input(
+                    "txt_reg_no",
+                    (string) (@$selected_result[0]['participant_id'] ?? ''),
+                    'type="number" class="form-control form-control-sm text-center fw-bold border-secondary-subtle" id="txt_reg_no" maxlength="4" inputmode="numeric" placeholder="Reg No" oninput="moveFocus(this, \'mark_1\', 4)"'
+                ); ?>
+              </div>
+
+              <!-- Judge Marks in same row -->
+              <?php
+              $marks_array = explode('#$#', (string) (@$selected_result[0]['marks'] ?? ''));
+              for ($i = 1; $i <= $cnt_judges; $i++) {
+                  $currentInputId = "mark_" . $i;
+                  $nextInputId = ($i < $cnt_judges) ? "mark_" . ($i + 1) : "totalMark";
+              ?>
+                <div class="flex-shrink-0" style="width: 85px;">
+                  <label for="<?php echo $currentInputId; ?>" class="form-label small fw-semibold text-muted mb-1 text-center d-block" style="font-size: 0.78rem;">
+                    Judge #<?php echo $i; ?>
+                  </label>
                   <?php echo form_input(
-                      "txt_reg_no",
-                      (string) (@$selected_result[0]['participant_id'] ?? ''),
-                      'type="number" class="form-control border-secondary-subtle fw-bold" id="txt_reg_no" maxlength="4" inputmode="numeric" placeholder="Reg No" oninput="moveFocus(this, \'mark_1\', 4)"'
+                      $currentInputId,
+                      (string) (@$marks_array[$i - 1] ?? ''),
+                      'type="number" id="' . $currentInputId . '" maxlength="2" class="form-control form-control-sm text-center fw-bold border-primary-subtle" inputmode="numeric" placeholder="0" oninput="onJudgeMarkInput(this, \'' . $nextInputId . '\')"'
                   ); ?>
                 </div>
-              </div>
+              <?php } ?>
 
-              <!-- Judge Marks Cards -->
-              <div class="col-12 mt-3">
-                <label class="form-label small fw-bold text-secondary mb-2 d-block">
-                  <i class="bi bi-award me-1"></i> Individual Judge Marks (Max 100 per judge):
+              <!-- Total Mark in same row -->
+              <div class="flex-shrink-0" style="width: 95px;">
+                <label for="totalMark" class="form-label small fw-bold text-primary mb-1 text-center d-block" style="font-size: 0.78rem;">
+                  Total
                 </label>
-                <div class="row g-2">
-                  <?php
-                  $marks_array = explode('#$#', (string) (@$selected_result[0]['marks'] ?? ''));
-                  for ($i = 1; $i <= $cnt_judges; $i++) {
-                      $currentInputId = "mark_" . $i;
-                      $nextInputId = ($i < $cnt_judges) ? "mark_" . ($i + 1) : "totalMark";
-                  ?>
-                    <div class="col-6 col-sm-4 col-md-2">
-                      <div class="judge-card text-center">
-                        <small class="text-muted fw-semibold d-block mb-1">Judge #<?php echo $i; ?></small>
-                        <?php echo form_input(
-                            $currentInputId,
-                            (string) (@$marks_array[$i - 1] ?? ''),
-                            'type="number" id="' . $currentInputId . '" maxlength="2" class="form-control form-control-lg text-center fw-bold border-0 shadow-none bg-transparent" inputmode="numeric" placeholder="0" oninput="onJudgeMarkInput(this, \'' . $nextInputId . '\')"'
-                        ); ?>
-                      </div>
-                    </div>
-                  <?php } ?>
-
-                  <!-- Total Marks Box -->
-                  <div class="col-12 col-sm-4 col-md-3">
-                    <div class="judge-card bg-primary bg-opacity-10 border-primary border-opacity-25 text-center">
-                      <small class="text-primary fw-bold d-block mb-1">
-                        <i class="bi bi-calculator me-1"></i> Total Mark
-                      </small>
-                      <?php echo form_input(
-                          "totalMark",
-                          (string) (@$selected_result[0]['total_mark'] ?? ''),
-                          'type="number" id="totalMark" maxlength="3" class="form-control form-control-lg text-center fw-bold text-primary border-0 shadow-none bg-transparent" inputmode="numeric" placeholder="Total" onkeydown="if(event.key===\'Enter\'||event.keyCode===13){event.preventDefault();document.getElementById(\'saveButton\').click();}" oninput="checkTotalMark(this)"'
-                      ); ?>
-                    </div>
-                  </div>
-                </div>
+                <?php echo form_input(
+                    "totalMark",
+                    (string) (@$selected_result[0]['total_mark'] ?? ''),
+                    'type="number" id="totalMark" maxlength="3" class="form-control form-control-sm text-center fw-bold text-primary bg-primary bg-opacity-10 border-primary" inputmode="numeric" placeholder="Total" onkeydown="if(event.key===\'Enter\'||event.keyCode===13){event.preventDefault();document.getElementById(\'saveButton\').click();}" oninput="checkTotalMark(this)"'
+                ); ?>
               </div>
 
-              <!-- Buttons -->
-              <div class="col-12 d-flex justify-content-end gap-2 mt-4 pt-2 border-top">
+              <!-- Action Buttons in same row -->
+              <div class="d-flex gap-1 align-items-end flex-shrink-0 ms-auto">
                 <?php if (!empty($selected_result)) { ?>
-                  <button type="button" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm d-flex align-items-center gap-1.5" onClick="javascript:fncSaveResultEntry()">
-                    <i class="bi bi-save2"></i> Update Score
+                  <button type="button" class="btn btn-sm btn-primary px-3 fw-bold shadow-sm d-flex align-items-center gap-1" id="saveButton" onClick="javascript:fncSaveResultEntry()" title="Update Score">
+                    <i class="bi bi-save2"></i> Update
                   </button>
-                  <button type="button" class="btn btn-outline-secondary rounded-pill px-4 py-2" onClick="javascript:fncCancel()">
+                  <button type="button" class="btn btn-sm btn-outline-secondary px-2.5" onClick="javascript:fncCancel()" title="Cancel Edit">
                     Cancel
                   </button>
                 <?php } else { ?>
-                  <button type="button" class="btn btn-primary rounded-pill px-4 py-2.5 fw-bold shadow-sm d-flex align-items-center gap-2" id="saveButton" onClick="javascript:fncSaveResultEntry()">
-                    <i class="bi bi-check2-circle fs-5"></i> Save Participant Score
+                  <button type="button" class="btn btn-sm btn-primary px-3 fw-bold shadow-sm d-flex align-items-center gap-1" id="saveButton" onClick="javascript:fncSaveResultEntry()" title="Save Score (Enter)">
+                    <i class="bi bi-check2-circle"></i> Save
                   </button>
                 <?php } ?>
               </div>
             </div>
           </div>
         <?php } ?>
+      </div>
+    <?php } else if (!empty($item_code_val)) { ?>
+      <div class="p-3 bg-white border-top">
+        <div class="alert alert-warning border-0 rounded-3 mb-0 d-flex align-items-center gap-2">
+          <i class="bi bi-exclamation-triangle-fill fs-5 text-warning"></i>
+          <span>உருப்படி எண் <strong>#<?php echo htmlspecialchars((string)$item_code_val); ?></strong>-க்கான விபரங்கள் எதுவும் கிடைக்கவில்லை. சரியான உருப்படி எண்ணை உள்ளிடவும்.</span>
+        </div>
       </div>
     <?php } ?>
 

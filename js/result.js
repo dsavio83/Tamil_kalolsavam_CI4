@@ -62,10 +62,7 @@ function hideItemSpinner() {
 
 function onItemCodeInput(el) {
     if (el && el.value.length === 3) {
-        showItemSpinner();
         fetch_item_details_result();
-    } else {
-        hideItemSpinner();
     }
 }
 
@@ -91,6 +88,10 @@ function fetch_item_details_result(force)
         if (typeof fetch !== 'undefined') {
             var formData = new FormData();
             formData.append('code', item_code);
+            var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            if (csrfMeta && csrfMeta.getAttribute('content')) {
+                formData.append('csrf_test_name', csrfMeta.getAttribute('content'));
+            }
             
             fetch(path + "result/resultentry/get_item_details_result", {
                 method: 'POST',
@@ -116,6 +117,12 @@ function fetch_item_details_result(force)
                     var codeNoEl = document.getElementById('txt_code_no');
                     if (codeNoEl) {
                         codeNoEl.focus();
+                    } else {
+                        var updatedItemEl = document.getElementById('txtItemCode');
+                        if (updatedItemEl) {
+                            updatedItemEl.focus();
+                            updatedItemEl.select();
+                        }
                     }
                 }
                 _isFetchingItemResult = false;

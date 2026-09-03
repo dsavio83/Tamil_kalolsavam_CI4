@@ -16,15 +16,13 @@ class Result_Model extends \App\Models\BaseModel {
             return false;
         }
 
-        $this->db->select('SM.*, IM.*, (SELECT COUNT(PID.participant_id)
-                        FROM participant_item_details PID WHERE PID.item_code = :pid_item_code: AND PID.is_captain = :pid_captain: ) AS total_participants ', FALSE);
-        $this->db->bind('pid_item_code', $item_code);
-        $this->db->bind('pid_captain', 'Y');
+        $this->db->select("SM.*, IM.*, (SELECT COUNT(PID.participant_id)
+                        FROM participant_item_details PID WHERE PID.item_code = IM.item_code AND PID.is_captain = 'Y' ) AS total_participants ", FALSE);
         $this->db->from('item_master AS IM');
         $this->db->join('stage_item_master AS SM', 'IM.item_code = SM.item_code');
         $this->db->where('IM.item_code', $item_code);
         $item_details = $this->db->get();
-        if ($item_details->getNumRows() > 0) {
+        if ($item_details && $item_details->getNumRows() > 0) {
             return $item_details->getResultArray();
         }
         return false;

@@ -37,11 +37,18 @@ class Resultentry  extends \App\Controllers\BaseController {
         }
         
 
-        $item_code = (empty($item_code)) ? $this->input->post('hidItemId') : $item_code;
-        if ($item_code) {
-            $this->Content['selected_item'] = $this->Result_Model->get_item_details_result($item_code);
-            $this->Content['selected_item_list'] = $this->Result_Model->get_item_result_list($item_code);
+        if (is_array($item_code)) {
+            $item_code = '';
+        }
+        $item_code = empty($item_code) ? ($this->input->post('hidItemId') ?: $this->input->post('txtItemCode') ?: $this->request->getPost('code')) : $item_code;
+        
+        if (!isset($this->Content)) {
+            $this->Content = array();
+        }
 
+        if ($item_code) {
+            $this->Content['item_code'] = (string)$item_code;
+            $this->Content['selected_item'] = $this->Result_Model->get_item_details_result($item_code);
             $this->Content['selected_item_list'] = $this->Result_Model->get_item_result_list($item_code);
             if (is_array($this->Content['selected_item_list']) && count($this->Content['selected_item_list']) > 0) {
                 $this->Content['show_conirm_button'] = ($this->Result_Model->check_confirm_item($item_code)) ? 'yes' : 'no';
@@ -51,9 +58,8 @@ class Resultentry  extends \App\Controllers\BaseController {
             $this->Content['absentee_list'] = $this->Result_Model->get_absentee_list($item_code);
             $this->Content['add_edit'] = ($this->Content['show_conirm_button'] == 'no') ? 'no' : 'yes';
         }
-        if (!isset($this->Content)) {
-            $this->Content = array();
-        }
+
+        $this->Content['item_code'] = $this->Content['item_code'] ?? (string)$item_code;
         $this->Content['selected_item'] = $this->Content['selected_item'] ?? false;
         $this->Content['selected_item_list'] = $this->Content['selected_item_list'] ?? array();
         $this->Content['selected_result'] = $this->Content['selected_result'] ?? array();
@@ -66,20 +72,24 @@ class Resultentry  extends \App\Controllers\BaseController {
     }
 
     function get_item_details_result() {
-
-        $item_id = $this->input->post('code');
+        $item_id = $this->input->post('code') ?: $this->request->getPost('code') ?: $this->input->post('hidItemId') ?: $this->input->post('txtItemCode');
         
+        if (!isset($this->Content)) {
+            $this->Content = array();
+        }
+
         if (empty($item_id)) {
+            $this->Content['item_code'] = '';
             $this->Content['selected_item'] = false;
             $this->Content['selected_item_list'] = array();
             $this->Content['selected_result'] = array();
             $this->Content['show_conirm_button'] = 'yes';
             $this->Content['absentee_list'] = false;
             $this->Content['add_edit'] = 'yes';
-            $this->load->view('result/resultentry', $this->Content);
-            return;
+            return $this->response->setBody(view('result/resultentry', $this->Content));
         }
 
+        $this->Content['item_code'] = (string)$item_id;
         $this->Content['selected_item'] = $this->Result_Model->get_item_details_result($item_id);
         $this->Content['selected_item_list'] = $this->Result_Model->get_item_result_list($item_id);
         $this->Content['selected_result'] = array();
@@ -90,7 +100,7 @@ class Resultentry  extends \App\Controllers\BaseController {
         }
         $this->Content['absentee_list'] = $this->Result_Model->get_absentee_list($item_id);
         $this->Content['add_edit'] = ($this->Content['show_conirm_button'] == 'no') ? 'no' : 'yes';
-        $this->load->view('result/resultentry', $this->Content);
+        return $this->response->setBody(view('result/resultentry', $this->Content));
     }
 
     function save_result_entry() {
