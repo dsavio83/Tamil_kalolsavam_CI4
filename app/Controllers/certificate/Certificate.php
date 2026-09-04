@@ -25,7 +25,7 @@ class Certificate extends \App\Controllers\BaseController {
         }
 
 
-        $certificate_type_array = $this->General_Model->prepare_select_box_data('certificate_type', 'ct_id,type', '', '', 'ct_id');
+        $certificate_type_array = $this->General_Model->prepare_select_box_data('sd_certificate_type', 'ct_id,type', '', '', 'ct_id');
 
         $sub_dist_code = $this->session->get('SUB_DISTRICT');
         $dist_code = $this->session->get('DISTRICT');
