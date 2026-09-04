@@ -259,13 +259,13 @@ class Registration_Modelold extends \App\Models\BaseModel {
 
             $this->db->where('item_code', $item_code);
             $this->db->selectMax('cluster_no');
-            $cluster_master = $this->db->get('cluster_master');
+            $cluster_master = $this->db->get('sd_cluster_master');
             $cluster = $cluster_master->getResultArray();
             $cluster_no = $cluster[0]['cluster_no'];
 
             $this->db->where('item_code', $item_code);
             $this->db->where('cluster_no', $cluster_no);
-            $cluster_master = $this->db->get('cluster_master');
+            $cluster_master = $this->db->get('sd_cluster_master');
             $cluster = $cluster_master->getResultArray();
             $no_of_participant = $cluster[0]['no_of_participant'];
             $no_of_participant++;
@@ -274,7 +274,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
             $data_cluser['no_of_participant'] = $no_of_participant;
             $this->db->where('item_code', $item_code);
             $this->db->where('cluster_no', $cluster_no);
-            $this->db->update('cluster_master', $data_cluser);
+            $this->db->update('sd_cluster_master', $data_cluser);
 
 
             $this->db->where('item_code', $item_code);
@@ -334,7 +334,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
 
                 $this->db->where('item_code', $item_code);
                 $this->db->where('cluster_no', $cluster_no);
-                $cluster_master = $this->db->get('cluster_master');
+                $cluster_master = $this->db->get('sd_cluster_master');
                 $cluster = $cluster_master->getResultArray();
                 $no_of_participant = $cluster[0]['no_of_participant'];
                 $no_of_participant--;
@@ -343,7 +343,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
                 $data_cluser['no_of_participant'] = $no_of_participant;
                 $this->db->where('item_code', $item_code);
                 $this->db->where('cluster_no', $cluster_no);
-                $this->db->update('cluster_master', $data_cluser);
+                $this->db->update('sd_cluster_master', $data_cluser);
 
 
                 $this->db->where('item_code', $item_code);

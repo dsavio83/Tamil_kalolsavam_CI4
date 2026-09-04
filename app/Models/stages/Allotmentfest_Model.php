@@ -42,7 +42,7 @@ class Allotmentfest_Model extends \App\Models\BaseModel {
             $esc_end = $this->db->escape($end_time);
             $this->db->where('stage_id', $stage_id);
             $this->db->where("($esc_start BETWEEN start_time AND end_time OR $esc_end BETWEEN start_time AND end_time)");
-            $cnt_stage_exist = $this->db->countAllResults('cluster_master');
+            $cnt_stage_exist = $this->db->countAllResults('sd_cluster_master');
         } else {
             $cnt_stage_exist = 0;
         }
@@ -114,7 +114,7 @@ class Allotmentfest_Model extends \App\Models\BaseModel {
             $data['start_time'] = $start_time;
             $data['no_of_participant'] = $no_of_participant;
             $data['end_time'] = $end_time;
-            $this->db->insert('cluster_master', $data);
+            $this->db->insert('sd_cluster_master', $data);
             $cluster_id = $this->db->insertID();
             /** inserting data to cluster master ends */
             $start_time = $end_time;
@@ -173,7 +173,7 @@ class Allotmentfest_Model extends \App\Models\BaseModel {
                 $this->db->delete('stage_item_master');
   
                 $this->db->where('item_code', $item_code);
-                $this->db->delete('cluster_master');
+                $this->db->delete('sd_cluster_master');
                 /*
                 $this->db->where('item_code', $item_code);
                 $this->db->delete('sd_cluster_participant_details');

@@ -459,7 +459,7 @@ class Import_Model extends \App\Models\BaseModel {
         $this->db->emptyTable('participant_details');
         $this->db->emptyTable('participant_item_details');
         $this->db->emptyTable('sd_certificate_master');
-        $this->db->emptyTable('cluster_master');
+        $this->db->emptyTable('sd_cluster_master');
         $this->db->emptyTable('sd_cluster_participant_details');
         $this->db->emptyTable('sd_item_absentee_master');
         $this->db->emptyTable('result_master');

@@ -378,7 +378,7 @@ pd.class, pd.gender, pid.item_code, pid.item_type, pid.is_captain, it.item_name,
     function cluster_reportreport($festid, $itemcode) {
         $this->db->where('cm.item_code', $itemcode);
         $this->db->select('cm.stage_id, cm.item_code, cm.cluster_id, cm.cluster_no, cpd.participant_id, cpd.cluster_no, fm.fest_name, im.item_name, sm.stage_name, sm.stage_desc, date(cm.start_time) AS stime,im.max_time,time( cm.start_time ) AS ttime');
-        $this->db->from('cluster_master AS cm');
+        $this->db->from('sd_cluster_master AS cm');
         $this->db->join('sd_cluster_participant_details AS cpd', 'cm.item_code = cpd.item_code');
         $this->db->join('item_master  AS  im', 'im.item_code = cpd.item_code');
         $this->db->join('festival_master  AS fm', 'fm.fest_id = im.fest_id');
@@ -404,7 +404,7 @@ HAVING cnt > '1'
 JOIN sd_cluster_participant_details AS CPD ON PD.participant_id = CPD.participant_id
 JOIN school_master AS SM ON SM.school_code = PD.school_code
 JOIN item_master AS IM ON IM.item_code = PID.item_code
-LEFT JOIN cluster_master AS CM ON CM. cluster_id = CPD. cluster_id and CM. item_code = PID. item_code
+LEFT JOIN sd_cluster_master AS CM ON CM. cluster_id = CPD. cluster_id and CM. item_code = PID. item_code
 WHERE c.participant_id = PD.participant_id and CM.start_time!='' and CM.end_time!=''
 ORDER BY  PD.participant_name,CM.start_time,CM.end_time";
         $clash_detail = $this->db->query($query);
