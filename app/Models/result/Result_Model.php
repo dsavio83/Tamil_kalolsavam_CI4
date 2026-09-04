@@ -466,18 +466,18 @@ class Result_Model extends \App\Models\BaseModel {
                 $item_absentee['participent_id_csv'] = $this->get_absentee_list_select($item_code);
                 $this->db->select('item_code');
                 $this->db->where('item_code', $item_code);
-                $check_absentee_id = $this->db->get('item_absentee_master');
+                $check_absentee_id = $this->db->get('sd_item_absentee_master');
                 $check_absentee_id = $check_absentee_id->getResultArray();
 
                 if (is_array($check_absentee_id) && count($check_absentee_id) > 0) {
                     if (!empty($item_absentee['participent_id_csv'])) {
-                        if (!$this->db->update('item_absentee_master', $item_absentee, array('item_code' => $item_code))) {
+                        if (!$this->db->update('sd_item_absentee_master', $item_absentee, array('item_code' => $item_code))) {
                             $this->db->transRollback();
                             return FALSE;
                         }
                     } else {
                         $this->db->where('item_code', $item_code);
-                        if (!$this->db->delete('item_absentee_master')) {
+                        if (!$this->db->delete('sd_item_absentee_master')) {
                             $this->db->transRollback();
                             return FALSE;
                         }
@@ -485,7 +485,7 @@ class Result_Model extends \App\Models\BaseModel {
                 } else {
                     if (!empty($item_absentee['participent_id_csv'])) {
                         $item_absentee['item_code'] = $item_code;
-                        if (!$this->db->insert('item_absentee_master', $item_absentee)) {
+                        if (!$this->db->insert('sd_item_absentee_master', $item_absentee)) {
                             $this->db->transRollback();
                             return FALSE;
                         }
@@ -574,7 +574,7 @@ class Result_Model extends \App\Models\BaseModel {
     function get_absentee_list($item_code) {
         $this->db->select('participent_id_csv');
         $this->db->where('item_code', $item_code);
-        $result = $this->db->get('item_absentee_master');
+        $result = $this->db->get('sd_item_absentee_master');
         $result = $result->getResultArray();
         if (is_array($result) && count($result) > 0) {
             return $result[0]['participent_id_csv'];
@@ -643,7 +643,7 @@ class Result_Model extends \App\Models\BaseModel {
     function reset_result_confirmation_status($item_code) {
         $this->db->transBegin();
         $this->db->where('item_code', $item_code);
-        if (!$this->db->delete('item_absentee_master')) {
+        if (!$this->db->delete('sd_item_absentee_master')) {
             $this->db->transRollback();
             return FALSE;
         }

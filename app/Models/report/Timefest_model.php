@@ -109,7 +109,7 @@ class Timefest_model  extends \App\Models\BaseModel {
     function timeoffest_result_absentee($itemcode) {
         $this->db->where('ab.item_code', $itemcode);
         $this->db->select('ab.participent_id_csv ');
-        $this->db->from('item_absentee_master AS ab');
+        $this->db->from('sd_item_absentee_master AS ab');
 
         $details = $this->db->get();
         if ($details->getNumRows() > 0) {
