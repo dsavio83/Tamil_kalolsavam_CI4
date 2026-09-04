@@ -11,7 +11,7 @@ namespace App\Controllers;
  * export_sub_district_data: Exports full school/participant data for a
  *   sub-district with encrypted checksums.
  *
- * Tables used: result_publish, result_master, participant_item_details,
+ * Tables used: sd_result_publish, result_master, participant_item_details,
  *              participant_details, school_master, school_details
  *
  * Permission: 8 (enforced in each method)
@@ -81,7 +81,7 @@ class Export extends \App\Controllers\BaseController {
      *
      * Permission: 8, USER_GROUP='A', USER_TYPE=3
      * Uses: Export_Model::get_district_export_data()
-     *   -> Queries result_publish JOIN result_master, participant_item_details,
+     *   -> Queries sd_result_publish JOIN result_master, participant_item_details,
      *      participant_details (grade A, is_withheld N, class > 4)
      */
     function export_district_data() {
@@ -118,7 +118,7 @@ class Export extends \App\Controllers\BaseController {
                     ->countAllResults();
 
                 // Total eligible higher-level participants (Grade A, class > 4, withheld N)
-                $eligible_count = $this->db->table('result_publish rp')
+                $eligible_count = $this->db->table('sd_result_publish rp')
                     ->join('participant_details pd', 'pd.participant_id = rp.participant_id')
                     ->where('rp.grade', 'A')
                     ->where('rp.is_withheld', 'N')

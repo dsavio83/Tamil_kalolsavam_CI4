@@ -171,7 +171,7 @@ class Export_Model  extends \App\Models\BaseModel {
         $i = 0;
 
         $this->db->select('pd.*, pid.*, rp.is_withheld');
-        $this->db->from('result_publish rp');
+        $this->db->from('sd_result_publish rp');
         $this->db->join('result_master rm', 'rm.participant_id=rp.participant_id AND rp.item_code=rm.item_code');
         $this->db->join('participant_item_details pid', 'pid.parent_admn_no=rm.admn_no AND pid.school_code=rm.school_code AND rp.item_code=pid.item_code');
         $this->db->join('participant_details pd', 'pid.participant_id=pd.participant_id');

@@ -208,7 +208,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
         $this->db->join('item_master AS i', 'i.item_code = s.item_code');
         $this->db->join('sd_stage_master AS sm', 'sm.stage_id=s.stage_id');
         $this->db->join('festival_master AS f', 'f.fest_id=i.fest_id');
-        $this->db->join('result_publish AS r', 'r.item_code = s.item_code', 'LEFT');
+        $this->db->join('sd_result_publish AS r', 'r.item_code = s.item_code', 'LEFT');
         $this->db->where('f.fest_id', $festid);
         $this->db->groupBy('s.item_code');
         $this->db->orderBy('s.item_code');

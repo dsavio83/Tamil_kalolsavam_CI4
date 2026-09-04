@@ -30,7 +30,7 @@ class Result_Model extends \App\Models\BaseModel {
 
     function get_item_result_list($item_code) {
         $this->db->where('item_code', $item_code);
-        $cnt_result_publish = $this->db->countAllResults('result_publish');
+        $cnt_result_publish = $this->db->countAllResults('sd_result_publish');
 
         $this->db->select('rm.*, spd.is_withheld');
         $this->db->from('result_master rm');
@@ -448,7 +448,7 @@ class Result_Model extends \App\Models\BaseModel {
 
                 if (is_array($result_publish_master) && count($result_publish_master)) {
                     $this->db->where('item_code', $item_code);
-                    $this->db->delete('result_publish');
+                    $this->db->delete('sd_result_publish');
                     foreach ($result_publish_master as $result_publish_master) {
                         $publish_array = array();
                         $publish_array['school_code'] = $result_publish_master['school_code'];
@@ -456,7 +456,7 @@ class Result_Model extends \App\Models\BaseModel {
                         $publish_array['participant_id'] = $result_publish_master['participant_id'];
                         $publish_array['grade'] = $result_publish_master['grade'];
                         $publish_array['is_withheld'] = $result_publish_master['is_withheld'];
-                        if (!$this->db->insert('result_publish', $publish_array)) {
+                        if (!$this->db->insert('sd_result_publish', $publish_array)) {
                             $this->db->transRollback();
                             return FALSE;
                         }
@@ -648,7 +648,7 @@ class Result_Model extends \App\Models\BaseModel {
             return FALSE;
         }
         $this->db->where('item_code', $item_code);
-        if (!$this->db->delete('result_publish')) {
+        if (!$this->db->delete('sd_result_publish')) {
             $this->db->transRollback();
             return FALSE;
         }

@@ -94,7 +94,7 @@ class CreateResultTables extends Migration
         $this->forge->addKey(['item_code', 'participant_id'], false);
         $this->forge->createTable('result_master', true);
 
-        // result_publish - Published/approved results
+        // sd_result_publish - Published/approved results
         $this->forge->addField([
             'item_code' => [
                 'type'       => 'MEDIUMINT',
@@ -128,7 +128,7 @@ class CreateResultTables extends Migration
         ]);
         $this->forge->addKey(['item_code', 'participant_id'], true);
         $this->forge->addKey('school_code');
-        $this->forge->createTable('result_publish', true);
+        $this->forge->createTable('sd_result_publish', true);
 
         // school_point_details - Points earned per school per item
         $this->forge->addField([
@@ -204,7 +204,7 @@ class CreateResultTables extends Migration
         $this->forge->dropTable('sd_result_time', true);
         $this->forge->dropTable('special_order_master', true);
         $this->forge->dropTable('school_point_details', true);
-        $this->forge->dropTable('result_publish', true);
+        $this->forge->dropTable('sd_result_publish', true);
         $this->forge->dropTable('result_master', true);
     }
 }

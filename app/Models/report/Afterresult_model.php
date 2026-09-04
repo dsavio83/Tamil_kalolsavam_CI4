@@ -213,7 +213,7 @@ class Afterresult_model extends \App\Models\BaseModel {
     function higherlevel_result($festid, $item) {
 
         $this->db->select('r.item_code, r.participant_id, r.school_code, r.grade, m.school_name, p.participant_name, p.class, f.fest_name,f.fest_id, i.item_name');
-        $this->db->from('result_publish AS r');
+        $this->db->from('sd_result_publish AS r');
         $this->db->join('school_master AS m', 'm.school_code = r.school_code');
         $this->db->join('participant_details AS p', "p.participant_id = r.participant_id AND p.class > 4");
         $this->db->join('item_master AS i', 'i.item_code = r.item_code');
@@ -235,7 +235,7 @@ class Afterresult_model extends \App\Models\BaseModel {
 
     function schoolhigher_result($school) {
         $this->db->select('r.item_code, r.participant_id, r.school_code, r.grade, m.school_name, p.participant_name, p.class, f.fest_name,f.fest_id, i.item_name');
-        $this->db->from('result_publish AS r');
+        $this->db->from('sd_result_publish AS r');
         $this->db->join('school_master AS m', 'm.school_code = r.school_code');
         $this->db->join('participant_details AS p', "p.participant_id = r.participant_id AND p.class > 4");
         $this->db->join('item_master AS i', 'i.item_code = r.item_code');
@@ -251,7 +251,7 @@ class Afterresult_model extends \App\Models\BaseModel {
 
     function schoolhigher_resultall() {
         $this->db->select('r.item_code, r.participant_id, r.school_code, r.grade, m.school_name, p.participant_name, p.class, f.fest_name,f.fest_id, i.item_name');
-        $this->db->from('result_publish AS r');
+        $this->db->from('sd_result_publish AS r');
         $this->db->join('school_master AS m', 'm.school_code = r.school_code');
         $this->db->join('participant_details AS p', "p.participant_id = r.participant_id AND p.class > 4");
         $this->db->join('item_master AS i', 'i.item_code = r.item_code');
@@ -266,7 +266,7 @@ class Afterresult_model extends \App\Models\BaseModel {
 
     function itemcomplete_schoolpoint() {
         $this->db->select('r.*, i.item_name, f.fest_id, f.fest_name');
-        $this->db->from('result_publish AS r');
+        $this->db->from('sd_result_publish AS r');
         $this->db->join('item_master AS i', 'i.item_code = r.item_code');
         $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id');
         $this->db->groupBy('r.item_code');

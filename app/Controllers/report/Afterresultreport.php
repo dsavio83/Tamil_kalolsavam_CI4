@@ -10,7 +10,7 @@ namespace App\Controllers\Report;
  * controller for PDF generation.
  *
  * Tables used: festival_master, school_master, item_master,
- *              result_master, result_publish, participant_details,
+ *              result_master, sd_result_publish, participant_details,
  *              school_point_details, sd_stage_item_master
  */
 class Afterresultreport extends \App\Controllers\BaseController {

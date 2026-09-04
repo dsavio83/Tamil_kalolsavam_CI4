@@ -27,6 +27,8 @@ $routes->match(['get', 'post'], 'publishresult/publicresult/incomplete_item', 'P
 
 // Confirmed PDF Endpoints
 $routes->match(['get', 'post'], 'itemreport/itemreport_pdf', 'Itemreport::itemreport_pdf');
+$routes->match(['get', 'post'], 'report/masterreport/item_code', 'Report\Masterreport::item_code');
+$routes->match(['get', 'post'], 'report/masterreport/item_code/', 'Report\Masterreport::item_code');
 $routes->match(['get', 'post'], 'report/masterreport/item_code_pdf', 'Report\Masterreport::item_code_pdf');
 $routes->match(['get', 'post'], 'report/prereportpdf/participant_regno_photo', 'Report\Prereportpdf::participant_regno_photo');
 
@@ -162,7 +164,11 @@ $routes->post('stage/stage_details/edit_stage_detials', 'Stage\Stage_Details::ed
 $routes->post('stage/stage_details/update_stage_detials', 'Stage\Stage_Details::update_stage_detials');
 $routes->post('stage/stage_details/delete_stage_detials', 'Stage\Stage_Details::delete_stage_detials');
 
-$routes->get('stage/allotment', 'Stage\Allotment::index');
+$routes->match(['get', 'post'], 'stage/allotment', 'Stage\Allotment::index');
+$routes->post('stage/allotment/save_allotment', 'Stage\Allotment::save_allotment');
+$routes->post('stage/allotment/update_allotment', 'Stage\Allotment::update_allotment');
+$routes->match(['get', 'post'], 'stage/allotment/delete_allotment/(:any)', 'Stage\Allotment::delete_allotment/$1');
+$routes->match(['get', 'post'], 'stage/allotment/delete_allotment', 'Stage\Allotment::delete_allotment');
 $routes->match(['get', 'post'], 'stage/item_participant/participant_nodetails', 'Stage\Item_Participant::participant_nodetails');
 $routes->post('stage/item_participant/stage_allot_fest_all', 'Stage\Item_Participant::stage_allot_fest_all');
 $routes->match(['get', 'post'], 'stage/festival_scheduling', 'Stage\Festival_Scheduling::index');
@@ -221,6 +227,7 @@ $routes->match(['GET', 'POST'], 'report/prereportpdf/score_date_stage', 'Report\
 $routes->match(['GET', 'POST'], 'report/prereportpdf/tabulation_date_stage', 'Report\Prereportpdf::tabulation_date_stage');
 $routes->match(['GET', 'POST'], 'report/prereportpdf/four_reports', 'Report\Prereportpdf::four_reports');
 $routes->match(['GET', 'POST'], 'report/prereport/rpt_tabulation_sheet', 'Report\Prereport::rpt_tabulation_sheet');
+$routes->match(['GET', 'POST'], 'report/prereport/rpt_tabulation_sheet1', 'Report\Prereport::rpt_tabulation_sheet1');
 $routes->match(['GET', 'POST'], 'report/prereportpdf/list_school', 'Report\Prereportpdf::list_school');
 $routes->match(['GET', 'POST'], 'report/prereportpdf/schoolfestall', 'Report\Prereportpdf::schoolfestall');
 $routes->match(['GET', 'POST'], 'report/prereportpdf/list_participants', 'Report\Prereportpdf::list_participants');
@@ -256,17 +263,19 @@ $routes->post('report/prereportpdf/more_limit_partlist', 'Report\Prereportpdf::m
 $routes->match(['GET', 'POST'], 'report/prereportpdf/more_limit_partlist_detailed', 'Report\Prereportpdf::more_limit_partlist_detailed');
 $routes->post('report/prereportpdf/list_participants_datewise', 'Report\Prereportpdf::list_participants_datewise');
 $routes->post('report/prereportpdf/list_participants_stagewise', 'Report\Prereportpdf::list_participants_stagewise');
-$routes->post('report/prereportpdf/participant_cardindex_school_photo', 'Report\Prereportpdf::participant_cardindex_school_photo');
-$routes->post('report/prereportpdf/participant_cardindex_school2', 'Report\Prereportpdf::participant_cardindex_school2');
-$routes->post('report/prereportpdf/participant_regnowithphoto', 'Report\Prereportpdf::participant_regnowithphoto');
-$routes->post('report/prereportpdf/rpt_itemwiseparticipants', 'Report\Prereportpdf::rpt_itemwiseparticipants');
-$routes->post('report/prereportpdf/fest_details', 'Report\Prereportpdf::fest_details');
-$routes->get('report/prereportpdf/stagereport_abstract', 'Report\Prereportpdf::stagereport_abstract');
+$routes->match(['GET', 'POST'], 'report/prereportpdf/participant_cardindex_school_photo', 'Report\Prereportpdf::participant_cardindex_school_photo');
+$routes->match(['GET', 'POST'], 'report/prereportpdf/participant_cardindex_school2', 'Report\Prereportpdf::participant_cardindex_school2');
+$routes->match(['GET', 'POST'], 'report/prereportpdf/participant_regnowithphoto', 'Report\Prereportpdf::participant_regnowithphoto');
+$routes->match(['GET', 'POST'], 'report/prereportpdf/rpt_itemwiseparticipants', 'Report\Prereportpdf::rpt_itemwiseparticipants');
+$routes->match(['GET', 'POST'], 'report/prereportpdf/fest_details', 'Report\Prereportpdf::fest_details');
+$routes->match(['GET', 'POST'], 'report/prereportpdf/stagereport_abstract', 'Report\Prereportpdf::stagereport_abstract');
 // Compatibility aliases for legacy view form targets that use abbreviated
 // names but resolve to the same PDF implementations (preserve URLs).
-$routes->post('report/prereportpdf/participant_cardindex_photo', 'Report\Prereportpdf::participant_cardindex_school_photo');
-$routes->post('report/prereportpdf/participant_cardindex2', 'Report\Prereportpdf::participant_cardindex_school2');
-$routes->post('report/prereportpdf/team_manager_all', 'Report\Prereportpdf::team_manager_all');
+$routes->match(['GET', 'POST'], 'report/prereportpdf/participant_cardindex_photo', 'Report\Prereportpdf::participant_cardindex_school_photo');
+$routes->match(['GET', 'POST'], 'report/prereportpdf/participant_cardindex2', 'Report\Prereportpdf::participant_cardindex_school2');
+$routes->match(['GET', 'POST'], 'report/prereportpdf/team_manager_all', 'Report\Prereportpdf::team_manager_all');
+$routes->match(['GET', 'POST'], 'test/nodata', 'Test::nodata');
+$routes->match(['GET', 'POST'], 'test', 'Test::index');
 
 // Ajax2 endpoints
 $routes->match(['GET', 'POST'], 'ajax/ajax2/fetch_callsheet_festival', 'Ajax\Ajax2::fetch_callsheet_festival');
@@ -284,11 +293,20 @@ $routes->match(['GET', 'POST', 'HEAD'], 'test', 'Test::index');
 $routes->match(['GET', 'POST', 'HEAD'], 'test/index', 'Test::index');
 $routes->match(['GET', 'POST', 'HEAD'], 'test/nodata', 'Test::nodata');
 
-// Result entry / publishing (primary landing pages only)
-$routes->get('result/resultentry', 'Result\Resultentry::index');
-$routes->post('result/resultentry/get_item_details_result', 'Result\Resultentry::get_item_details_result');
-$routes->match(['get', 'post'], 'result/resultentry/item_result_list', 'Result\Resultentry::item_result_list');
+// Result entry / publishing
+$routes->match(['GET', 'POST'], 'result/resultentry', 'Result\Resultentry::index');
+$routes->match(['GET', 'POST'], 'result/resultentry/index', 'Result\Resultentry::index');
+$routes->match(['GET', 'POST'], 'result/resultentry/get_item_details_result', 'Result\Resultentry::get_item_details_result');
+$routes->match(['GET', 'POST'], 'result/resultentry/save_result_entry', 'Result\Resultentry::save_result_entry');
+$routes->match(['GET', 'POST'], 'result/resultentry/edit_result_entry', 'Result\Resultentry::edit_result_entry');
+$routes->match(['GET', 'POST'], 'result/resultentry/edit_result_entry/(:any)', 'Result\Resultentry::edit_result_entry/$1');
+$routes->match(['GET', 'POST'], 'result/resultentry/delete_result_entry', 'Result\Resultentry::delete_result_entry');
+$routes->match(['GET', 'POST'], 'result/resultentry/delete_result_entry/(:any)', 'Result\Resultentry::delete_result_entry/$1');
+$routes->match(['GET', 'POST'], 'result/resultentry/confirm_result_entry', 'Result\Resultentry::confirm_result_entry');
+$routes->match(['GET', 'POST'], 'result/resultentry/printConfidentialReport', 'Result\Resultentry::printConfidentialReport');
+$routes->match(['GET', 'POST'], 'result/resultentry/item_result_list', 'Result\Resultentry::item_result_list');
 $routes->get('publishresult/resultindex/resultview', 'Publishresult\Resultindex::resultview');
+$routes->match(['GET', 'POST'], 'publishresult/resultindex/itemwise_report', 'Publishresult\Resultindex::itemwise_report');
 
 // ------------------------------------------------------------------
 // PHASE 97 - Protected Admin Users AJAX endpoints (POST only)
@@ -301,8 +319,11 @@ $routes->post('ajax/loadajax/get_school_details', 'Ajax\Loadajax::get_school_det
 $routes->post('ajax/loadajax/get_edu_district_details', 'Ajax\Loadajax::get_edu_district_details');
 $routes->post('ajax/loadajax/get_subdistrict_details_of_edu_district', 'Ajax\Loadajax::get_subdistrict_details_of_edu_district');
 $routes->post('ajax/loadajax/get_subdistrict_details_small', 'Ajax\Loadajax::get_subdistrict_details_small');
+$routes->post('ajax/loadajax/get_school_details_small', 'Ajax\Loadajax::get_school_details_small');
 $routes->post('ajax/loadajax/change_confirmation_status', 'Ajax\Loadajax::change_confirmation_status');
 $routes->post('ajax/change_confirmation_status', 'Ajax\Loadajax::change_confirmation_status');
+$routes->match(['GET', 'POST'], 'ajax/loadajax/reset_result_confirmation_status', 'Ajax\Loadajax::reset_result_confirmation_status');
+$routes->match(['GET', 'POST'], 'ajax/reset_result_confirmation_status', 'Ajax\Loadajax::reset_result_confirmation_status');
 
 // ------------------------------------------------------------------
 // PHASE 101 - Stage Allotment item-details AJAX endpoint (POST only)
@@ -345,7 +366,7 @@ $routes->match(['GET', 'POST'], 'report/timefestreportpdf/datewisepart', 'Report
 // higherlevel_result: Shows participants eligible for higher-level
 //   competitions (class > 4, grade A). Form POSTs to PDF endpoint.
 //   Uses Afterresult_model::higherlevel_result() which queries
-//   result_publish JOIN school_master, participant_details, item_master,
+//   sd_result_publish JOIN school_master, participant_details, item_master,
 //   festival_master, result_master.
 // schoolhigher_result / schoolhigher_resultall: School-wise higher-level.
 // All methods enforce login + permission 8.
@@ -372,6 +393,8 @@ $routes->match(['GET', 'POST'], 'report/afterresultreportpdf/report_press', 'Rep
 $routes->match(['GET', 'POST'], 'report/afterresultreportpdf/time_wise_result_report', 'Report\Afterresultreportpdf::time_wise_result_report');
 $routes->match(['GET', 'POST'], 'report/afterresultreportpdf/numwise_timeresult_report', 'Report\Afterresultreportpdf::numwise_timeresult_report');
 $routes->match(['GET', 'POST'], 'report/afterresultreportpdf/status_of_kalolsavam', 'Report\Afterresultreportpdf::status_of_kalolsvam');
+$routes->match(['GET', 'POST'], 'report/afterresultreportpdf/status_of_kalolsvam', 'Report\Afterresultreportpdf::status_of_kalolsvam');
+$routes->match(['GET', 'POST'], 'report/afterresultreportpdf/item_wise_result', 'Report\Resultindex::itemwise_report');
 $routes->match(['GET', 'POST'], 'report/afterresultreportpdf/status_of_kalolsavam1', 'Report\Afterresultreportpdf::status_of_kalolsavam1');
 $routes->match(['GET', 'POST'], 'report/afterresultreportpdf/datewisepart', 'Report\Afterresultreportpdf::datewisepart');
 
@@ -379,7 +402,7 @@ $routes->match(['GET', 'POST'], 'report/afterresultreportpdf/datewisepart', 'Rep
 // EXPORT MODULE — District & Sub-District Data Export
 // export/export_district_data: GET renders export form; POST with
 //   hidExport=TRUE streams CSV via Export_Model::get_district_export_data().
-//   Queries result_publish JOIN result_master, participant_item_details,
+//   Queries sd_result_publish JOIN result_master, participant_item_details,
 //   participant_details (grade A, class > 4). Encrypted row integrity.
 // export/export_sub_district_data: POST-only CSV stream for sub-district.
 //   Includes school_master, school_details, participant_details,
