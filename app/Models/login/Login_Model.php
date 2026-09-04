@@ -147,7 +147,7 @@ class Login_Model extends \App\Models\BaseModel {
 
         $this->db->select('UM.user_id, UM.user_name,
 		COUNT(UC.school_code) AS total, COUNT(SD.school_code) AS data_entered, COUNT(SF.is_finalize) AS finialized');
-        $this->db->from('user_cluster AS UC');
+        $this->db->from('sd_user_cluster AS UC');
         $this->db->join('user_master AS UM', 'UM.user_id = UC.user_id');
         $this->db->join('school_details AS SD', 'SD.school_code = UC.school_code', 'LEFT');
         $this->db->join('school_details AS SF', "SF.school_code = UC.school_code AND SF.is_finalize = 'Y'", 'LEFT');
@@ -208,7 +208,7 @@ class Login_Model extends \App\Models\BaseModel {
         $total_school = $this->db->countAllResults('school_master');
 
         $this->db->where('sub_district_code', $subdist);
-        $cluster_school = $this->db->countAllResults('user_cluster');
+        $cluster_school = $this->db->countAllResults('sd_user_cluster');
 
         $this->db->where('SM.sub_district_code', $subdist);
         $this->db->join('school_details AS SD', 'SM.school_code = SD.school_code');
@@ -374,17 +374,18 @@ class Login_Model extends \App\Models\BaseModel {
     }
 
     function get_district_school_details($dist) {
+        $dist = (int)$dist;
         $this->db->where('rev_district_code', $dist);
         $total_school = $this->db->countAllResults('school_master');
 
-        $this->db->where('sub_district_code IN (SELECT sub_district_code FROM sub_district_master WHERE rev_district_code= ?)', [$dist]);
-        $cluster_school = $this->db->countAllResults('user_cluster');
+        $this->db->where("sub_district_code IN (SELECT sub_district_code FROM sub_district_master WHERE rev_district_code = {$dist})", null, false);
+        $cluster_school = $this->db->countAllResults('sd_user_cluster');
 
-        $this->db->where('SM.sub_district_code IN (SELECT SDM.sub_district_code FROM sub_district_master SDM WHERE SDM.rev_district_code= ?)', [$dist]);
+        $this->db->where("SM.sub_district_code IN (SELECT SDM.sub_district_code FROM sub_district_master SDM WHERE SDM.rev_district_code = {$dist})", null, false);
         $this->db->join('school_details AS SD', 'SM.school_code = SD.school_code');
         $data_entered = $this->db->countAllResults('school_master AS SM');
 
-        $this->db->where('SM.sub_district_code IN (SELECT SDM.sub_district_code FROM sub_district_master SDM WHERE SDM.rev_district_code= ?)', [$dist]);
+        $this->db->where("SM.sub_district_code IN (SELECT SDM.sub_district_code FROM sub_district_master SDM WHERE SDM.rev_district_code = {$dist})", null, false);
         $this->db->where('SD.is_finalize', 'Y');
         $this->db->join('school_details AS SD', 'SM.school_code = SD.school_code');
         $confirmed = $this->db->countAllResults('school_master AS SM');

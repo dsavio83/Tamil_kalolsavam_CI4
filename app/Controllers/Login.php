@@ -39,7 +39,7 @@ class Login extends \App\Controllers\BaseController {
                     // If school user (user_type 5) or school_code is 0, resolve from user_cluster
                     if ((empty($school_code) || $school_code == 0) && (int)$login[0]['user_type'] == 5) {
                         $db = \Config\Database::connect();
-                        $cluster = $db->table('user_cluster')->select('school_code, sub_district_code')->where('user_id', $login[0]['user_id'])->get()->getRowArray();
+                        $cluster = $db->table('sd_user_cluster')->select('school_code, sub_district_code')->where('user_id', $login[0]['user_id'])->get()->getRowArray();
                         if (!empty($cluster['school_code'])) {
                             $school_code = $cluster['school_code'];
                             if (empty($sub_dist_code) || $sub_dist_code == 0) {
@@ -80,7 +80,7 @@ class Login extends \App\Controllers\BaseController {
                     session()->regenerate();
                     session()->setFlashdata('success', 'Logged in successfully!');
                     if ($login[0]['is_change_password'] == 'N') {
-                        redirect('login/change_password/');
+                        return redirect()->to(base_url('login/change_password'));
                     } else {
                         if ((int)$login[0]['user_type'] == 5) {
                             $schCode = $set_session_data['SCHOOL_CODE'] ?? 0;
@@ -88,12 +88,11 @@ class Login extends \App\Controllers\BaseController {
                                 $db = \Config\Database::connect();
                                 if ($db->table('school_details')->where('school_code', $schCode)->countAllResults() == 0) {
                                     session()->setFlashdata('message', 'Please complete your school profile details.');
-                                    redirect('schools/profile');
-                                    return;
+                                    return redirect()->to(base_url('schools/profile'));
                                 }
                             }
                         }
-                        redirect('welcome/');
+                        return redirect()->to(base_url('welcome'));
                     }
                 }
             }
@@ -172,7 +171,7 @@ class Login extends \App\Controllers\BaseController {
 
             if ((empty($school_code) || $school_code == 0) && (int)$login[0]['user_type'] == 5) {
                 $db = \Config\Database::connect();
-                $cluster = $db->table('user_cluster')->select('school_code, sub_district_code')->where('user_id', $login[0]['user_id'])->get()->getRowArray();
+                $cluster = $db->table('sd_user_cluster')->select('school_code, sub_district_code')->where('user_id', $login[0]['user_id'])->get()->getRowArray();
                 if (!empty($cluster['school_code'])) {
                     $school_code = $cluster['school_code'];
                     if (empty($sub_dist_code) || $sub_dist_code == 0) {
@@ -327,7 +326,7 @@ class Login extends \App\Controllers\BaseController {
                 $school_code = $this->session->get('SCHOOL_CODE');
                 if (!$school_code && (int)$this->session->get('USER_TYPE') == 5) {
                     $db = \Config\Database::connect();
-                    $cluster = $db->table('user_cluster')->select('school_code')->where('user_id', $this->session->get('USERID'))->get()->getRowArray();
+                    $cluster = $db->table('sd_user_cluster')->select('school_code')->where('user_id', $this->session->get('USERID'))->get()->getRowArray();
                     if (!empty($cluster['school_code'])) {
                         $school_code = $cluster['school_code'];
                         $this->session->set('SCHOOL_CODE', $school_code);
@@ -337,12 +336,11 @@ class Login extends \App\Controllers\BaseController {
                     $db = \Config\Database::connect();
                     if ($db->table('school_details')->where('school_code', $school_code)->countAllResults() == 0) {
                         session()->setFlashdata('message', 'Please complete your school profile details.');
-                        redirect('schools/profile');
-                        return;
+                        return redirect()->to(base_url('schools/profile'));
                     }
                 }
 
-                redirect('welcome/');
+                return redirect()->to(base_url('welcome'));
             } else {
                 $this->template->write('error', 'Old Password and New Password are same!!! Enter a new one');
                 $this->template->write('title', '');

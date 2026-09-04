@@ -55,10 +55,10 @@ class User_Registration_Model extends \App\Models\BaseModel {
         $this->db->select('(SELECT COUNT(rf_id) FROM user_rights UR WHERE UR.user_id = UM.user_id) AS rights_count');
 
         // Add cluster school count for cluster users (user_type = 5)
-        $this->db->select('(CASE WHEN UM.user_type = 5 THEN (SELECT COUNT(uc_id) FROM user_cluster UC WHERE UC.user_id = UM.user_id) ELSE 0 END) AS cluster_school_count');
+        $this->db->select('(CASE WHEN UM.user_type = 5 THEN (SELECT COUNT(uc_id) FROM sd_user_cluster UC WHERE UC.user_id = UM.user_id) ELSE 0 END) AS cluster_school_count');
 
         // Add cluster school names for cluster users (user_type = 5)
-        $this->db->select('(CASE WHEN UM.user_type = 5 THEN (SELECT GROUP_CONCAT(SM.school_name SEPARATOR ", ") FROM user_cluster UC INNER JOIN school_master SM ON UC.school_code = SM.school_code WHERE UC.user_id = UM.user_id) ELSE "" END) AS cluster_school_names');
+        $this->db->select('(CASE WHEN UM.user_type = 5 THEN (SELECT GROUP_CONCAT(SM.school_name SEPARATOR ", ") FROM sd_user_cluster UC INNER JOIN school_master SM ON UC.school_code = SM.school_code WHERE UC.user_id = UM.user_id) ELSE "" END) AS cluster_school_names');
 
         $result = $this->db->get();
         return $result->getResultArray();

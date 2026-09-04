@@ -79,7 +79,7 @@ class Registration extends \App\Controllers\BaseController {
         if (empty($own) || $own === '0' || $own === '') {
             if ((int)$this->session->get('USER_TYPE') == 5) {
                 $db = \Config\Database::connect();
-                $cluster = $db->table('user_cluster')->select('school_code')
+                $cluster = $db->table('sd_user_cluster')->select('school_code')
                     ->where('user_id', $this->session->get('USERID'))->get()->getRowArray();
                 if (!empty($cluster['school_code'])) {
                     $own = $cluster['school_code'];
@@ -187,7 +187,7 @@ class Registration extends \App\Controllers\BaseController {
         }
         if (empty($schoolCode) && (int)$this->session->get('USER_TYPE') == 5) {
             $db = \Config\Database::connect();
-            $cluster = $db->table('user_cluster')->select('school_code')->where('user_id', $this->session->get('USERID'))->get()->getRowArray();
+            $cluster = $db->table('sd_user_cluster')->select('school_code')->where('user_id', $this->session->get('USERID'))->get()->getRowArray();
             if (!empty($cluster['school_code'])) {
                 $schoolCode = $cluster['school_code'];
                 $this->session->set('SCHOOL_CODE', $schoolCode);
@@ -363,7 +363,7 @@ class Registration extends \App\Controllers\BaseController {
             $this->Content = array();
         }
         //print('<pre>');print_r($bank_details);//exit;
-        $this->template->write_view('content', 'schools/school_entry1', $this->Content);
+        $this->template->write_view('content', 'schools/school_entry', $this->Content);
         $this->template->load();
     }
 
@@ -398,7 +398,7 @@ class Registration extends \App\Controllers\BaseController {
         }
         if (empty($schoolCode) && (int)$this->session->get('USER_TYPE') == 5) {
             $db = \Config\Database::connect();
-            $cluster = $db->table('user_cluster')->select('school_code')->where('user_id', $this->session->get('USERID'))->get()->getRowArray();
+            $cluster = $db->table('sd_user_cluster')->select('school_code')->where('user_id', $this->session->get('USERID'))->get()->getRowArray();
             if (!empty($cluster['school_code'])) {
                 $schoolCode = $cluster['school_code'];
                 $this->session->set('SCHOOL_CODE', $schoolCode);
@@ -436,7 +436,7 @@ class Registration extends \App\Controllers\BaseController {
         }
         if (empty($schoolCode) && (int)$this->session->get('USER_TYPE') == 5) {
             $db = \Config\Database::connect();
-            $cluster = $db->table('user_cluster')->select('school_code')->where('user_id', $this->session->get('USERID'))->get()->getRowArray();
+            $cluster = $db->table('sd_user_cluster')->select('school_code')->where('user_id', $this->session->get('USERID'))->get()->getRowArray();
             if (!empty($cluster['school_code'])) {
                 $schoolCode = $cluster['school_code'];
                 $this->session->set('SCHOOL_CODE', $schoolCode);
@@ -626,7 +626,7 @@ class Registration extends \App\Controllers\BaseController {
         }
         if (empty($schoolCode) && (int)$this->session->get('USER_TYPE') == 5) {
             $db = \Config\Database::connect();
-            $cluster = $db->table('user_cluster')->select('school_code')->where('user_id', $this->session->get('USERID'))->get()->getRowArray();
+            $cluster = $db->table('sd_user_cluster')->select('school_code')->where('user_id', $this->session->get('USERID'))->get()->getRowArray();
             if (!empty($cluster['school_code'])) {
                 $schoolCode = $cluster['school_code'];
                 $this->session->set('SCHOOL_CODE', $schoolCode);

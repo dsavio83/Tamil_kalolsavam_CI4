@@ -23,7 +23,24 @@ class Welcome extends \App\Controllers\BaseController {
 
 	function __construct () {
 		parent::__construct ();
-		$this->Session_Model->is_user_logged(true);
+		// Check if user is logged in via USERID session variable
+		// (Authentication was verified in Login controller)
+		$userId = $this->session->get('USERID');
+		$changePwd = $this->session->get('CHANGEPWD');
+		
+		if (!$userId || (int)$userId <= 0) {
+			// User not authenticated - redirect to login
+			helper('url');
+			redirect('login');
+		}
+		
+		// User is authenticated - check CHANGEPWD onboarding
+		// If CHANGEPWD != 'Y', redirect to complete onboarding
+		if ($changePwd !== 'Y') {
+			// User needs to change password first - redirect to complete onboarding
+			helper('url');
+			redirect('login/change_password');
+		}
         $this->template->add_js('js/admin/admin.js');
         $this->template->write_view('menu', 'menu', '');
         $this->template->write_view('left_panel', 'menu_left', '');
@@ -36,7 +53,7 @@ class Welcome extends \App\Controllers\BaseController {
 		$school_code = $this->session->get('SCHOOL_CODE');
 		if (!$school_code && (int)$this->session->get('USER_TYPE') == 5) {
 			$db = \Config\Database::connect();
-			$cluster = $db->table('user_cluster')->select('school_code')->where('user_id', $this->session->get('USERID'))->get()->getRowArray();
+			$cluster = $db->table('sd_user_cluster')->select('school_code')->where('user_id', $this->session->get('USERID'))->get()->getRowArray();
 			if (!empty($cluster['school_code'])) {
 				$school_code = $cluster['school_code'];
 				$this->session->set('SCHOOL_CODE', $school_code);
@@ -56,9 +73,9 @@ class Welcome extends \App\Controllers\BaseController {
 		// $this->load->view('welcome_message');
 
 		        //echo $this->session->get('USER_TYPE');.
-				if ($this->session->get('USER_TYPE') == 0 || $this->session->get('USER_TYPE') == 1) {
-					redirect('welcome/district_details');
-				}
+				// if ($this->session->get('USER_TYPE') == 0 || $this->session->get('USER_TYPE') == 1) {
+				//	redirect('welcome/district_details');
+				// }
 				if ($this->session->get('USER_TYPE') == 5) {
 					redirect('welcome/cluster_schools');
 				}
@@ -77,16 +94,14 @@ class Welcome extends \App\Controllers\BaseController {
                 $next_year = $current_year + 1;
                 $sub_dist_code = $this->session->get('SUB_DISTRICT');
 
-                if ($this->session->get('USER_TYPE') == 3) {
+                if ((int)$this->session->get('USER_TYPE') === 3) {
                     $sub_dist_name = get_sub_dist_name($sub_dist_code);
-                    $welcome_label = $sub_dist_name . " District Tamil Kalaivizha $current_year - $next_year";
-                } else if ($this->session->get('USER_TYPE') == 2) {
+                    $welcome_label = ($sub_dist_name ? $sub_dist_name . " " : "") . "Tamil Kalaivizha $current_year - $next_year";
+                } else if ((int)$this->session->get('USER_TYPE') === 2) {
                     $dist_code = $this->session->get('DISTRICT');
-                    $dist_name = get_dist_name($this->session->get('DISTRICT'));
-                    $welcome_label = $dist_name . " District Tamil Kalaivizha $current_year - $next_year";
-                } else if ($this->session->get('USER_TYPE') < 2) {
-                    $dist_code = $this->session->get('DISTRICT');
-                    $dist_name = get_dist_name($this->session->get('DISTRICT'));
+                    $dist_name = get_dist_name($dist_code);
+                    $welcome_label = ($dist_name ? $dist_name . " District " : "") . "Tamil Kalaivizha $current_year - $next_year";
+                } else {
                     $welcome_label = "Tamil Kalaivizha $current_year - $next_year";
                 }
                 

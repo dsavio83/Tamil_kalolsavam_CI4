@@ -38,7 +38,7 @@ class User_Cluster_Model extends \App\Models\BaseModel {
         $this->db->update('user_master', $data);
 
         $this->db->where('user_id', $userId);
-        $this->db->delete('user_cluster');
+        $this->db->delete('sd_user_cluster');
         $this->save_cluster_school_codes($userId);
 
         $this->db->where('user_id', $userId);
@@ -70,7 +70,7 @@ class User_Cluster_Model extends \App\Models\BaseModel {
         $this->db->where('UM.user_type', '5');
         $this->db->from('user_master AS UM');
         $this->db->orderBy('user_name', 'ASC');
-        $this->db->select('user_id, user_name, is_change_password, (SELECT COUNT(uc_id) FROM user_cluster UC WHERE UC.user_id = UM.user_id) AS total, (SELECT GROUP_CONCAT(SM.school_name SEPARATOR ", ") FROM user_cluster UC INNER JOIN school_master SM ON UC.school_code = SM.school_code WHERE UC.user_id = UM.user_id) AS school_names');
+        $this->db->select('user_id, user_name, is_change_password, (SELECT COUNT(uc_id) FROM sd_user_cluster UC WHERE UC.user_id = UM.user_id) AS total, (SELECT GROUP_CONCAT(SM.school_name SEPARATOR ", ") FROM sd_user_cluster UC INNER JOIN school_master SM ON UC.school_code = SM.school_code WHERE UC.user_id = UM.user_id) AS school_names');
         $result = $this->db->get();
         return $result->getResultArray();
     }
@@ -137,7 +137,7 @@ class User_Cluster_Model extends \App\Models\BaseModel {
         $this->db->where('user_id', $this->input->post('UserIdty'));
         $this->db->delete('user_master');
         $this->db->where('user_id', $this->input->post('UserIdty'));
-        $this->db->delete('user_cluster');
+        $this->db->delete('sd_user_cluster');
     }
 
     function save_cluster_school_codes($userId) {
@@ -149,7 +149,7 @@ class User_Cluster_Model extends \App\Models\BaseModel {
                     $school_code['user_id'] = $userId;
                     $school_code['school_code'] = $schools[$i]['school_code'];
                     $school_code['sub_district_code'] = $this->session->get('SUB_DISTRICT');
-                    $this->db->insert('user_cluster', $school_code);
+                    $this->db->insert('sd_user_cluster', $school_code);
                 }
             }
         }
