@@ -32,7 +32,7 @@ echo form_open('user/admin_users/', array('id' => 'filter'));
             </div> 
             <div style="float:left; padding-left:8px; display:<?php echo (isset($_POST['cmbSchoolFilter']) && trim($_POST['cmbSchoolFilter']) != 0) ? 'block' : 'none'; ?>" id="divSchoolFilter">
                 <?php
-                echo form_dropdown("cmbSchoolFilter", $schools, @$_POST['cmbSchoolFilter'], 'id="cmbSchoolFilter" class="form-control"');
+                echo form_dropdown("cmbSchoolFilter", @$schools ?: array(), @$_POST['cmbSchoolFilter'], 'id="cmbSchoolFilter" class="form-control"');
                 ?>
             </div> 
             <div style="float:left; padding-left:8px; ">

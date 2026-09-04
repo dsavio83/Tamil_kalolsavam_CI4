@@ -68,11 +68,11 @@
             <tr>
                 <td width='30' style='border: 0 1px 1px 0 #000000;  height:20px;'><?php echo $count; ?></td>
                 <td width='60' style='border: 0 1px 1px 0 #000000;  height:20px;'><?php echo $data['participant_id']; ?></td>
-                <td width='200' style='border: 0 1px 1px 0 #000000;  height:20px;'><?php echo $data['participant_name']; ?></td>
+                <td width='200' style='border: 0 1px 1px 0 #000000;  height:20px;'><?php echo esc($data['participant_name']); ?></td>
                 <td width='30' style='border: 0 1px 1px 0 #000000;  height:20px;'><div align="center"><?php echo $data['gender']; ?></div></td>                  
                 <td width='30' style='border: 0 1px 1px 0 #000000;  height:20px;'><div align="center"><?php echo $data['class']; ?></div></td>
                 <td width='60' style='border: 0 1px 1px 0 #000000;  height:20px;'><div align="center"><?php echo $data['school_code']; ?></div></td>
-                <td width='200' style='border: 0 1px 1px 0 #000000;  height:20px;'>&nbsp;&nbsp;<?php echo $data['school_name']; ?></td>
+                <td width='200' style='border: 0 1px 1px 0 #000000;  height:20px;'>&nbsp;&nbsp;<?php echo esc($data['school_name']); ?></td>
             </tr>
             <?php
         }

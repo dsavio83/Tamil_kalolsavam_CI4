@@ -7,7 +7,6 @@
 echo form_open('report/afterresultreportpdf/datewisepart', array('id' => 'formDWP', 'target' => '_blank'));
 
 ?>
-<form name="form1" method="post" action="">
     <table class="table">
         <tr>
             <th colspan="4" align="left">&nbsp;</th>
@@ -46,7 +45,6 @@ echo form_open('report/afterresultreportpdf/datewisepart', array('id' => 'formDW
         </tr>
     </table>
     <input type="hidden" name="hidUserId" id="hidUserId" />
-</form>
 <?php
 //itemwise_report_interface
 echo form_close();

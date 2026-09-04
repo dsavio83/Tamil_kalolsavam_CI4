@@ -83,7 +83,7 @@ for ($j = 0; $j < count($partarray); $j++) {
                                 ?>
 
 
-                                <table align="left" width="50%" border="1"><tr><td class="style56" colspan="2" >Kerala School Kalolsavam 2025-26</td></tr>
+                                <table align="left" width="50%" border="1"><tr><td class="style56" colspan="2" ><?php echo get_festival_title(); ?></td></tr>
                                     <tr>
                                         <td height="40">
                                             <?php if ($file_path) { ?>
@@ -147,7 +147,7 @@ for ($j = 0; $j < count($partarray); $j++) {
                      */
                     ?>
 
-                    <table align="left" width="50%" border="1"><tr><td class="style56" colspan="2" >Kerala School Kalolsavam 2025-26</td></tr>
+                    <table align="left" width="50%" border="1"><tr><td class="style56" colspan="2" ><?php echo get_festival_title(); ?></td></tr>
                         <tr><td> <img src="<?php echo $file_path ?>" height="40"></td>
                             <td align="center"><?php echo $title . '<br> ' . $venue; ?><br></td></tr>
 
@@ -191,7 +191,7 @@ for ($j = 0; $j < count($partarray); $j++) {
 
 
 
-                    <table align="left" width="50%" border="1"><tr><td class="style56" colspan="2" >Kerala School Kalolsavam 2025-26</td></tr>
+                    <table align="left" width="50%" border="1"><tr><td class="style56" colspan="2" ><?php echo get_festival_title(); ?></td></tr>
                         <tr>
                             <td height="40">
                                 <?php if ($file_path) { ?>

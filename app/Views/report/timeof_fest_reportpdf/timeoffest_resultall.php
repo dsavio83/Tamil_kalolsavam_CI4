@@ -159,4 +159,6 @@ foreach ($fest_details as $data) {
 
     </table>
 </page>
-
+<?php
+}
+?>

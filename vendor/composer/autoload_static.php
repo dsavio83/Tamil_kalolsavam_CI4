@@ -101,12 +101,15 @@ class ComposerStaticInitf5cce40800fa5dae1504b9364f585e6a
 
     public static $classMap = array (
         'App\\Controllers\\BaseController' => __DIR__ . '/../..' . '/app/Controllers/BaseController.php',
+        'App\\Controllers\\Downloads' => __DIR__ . '/../..' . '/app/Controllers/Downloads.php',
         'App\\Controllers\\Export' => __DIR__ . '/../..' . '/app/Controllers/Export.php',
         'App\\Controllers\\Home' => __DIR__ . '/../..' . '/app/Controllers/Home.php',
         'App\\Controllers\\Import' => __DIR__ . '/../..' . '/app/Controllers/Import.php',
+        'App\\Controllers\\Item\\Item_Master' => __DIR__ . '/../..' . '/app/Controllers/Item/Item_Master.php',
         'App\\Controllers\\Itemreport' => __DIR__ . '/../..' . '/app/Controllers/Itemreport.php',
         'App\\Controllers\\Login' => __DIR__ . '/../..' . '/app/Controllers/Login.php',
         'App\\Controllers\\Prereportpdf' => __DIR__ . '/../..' . '/app/Controllers/Prereportpdf.php',
+        'App\\Controllers\\SessionDiagnostic' => __DIR__ . '/../..' . '/app/Controllers/SessionDiagnostic.php',
         'App\\Controllers\\Test' => __DIR__ . '/../..' . '/app/Controllers/Test.php',
         'App\\Controllers\\Welcome' => __DIR__ . '/../..' . '/app/Controllers/Welcome.php',
         'App\\Filters\\NoCache' => __DIR__ . '/../..' . '/app/Filters/NoCache.php',
@@ -125,6 +128,7 @@ class ComposerStaticInitf5cce40800fa5dae1504b9364f585e6a
         'App\\Models\\Export_Model' => __DIR__ . '/../..' . '/app/Models/Export_Model.php',
         'App\\Models\\General_Model' => __DIR__ . '/../..' . '/app/Models/General_Model.php',
         'App\\Models\\Import_Model' => __DIR__ . '/../..' . '/app/Models/Import_Model.php',
+        'App\\Models\\Item\\Item_Master_Model' => __DIR__ . '/../..' . '/app/Models/Item/Item_Master_Model.php',
         'App\\Models\\Itemreport_Model' => __DIR__ . '/../..' . '/app/Models/Itemreport_Model.php',
         'App\\Models\\Registration_Model' => __DIR__ . '/../..' . '/app/Models/Registration_Model.php',
         'App\\Models\\Registration_Model1' => __DIR__ . '/../..' . '/app/Models/Registration_Model1.php',

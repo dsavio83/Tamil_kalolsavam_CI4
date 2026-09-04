@@ -35,6 +35,7 @@ class Filters extends BaseFilters
         'forcehttps'    => ForceHTTPS::class,
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
+        'writefreeze'   => \App\Filters\WriteFreezeFilter::class,
     ];
 
     /**
@@ -52,6 +53,7 @@ class Filters extends BaseFilters
      */
     public array $required = [
         'before' => [
+            'writefreeze',
             'forcehttps', // Force Global Secure Requests
             'pagecache',  // Web Page Caching
         ],
@@ -73,8 +75,13 @@ class Filters extends BaseFilters
      */
     public array $globals = [
         'before' => [
+            'writefreeze',
             // 'honeypot',
-            'csrf',
+            'csrf' => [
+                'except' => [
+                    'publishresult/publicresult/get_item_results_ajax',
+                ],
+            ],
             // 'invalidchars',
         ],
         'after' => [

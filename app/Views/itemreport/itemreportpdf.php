@@ -14,7 +14,7 @@
                 <td style="text-align: left;width: 50%">
                     <img src="<?php echo image_url() . 'logo.jpg' ?>">
                 </td>
-                <td style="text-align: right;width: 50%">Kerala School Kalolsavam 2022 - 2024 </td>
+                <td style="text-align: right;width: 50%"><?php echo get_festival_title(); ?></td>
             </tr>
             <tr>
                 <td style="width: 100%" colspan="2"><hr/></td>
@@ -48,7 +48,7 @@
                             <td style="text-align: left;width: 50%">
                                 <img src="<?php echo image_url() . 'logo.jpg' ?>">
                             </td>
-                            <td style="text-align: right;width: 50%">Kerala School Kalolsavam 2022 - 2024 </td>
+                            <td style="text-align: right;width: 50%"><?php echo get_festival_title(); ?></td>
                         </tr>
                         <tr>
                             <td style="width: 100%" colspan="2"><hr/></td>

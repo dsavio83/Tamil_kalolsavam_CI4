@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Report;
 
+use HTML2PDF;
 
 class Resultindex  extends \App\Controllers\BaseController {
 
@@ -21,7 +22,7 @@ class Resultindex  extends \App\Controllers\BaseController {
         $this->template->write('title', '');
         $fest = $this->General_Model->get_data('festival_master', 'fest_id,fest_name', '', 'fest_id');
         $this->Contents['fest'] = $fest;
-        $this->template->write_view('content', 'publishresult/resultview', $this->Contents);
+        $this->template->write_view('content', 'report/publishresult/resultview', $this->Contents);
         $this->template->load();
     }
 
@@ -33,7 +34,7 @@ class Resultindex  extends \App\Controllers\BaseController {
         //	print_r($details);
 
         $this->Contents['details'] = $details;
-        $this->load->view('publishresult/result_declared', $this->Contents);
+        $this->load->view('report/publishresult/result_declared', $this->Contents);
     }
 
     function schoolpoints() {
@@ -44,7 +45,7 @@ class Resultindex  extends \App\Controllers\BaseController {
         //print_r($details);
 
         $this->Contents['details'] = $details;
-        $this->load->view('publishresult/schoolpoints', $this->Contents);
+        $this->load->view('report/publishresult/schoolpoints', $this->Contents);
     }
 
     function allresults() {
@@ -54,7 +55,7 @@ class Resultindex  extends \App\Controllers\BaseController {
         //print_r($details);
 
         $this->Contents['details'] = $details;
-        $this->load->view('publishresult/allresults', $this->Contents);
+        $this->load->view('report/publishresult/allresults', $this->Contents);
     }
 
     function festval_status() {
@@ -65,7 +66,7 @@ class Resultindex  extends \App\Controllers\BaseController {
         //print_r($details);
         $this->Contents['details1'] = $details1;
         $this->Contents['details2'] = $details2;
-        $this->template->write_view('content', 'publishresult/festival_status', $this->Contents);
+        $this->template->write_view('content', 'report/publishresult/festival_status', $this->Contents);
         $this->template->load();
     }
 
@@ -76,7 +77,7 @@ class Resultindex  extends \App\Controllers\BaseController {
         $totitem = $this->Resultindex_Model->festval_allitems($fest);
         //print_r($totitem);
         $this->Contents['totitem'] = $totitem;
-        $this->load->view('publishresult/festival_allitem', $this->Contents);
+        $this->load->view('report/publishresult/festival_allitem', $this->Contents);
     }
 
     function finished_item() {
@@ -86,7 +87,7 @@ class Resultindex  extends \App\Controllers\BaseController {
         $totitem = $this->Resultindex_Model->finished_allitems($fest);
         //print_r($totitem);
         $this->Contents['totitem'] = $totitem;
-        $this->load->view('publishresult/finished_allitem', $this->Contents);
+        $this->load->view('report/publishresult/finished_allitem', $this->Contents);
     }
 
     function incomplete_item() {
@@ -96,7 +97,7 @@ class Resultindex  extends \App\Controllers\BaseController {
         $totitem = $this->Resultindex_Model->incomplete_allitems($fest);
         //print_r($totitem);
         $this->Contents['totitem'] = $totitem;
-        $this->load->view('publishresult/incomplete_item', $this->Contents);
+        $this->load->view('report/publishresult/incomplete_item', $this->Contents);
     }
 
     function gradewise_interface() {

@@ -51,9 +51,9 @@
             <tr> 
                 <td><?php echo $count; ?></td>
                 <td><?php echo $data['participant_id']; ?></td>
-                <td><?php echo $data['participant_name']; ?></td>
+                <td><?php echo esc($data['participant_name']); ?></td>
                 <td><?php echo $data['school_code']; ?></td>
-                <td><?php echo $data['school_name']; ?></td>
+                <td><?php echo esc($data['school_name']); ?></td>
             </tr>
             <?php
         }

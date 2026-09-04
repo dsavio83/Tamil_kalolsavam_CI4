@@ -11,7 +11,6 @@
 <?php
 echo form_open('report/timefestreportpdf/confidential', array('id' => 'formDWP', 'target' => '_blank'));
 ?>
-<form name="form1" method="post" action="">
  <div class="row justify-content-center">
   <div class="col-md-12 col-sm-12 col-xl-12">
     <div class="card">
@@ -35,7 +34,6 @@ echo form_open('report/timefestreportpdf/confidential', array('id' => 'formDWP',
             </div>
             
             <div class="col-12">
-                <form name="form1" method="post" action="">
                     <center>
                         <input type="submit" name="btnSubmit" class="btn btn-primary" id="btnSubmit" value="View Result">
                     </center>
@@ -46,7 +44,6 @@ echo form_open('report/timefestreportpdf/confidential', array('id' => 'formDWP',
     </div>
 </div>
 </div>
-</form>
 
 <input type="hidden" name="hidUserId" id="hidUserId" />
 

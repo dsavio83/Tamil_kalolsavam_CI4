@@ -27,6 +27,8 @@ function index() {
         $this->Content['states'] = $this->General_Model->prepare_select_box_data('rev_district_master', 'rev_district_code, rev_district_name', '', 'Select District', 'rev_district_code');
         $this->Content['user_types'] = $this->General_Model->prepare_select_box_data('user_types', 'user_type_id, type_name', 'user_type_id NOT IN (4,5)', '-- Select User Type --', 'user_type_id');
         $this->Content['retvalue'] = $this->Admin_Users_Model->exist_admin_details();
+        $this->Content['sub_districts'] = array();
+        $this->Content['schools'] = array();
         if (isset($_POST['cmbSubDistrictFilter']) && trim($_POST['cmbSubDistrictFilter']) != 0) {
             $this->Content['sub_districts'] = $this->General_Model->get_subdistrict_details_combo(trim($_POST['cmbDistrictFilter']));
         }

@@ -245,10 +245,10 @@
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div>
                                                 <div class="school-rank">Rank <?php echo $count; ?></div>
-                                                <div class="school-name"><?php echo $value['school_name']; ?></div>
-                                                <div class="school-code">School Code: <?php echo $value['school_code']; ?></div>
+                                                <div class="school-name"><?php echo esc($value['school_name']); ?></div>
+                                                <div class="school-code">School Code: <?php echo esc($value['school_code']); ?></div>
                                             </div>
-                                            <div class="school-points"><?php echo $value['spoint']; ?> pts</div>
+                                            <div class="school-points"><?php echo esc($value['spoint']); ?> pts</div>
                                         </div>
                                     </div>
                                 </div>

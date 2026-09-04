@@ -913,7 +913,7 @@ if (!defined('__CLASS_HTML2PDF__')) {
                     if ($background['img']) {
                         // est-ce que c'est une image ?
                         $infos = @GetImageSize($background['img']);
-                        if (count($infos) > 1) {
+                        if ($infos && count($infos) > 1) {
                             // taille de l'image, en fonction de la taille sp�cifi�e. 
                             $Wi = $this->style->ConvertToMM($background['width'], $this->pdf->w);
                             $Hi = $Wi * $infos[1] / $infos[0];
@@ -1648,7 +1648,7 @@ if (!defined('__CLASS_HTML2PDF__')) {
             // est-ce que c'est une image ?
             $infos = @GetImageSize($src);
 
-            if (count($infos) < 2) {
+            if (!$infos || count($infos) < 2) {
                 HTML2PDF::makeError(6, __FILE__, __LINE__, $src);
                 return false;
             }
@@ -1835,7 +1835,7 @@ if (!defined('__CLASS_HTML2PDF__')) {
                 // est-ce que c'est une image ?
                 $i_infos = @GetImageSize($i_name);
 
-                if (count($i_infos) < 2) {
+                if (!$i_infos || count($i_infos) < 2) {
                     HTML2PDF::makeError(6, __FILE__, __LINE__, $i_name);
                     return false;
                 }
@@ -4680,6 +4680,15 @@ if (!defined('__CLASS_HTML2PDF__')) {
 
 if (!class_exists('App\Controllers\Report\HTML2PDF', false)) {
     class_alias('HTML2PDF', 'App\Controllers\Report\HTML2PDF');
+}
+if (!class_exists('App\Controllers\Publishresult\HTML2PDF', false)) {
+    class_alias('HTML2PDF', 'App\Controllers\Publishresult\HTML2PDF');
+}
+if (!class_exists('App\Controllers\Result\HTML2PDF', false)) {
+    class_alias('HTML2PDF', 'App\Controllers\Result\HTML2PDF');
+}
+if (!class_exists('App\Controllers\HTML2PDF', false)) {
+    class_alias('HTML2PDF', 'App\Controllers\HTML2PDF');
 }
 
 

@@ -22,11 +22,10 @@ echo form_open('staticreport/onstagereport1/rpt_timesheet', array('id' => 'formT
     <tr>
         <td>&nbsp;</td>
         <td align="left" width="27%" class="table_row_first">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-        <td align="left" width="55%" class="table_row_first"><form name="form1" method="post" action="">
+        <td align="left" width="55%" class="table_row_first">
                 <label>
                     <input type="submit" name="btnSubmit" class="btn btn-primary" id="btnSubmit" value="View report">
                 </label>
-            </form>
         </td>
         <td width="18%">&nbsp;</td>
     </tr>

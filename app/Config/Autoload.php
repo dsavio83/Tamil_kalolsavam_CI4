@@ -61,7 +61,10 @@ class Autoload extends AutoloadConfig
     public $classmap = [
         'HTML2PDF'     => APPPATH . 'Libraries/_html2pdf.php',
         'Html2pdf'     => APPPATH . 'Libraries/_html2pdf.php',
+        'App\\Controllers\\HTML2PDF' => APPPATH . 'Libraries/_html2pdf.php',
         'App\\Controllers\\Report\\HTML2PDF' => APPPATH . 'Libraries/_html2pdf.php',
+        'App\\Controllers\\Publishresult\\HTML2PDF' => APPPATH . 'Libraries/_html2pdf.php',
+        'App\\Controllers\\Result\\HTML2PDF' => APPPATH . 'Libraries/_html2pdf.php',
         'HTML2PDFgetTimerDebug' => APPPATH . 'Libraries/_html2pdf.php',
         'Fpdf'         => APPPATH . 'Libraries/fpdf.php',
         'FPDF'         => APPPATH . 'Libraries/fpdf.php',

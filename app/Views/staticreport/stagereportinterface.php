@@ -1,7 +1,6 @@
 <?php
 echo form_open('staticreport/Onstagereport1/rpt_stagereport', array('id' => 'formStageReport', 'target' => '_blank'));
 ?>
-<form name="form1" method="post" action="">
     <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top:15px;">
         <tr>
             <th colspan="4" align="left">Select Item</th>
@@ -37,7 +36,6 @@ echo form_open('staticreport/Onstagereport1/rpt_stagereport', array('id' => 'for
         </tr>
     </table>
     <input type="hidden" name="stagename" id="stagename" />
-</form>
 <?php
 //itemwise_report_interface
 echo form_close();

@@ -1,21 +1,58 @@
 <style type="text/css">
     <!--
     .style1 {
-        font-size: 14px;
+        font-size: 13px;
         font-weight: bold;
-        color: #660033;
+        color: #000000;
     }
-    .tb{
-        font-size: 11px;
+    .tb {
+        font-size: 9px;
         font-weight: bold;
-        color:#000000;}
-    .ety{
-        font-size: 12px;
-        color:#000000;
+        color: #000000;
+    }
+    .ety {
+        font-size: 9px;
+        color: #000000;
     }
     -->
 </style>
-<page backtop="20mm" backbottom="20mm ">
+<?php
+if (!function_exists('fmt_datewise_count')) {
+    function fmt_datewise_count($val) {
+        return (empty($val) || $val == 0) ? '-' : $val;
+    }
+}
+
+// Modern O(1) Lookup Maps for Category Data
+$lp_map = [];
+if (!empty($lp) && is_array($lp)) {
+    foreach ($lp as $r) {
+        $lp_map[$r['school_code']][$r['gender']] = (int)($r['cntlp'] ?? 0);
+    }
+}
+
+$up_map = [];
+if (!empty($up) && is_array($up)) {
+    foreach ($up as $r) {
+        $up_map[$r['school_code']][$r['gender']] = (int)($r['upid'] ?? 0);
+    }
+}
+
+$hs_map = [];
+if (!empty($hs) && is_array($hs)) {
+    foreach ($hs as $r) {
+        $hs_map[$r['school_code']][$r['gender']] = (int)($r['hsid'] ?? 0);
+    }
+}
+
+$hss_map = [];
+if (!empty($hss) && is_array($hss)) {
+    foreach ($hss as $r) {
+        $hss_map[$r['school_code']][$r['gender']] = (int)($r['hssid'] ?? 0);
+    }
+}
+?>
+<page backtop="20mm" backbottom="20mm">
     <page_header>
         <?php
         $this->load->view('report/report_header');
@@ -27,182 +64,124 @@
         ?>
     </page_footer>
 
-    <!-- <div align="center" class="style1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Date wise participants list</div>-->
-
-    <table align="center" width="100%"><tr>
-            <td align="center" class="style1">Total  participants list <?php
-                if ($date != "") {
+    <table align="center" style="width: 100%;">
+        <tr>
+            <td align="center" class="style1" style="font-size: 13px; font-weight: bold; color: #000000; padding-bottom: 8px;">
+                Total participants list<?php
+                if (!empty($date)) {
                     echo ' on ' . datetophpmodel($date);
                 }
-                ?></td>
-        </tr></table>
-
-    <br /><table width="87%" border="1" align="center" cellpadding="0" cellspacing="0">
-
-        <tr>
-            <td class="tb" width='30'  style="border-top:0px #000000; border-right:1px #000000; padding:2px;" align="center" rowspan="2"> Sl.No. </td>
-            <td class="tb" width='170' style="border-top:0px #000000; border-right:1px #000000; padding:2px;" align="left" rowspan="2"> &nbsp;&nbsp;School</td>
-            <td  class="tb"width='70' style="border-top:0px #000000; border-right:1px #000000; padding:2px;" colspan="2" align="center" > LP </td>
-            <td class="tb" width='70' style="border-top:0px #000000; border-right:1px #000000; padding:2px;" colspan="2" align="center" > UP</td>
-            <td  class="tb"width='70' style="border-top:0px #000000; border-right:1px #000000; padding:2px;" colspan="2" align="center" > HS </td>
-            <td  class="tb"width='80' style="border-top:0px #000000; border-right:1px #000000; padding:2px;" colspan="2" align="center" > HSS</td>
-            <td class="tb" width='80' style="border-top:0px #000000; border-right:1px #000000; padding:2px;" colspan="2" align="center" > Total </td>
-            <td class="tb" width='70' style="border-top:0px #000000; border-right:0px #000000; padding:2px;" rowspan="2" align="center" >Grand Total </td>
-
+                ?>
+            </td>
         </tr>
-        <tr><td style="border-top:1px #000000; border-right:1px #000000; padding:2px;" align="center">B</td>
-            <td style="border-top:1px #000000; border-right:1px #000000; padding:2px;" align="center">G</td>
-            <td style="border-top:1px #000000; border-right:1px #000000; padding:2px;" align="center">B</td>
-            <td style="border-top:1px #000000; border-right:1px #000000; padding:2px;" align="center">G</td>
-            <td style="border-top:1px #000000; border-right:1px #000000; padding:2px;" align="center">B</td>
-            <td style="border-top:1px #000000; border-right:1px #000000; padding:2px;" align="center">G</td>
-            <td style="border-top:1px #000000; border-right:1px #000000; padding:2px;" align="center">B</td>
-            <td style="border-top:1px #000000; border-right:1px #000000; padding:2px;" align="center">G</td>
-            <td style="border-top:1px #000000; border-right:1px #000000; padding:2px;" align="center">B</td>
-            <td style="border-top:1px #000000; border-right:1px #000000; padding:2px;" align="center">G</td></tr>
+    </table>
+
+    <table border="0" align="center" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td class="tb" width="28" style="border: 1px solid #000000; padding: 2px;" align="center" rowspan="2">Sl.No.</td>
+            <td class="tb" width="260" style="border: 1px solid #000000; padding: 2px 6px;" align="left" rowspan="2">School</td>
+            <td class="tb" width="44" style="border: 1px solid #000000; padding: 2px;" colspan="2" align="center">LP</td>
+            <td class="tb" width="44" style="border: 1px solid #000000; padding: 2px;" colspan="2" align="center">UP</td>
+            <td class="tb" width="44" style="border: 1px solid #000000; padding: 2px;" colspan="2" align="center">HS</td>
+            <td class="tb" width="48" style="border: 1px solid #000000; padding: 2px;" colspan="2" align="center">HSS</td>
+            <td class="tb" width="52" style="border: 1px solid #000000; padding: 2px;" colspan="2" align="center">Total</td>
+            <td class="tb" width="40" style="border: 1px solid #000000; padding: 2px 0px; font-size: 8px; line-height: 1.1;" rowspan="2" align="center">Grand<br/>Total</td>
+        </tr>
+        <tr>
+            <td class="tb" width="22" style="border: 1px solid #000000; border-left: none; padding: 2px;" align="center">B</td>
+            <td class="tb" width="22" style="border: 1px solid #000000; padding: 2px;" align="center">G</td>
+            <td class="tb" width="22" style="border: 1px solid #000000; padding: 2px;" align="center">B</td>
+            <td class="tb" width="22" style="border: 1px solid #000000; padding: 2px;" align="center">G</td>
+            <td class="tb" width="22" style="border: 1px solid #000000; padding: 2px;" align="center">B</td>
+            <td class="tb" width="22" style="border: 1px solid #000000; padding: 2px;" align="center">G</td>
+            <td class="tb" width="24" style="border: 1px solid #000000; padding: 2px;" align="center">B</td>
+            <td class="tb" width="24" style="border: 1px solid #000000; padding: 2px;" align="center">G</td>
+            <td class="tb" width="26" style="border: 1px solid #000000; padding: 2px;" align="center">B</td>
+            <td class="tb" width="26" style="border: 1px solid #000000; padding: 2px;" align="center">G</td>
+        </tr>
         <?php
         $count = 0;
-        $grandtotal = 0;
-        $no_lp_boys = 0;
-        $no_lp_girls = 0;
-        $no_up_boys = 0;
-        $no_up_girls = 0;
-        $no_hs_boys = 0;
-        $no_hs_girls = 0;
-        $no_hss_boys = 0;
-        $no_hss_girls = 0;
+        $totals = [
+            'lp_b'        => 0,
+            'lp_g'        => 0,
+            'up_b'        => 0,
+            'up_g'        => 0,
+            'hs_b'        => 0,
+            'hs_g'        => 0,
+            'hss_b'       => 0,
+            'hss_g'       => 0,
+            'total_b'     => 0,
+            'total_g'     => 0,
+            'grand_total' => 0,
+        ];
 
-        $lptotalboys = array();
-        $lptotalgirls = array();
-        $uptotalboys = array();
-        $uptotalgirls = array();
-        $hstotalboys = array();
-        $hstotalgirls = array();
-        $hsstotalboys = array();
-        $hsstotalgirls = array();
-        $school_tot_boys = array();
-        $school_tot_girls = array();
-        $school_boygirl_tot = array();
+        if (!empty($school) && is_array($school)) {
+            foreach ($school as $sch) {
+                $count++;
+                $code = $sch['school_code'];
+                $name = $sch['school_name'];
+                $school_full_name = $code . ' - ' . $name;
 
+                $no_lp_boys  = $lp_map[$code]['B'] ?? 0;
+                $no_lp_girls = $lp_map[$code]['G'] ?? 0;
 
-        for ($j = 0; $j < count($school); $j++) {
+                $no_up_boys  = $up_map[$code]['B'] ?? 0;
+                $no_up_girls = $up_map[$code]['G'] ?? 0;
 
-            $no_lp_boys = 0;
-            $no_lp_girls = 0;
-            $no_up_boys = 0;
-            $no_up_girls = 0;
-            $no_hs_boys = 0;
-            $no_hs_girls = 0;
-            $no_hss_boys = 0;
-            $no_hss_girls = 0;
-            $school_sum_boys = 0;
-            $school_sum_girls = 0;
-            $total_school_sum = 0;
+                $no_hs_boys  = $hs_map[$code]['B'] ?? 0;
+                $no_hs_girls = $hs_map[$code]['G'] ?? 0;
 
-            for ($k = 0; $k < count($lp); $k++) {
-                if (($lp[$k]['school_code'] == $school[$j]['school_code']) && ($lp[$k]['gender'] == 'B')) {
-                    $no_lp_boys = $lp[$k]['cntlp'];
-                } else if (($lp[$k]['school_code'] == $school[$j]['school_code']) && ($lp[$k]['gender'] == 'G')) {
-                    $no_lp_girls = $lp[$k]['cntlp'];
-                }
+                $no_hss_boys  = $hss_map[$code]['B'] ?? 0;
+                $no_hss_girls = $hss_map[$code]['G'] ?? 0;
+
+                $school_sum_boys  = $no_lp_boys + $no_up_boys + $no_hs_boys + $no_hss_boys;
+                $school_sum_girls = $no_lp_girls + $no_up_girls + $no_hs_girls + $no_hss_girls;
+                $total_school_sum = $school_sum_boys + $school_sum_girls;
+
+                $totals['lp_b']        += $no_lp_boys;
+                $totals['lp_g']        += $no_lp_girls;
+                $totals['up_b']        += $no_up_boys;
+                $totals['up_g']        += $no_up_girls;
+                $totals['hs_b']        += $no_hs_boys;
+                $totals['hs_g']        += $no_hs_girls;
+                $totals['hss_b']       += $no_hss_boys;
+                $totals['hss_g']       += $no_hss_girls;
+                $totals['total_b']     += $school_sum_boys;
+                $totals['total_g']     += $school_sum_girls;
+                $totals['grand_total'] += $total_school_sum;
+                ?>
+                <tr>
+                    <td class="ety" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo $count; ?></td>
+                    <td class="ety" style="border: 1px solid #000000; padding: 2px 6px;" align="left"><?php echo wordwrap($school_full_name, 50, '<br/>'); ?></td>
+                    <td class="ety" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo fmt_datewise_count($no_lp_boys); ?></td>
+                    <td class="ety" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo fmt_datewise_count($no_lp_girls); ?></td>
+                    <td class="ety" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo fmt_datewise_count($no_up_boys); ?></td>
+                    <td class="ety" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo fmt_datewise_count($no_up_girls); ?></td>
+                    <td class="ety" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo fmt_datewise_count($no_hs_boys); ?></td>
+                    <td class="ety" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo fmt_datewise_count($no_hs_girls); ?></td>
+                    <td class="ety" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo fmt_datewise_count($no_hss_boys); ?></td>
+                    <td class="ety" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo fmt_datewise_count($no_hss_girls); ?></td>
+                    <td class="ety" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo fmt_datewise_count($school_sum_boys); ?></td>
+                    <td class="ety" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo fmt_datewise_count($school_sum_girls); ?></td>
+                    <td class="ety" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo fmt_datewise_count($total_school_sum); ?></td>
+                </tr>
+                <?php
             }
-
-            for ($k = 0; $k < count($up); $k++) {
-                if (($up[$k]['school_code'] == $school[$j]['school_code']) && ($up[$k]['gender'] == 'B')) {
-                    $no_up_boys = $up[$k]['upid'];
-                } else if (($up[$k]['school_code'] == $school[$j]['school_code']) && ($up[$k]['gender'] == 'G')) {
-                    $no_up_girls = $up[$k]['upid'];
-                }
-            }
-            for ($k = 0; $k < count($hs); $k++) {
-                if (($hs[$k]['school_code'] == $school[$j]['school_code']) && ($hs[$k]['gender'] == 'B')) {
-                    $no_hs_boys = $hs[$k]['hsid'];
-                } else if (($hs[$k]['school_code'] == $school[$j]['school_code']) && ($hs[$k]['gender'] == 'G')) {
-                    $no_hs_girls = $hs[$k]['hsid'];
-                }
-            }
-            for ($k = 0; $k < count($hss); $k++) {
-                if (($hss[$k]['school_code'] == $school[$j]['school_code']) && ($hss[$k]['gender'] == 'B')) {
-                    $no_hss_boys = $hss[$k]['hssid'];
-                } else if (($hss[$k]['school_code'] == $school[$j]['school_code']) && ($hss[$k]['gender'] == 'G')) {
-                    $no_hss_girls = $hss[$k]['hssid'];
-                }
-            }
-
-            $count++;
-            //$grandtotal	=	$grandtotal	+	$partdata[$j]['total'];
-
-            array_push($lptotalboys, $no_lp_boys);
-            array_push($lptotalgirls, $no_lp_girls);
-
-            array_push($uptotalboys, $no_up_boys);
-            array_push($uptotalgirls, $no_up_girls);
-
-            array_push($hstotalboys, $no_hs_boys);
-            array_push($hstotalgirls, $no_hs_girls);
-
-            array_push($hsstotalboys, $no_hss_boys);
-            array_push($hsstotalgirls, $no_hss_girls);
-
-            $school_sum_boys = $no_lp_boys + $no_up_boys + $no_hs_boys + $no_hss_boys;
-            $school_sum_girls = $no_lp_girls + $no_up_girls + $no_hs_girls + $no_hss_girls;
-
-            $total_school_sum = $school_sum_boys + $school_sum_girls;
-
-            array_push($school_tot_boys, $school_sum_boys);
-            array_push($school_tot_girls, $school_sum_girls);
-
-            array_push($school_boygirl_tot, $total_school_sum);
-            ?>
-            <tr>
-                <td class="ety" style="border-top:1px #000000; border-right:1px #000000; padding:0px;" align="center"><?php echo $count; ?></td>
-                <td class="ety" style="border-top:1px #000000; border-right:1px #000000; padding:0px;" align="left"><?php echo wordwrap($school[$j]['school_code'] . ' - ' . $school[$j]['school_name'], 30, '<br/>'); ?></td>
-                <td class="ety" style="border-top:1px #000000; border-right:1px #000000; padding:0px;" align="center"><?php echo $no_lp_boys; ?></td>
-                <td class="ety" style="border-top:1px #000000; border-right:1px #000000; padding:0px;" align="center"><?php echo $no_lp_girls; ?></td>
-                <td class="ety" style="border-top:1px #000000; border-right:1px #000000; padding:0px;" align="center"><?php echo $no_up_boys; ?></td>
-                <td class="ety" style="border-top:1px #000000; border-right:1px #000000; padding:0px;" align="center"><?php echo $no_up_girls; ?></td>
-                <td class="ety"  style="border-top:1px #000000; border-right:1px #000000; padding:0px;" align="center"><?php echo $no_hs_boys; ?></td>
-                <td class="ety" style="border-top:1px #000000; border-right:1px #000000; padding:0px;" align="center"><?php echo $no_hs_girls; ?></td>
-                <td class="ety" style="border-top:1px #000000; border-right:1px #000000; padding:0px;" align="center"><?php echo $no_hss_boys; ?></td>
-                <td class="ety" style="border-top:1px #000000; border-right:1px #000000; padding:0px;" align="center"><?php echo $no_hss_girls; ?></td>
-                <td class="ety" style="border-top:1px #000000; border-right:1px #000000; padding:0px;" align="center"><?php echo $school_sum_boys; ?></td>
-                <td class="ety" style="border-top:1px #000000; border-right:1px #000000; padding:0px;" align="center"><?php echo $school_sum_girls; ?> </td>
-                <td class="ety" style="border-top:1px #000000; border-right:0px #000000; padding:2px;" align="center"><?php echo $total_school_sum; ?> </td>
-            </tr>
-            <?php
         }
-        $school_tot_boys_total = 0;
-        $school_tot_girls_total = 0;
-        $grand_total_allschool = 0;
-        $lpsumboys = array_sum($lptotalboys);
-        $lpsumgirls = array_sum($lptotalgirls);
-
-        $upsumboys = array_sum($uptotalboys);
-        $upsumgirls = array_sum($uptotalgirls);
-
-        $hssumboys = array_sum($hstotalboys);
-        $hssumgirls = array_sum($hstotalgirls);
-
-        $hsssumboys = array_sum($hsstotalboys);
-        $hsssumgirls = array_sum($hsstotalgirls);
-
-        $school_tot_boys_total = array_sum($school_tot_boys);
-        $school_tot_girls_total = array_sum($school_tot_girls);
-
-        $grand_total_allschool = array_sum($school_boygirl_tot);
-        ?>		 <tr>
-            <td class="tb"  style="border-top:1px #000000; border-right:1px #000000; padding:2px;"  align="right" colspan="2">Grand Total</td>
-            <td class="tb" style="border-top:1px #000000;  border-right:1px #000000; padding:2px;" align="center"><?php echo $lpsumboys; ?></td>
-            <td class="tb" style="border-top:1px #000000; border-right:1px #000000; padding:2px;" align="center"><?php echo $lpsumgirls; ?></td>
-            <td class="tb" style="border-top:1px #000000; border-right:1px #000000; padding:2px;" align="center"><?php echo $upsumboys; ?></td>
-            <td class="tb" style="border-top:1px #000000; border-right:1px #000000; padding:2px;" align="center"><?php echo $upsumgirls; ?></td>
-            <td class="tb" style="border-top:1px #000000; border-right:1px #000000; padding:2px;" align="center"><?php echo $hssumboys; ?></td>
-            <td  class="tb"style="border-top:1px #000000; border-right:1px #000000; padding:2px;" align="center"><?php echo $hssumgirls; ?></td>
-            <td class="tb" style="border-top:1px #000000; border-right:1px #000000; padding:2px;" align="center"><?php echo $hsssumboys; ?></td>
-            <td class="tb"  style="border-top:1px #000000; border-right:1px #000000; padding:2px;" align="center"><?php echo $hsssumgirls; ?></td>
-            <td class="tb" style="border-top:1px #000000; border-right:1px #000000; padding:2px;" align="center"><?php echo $school_tot_boys_total; ?></td>
-            <td class="tb" style="border-top:1px #000000; border-right:1px #000000; padding:2px;" align="center"><?php echo $school_tot_girls_total; ?></td>
-            <td class="tb" style="border-top:1px #000000; border-right:0px #000000; padding:2px;" align="center"><?php echo $grand_total_allschool; ?></td>
+        ?>
+        <tr>
+            <td class="tb" style="border: 1px solid #000000; padding: 2px 8px;" align="right" colspan="2">Grand Total</td>
+            <td class="tb" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo fmt_datewise_count($totals['lp_b']); ?></td>
+            <td class="tb" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo fmt_datewise_count($totals['lp_g']); ?></td>
+            <td class="tb" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo fmt_datewise_count($totals['up_b']); ?></td>
+            <td class="tb" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo fmt_datewise_count($totals['up_g']); ?></td>
+            <td class="tb" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo fmt_datewise_count($totals['hs_b']); ?></td>
+            <td class="tb" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo fmt_datewise_count($totals['hs_g']); ?></td>
+            <td class="tb" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo fmt_datewise_count($totals['hss_b']); ?></td>
+            <td class="tb" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo fmt_datewise_count($totals['hss_g']); ?></td>
+            <td class="tb" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo fmt_datewise_count($totals['total_b']); ?></td>
+            <td class="tb" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo fmt_datewise_count($totals['total_g']); ?></td>
+            <td class="tb" style="border: 1px solid #000000; padding: 2px;" align="center"><?php echo fmt_datewise_count($totals['grand_total']); ?></td>
         </tr>
     </table>
 </page>

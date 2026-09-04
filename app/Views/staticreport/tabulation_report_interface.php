@@ -21,11 +21,10 @@ echo form_open('staticreport/reports/rpt_tabulation_sheet', array('id' => 'formI
     <tr>
         <td>&nbsp;</td>
         <td align="left" width="27%" class="table_row_first">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-        <td align="left" width="55%" class="table_row_first"><form name="form1" method="post" action="">
+        <td align="left" width="55%" class="table_row_first">
                 <label>
                     <input type="submit" name="btnSubmit" id="btnSubmit" value="View report">
                 </label>
-            </form>
         </td>
         <td width="18%">&nbsp;</td>
     </tr>

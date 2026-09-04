@@ -84,20 +84,53 @@ function fetch_item_details_result(force)
         _lastFetchedItemCode = item_code;
         showItemSpinner();
         
+        var targetUrl = (typeof path !== 'undefined' && path) ? path : '';
+        if (!targetUrl) {
+            targetUrl = window.location.origin + window.location.pathname.split('index.php')[0];
+        }
+        if (window.location.href.indexOf('index.php') !== -1 && targetUrl.indexOf('index.php') === -1) {
+            targetUrl = targetUrl.replace(/\/$/, '') + '/index.php/';
+        }
+        if (!targetUrl.endsWith('/')) {
+            targetUrl += '/';
+        }
+        targetUrl += "result/resultentry/get_item_details_result";
+
+        // Resolve current CSRF token dynamically
+        var csrfToken = (typeof getCsrfToken === 'function') ? getCsrfToken() : '';
+        if (!csrfToken) {
+            var cookieMatch = document.cookie.match(/(?:^|;\s*)csrf_cookie_name=([^;]+)/);
+            if (cookieMatch && cookieMatch[1]) {
+                csrfToken = decodeURIComponent(cookieMatch[1]);
+            } else {
+                var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                if (csrfMeta) csrfToken = csrfMeta.getAttribute('content') || '';
+            }
+        }
+
         // Use modern fetch API if available, fallback to Ajax
         if (typeof fetch !== 'undefined') {
             var formData = new FormData();
             formData.append('code', item_code);
-            var csrfMeta = document.querySelector('meta[name="csrf-token"]');
-            if (csrfMeta && csrfMeta.getAttribute('content')) {
-                formData.append('csrf_test_name', csrfMeta.getAttribute('content'));
+            if (csrfToken) {
+                formData.append('csrf_test_name', csrfToken);
             }
             
-            fetch(path + "result/resultentry/get_item_details_result", {
+            fetch(targetUrl, {
                 method: 'POST',
+                headers: csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {},
                 body: formData
             })
             .then(response => {
+                var newHeaderToken = response.headers.get('X-CSRF-TOKEN');
+                if (newHeaderToken) {
+                    if (typeof updateCsrfToken === 'function') {
+                        updateCsrfToken(newHeaderToken);
+                    } else {
+                        var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                        if (csrfMeta) csrfMeta.setAttribute('content', newHeaderToken);
+                    }
+                }
                 if (!response.ok) {
                     throw new Error('Server error: ' + response.status);
                 }
@@ -114,32 +147,39 @@ function fetch_item_details_result(force)
                     } else {
                         divEl.innerHTML = data;
                     }
+
+                    // Clear item code input so subsequent item codes can be entered immediately
+                    var updatedItemEl = document.getElementById('txtItemCode');
+                    if (updatedItemEl) {
+                        updatedItemEl.value = '';
+                    }
+
                     var codeNoEl = document.getElementById('txt_code_no');
                     if (codeNoEl) {
                         codeNoEl.focus();
-                    } else {
-                        var updatedItemEl = document.getElementById('txtItemCode');
-                        if (updatedItemEl) {
-                            updatedItemEl.focus();
-                            updatedItemEl.select();
-                        }
+                    } else if (updatedItemEl) {
+                        updatedItemEl.focus();
                     }
                 }
                 _isFetchingItemResult = false;
+                _lastFetchedItemCode = null;
                 hideItemSpinner();
             })
             .catch(error => {
                 console.error('Error:', error);
                 _isFetchingItemResult = false;
+                _lastFetchedItemCode = null;
                 hideItemSpinner();
             });
         } else if (typeof Ajax !== 'undefined') {
             var oOptions = {
                 method: "post",
-                parameters: {'code': item_code},
+                parameters: {'code': item_code, 'csrf_test_name': csrfToken},
+                requestHeaders: csrfToken ? {'X-CSRF-TOKEN': csrfToken} : {},
                 onFailure: function (oXHR, oJson) {
                     console.error("An error occurred: " + oXHR.status);
                     _isFetchingItemResult = false;
+                    _lastFetchedItemCode = null;
                     hideItemSpinner();
                 },
                 onSuccess: function (transport) {
@@ -154,12 +194,22 @@ function fetch_item_details_result(force)
                         } else {
                             divEl.innerHTML = response;
                         }
+
+                        // Clear item code input
+                        var updatedItemEl = document.getElementById('txtItemCode');
+                        if (updatedItemEl) {
+                            updatedItemEl.value = '';
+                        }
+
                         var codeNoEl = document.getElementById('txt_code_no');
                         if (codeNoEl) {
                             codeNoEl.focus();
+                        } else if (updatedItemEl) {
+                            updatedItemEl.focus();
                         }
                     }
                     _isFetchingItemResult = false;
+                    _lastFetchedItemCode = null;
                     hideItemSpinner();
                 }
             };
@@ -167,6 +217,7 @@ function fetch_item_details_result(force)
         }
     } else {
         _isFetchingItemResult = false;
+        _lastFetchedItemCode = null;
         hideItemSpinner();
         return false;
     }
@@ -230,18 +281,67 @@ function fncSaveResultEntry()
 
     if (formEl) {
         _lastFetchedItemCode = null;
-        formEl.action = path + 'result/resultentry/save_result_entry/';
+        formEl.target = '_self';
+        formEl.action = path + 'result/resultentry/save_result_entry';
         formEl.submit();
     }
 }
 
 function editResult(id) {
+    var row = document.getElementById('result_row_' + id);
+    var consoleEl = document.getElementById('marksEntryConsole');
+    var codeNoInput = document.getElementById('txt_code_no');
+    var regNoInput = document.getElementById('txt_reg_no');
+    var totalMarkInput = document.getElementById('totalMark');
+    var hidResultIdConsole = document.getElementById('resultEntry_hidResultId');
     var hidResultIdEl = document.getElementById('hidResultId');
+    var consoleTitle = document.getElementById('consoleTitle');
+    var saveBtn = document.getElementById('saveButton');
+    var cancelBtn = document.getElementById('cancelEditButton');
     var formEl = document.getElementById('resultEntryList');
+
     if (hidResultIdEl) hidResultIdEl.value = id;
+
+    // Instant client-side edit mode if console inputs are available in DOM
+    if (row && consoleEl && codeNoInput && regNoInput) {
+        if (hidResultIdConsole) hidResultIdConsole.value = id;
+        codeNoInput.value = row.getAttribute('data-code-no') || '';
+        regNoInput.value = row.getAttribute('data-participant-id') || '';
+        if (totalMarkInput) totalMarkInput.value = row.getAttribute('data-total-mark') || '';
+
+        var rawMarks = row.getAttribute('data-marks') || '';
+        var marks = rawMarks.split('#$#');
+        var hidNoJudgeEl = document.getElementById('hidNoJudge');
+        var numJudges = hidNoJudgeEl ? parseInt(hidNoJudgeEl.value) : marks.length;
+        for (var i = 1; i <= numJudges; i++) {
+            var markInput = document.getElementById('mark_' + i);
+            if (markInput) {
+                markInput.value = (marks[i - 1] !== undefined && marks[i - 1] !== '') ? marks[i - 1] : '';
+            }
+        }
+
+        if (consoleTitle) {
+            consoleTitle.innerHTML = '<i class="bi bi-pencil-square text-primary"></i> <strong class="text-dark small">Edit Participant Score</strong>';
+        }
+        if (saveBtn) {
+            saveBtn.innerHTML = '<i class="bi bi-save2"></i> <span>Update</span>';
+            saveBtn.title = 'Update Score';
+        }
+        if (cancelBtn) {
+            cancelBtn.classList.remove('d-none');
+        }
+
+        consoleEl.classList.remove('d-none');
+        consoleEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        codeNoInput.focus();
+        return;
+    }
+
+    // Fallback: server-side submit
     if (formEl) {
         _lastFetchedItemCode = null;
-        formEl.action = path + 'result/resultentry/edit_result_entry/';
+        formEl.target = '_self';
+        formEl.action = path + 'result/resultentry/edit_result_entry';
         formEl.submit();
     }
 }
@@ -263,7 +363,8 @@ function deleteResult(id) {
             if (hidResultIdEl) hidResultIdEl.value = id;
             if (formEl) {
                 _lastFetchedItemCode = null;
-                formEl.action = path + 'result/resultentry/delete_result_entry/';
+                formEl.target = '_self';
+                formEl.action = path + 'result/resultentry/delete_result_entry';
                 formEl.submit();
             }
         }
@@ -271,21 +372,62 @@ function deleteResult(id) {
 }
 
 function fncCancel() {
+    var consoleEl = document.getElementById('marksEntryConsole');
+    var codeNoInput = document.getElementById('txt_code_no');
+    var regNoInput = document.getElementById('txt_reg_no');
+    var totalMarkInput = document.getElementById('totalMark');
+    var hidResultIdConsole = document.getElementById('resultEntry_hidResultId');
+    var hidResultIdEl = document.getElementById('hidResultId');
+    var consoleTitle = document.getElementById('consoleTitle');
+    var saveBtn = document.getElementById('saveButton');
+    var cancelBtn = document.getElementById('cancelEditButton');
+    var hidCntItemList = document.getElementById('hidCntItemList');
+    var hidTotalPart = document.getElementById('hidTotalPart');
     var formEl = document.getElementById('resultEntryList');
+
+    if (consoleEl && codeNoInput && regNoInput) {
+        if (hidResultIdConsole) hidResultIdConsole.value = '';
+        if (hidResultIdEl) hidResultIdEl.value = '';
+        codeNoInput.value = '';
+        regNoInput.value = '';
+        if (totalMarkInput) totalMarkInput.value = '';
+
+        var hidNoJudgeEl = document.getElementById('hidNoJudge');
+        var numJudges = hidNoJudgeEl ? parseInt(hidNoJudgeEl.value) : 0;
+        for (var i = 1; i <= numJudges; i++) {
+            var markInput = document.getElementById('mark_' + i);
+            if (markInput) markInput.value = '';
+        }
+
+        if (consoleTitle) {
+            consoleTitle.innerHTML = '<i class="bi bi-pencil-square text-primary"></i> <strong class="text-dark small">Enter Participant Score</strong>';
+        }
+        if (saveBtn) {
+            saveBtn.innerHTML = '<i class="bi bi-check2-circle"></i> <span>Save</span>';
+            saveBtn.title = 'Save Score (Enter)';
+        }
+        if (cancelBtn) {
+            cancelBtn.classList.add('d-none');
+        }
+
+        var cnt = hidCntItemList ? parseInt(hidCntItemList.value) : 0;
+        var total = hidTotalPart ? parseInt(hidTotalPart.value) : 0;
+        if (total > 0 && cnt >= total) {
+            consoleEl.classList.add('d-none');
+        } else {
+            codeNoInput.focus();
+        }
+        return;
+    }
+
     if (formEl) {
         _lastFetchedItemCode = null;
-        formEl.action = path + 'result/resultentry/';
+        formEl.target = '_self';
+        formEl.action = path + 'result/resultentry';
         formEl.submit();
     }
 }
-// function confirmResutlEntry()
-// {
-//     if (confirm('Do you really want to confirm the results?'))
-//     {
-//         $('resultEntryList').action = path + 'result/resultentry/confirm_result_entry';
-//         $('resultEntryList').submit();
-//     }
-// }
+
 function confirmResutlEntry() {
     Swal.fire({
         title: "Confirm Results Entry",
@@ -300,6 +442,7 @@ function confirmResutlEntry() {
         if (result.isConfirmed) {
             var formEl = document.getElementById('resultEntryList');
             if (formEl) {
+                formEl.target = '_self';
                 formEl.action = path + 'result/resultentry/confirm_result_entry';
                 formEl.submit();
             }
@@ -457,7 +600,9 @@ function printConfidentialReport()
 {
     var formEl = document.getElementById('resultEntryList');
     if (formEl) {
+        formEl.target = '_blank';
         formEl.action = path + 'result/resultentry/printConfidentialReport';
         formEl.submit();
+        formEl.target = '_self';
     }
 }

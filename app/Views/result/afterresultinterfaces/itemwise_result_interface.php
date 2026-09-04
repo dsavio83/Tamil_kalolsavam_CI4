@@ -27,11 +27,9 @@ echo form_open('report/afterresultreportpdf/item_wise_result', array('id' => 'fo
         <td>&nbsp;</td>
         <td align="left" width="27%" class="table_row_first">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
         <td align="left" width="55%" class="table_row_first">
-            <form name="form1" method="post" action="">
                 <label>
                     <input type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-primary" value="View report" onclick="javascript: return callsheetfirst()">
                 </label>
-            </form>
         </td>
         <td width="18%">&nbsp;</td>
     </tr>

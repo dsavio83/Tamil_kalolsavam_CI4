@@ -36,7 +36,7 @@ class Login extends \App\Controllers\BaseController {
                     $sub_dist_code = $login[0]['sub_district_code'];
                     $dist_code = $login[0]['rev_district_code'];
 
-                    // If school user (user_type 5) or school_code is 0, resolve from user_cluster
+                    // If school user (user_type 5) or school_code is 0, resolve from sd_user_cluster
                     if ((empty($school_code) || $school_code == 0) && (int)$login[0]['user_type'] == 5) {
                         $db = \Config\Database::connect();
                         $cluster = $db->table('sd_user_cluster')->select('school_code, sub_district_code')->where('user_id', $login[0]['user_id'])->get()->getRowArray();

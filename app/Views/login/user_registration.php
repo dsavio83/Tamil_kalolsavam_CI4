@@ -9,10 +9,10 @@ echo form_open('schools/registration/update', array('id' => 'formSchool'));
     <tr>
         <td width="23%">&nbsp;</td>
         <td align="left" width="32%" class="table_row_first">User Name : </td>
-        <td align="left" width="45%" class="table_row_first"><?php echo form_input("txtUserName", class = "form-control" id = "txtUserName" ); ?></td>
+        <td align="left" width="45%" class="table_row_first"><?php echo form_input("txtUserName", "", 'class="form-control" id="txtUserName"'); ?></td>
     </tr><tr><td>&nbsp;</td>
         <td align="left" width="32%" class="table_row_first">Password : </td>
-        <td align="left" width="45%" class="table_row_first"><?php echo form_password("txtPassword", class = "form-control" id = "txtPassword" ); ?></td>
+        <td align="left" width="45%" class="table_row_first"><?php echo form_password("txtPassword", "", 'class="form-control" id="txtPassword"'); ?></td>
     </tr>
     <tr><td>&nbsp;</td>
         <td align="left" width="32%" class="table_row_first">User Type : </td>

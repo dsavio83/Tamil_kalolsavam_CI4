@@ -8,10 +8,23 @@ Options -Indexes
 	RewriteEngine On
 
 	# Block access to internal app directories
-	RewriteRule ^(?:app|application|writable|vendor|tests|database)/ - [F,L,NC]
+	RewriteRule ^(?:app|application|writable|vendor|tests|database|dbBackup)/ - [F,L,NC]
 	RewriteRule ^(?:system_ci3_old|system)/ - [F,L,NC]
-	RewriteRule ^\.(?:env|git)/ - [F,L,NC]
+	RewriteRule ^\.(?:env|git)(?:/|$|.*) - [F,L,NC]
+	RewriteRule ^composer\.(?:json|lock)$ - [F,L,NC]
+	RewriteRule ^(?:phpunit\.dist\.xml|spark)$ - [F,L,NC]
 </IfModule>
+
+# Defense-in-depth file blocking
+<FilesMatch "^(\.env|composer\.(json|lock)|phpunit\.dist\.xml|spark)$">
+	<IfModule authz_core_module>
+		Require all denied
+	</IfModule>
+	<IfModule !authz_core_module>
+		Deny from all
+	</IfModule>
+</FilesMatch>
+
 
 <IfModule mod_rewrite.c>
 	Options +FollowSymlinks

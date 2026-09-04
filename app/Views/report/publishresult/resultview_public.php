@@ -1070,8 +1070,12 @@
 
             fetch('<?php echo base_url("publishresult/publicresult/get_item_results_ajax"); ?>', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `item_code=${itemCode}&district=${distCode}&sub_district=${subDistCode}`
+                headers: { 
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': '<?php echo csrf_hash(); ?>'
+                },
+                body: `item_code=${itemCode}&district=${distCode}&sub_district=${subDistCode}&<?php echo csrf_token(); ?>=<?php echo csrf_hash(); ?>`
             })
             .then(res => res.json())
             .then(data => {

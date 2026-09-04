@@ -12,7 +12,6 @@
 <?php
 echo form_open('report/timefestreportpdf/confidential', array('id' => 'formDWP', 'target' => '_blank'));
 ?>
-<form name="form1" method="post" action="">
     <div class="row justify-content-center">
     <div class="col-12">
      <div class="card">
@@ -54,7 +53,6 @@ echo form_open('report/timefestreportpdf/confidential', array('id' => 'formDWP',
 </div>
 
     <input type="hidden" name="hidUserId" id="hidUserId" />
-</form>
 <?php
 //itemwise_report_interface
 

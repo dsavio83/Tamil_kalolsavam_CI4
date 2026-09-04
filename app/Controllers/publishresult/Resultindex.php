@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Publishresult;
 
+use HTML2PDF;
 
 class Resultindex  extends \App\Controllers\BaseController {
 

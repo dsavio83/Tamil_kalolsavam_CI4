@@ -97,10 +97,10 @@
                 <tr>
                     <td class="ety" align="center"  style="border-top:1px #666666; border-right:1px #666666; padding:2px;" ><?php echo $count; ?></td>
                     <td  class="ety"align="left"  style="border-top:1px #666666; border-right:1px #666666; padding:2px;">&nbsp;<?php echo $data['participant_id']; ?></td>
-                    <td class="ety" align="left"  style="border-top:1px #666666; border-right:1px #666666; padding:2px;" >&nbsp;<?php echo $data['participant_name']; ?></td>
+                    <td class="ety" align="left"  style="border-top:1px #666666; border-right:1px #666666; padding:2px;" >&nbsp;<?php echo esc($data['participant_name']); ?></td>
 
                     <td  class="ety" align="center"  style="border-top:1px #666666; border-right:1px #666666; padding:2px;"><?php echo $data['class']; ?></td>
-                    <td  class="ety" align="left"  style="border-top:1px #666666; border-right:1px #666666; padding:2px;">&nbsp;<?php echo wordwrap($data['school_name'], 30, "<br />"); ?></td>
+                    <td  class="ety" align="left"  style="border-top:1px #666666; border-right:1px #666666; padding:2px;">&nbsp;<?php echo wordwrap(esc($data['school_name']), 30, "<br />"); ?></td>
                     <td  class="ety" align="center"  style="border-top:1px #666666; border-right:1px #666666; padding:2px;"><?php echo $data['item_count']; ?></td>
                     <td  class="ety" align="center"  style="border-top:1px #666666; border-right:1px #666666; padding:2px;"><?php echo $data['total_point']; ?></td>
 

@@ -41,10 +41,10 @@
                                             ?>
                                         </div>
                                         <div class="col-9">
-                                            <h5 class="card-title"><?php echo $value['participant_name']; ?> <span class="badge bg-info"><?php echo $value['class']; ?></span></h5>
+                                            <h5 class="card-title"><?php echo esc($value['participant_name']); ?> <span class="badge bg-info"><?php echo esc($value['class']); ?></span></h5>
                                             <p class="card-text">
-                                                <strong>Reg. No & Code No:</strong> <?php echo $value['participant_id']; ?> & <?php echo $value['code_no']; ?><br>
-                                                <strong>School Name:</strong> <?php echo $value['school_name']; ?><br>
+                                                <strong>Reg. No & Code No:</strong> <?php echo esc($value['participant_id']); ?> & <?php echo esc($value['code_no']); ?><br>
+                                                <strong>School Name:</strong> <?php echo esc($value['school_name']); ?><br>
                                                 <strong>Grade:</strong>
                                                 <?php
                                                 $grade = $value['grade'];
@@ -110,16 +110,16 @@
                                         }
                                         ?>
                                     </td>
-                                    <td><?php echo $value['participant_id']; ?></td>
+                                    <td><?php echo esc($value['participant_id']); ?></td>
                                     <td>
-                                        <?php echo $value['participant_name']; ?>
+                                        <?php echo esc($value['participant_name']); ?>
                                         <?php if ($value['rank'] == 1) { ?>
                                             <div class="eligible-text">Eligible for Higher Level</div>
                                         <?php } ?>
                                     </td>
-                                    <td><span class="badge bg-info"><?php echo $value['class']; ?></span></td>
-                                    <td><?php echo $value['code_no']; ?></td>
-                                    <td><?php echo $value['school_name']; ?></td>
+                                    <td><span class="badge bg-info"><?php echo esc($value['class']); ?></span></td>
+                                    <td><?php echo esc($value['code_no']); ?></td>
+                                    <td><?php echo esc($value['school_name']); ?></td>
                                     <td>
                                         <?php
                                         $grade = $value['grade'];

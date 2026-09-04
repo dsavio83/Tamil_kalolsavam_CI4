@@ -1,7 +1,6 @@
 <?php
 echo form_open('staticreport/Onstagereport1/rpt_datewiseparticipants', array('id' => 'formDWP'));
 ?>
-<form name="form1" method="post" action="">
     <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top:15px;">
         <tr>
             <th colspan="4" align="left">Select Item</th>
@@ -43,7 +42,6 @@ echo form_open('staticreport/Onstagereport1/rpt_datewiseparticipants', array('id
         </tr>
     </table>
     <input type="hidden" name="hidUserId" id="hidUserId" />
-</form>
 <?php
 //itemwise_report_interface
 echo form_close();

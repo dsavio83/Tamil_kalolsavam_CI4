@@ -7,12 +7,15 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'App\\Controllers\\BaseController' => $baseDir . '/app/Controllers/BaseController.php',
+    'App\\Controllers\\Downloads' => $baseDir . '/app/Controllers/Downloads.php',
     'App\\Controllers\\Export' => $baseDir . '/app/Controllers/Export.php',
     'App\\Controllers\\Home' => $baseDir . '/app/Controllers/Home.php',
     'App\\Controllers\\Import' => $baseDir . '/app/Controllers/Import.php',
+    'App\\Controllers\\Item\\Item_Master' => $baseDir . '/app/Controllers/Item/Item_Master.php',
     'App\\Controllers\\Itemreport' => $baseDir . '/app/Controllers/Itemreport.php',
     'App\\Controllers\\Login' => $baseDir . '/app/Controllers/Login.php',
     'App\\Controllers\\Prereportpdf' => $baseDir . '/app/Controllers/Prereportpdf.php',
+    'App\\Controllers\\SessionDiagnostic' => $baseDir . '/app/Controllers/SessionDiagnostic.php',
     'App\\Controllers\\Test' => $baseDir . '/app/Controllers/Test.php',
     'App\\Controllers\\Welcome' => $baseDir . '/app/Controllers/Welcome.php',
     'App\\Filters\\NoCache' => $baseDir . '/app/Filters/NoCache.php',
@@ -31,6 +34,7 @@ return array(
     'App\\Models\\Export_Model' => $baseDir . '/app/Models/Export_Model.php',
     'App\\Models\\General_Model' => $baseDir . '/app/Models/General_Model.php',
     'App\\Models\\Import_Model' => $baseDir . '/app/Models/Import_Model.php',
+    'App\\Models\\Item\\Item_Master_Model' => $baseDir . '/app/Models/Item/Item_Master_Model.php',
     'App\\Models\\Itemreport_Model' => $baseDir . '/app/Models/Itemreport_Model.php',
     'App\\Models\\Registration_Model' => $baseDir . '/app/Models/Registration_Model.php',
     'App\\Models\\Registration_Model1' => $baseDir . '/app/Models/Registration_Model1.php',

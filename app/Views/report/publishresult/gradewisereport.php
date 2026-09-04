@@ -129,7 +129,7 @@ if (!empty($grade)) {
                 <tr> 
                     <td width="38"  class="style2" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $count; ?></td>
                     <td width="200" class="style2" align="left" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo ($value['item_code'] ?? '') . '-' . ($value['item_name'] ?? ''); ?></td>
-                    <td width="276" class="style2" align="left" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $value['participant_name'] ?? ''; ?></td>
+                    <td width="276" class="style2" align="left" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo esc($value['participant_name'] ?? ''); ?></td>
                     <td width="52" class="style2" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $rank; ?> </td>
                     <td width="46" class="style2" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $value['grade'] ?? ''; ?></td>
                     <td width="50" class="style2" align="center" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;"><?php echo $value['point'] ?? ''; ?></td>

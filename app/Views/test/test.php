@@ -69,13 +69,13 @@
                     <?php echo $school['school_email'] ?>
                 </td>
                 <td>
-                    <?php echo $school['hm_name'] ?>
+                    <?php echo esc($school['hm_name']) ?>
                 </td>
                 <td>
                     <?php echo $school['hm_phone'] ?>
                 </td>
                 <td>
-                    <?php echo $school['principal_name'] ?>
+                    <?php echo esc($school['principal_name']) ?>
                 </td>
                 <td>
                     <?php echo $school['principal_phone'] ?>
@@ -140,7 +140,7 @@
                     <?php echo $participant['admn_no'] ?>
                 </td>
                 <td>
-                    <?php echo $participant['participant_name'] ?>
+                    <?php echo esc($participant['participant_name']) ?>
                 </td>
 
                 <td>
@@ -190,7 +190,7 @@
                     <?php echo $participant['spo_id'] ?>
                 </td>
                 <td>
-                    <?php echo $participant['spo_remarks'] ?>
+                    <?php echo esc($participant['spo_remarks']) ?>
                 </td>
                 <td>
                     <?php echo $participant['is_captain'] ?>

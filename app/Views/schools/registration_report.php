@@ -5,7 +5,7 @@
                     <!--<td style="text-align: left; width: 50%">
                             <img src="<?php //echo image_url().'logo.jpg'   ?>">
                     </td>-->
-                <td style="width: 100%" align="center"><strong>Kerala School Kalolsavam 2025-26</strong></td>
+                <td style="width: 100%" align="center"><strong><?php echo get_festival_title(); ?></strong></td>
             </tr>
             <tr>
                 <td style="width: 100%" align="center">

@@ -86,7 +86,7 @@ if (count($fest_master_details) > 0) {
                                     ?>
                                     <td width="74" rowspan="2">&nbsp; </td>
                                 <?php } ?>
-                                <td width="243"  class="style56" align="right">Kerala School Kalolsavam 2025 - 2026</td>
+                                <td width="243"  class="style56" align="right"><?php echo get_festival_title(); ?></td>
                             </tr>
                             <tr>
 
@@ -185,7 +185,7 @@ if (count($fest_master_details) > 0) {
                                     <?php
                                 }
                                 ?>
-                                <td width="263" class="style56" align="right">Kerala School Kalolsavam 2025 - 2026</td>
+                                <td width="263" class="style56" align="right"><?php echo get_festival_title(); ?></td>
                             </tr>
                             <tr>
 

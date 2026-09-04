@@ -71,6 +71,7 @@ composer.lock
 /build/.phpunit.cache/
 /build/logs/
 /.automation/
+/automation/
 /.opencode/
 /.freebuff/
 /_audit/

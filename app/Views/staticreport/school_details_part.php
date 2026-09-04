@@ -1,5 +1,5 @@
 <?php
-echo form_open('staticreport/onstagereport/list_participant_report', array('id' => 'formPWD', 'target' = '_blank'));
+echo form_open('staticreport/onstagereport/list_participant_report', array('id' => 'formPWD', 'target' => '_blank'));
 
 for ($j = 0; $j < count($retdat); $j++) {
     $dat[$retdat[$j]['school_code']] = $retdat[$j]['school_name'];

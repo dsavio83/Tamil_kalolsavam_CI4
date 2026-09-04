@@ -5,7 +5,8 @@ $selected_result = $selected_result ?? [];
 $absentee_list = $absentee_list ?? false;
 $show_conirm_button = $show_conirm_button ?? 'yes';
 $add_edit = $add_edit ?? 'yes';
-$post_item_id = (string) (request()->getPost('hidItemId') ?? request()->getPost('txtItemCode') ?? '');
+$item_code = $item_code ?? '';
+$post_item_id = (string) ($item_code ?: (request()->getPost('code') ?? request()->getPost('hidItemId') ?? request()->getPost('txtItemCode') ?? ''));
 
 $item_info = (is_array($selected_item) && isset($selected_item[0])) ? $selected_item[0] : null;
 $item_code_val = $item_info ? (string)($item_info['item_code'] ?? '') : $post_item_id;
@@ -155,8 +156,8 @@ $progress_pct = ($total_participants > 0) ? min(100, (int)round(($cnt_item_list 
                 </span>
                 <?php echo form_input(
                     "txtItemCode",
-                    (string)$item_code_val,
-                    'type="number" class="form-control border-0 fw-bold fs-5 text-dark shadow-none" id="txtItemCode" placeholder="Item Code (e.g. 101)" inputmode="numeric" onkeypress="javascript:return numbersonly(this, event, false);" onkeydown="if(event.key===\'Enter\'||event.keyCode===13){event.preventDefault();fetch_item_details_result(true);}" oninput="if(this.value.length===3){fetch_item_details_result();}" onBlur="javascript:fetch_item_details_result()" maxlength="3" autofocus'
+                    "",
+                    'type="number" class="form-control border-0 fw-bold fs-5 text-dark shadow-none" id="txtItemCode" placeholder="Item Code (e.g. 101)" inputmode="numeric" onkeypress="javascript:return numbersonly(this, event, false);" onkeydown="if(event.key===\'Enter\'||event.keyCode===13){event.preventDefault();fetch_item_details_result(true);}" oninput="if(this.value.length===3){fetch_item_details_result();}" onfocus="this.select();" onBlur="javascript:fetch_item_details_result()" maxlength="3" autofocus'
                 ); ?>
                 <span class="input-group-text bg-white border-0 pe-3">
                   <div id="itemCodeSpinner" class="d-none align-items-center justify-content-center" title="Fetching item details...">
@@ -215,15 +216,18 @@ $progress_pct = ($total_participants > 0) ? min(100, (int)round(($cnt_item_list 
         </div>
 
         <!-- Marks Entry Compact Single Row Console -->
-        <?php if ($add_edit == 'yes' && $cnt_item_list != $total_participants) { ?>
+        <?php
+        $is_editing = !empty($selected_result);
+        if ($add_edit == 'yes') {
+        ?>
           <hr class="my-3 border-secondary-subtle">
           
-          <div class="bg-white rounded-3 p-3 border border-primary border-opacity-25 shadow-sm">
+          <div id="marksEntryConsole" class="bg-white rounded-3 p-3 border border-primary border-opacity-25 shadow-sm <?php echo ($cnt_item_list == $total_participants && !$is_editing) ? 'd-none' : ''; ?>">
             <div class="d-flex align-items-center justify-content-between mb-2">
-              <div class="d-flex align-items-center gap-1.5">
+              <div class="d-flex align-items-center gap-1.5" id="consoleTitle">
                 <i class="bi bi-pencil-square text-primary"></i>
                 <strong class="text-dark small">
-                  <?php echo !empty($selected_result) ? 'Edit Participant Score' : 'Enter Participant Score'; ?>
+                  <?php echo $is_editing ? 'Edit Participant Score' : 'Enter Participant Score'; ?>
                 </strong>
               </div>
               <small class="text-muted" style="font-size: 0.75rem;">
@@ -287,20 +291,17 @@ $progress_pct = ($total_participants > 0) ? min(100, (int)round(($cnt_item_list 
                 ); ?>
               </div>
 
+              <!-- Hidden Result Id for Editing -->
+              <input type="hidden" name="hidResultId" id="resultEntry_hidResultId" value="<?php echo htmlspecialchars((string)(@$selected_result[0]['rm_id'] ?? '')); ?>">
+
               <!-- Action Buttons in same row -->
               <div class="d-flex gap-1 align-items-end flex-shrink-0 ms-auto">
-                <?php if (!empty($selected_result)) { ?>
-                  <button type="button" class="btn btn-sm btn-primary px-3 fw-bold shadow-sm d-flex align-items-center gap-1" id="saveButton" onClick="javascript:fncSaveResultEntry()" title="Update Score">
-                    <i class="bi bi-save2"></i> Update
-                  </button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary px-2.5" onClick="javascript:fncCancel()" title="Cancel Edit">
-                    Cancel
-                  </button>
-                <?php } else { ?>
-                  <button type="button" class="btn btn-sm btn-primary px-3 fw-bold shadow-sm d-flex align-items-center gap-1" id="saveButton" onClick="javascript:fncSaveResultEntry()" title="Save Score (Enter)">
-                    <i class="bi bi-check2-circle"></i> Save
-                  </button>
-                <?php } ?>
+                <button type="button" class="btn btn-sm btn-primary px-3 fw-bold shadow-sm d-flex align-items-center gap-1" id="saveButton" onClick="javascript:fncSaveResultEntry()" title="<?php echo $is_editing ? 'Update Score' : 'Save Score (Enter)'; ?>">
+                  <i class="bi <?php echo $is_editing ? 'bi-save2' : 'bi-check2-circle'; ?>"></i> <span><?php echo $is_editing ? 'Update' : 'Save'; ?></span>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary px-2.5 <?php echo $is_editing ? '' : 'd-none'; ?>" id="cancelEditButton" onClick="javascript:fncCancel()" title="Cancel Edit">
+                  Cancel
+                </button>
               </div>
             </div>
           </div>
@@ -323,8 +324,7 @@ $progress_pct = ($total_participants > 0) ? min(100, (int)round(($cnt_item_list 
 
   <!-- Card 2: Results Table & Actions -->
   <?php if (!empty($selected_item_list) && count($selected_item_list) > 0) {
-      $is_confirm_to_print = isset($_POST['hidBlank']) ? '_blank' : '_self';
-      echo form_open('', array('id' => 'resultEntryList', 'name' => 'resultEntryList', 'target' => $is_confirm_to_print));
+      echo form_open('', array('id' => 'resultEntryList', 'name' => 'resultEntryList', 'target' => '_self'));
   ?>
     <div class="glass-card mb-4 overflow-hidden">
       <div class="card-header bg-white py-3 px-4 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
@@ -382,7 +382,12 @@ $progress_pct = ($total_participants > 0) ? min(100, (int)round(($cnt_item_list 
                   $gradeVal = trim((string)($row['grade'] ?? ''));
                   $marks_array = explode('#$#', (string)($row['marks'] ?? ''));
               ?>
-                <tr>
+                <tr id="result_row_<?php echo $row['rm_id']; ?>"
+                    data-rm-id="<?php echo htmlspecialchars((string)$row['rm_id']); ?>"
+                    data-participant-id="<?php echo htmlspecialchars((string)$row['participant_id']); ?>"
+                    data-code-no="<?php echo htmlspecialchars((string)$row['code_no']); ?>"
+                    data-marks="<?php echo htmlspecialchars((string)($row['marks'] ?? '')); ?>"
+                    data-total-mark="<?php echo htmlspecialchars((string)$row['total_mark']); ?>">
                   <td class="ps-4 text-center text-muted fw-semibold"><?php echo $i + 1; ?></td>
                   <td class="text-center">
                     <span class="fw-bold text-dark font-monospace"><?php echo htmlspecialchars((string)$row['participant_id']); ?></span>
@@ -494,7 +499,8 @@ $progress_pct = ($total_participants > 0) ? min(100, (int)round(($cnt_item_list 
     <input type="hidden" name="hidItemId" id="hidItemId" value="<?php echo htmlspecialchars((string)$item_code_val); ?>">
     <input type="hidden" name="hidNoJudge" id="hidNoJudge" value="<?php echo (int)$cnt_judges; ?>">
     <input type="hidden" name="hidResultId" id="hidResultId" value="">
-    <input type="hidden" name="hidBlank" id="hidBlank" value="_blank">
+    <input type="hidden" name="hidCntItemList" id="hidCntItemList" value="<?php echo (int)$cnt_item_list; ?>">
+    <input type="hidden" name="hidTotalPart" id="hidTotalPart" value="<?php echo (int)$total_participants; ?>">
   <?php
       echo form_close();
   } ?>
@@ -557,12 +563,18 @@ $progress_pct = ($total_participants > 0) ? min(100, (int)round(($cnt_item_list 
     </table>
   </div>
 
-  <?php if (!empty($post_item_id) && ($show_conirm_button ?? 'yes') == 'yes') { ?>
+  <?php if (!empty($item_code_val) && ($show_conirm_button ?? 'yes') == 'yes') { ?>
     <script>
-      window.onload = function() {
+      document.addEventListener('DOMContentLoaded', function() {
+        var consoleEl = document.getElementById('marksEntryConsole');
+        <?php if (!empty($selected_result)) { ?>
+          if (consoleEl) {
+            consoleEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        <?php } ?>
         var el = document.getElementById('txt_code_no');
         if (el) el.focus();
-      };
+      });
     </script>
   <?php } ?>
 </div>

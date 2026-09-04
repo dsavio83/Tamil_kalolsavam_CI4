@@ -200,7 +200,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     <script>
-        var path = '<?php echo base_url(); ?>';
+        var path = '<?php echo site_url('/'); ?>';
 
         function clicktoviewfestdet_public(festid) {
             $('#hidfestid').val(festid);

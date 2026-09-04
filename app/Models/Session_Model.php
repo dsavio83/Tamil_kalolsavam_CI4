@@ -25,7 +25,9 @@ class Session_Model extends \App\Models\BaseModel {
         
         if (trim($this->session->get('USERID') ?? '') == '' || (int) ($this->session->get('USERID') ?? 0) <= 0) {
             if ($redirect == true) {
-                $uri = 'http' . (@$_SERVER['HTTPS'] ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+                $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+                $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
+                $uri = 'http' . (@$_SERVER['HTTPS'] ? 's' : '') . '://' . $host . $requestUri;
                 $set_session_data = array('REQUEST_URI' => $uri);
                 $this->set_session($set_session_data);
                

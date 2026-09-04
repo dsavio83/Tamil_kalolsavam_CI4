@@ -70,7 +70,7 @@ class Registration extends \App\Controllers\BaseController {
     }
 
     /**
-     * Resolve a school (Type 5) user's own school code from session or user_cluster.
+     * Resolve a school (Type 5) user's own school code from session or sd_user_cluster.
      *
      * @return string The authenticated user's own school code, or '' if unknown.
      */

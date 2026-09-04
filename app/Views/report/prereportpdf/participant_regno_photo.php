@@ -43,339 +43,51 @@
 </style>
 
 <?php
-if ($this->session->get('SUB_DISTRICT')) {
-    /* $sub_dist_name		=	get_sub_dist_name($this->session->get('SUB_DISTRICT'));
-      $label				=	$sub_dist_name; */
-    $title = wordwrap(get_sub_dist_name($this->session->get('SUB_DISTRICT')) . ' Sub District', 40, '<br/>');
-} else if ($this->session->get('DISTRICT')) {
-    $title = wordwrap(get_dist_name($this->session->get('DISTRICT')) . '  District', 40, '<br/>');
-}
-$file_path = '';
-$venue = '';
 $title = '';
+if ($this->session->get('SUB_DISTRICT')) {
+    $title = wordwrap(get_sub_dist_name($this->session->get('SUB_DISTRICT')) . ' Sub District', 40, '<br/>');
+    $dir = 'sub_district';
+} else if ($this->session->get('DISTRICT')) {
+    $title = wordwrap(get_dist_name($this->session->get('DISTRICT')) . ' District', 40, '<br/>');
+    $dir = 'district';
+} else {
+    $dir = 'sub_district';
+}
+
+$venue = '';
+$file_path = '';
 $fest_master_details = $this->General_Model->get_fest_master_details();
-if (count($fest_master_details) > 0) {
-    //$title		=	(@$fest_master_details[0]['sub_dist_kalolsavam_name']) ? @$fest_master_details[0]['sub_dist_kalolsavam_name'] : '';
-    //$title		=	wordwrap(get_sub_dist_name($this->session->get('SUB_DISTRICT')).' Sub District',40,'<br/>');
+if (!empty($fest_master_details) && count($fest_master_details) > 0) {
     $venue = wordwrap(@$fest_master_details[0]['venue'], 40, '<br/>');
     $logo = @$fest_master_details[0]['logo_name'];
-    $file_path = pdf_safe_logo_image('district', $logo, false);
+    $file_path = pdf_safe_logo_image($dir, $logo, true);
 }
 ?>
 
-<page backtop="5mm" backbottom="0mm ">
-    <table align="left" border="0">
+<page backtop="3mm" backbottom="3mm" backleft="3mm" backright="3mm">
+    <table align="left" border="0" cellspacing="0" cellpadding="0">
         <tr>
-            <td valign="top">
-                <table align="left" width="275" border="1" >
-
-                    <tr valign="top">
-                        <?php
-                        if ($file_path != "") {
-                            ?>
-
-                            <td rowspan="2"> <img src="<?php echo $file_path ?>" height="40"></td>
-                        <?php } else {
-                            ?>
-                            <td rowspan="2" height="40">&nbsp;</td>
-                        <?php } ?>
-
-                        <td align="center" class="style56">Kerala School Kalolsavam 2025-2620</td>
-                    </tr>
-                    <tr>
-                        <td align="right" class="style2"><?php echo $title . '<br> ' . $venue; ?><br></td>
-                    </tr>
-
-
-                    <tr bgcolor="#CCCCCC">
-
-                        <td bgcolor="#E5E5E5" colspan="2" align="center" class="style2" style="border-bottom:1px #000000;border-top:1px #000000; border-right:0px #000000; padding:2px;">Participant's Card</td>
-                    </tr>
-                    <tr>
-                        <td align="center">Reg. No</td>
-
-                        <td rowspan="2" style="border-bottom:1px #000000; border-left:1px #000000; padding:0px;">
-                            <table>
-                                <tr>
-                                    <td>
-
-                                        <span class="style2">&nbsp;<?php echo $partcard[0]['participant_name']; ?></span><br>
-                                        &nbsp;<?php echo wordwrap($partcard[0]['school_code'] . '  ' . @$partcard[0]['school_name'], 30, '<br/>'); ?><br />
-
-                                        &nbsp;<?php echo 'Class  :' . $partcard[0]['class'] . "<br>&nbsp;" . $partcard[0]['sub_district_name'] . " - Sub-District"; ?></td>
-
-                                    <td align="left" valign="top">&nbsp;&nbsp;
-                                        <?php
-                                        //echo "<br /><br />-->".var_dump($Photo['pic'][$reg]);
-                                        $reg	=	@$partcard[0]['admn_no'];
-                                        if(@$Photo['pic'][$reg])
-                                        {
-                                        @$pic_path	=	@$Photo['pic'][$reg];
-                                        echo "<img src='".@$pic_path."'width='80' height='80'>";
-                                        }
-                                        else
-                                        {
-                                        //$document_root 	=	image_url(false)."photos";
-                                        @$pic_path	=	image_url()."/img_user_nophoto.jpg";
-                                        echo "<img src='".@$pic_path."'width='80' height='80'>";
-                                        }
-                                        ?>
-
-                                    </td>
-                                </tr>
-                            </table>
-
-                        </td>
-
-                    </tr>
-                    <tr>
-                        <td  width="50"class="style1" valign="top" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;" align="center"><?php echo $partcard[0]['participant_id']; ?></td>
-
-
-                    </tr>
-
-                    <?php
-                    $count = 1;
-                    $cnt = count($partcard);
-                    for ($j = 0; $j < count($partcard); $j++) {
-                        $dat_itme = datetophpmodel($partcard[$j]['datee']);
-                        $timer = explode(" ", $dat_itme);
-                        if ($cnt != ($j + 1)) {
-                            ?>
-
-                            <tr>
-                                <td align="left" colspan="2" class="style55">&nbsp;<?php echo $partcard[$j]['item_code'] . '&nbsp;&nbsp;&nbsp;' . $partcard[$j]['item_name']; ?></td>
-                            </tr>
-
-                            <tr>
-                                <td align="right" colspan="2" class="style9" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;"><?php echo 'Cluster ' . $partcard[$j]['cluster_no'] . ' :&nbsp;&nbsp; ' . $partcard[$j]['stage_name'] . ' - ' . $partcard[$j]['stage_desc'] . '&nbsp; :  on  ' . $dat_itme; ?>&nbsp;&nbsp;&nbsp;</td>
-                            </tr>
-                            <?php
-                        } else {
-                            ?>
-                            <tr>
-                                <td colspan="2" class="style55" align="left">&nbsp;<?php echo $partcard[$j]['item_code'] . '&nbsp;&nbsp;&nbsp;' . $partcard[$j]['item_name']; ?></td>
-                            </tr>
-                            <tr>
-                                <td colspan="2" class="style55" align="right"><?php echo 'Cluster ' . $partcard[$j]['cluster_no'] . ' :&nbsp;&nbsp; ' . $partcard[$j]['stage_name'] . ' - ' . $partcard[$j]['stage_desc'] . '&nbsp; : on ' . $dat_itme; ?>&nbsp;&nbsp;&nbsp;</td>
-                            </tr>
-
-
-                            <?php
-                        }
-                        $count++;
-                    }
-                    ?>
-                </table>
-            </td>
-            <?php if (is_array($partcard1) and count($partcard1) > 0) { ?>
-                <td width="5">&nbsp;</td>
+            <?php if (!empty($partcard) && is_array($partcard) && count($partcard) > 0 && !empty($partcard[0]['participant_id'])) { ?>
                 <td valign="top">
-                    <table align="left" width="275" border="1" >
-
-                        <tr valign="top">
-                            <?php
-                            if ($file_path != "") {
-                                ?>
-
-                                <td rowspan="2"> <img src="<?php echo $file_path ?>" height="40"></td>
-                            <?php } else {
-                                ?>
-                                <td rowspan="2" height="40">&nbsp;</td>
-                            <?php } ?>
-
-                            <td align="center" class="style56">Kerala School Kalolsavam 2025-2620</td>
-                        </tr>
-                        <tr>
-                            <td align="right" class="style2"><?php echo $title . '<br> ' . $venue; ?><br></td>
-                        </tr>
-
-
-                        <tr bgcolor="#CCCCCC">
-
-                            <td bgcolor="#E5E5E5" colspan="2" align="center" class="style2" style="border-bottom:1px #000000;border-top:1px #000000; border-right:0px #000000; padding:2px;">Participant's Card</td>
-                        </tr>
-                        <tr>
-                            <td align="center">Reg. No</td>
-
-                            <td rowspan="2" style="border-bottom:1px #000000; border-left:1px #000000; padding:0px;">
-                                <table>
-                                    <tr>
-                                        <td>
-                                            <span class="style2">&nbsp;<?php echo $partcard1[0]['participant_name']; ?></span><br>
-                                            &nbsp;<?php echo wordwrap($partcard1[0]['school_code'] . '  ' . @$partcard1[0]['school_name'], 30, '<br/>'); ?><br>
-                                            &nbsp;<?php echo 'Class  :' . $partcard1[0]['class'] . "<br>&nbsp;" . $partcard1[0]['sub_district_name'] . " - Sub-District"; ?></td>
-                                        <td align="left" valign="top">&nbsp;&nbsp;
-                                            <?php
-                                            //echo "<br /><br />-->".var_dump($Photo['pic'][$reg]);
-                                            $reg	=	@$partcard1[0]['admn_no'];
-                                            if(@$Photo['pic'][$reg])
-                                            {
-                                            @$pic_path	=	@$Photo['pic'][$reg];
-                                            echo "<img src='".@$pic_path."'width='80' height='80'>";
-                                            }
-                                            else
-                                            {
-                                            //$document_root 	=	image_url(false)."photos";
-                                            @$pic_path	=	image_url()."/img_user_nophoto.jpg";
-                                            echo "<img src='".@$pic_path."'width='80' height='80'>";
-                                            }
-                                            ?>
-
-                                        </td>
-                                    </tr>
-                                </table>
-
-                            </td>
-
-
-                        </tr>
-                        <tr>
-                            <td  width="50"class="style1" valign="top" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;" align="center"><?php echo $partcard1[0]['participant_id']; ?></td>
-                        </tr>
-
-                        <?php
-                        $count = 1;
-                        $cnt = count($partcard1);
-                        for ($j = 0; $j < count($partcard1); $j++) {
-                            $dat_itme = datetophpmodel($partcard1[$j]['datee']);
-                            $timer = explode(" ", $dat_itme);
-                            if ($cnt != ($j + 1)) {
-                                ?>
-
-                                <tr>
-                                    <td align="left" colspan="2" class="style55">&nbsp;<?php echo $partcard1[$j]['item_code'] . '&nbsp;&nbsp;&nbsp;' . $partcard1[$j]['item_name']; ?></td>
-                                </tr>
-
-                                <tr>
-                                    <td align="right" colspan="2" class="style9" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;"><?php echo 'Cluster ' . $partcard1[$j]['cluster_no'] . ' :&nbsp;&nbsp; ' . $partcard1[$j]['stage_name'] . ' - ' . $partcard1[$j]['stage_desc'] . '&nbsp; :  on  ' . $dat_itme; ?>&nbsp;&nbsp;&nbsp;</td>
-                                </tr>
-                                <?php
-                            } else {
-                                ?>
-                                <tr>
-                                    <td colspan="2" class="style55" align="left">&nbsp;<?php echo $partcard1[$j]['item_code'] . '&nbsp;&nbsp;&nbsp;' . $partcard1[$j]['item_name']; ?></td>
-                                </tr>
-                                <tr>
-                                    <td colspan="2" class="style55" align="right"><?php echo 'Cluster ' . $partcard1[$j]['cluster_no'] . ' :&nbsp;&nbsp; ' . $partcard1[$j]['stage_name'] . ' - ' . $partcard1[$j]['stage_desc'] . '&nbsp; : on ' . $dat_itme; ?>&nbsp;&nbsp;&nbsp;</td>
-                                </tr>
-
-
-                                <?php
-                            }
-                            $count++;
-                        }
-                        ?>
-                    </table>
-
+                    <?php echo render_single_photo_card($partcard[0], $Photo, $file_path, $title, $venue, $this, $partcard); ?>
                 </td>
             <?php } ?>
-            <?php if (is_array($partcard2) and count($partcard2) > 0) { ?>
-                <td width="5">&nbsp;</td>
+            <?php if (!empty($partcard1) && is_array($partcard1) && count($partcard1) > 0 && !empty($partcard1[0]['participant_id'])) { ?>
+                <td width="10">&nbsp;</td>
                 <td valign="top">
-                    <table align="left" width="275" border="1" >
-
-                        <tr valign="top">
-                            <?php
-                            if ($file_path != "") {
-                                ?>
-
-                                <td rowspan="2"> <img src="<?php echo $file_path ?>" height="40"></td>
-                            <?php } else {
-                                ?>
-                                <td rowspan="2" height="40">&nbsp;</td>
-                            <?php } ?>
-
-                            <td align="center" class="style56">Kerala School Kalolsavam 2025-2620</td>
-                        </tr>
-                        <tr>
-                            <td align="right" class="style2"><?php echo $title . '<br> ' . $venue; ?><br></td>
-                        </tr>
-
-
-                        <tr bgcolor="#CCCCCC">
-
-                            <td bgcolor="#E5E5E5" colspan="2" align="center" class="style2" style="border-bottom:1px #000000;border-top:1px #000000; border-right:0px #000000; padding:2px;">Participant's Card</td>
-                        </tr>
-                        <tr>
-                            <td align="center">Reg. No</td>
-
-                            <td rowspan="2" style="border-bottom:1px #000000; border-left:1px #000000; padding:0px;">
-                                <table>
-                                    <tr>
-                                        <td>
-
-                                            <span class="style2">&nbsp;<?php echo $partcard2[0]['participant_name']; ?></span><br>
-                                            &nbsp;<?php echo wordwrap($partcard2[0]['school_code'] . '  ' . @$partcard2[0]['school_name'], 30, '<br/>'); ?><br>
-                                            &nbsp;<?php echo 'Class  :' . $partcard2[0]['class'] . "<br>&nbsp;" . $partcard2[0]['sub_district_name'] . " - Sub-District"; ?></td>
-                                        <td align="left" valign="top">&nbsp;&nbsp;
-                                            <?php
-                                            //echo "<br /><br />-->".var_dump($Photo['pic'][$reg]);
-                                            $reg	=	@$partcard2[0]['admn_no'];
-                                            if(@$Photo['pic'][$reg])
-                                            {
-                                            @$pic_path	=	@$Photo['pic'][$reg];
-                                            echo "<img src='".@$pic_path."'width='80' height='80'>";
-                                            }
-                                            else
-                                            {
-                                            //$document_root 	=	image_url(false)."photos";
-                                            @$pic_path	=	image_url()."/img_user_nophoto.jpg";
-                                            echo "<img src='".@$pic_path."'width='80' height='80'>";
-                                            }
-                                            ?>
-
-                                        </td>
-                                    </tr>
-                                </table>
-
-                            </td>
-
-                        </tr>
-                        <tr>
-                            <td  width="50"class="style1" valign="top" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;" align="center"><?php echo $partcard2[0]['participant_id']; ?></td>
-                        </tr>
-
-                        <?php
-                        $count = 1;
-                        $cnt = count($partcard2);
-                        for ($j = 0; $j < count($partcard2); $j++) {
-                            $dat_itme = datetophpmodel($partcard2[$j]['datee']);
-                            $timer = explode(" ", $dat_itme);
-                            if ($cnt != ($j + 1)) {
-                                ?>
-
-                                <tr>
-                                    <td align="left" colspan="2" class="style55">&nbsp;<?php echo $partcard2[$j]['item_code'] . '&nbsp;&nbsp;&nbsp;' . $partcard2[$j]['item_name']; ?></td>
-                                </tr>
-
-                                <tr>
-                                    <td align="right" colspan="2" class="style9" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;"><?php echo 'Cluster ' . $partcard2[$j]['cluster_no'] . ' :&nbsp;&nbsp; ' . $partcard2[$j]['stage_name'] . ' - ' . $partcard2[$j]['stage_desc'] . '&nbsp; :  on  ' . $dat_itme; ?>&nbsp;&nbsp;&nbsp;</td>
-                                </tr>
-                                <?php
-                            } else {
-                                ?>
-                                <tr>
-                                    <td colspan="2" class="style55" align="left">&nbsp;<?php echo $partcard2[$j]['item_code'] . '&nbsp;&nbsp;&nbsp;' . $partcard2[$j]['item_name']; ?></td>
-                                </tr>
-                                <tr>
-                                    <td colspan="2" class="style55" align="right"><?php echo 'Cluster ' . $partcard2[$j]['cluster_no'] . ' :&nbsp;&nbsp; ' . $partcard2[$j]['stage_name'] . ' - ' . $partcard2[$j]['stage_desc'] . '&nbsp; : on ' . $dat_itme; ?>&nbsp;&nbsp;&nbsp;</td>
-                                </tr>
-
-
-                                <?php
-                            }
-                            $count++;
-                        }
-                        ?>
-                    </table>
-
+                    <?php echo render_single_photo_card($partcard1[0], $Photo, $file_path, $title, $venue, $this, $partcard1); ?>
+                </td>
+            <?php } ?>
+            <?php if (!empty($partcard2) && is_array($partcard2) && count($partcard2) > 0 && !empty($partcard2[0]['participant_id'])) { ?>
+                <td width="10">&nbsp;</td>
+                <td valign="top">
+                    <?php echo render_single_photo_card($partcard2[0], $Photo, $file_path, $title, $venue, $this, $partcard2); ?>
                 </td>
             <?php } ?>
         </tr>
     </table>
-
 </page>
+
 
 
 

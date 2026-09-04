@@ -4,7 +4,7 @@
 <br />
 
 <?php
-echo form_open('publishresult/Resultindex/itemwise_report', array('id' => 'itemwise', 'target' => '_blank'));
+echo form_open('publishresult/resultindex/itemwise_report', array('id' => 'itemwise', 'target' => '_blank'));
 
 ?>
 <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top:15px;">
@@ -27,11 +27,11 @@ echo form_open('publishresult/Resultindex/itemwise_report', array('id' => 'itemw
     <tr>
         <td>&nbsp;</td>
         <td align="left" width="27%" class="table_row_first">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-        <td align="left" width="55%" class="table_row_first"><form name="form1" method="post" action="">
+        <td align="left" width="55%" class="table_row_first">
                 <label>
                     <input type="submit" name="btnSubmit" class="btn btn-primary" id="btnSubmit" value="View report" onClick="return checkitemwise();">
                 </label>
-            </form>    </td>
+        </td>
         <td width="18%">&nbsp;</td>
     </tr>
 

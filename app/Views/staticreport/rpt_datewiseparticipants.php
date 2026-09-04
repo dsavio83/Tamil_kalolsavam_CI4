@@ -53,7 +53,7 @@
             <tr>
                 <td width='30' style='border: 0 1px 1px 0 #000000;  height:20px;'>&nbsp;&nbsp;<?php echo $count; ?></td>
                 <td width='50' style='border: 0 1px 1px 0 #000000;  height:20px;'>&nbsp;&nbsp;&nbsp;&nbsp;<?php echo $data['school_code']; ?></td>
-                <td width='330' style='border: 0 1px 1px 0 #000000;  height:20px;'>&nbsp;&nbsp;<?php echo $data['school_name']; ?></td>
+                <td width='330' style='border: 0 1px 1px 0 #000000;  height:20px;'>&nbsp;&nbsp;<?php echo esc($data['school_name']); ?></td>
                 <td width='100' style='border: 0 1px 1px 0 #000000;  height:20px;'>&nbsp;&nbsp;<?php echo $data['total']; ?></td>
             </tr>
             <?php
