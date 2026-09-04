@@ -70,7 +70,7 @@ class Result_Model extends \App\Models\BaseModel {
 
 
 
-   function save_result_details() {
+   function save_result_details($code_no = '', $item_code = '') {
     $error_array = array();
     $success_array = array(); // New array for success messages
     $return_array = array(); // Combined array for errors and success messages
@@ -124,7 +124,7 @@ class Result_Model extends \App\Models\BaseModel {
         $data['participant_id'] = $participant_details[0]['participant_id'];
         $data['school_code'] = $participant_details[0]['school_code'];
         $data['admn_no'] = $participant_details[0]['admn_no'];
-        $data['code_no'] = $this->input->post('txt_code_no');
+        $data['code_no'] = $code_no;
         $data['total_mark'] = $this->input->post('totalMark');
         $data['percentage'] = $percentage;
         $data['grade'] = $grade;
@@ -132,27 +132,35 @@ class Result_Model extends \App\Models\BaseModel {
         $data['marks'] = $marks;
         $data['spo_id'] = $spoId;
 
-        $this->db->where('item_code', $participant_details[0]['item_code']);
-        $this->db->where('participant_id', $participant_details[0]['participant_id']);
-        $this->db->where('school_code', $participant_details[0]['school_code']);
-        $result_master = $this->db->get('result_master');
-        $result_master = $result_master->getResultArray();
-
-        if (count($result_master) > 0) {
-            $this->db->where('rm_id', $result_master[0]['rm_id']);
+        $hid_result_id = $this->input->post('hidResultId') ?: (isset($_POST['hidResultId']) ? $_POST['hidResultId'] : '');
+        if (!empty($hid_result_id)) {
+            $this->db->where('rm_id', $hid_result_id);
             $this->db->update('result_master', $data);
             $success_array[] = 'Result updated successfully!';
-            //swal("Good job!", "Result updated successfully!", "success");
         } else {
-            // Check if code number already exists before inserting
-            $codeSatatus = $this->checkCodeNoExists($data['code_no'], $data['item_code']);
+            $this->db->where('item_code', $participant_details[0]['item_code']);
+            $this->db->where('participant_id', $participant_details[0]['participant_id']);
+            $this->db->where('school_code', $participant_details[0]['school_code']);
+            $result_master = $this->db->get('result_master');
+            $result_master = $result_master->getResultArray();
 
-            if ($codeSatatus == 0) {
-                $this->db->insert('result_master', $data);
-                $success_array[] = 'Result saved successfully!';
-                
+            if (count($result_master) > 0) {
+                $this->db->where('rm_id', $result_master[0]['rm_id']);
+                $this->db->update('result_master', $data);
+                $success_array[] = 'Result updated successfully!';
+                //swal("Good job!", "Result updated successfully!", "success");
             } else {
-                $error_array[] = $data['code_no'] . ' Code number already exists in this Item!';
+                // Check if code number already exists before inserting
+                $code_status = $this->checkCodeNoExists($code_no, $item_code);
+
+                if ($code_status == 0) {
+                    $data['item_code'] = $item_code;
+                    $this->db->insert('result_master', $data);
+                    $success_array[] = 'Result saved successfully!';
+                    
+                } else {
+                    $error_array[] = $code_no . ' Code number already exists in this Item!';
+                }
             }
         }
     } else {
@@ -249,8 +257,12 @@ class Result_Model extends \App\Models\BaseModel {
         return TRUE;
     }
 
-    function get_selected_result_details() {
-        $this->db->where('rm_id', $this->input->post('hidResultId'));
+    function get_selected_result_details($rm_id = '') {
+        $rm_id = $rm_id ?: $this->input->post('hidResultId') ?: (request()->getPost('hidResultId') ?? request()->getGet('id') ?? request()->getGet('hidResultId'));
+        if (empty($rm_id)) {
+            return array();
+        }
+        $this->db->where('rm_id', $rm_id);
         $result_master = $this->db->get('result_master');
         $result_array = array();
         if ($result_master->getNumRows() > 0) {
@@ -261,9 +273,9 @@ class Result_Model extends \App\Models\BaseModel {
                 $result_array[$k]['code_no'] = $result_list['code_no'];
                 $result_array[$k]['marks'] = $result_list['marks'];
                 $result_array[$k]['total_mark'] = $result_list['total_mark'];
+                $result_array[$k]['item_code'] = $result_list['item_code'];
                 $k++;
             }
-            
         }
 
         return $result_array;
@@ -498,17 +510,17 @@ class Result_Model extends \App\Models\BaseModel {
                 if (is_array($cirtificate_array_master) && count($cirtificate_array_master) > 0) {
                     $this->db->select('item_code');
                     $this->db->where('item_code', $item_code);
-                    $check_cirtificate_array = $this->db->get('certificate_master');
+                    $check_cirtificate_array = $this->db->get('sd_certificate_master');
                     $check_cirtificate_array = $check_cirtificate_array->getResultArray();
                     if (is_array($check_cirtificate_array) && count($check_cirtificate_array) > 0) {
                         $this->db->where('item_code', $item_code);
-                        if (!$this->db->delete('certificate_master')) {
+                        if (!$this->db->delete('sd_certificate_master')) {
                             $this->db->transRollback();
                             return FALSE;
                         }
                     }
                     foreach ($cirtificate_array_master as $cirtificate_array_master) {
-                        if (!$this->db->insert('certificate_master', $cirtificate_array_master)) {
+                        if (!$this->db->insert('sd_certificate_master', $cirtificate_array_master)) {
                             $this->db->transRollback();
                             return FALSE;
                         }
@@ -646,7 +658,7 @@ class Result_Model extends \App\Models\BaseModel {
             return FALSE;
         }
         $this->db->where('item_code', $item_code);
-        if (!$this->db->delete('certificate_master')) {
+        if (!$this->db->delete('sd_certificate_master')) {
             $this->db->transRollback();
             return FALSE;
         }
