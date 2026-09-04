@@ -89,7 +89,7 @@ class Stage_Report_Model extends \App\Models\BaseModel {
         $this->db->join('festival_master AS fm', 'fm.fest_id=im.fest_id');
         $this->db->join('stage_item_master AS sm', 'pd.item_code = sm.item_code');
         $this->db->join('stage_master AS ms', ' ms.stage_id = sm.stage_id');
-        $this->db->join('cluster_participant_details AS cp', 'cp.item_code = sm.item_code');
+        $this->db->join('sd_cluster_participant_details AS cp', 'cp.item_code = sm.item_code');
         $this->db->where('cp.participant_id = p.participant_id');
         $this->db->where('d.school_code', $schoolcode);
         $this->db->groupBy('p.participant_id');
@@ -110,7 +110,7 @@ class Stage_Report_Model extends \App\Models\BaseModel {
         $this->db->join('festival_master AS fm', 'fm.fest_id=im.fest_id');
         $this->db->join('stage_item_master AS sm', 'pd.item_code = sm.item_code');
         $this->db->join('stage_master AS ms', ' ms.stage_id = sm.stage_id');
-        $this->db->join('cluster_participant_details AS cp', 'cp.item_code = sm.item_code');
+        $this->db->join('sd_cluster_participant_details AS cp', 'cp.item_code = sm.item_code');
         $this->db->where('cp.participant_id = p.participant_id');
         $this->db->groupBy('p.participant_id');
         $this->db->groupBy('pd.item_code');
@@ -272,7 +272,7 @@ class Stage_Report_Model extends \App\Models\BaseModel {
         $this->db->join('stage_master AS SM ', 'SM.stage_id = SIM.stage_id');
         $this->db->join('item_master    AS IM ', 'IM.item_code = SIM.item_code');
         $this->db->join('festival_master  AS FM', 'FM.fest_id = IM.fest_id');
-        $this->db->join('cluster_participant_details  AS CP', 'SIM.stage_id = CP.stage_id');
+        $this->db->join('sd_cluster_participant_details  AS CP', 'SIM.stage_id = CP.stage_id');
         $this->db->where('CP.item_code', $itemcode);
         $this->db->groupBy('CP.participant_id');
         $this->db->groupBy('IM.item_code');
@@ -291,7 +291,7 @@ pd.class, pd.gender, pid.item_code, pid.item_type, pid.is_captain, it.item_name,
         $this->db->join('festival_master AS fm', 'fm.fest_id = it.fest_id');
         $this->db->join('stage_item_master AS sm', 'sm.item_code = it.item_code');
         $this->db->join('stage_master AS ssm', 'ssm.stage_id = sm.stage_id');
-        $this->db->join('cluster_participant_details AS cpd', 'cpd.item_code = pid.item_code');
+        $this->db->join('sd_cluster_participant_details AS cpd', 'cpd.item_code = pid.item_code');
         $this->db->where('sd.school_code', $schoolcode);
         //$this->db->where(' pid.school_code = sd.school_code');
         //$this->db->where(' cpd.stage_id = sm.stage_id');
@@ -379,7 +379,7 @@ pd.class, pd.gender, pid.item_code, pid.item_type, pid.is_captain, it.item_name,
         $this->db->where('cm.item_code', $itemcode);
         $this->db->select('cm.stage_id, cm.item_code, cm.cluster_id, cm.cluster_no, cpd.participant_id, cpd.cluster_no, fm.fest_name, im.item_name, sm.stage_name, sm.stage_desc, date(cm.start_time) AS stime,im.max_time,time( cm.start_time ) AS ttime');
         $this->db->from('cluster_master AS cm');
-        $this->db->join('cluster_participant_details AS cpd', 'cm.item_code = cpd.item_code');
+        $this->db->join('sd_cluster_participant_details AS cpd', 'cm.item_code = cpd.item_code');
         $this->db->join('item_master  AS  im', 'im.item_code = cpd.item_code');
         $this->db->join('festival_master  AS fm', 'fm.fest_id = im.fest_id');
         $this->db->join('stage_master AS sm', 'sm.stage_id = cm.stage_id');
@@ -401,7 +401,7 @@ GROUP BY `PID`.`participant_id`
 HAVING cnt > '1'
 ) AS C, participant_item_details AS PID
  JOIN participant_details AS PD ON PD.participant_id = PID.participant_id
-JOIN cluster_participant_details AS CPD ON PD.participant_id = CPD.participant_id
+JOIN sd_cluster_participant_details AS CPD ON PD.participant_id = CPD.participant_id
 JOIN school_master AS SM ON SM.school_code = PD.school_code
 JOIN item_master AS IM ON IM.item_code = PID.item_code
 LEFT JOIN cluster_master AS CM ON CM. cluster_id = CPD. cluster_id and CM. item_code = PID. item_code

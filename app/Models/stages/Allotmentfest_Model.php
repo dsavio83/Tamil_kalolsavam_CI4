@@ -119,20 +119,20 @@ class Allotmentfest_Model extends \App\Models\BaseModel {
             /** inserting data to cluster master ends */
             $start_time = $end_time;
 
-            /** inserting data to cluster_participant_details */
+            /** inserting data to sd_cluster_participant_details */
             for ($k = 0; $k < $no_of_participant; $k++) {
                 $cluster_item = array();
                 $cluster_item['cluster_id'] = $cluster_id;
                 $cluster_item['stage_id'] = $this->input->post('cmbStage' . $item_code);
                 $cluster_item['participant_id'] = (int) @$participants[$i]['participant_id'];
                 $cluster_item['item_code'] = $item_code;
-                //$this->db->insert('cluster_participant_details', $cluster_item);
+                //$this->db->insert('sd_cluster_participant_details', $cluster_item);
 
               
                 $this->db->where('item_code', $item_code);
                 $this->db->where('participant_id', @$participants[$i]['participant_id']);
                 $this->db->select('*');
-                $this->db->from('cluster_participant_details');
+                $this->db->from('sd_cluster_participant_details');
 
 
                 $result2 = $this->db->get();
@@ -143,17 +143,17 @@ class Allotmentfest_Model extends \App\Models\BaseModel {
                     $cluster_item['stage_id'] =  $this->input->post('cmbStage' . $item_code);
                     $this->db->where('item_code', $item_code);
                     $this->db->where('participant_id', @$participants[$i]['participant_id']);
-                    $this->db->update('cluster_participant_details', $cluster_item);
+                    $this->db->update('sd_cluster_participant_details', $cluster_item);
                 } else {
                    $cluster_item['cluster_no'] = $j;
-                   $this->db->insert('cluster_participant_details', $cluster_item);
+                   $this->db->insert('sd_cluster_participant_details', $cluster_item);
                 }              
 
                 $i++;
 
             }
             //exit;
-            /** inserting data to cluster_participant_details ends */
+            /** inserting data to sd_cluster_participant_details ends */
         }
         //echo $balance;
         $no_of_participant = '';
@@ -176,7 +176,7 @@ class Allotmentfest_Model extends \App\Models\BaseModel {
                 $this->db->delete('cluster_master');
                 /*
                 $this->db->where('item_code', $item_code);
-                $this->db->delete('cluster_participant_details');
+                $this->db->delete('sd_cluster_participant_details');
                 */
                 
                 $this->save_allotment($item_code);

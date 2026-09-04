@@ -364,8 +364,8 @@ class Registration_Model extends \App\Models\BaseModel {
 
             $this->db->where('item_code', $item_code);
             $this->db->where('cluster_no', $cluster_no);
-            $cluster_participant_details = $this->db->get('cluster_participant_details');
-            $cluster_participant = $cluster_participant_details->getResultArray();
+            $sd_cluster_participant_details = $this->db->get('sd_cluster_participant_details');
+            $cluster_participant = $sd_cluster_participant_details->getResultArray();
 
             $data_cluster_participant = array();
             $data_cluster_participant['cluster_id'] = $cluster_participant[0]['cluster_id'];
@@ -373,7 +373,7 @@ class Registration_Model extends \App\Models\BaseModel {
             $data_cluster_participant['participant_id'] = $participant_id;
             $data_cluster_participant['item_code'] = $cluster_participant[0]['item_code'];
             $data_cluster_participant['cluster_no'] = $cluster_participant[0]['cluster_no'];
-            $this->db->insert('cluster_participant_details', $data_cluster_participant);
+            $this->db->insert('sd_cluster_participant_details', $data_cluster_participant);
         }
     }
 
@@ -389,7 +389,7 @@ class Registration_Model extends \App\Models\BaseModel {
 
             $data_cluster_participant = array();
             $data_cluster_participant['participant_id'] = $new_participant_id;
-            $this->db->update('cluster_participant_details', $data_cluster_participant);
+            $this->db->update('sd_cluster_participant_details', $data_cluster_participant);
         }
     }
 
@@ -402,8 +402,8 @@ class Registration_Model extends \App\Models\BaseModel {
         if ($stage_item_master->getNumRows() > 0) {
             $this->db->where('item_code', $item_code);
             $this->db->where('participant_id', $participant_id);
-            $cluster_participant_details = $this->db->get('cluster_participant_details');
-            if ($cluster_participant_details->getNumRows() > 0) {
+            $sd_cluster_participant_details = $this->db->get('sd_cluster_participant_details');
+            if ($sd_cluster_participant_details->getNumRows() > 0) {
 
 
                 $stage_item = $stage_item_master->getResultArray();
@@ -414,7 +414,7 @@ class Registration_Model extends \App\Models\BaseModel {
                 $this->db->where('item_code', $item_code);
                 $this->db->update('stage_item_master', $data_stage);
 
-                $cluster_participant = $cluster_participant_details->getResultArray();
+                $cluster_participant = $sd_cluster_participant_details->getResultArray();
                 $cluster_no = $cluster_participant[0]['cluster_no'];
 
                 $this->db->where('item_code', $item_code);
@@ -433,7 +433,7 @@ class Registration_Model extends \App\Models\BaseModel {
 
                 $this->db->where('item_code', $item_code);
                 $this->db->where('participant_id', $participant_id);
-                $this->db->delete('cluster_participant_details');
+                $this->db->delete('sd_cluster_participant_details');
             }
         }
     }

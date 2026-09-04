@@ -160,7 +160,7 @@ class Allotment_Model extends \App\Models\BaseModel {
             /** inserting data to cluster master ends */
             $start_time = $end_time;
 
-            /** inserting data to cluster_participant_details */
+            /** inserting data to sd_cluster_participant_details */
             for ($k = 0; $k < $no_of_participant; $k++) {
                 $cluster_item = array();
                 $cluster_item['cluster_id'] = $cluster_id;
@@ -168,20 +168,20 @@ class Allotment_Model extends \App\Models\BaseModel {
                 $cluster_item['participant_id'] = $participants[$i]['participant_id'];
                 $cluster_item['item_code'] = $this->input->post('hidItemId');
                 $cluster_item['cluster_no'] = $j;
-                //$this->db->insert('cluster_participant_details', $cluster_item);
+                //$this->db->insert('sd_cluster_participant_details', $cluster_item);
                 /*
                 $whr = " cluster_id = ".$cluster_id." and participant_id = ".$cluster_item['participant_id']." and item_code = ".$cluster_item['item_code'];
-                if ($this->General_Model->is_record_exists('cluster_participant_details', $whr)) {
-                    $this->db->update('cluster_participant_details', $cluster_item);
+                if ($this->General_Model->is_record_exists('sd_cluster_participant_details', $whr)) {
+                    $this->db->update('sd_cluster_participant_details', $cluster_item);
                     $this->db->where($whr);
                 }else{
-                    $this->db->insert('cluster_participant_details', $cluster_item);
+                    $this->db->insert('sd_cluster_participant_details', $cluster_item);
                 }
                 */
                 $this->db->where('item_code', $this->input->post('hidItemId'));
                 $this->db->where('participant_id', $participants[$i]['participant_id']);
                 $this->db->select('*');
-                $this->db->from('cluster_participant_details');
+                $this->db->from('sd_cluster_participant_details');
 
 
                 $result2 = $this->db->get();
@@ -190,16 +190,16 @@ class Allotment_Model extends \App\Models\BaseModel {
                     $cluster_item['cluster_no'] = $result2[0]['cluster_no'];
                     $this->db->where('item_code', $this->input->post('hidItemId'));
                     $this->db->where('participant_id', $participants[$i]['participant_id']);
-                    $this->db->update('cluster_participant_details', $cluster_item);
+                    $this->db->update('sd_cluster_participant_details', $cluster_item);
                     
                 } else {
                    $cluster_item['cluster_no'] = $j;
-                   $this->db->insert('cluster_participant_details', $cluster_item);
+                   $this->db->insert('sd_cluster_participant_details', $cluster_item);
                 }
 
                 $i++;
             }
-            /** inserting data to cluster_participant_details ends */
+            /** inserting data to sd_cluster_participant_details ends */
         }
         //echo $balance;
         $no_of_participant = '';
@@ -216,7 +216,7 @@ class Allotment_Model extends \App\Models\BaseModel {
             $this->db->delete('cluster_master');
             /*
             $this->db->where('item_code', $this->input->post('hidItemId'));
-            $this->db->delete('cluster_participant_details');
+            $this->db->delete('sd_cluster_participant_details');
             */
             $this->save_allotment();
             return;
@@ -240,7 +240,7 @@ class Allotment_Model extends \App\Models\BaseModel {
               $this->db->where('item_code', $this->input->post('hidItemId'));
               $cluster_item	=	array();
               $cluster_item['stage_id']		=	$this->input->post('cmbStage');
-              $this->db->update('cluster_participant_details', $cluster_item);
+              $this->db->update('sd_cluster_participant_details', $cluster_item);
 
               $this->update_cluster_time();
               return; */
@@ -339,7 +339,7 @@ class Allotment_Model extends \App\Models\BaseModel {
     function get_alloted_item_details($item_code = '') {
         $item_code = ($item_code != '') ? $item_code : $this->input->post('code');
         $this->db->select('PD.item_code, PD.cluster_no, PD.participant_id, PDT.school_code, PD.cp_id, PD.stage_id, PD.cluster_id, CM.si_id, IM.no_of_cluster, IM.start_time, IM.no_of_judges');
-        $this->db->from('cluster_participant_details PD');
+        $this->db->from('sd_cluster_participant_details PD');
         $this->db->join('cluster_master CM', 'CM.cluster_id = PD.cluster_id', 'INNER');
         $this->db->join('stage_item_master IM', 'CM.si_id = IM.si_id', 'INNER');
         $this->db->join('participant_details PDT', 'PDT.participant_id = PD.participant_id', 'INNER');
@@ -362,8 +362,8 @@ class Allotment_Model extends \App\Models\BaseModel {
     function update_cluster_participant($item_code) {
         $item_code = ($item_code != '') ? $item_code : $this->input->post('code');
         $this->db->where('item_code', $item_code);
-        $cluster_participant_details = $this->db->get('cluster_participant_details');
-        foreach ($cluster_participant_details->getResultArray() as $cluster_participant) {
+        $sd_cluster_participant_details = $this->db->get('sd_cluster_participant_details');
+        foreach ($sd_cluster_participant_details->getResultArray() as $cluster_participant) {
             $cp_id = $cluster_participant['cp_id'];
             $cluster_no = $this->input->post('cmbClusterNo_' . $cp_id);
 
@@ -379,7 +379,7 @@ class Allotment_Model extends \App\Models\BaseModel {
             $data['cluster_no'] = $cluster_no;
             $data['cluster_id'] = $cluster_id;
             $this->db->where('cp_id', $cp_id);
-            $this->db->update('cluster_participant_details', $data);
+            $this->db->update('sd_cluster_participant_details', $data);
         }
 
         $this->db->where('item_code', $item_code);
@@ -398,7 +398,7 @@ class Allotment_Model extends \App\Models\BaseModel {
         foreach ($cluster_master->getResultArray() as $cluster) {
             $cluster_id = $cluster['cluster_id'];
             $this->db->where('cluster_id', $cluster_id);
-            $no_of_participant = $this->db->countAllResults('cluster_participant_details');
+            $no_of_participant = $this->db->countAllResults('sd_cluster_participant_details');
 
             $total_time_for_item = ($time_type == 'S') ? ceil((int) $item_time / 60) : (int) $item_time;
             $total_time_in_minutes = (int) $total_time_for_item * $no_of_participant;
