@@ -403,7 +403,7 @@ class Welcome extends \App\Controllers\BaseController {
         if (!$sub_dist_code) return $stats;
         
         $school_query = "SELECT sm.school_code, sm.school_name, sd.class_start, sd.class_end, sd.is_finalize
-        FROM school_master sm
+        FROM sd_school_master sm
         LEFT JOIN sd_school_details sd ON sm.school_code = sd.school_code
         WHERE sm.sub_district_code = ? AND sm.school_status = 'A'";
         
@@ -473,7 +473,7 @@ class Welcome extends \App\Controllers\BaseController {
         
         $participant_query = "SELECT pd.gender, COUNT(*) as count
         FROM sd_participant_details pd
-        INNER JOIN school_master sm ON pd.school_code = sm.school_code
+        INNER JOIN sd_school_master sm ON pd.school_code = sm.school_code
         WHERE sm.sub_district_code = ?
         GROUP BY pd.gender";
         
@@ -488,7 +488,7 @@ class Welcome extends \App\Controllers\BaseController {
         
         $category_query = "SELECT pd.class, pd.gender, COUNT(*) as count
         FROM sd_participant_details pd
-        INNER JOIN school_master sm ON pd.school_code = sm.school_code
+        INNER JOIN sd_school_master sm ON pd.school_code = sm.school_code
         WHERE sm.sub_district_code = ?
         GROUP BY pd.class, pd.gender";
         

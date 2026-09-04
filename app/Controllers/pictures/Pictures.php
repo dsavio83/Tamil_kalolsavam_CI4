@@ -73,7 +73,7 @@ class Pictures extends \App\Controllers\BaseController {
                 return;
             }
 
-            $subDistrict = $this->General_Model->get_data('school_master', 'sub_district_code', array('school_code' => $school_code));
+            $subDistrict = $this->General_Model->get_data('sd_school_master', 'sub_district_code', array('school_code' => $school_code));
             if (empty($subDistrict)) {
                 $this->template->write('error', 'Invalid school code.');
                 $this->regnum_wise_photo_interface($school_code, $admn_no);
@@ -178,7 +178,7 @@ class Pictures extends \App\Controllers\BaseController {
                     continue;
                 }
 
-                $subDistrict = $this->General_Model->get_data('school_master', 'sub_district_code', array('school_code' => $school_code));
+                $subDistrict = $this->General_Model->get_data('sd_school_master', 'sub_district_code', array('school_code' => $school_code));
                 if (empty($subDistrict)) {
                     $errors[] = "Invalid school code: $school_code for admission number: $admn_no";
                     $error_count++;
@@ -336,7 +336,7 @@ class Pictures extends \App\Controllers\BaseController {
     
         $dataReturn['participant_det'] = $this->Photos_Model->get_schoolwise_participant_details($config['per_page'], $intOffset, $pag_school);
         $dataReturn['Photo'] = $this->Photos_Model->get_schoolwise_Photo_With_Thumbnail($dataReturn, $pag_school);
-        $dataReturn['school_det'] = $this->General_Model->get_data('school_master', '*', array('school_code' => $pag_school));
+        $dataReturn['school_det'] = $this->General_Model->get_data('sd_school_master', '*', array('school_code' => $pag_school));
         $dataReturn['pagination'] = $this->pagination->create_links();
         $this->template->write_view('content', 'photos/school_wise_photo', $dataReturn);
         $this->template->load();

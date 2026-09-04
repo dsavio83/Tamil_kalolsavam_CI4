@@ -16,7 +16,7 @@ class Afterresult_model extends \App\Models\BaseModel {
                   LEFT JOIN sd_school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code 
                   LEFT JOIN sd_participant_details AS PD ON PD.participant_id = RM.participant_id 
                   JOIN item_master AS IM ON IM.item_code = RM.item_code
-                  JOIN school_master AS SM ON SM.school_code = RM.school_code
+                  JOIN sd_school_master AS SM ON SM.school_code = RM.school_code
                   JOIN festival_master AS FM ON IM.fest_id = FM.fest_id
                   WHERE RM.school_code = ? AND (SPD.is_withheld = 'N' OR SPD.is_withheld IS NULL) AND RM.is_finish = 'Y' AND RM.grade != ''
                   ORDER BY FM.fest_id, IM.item_code, RM.total_mark DESC";
@@ -31,7 +31,7 @@ class Afterresult_model extends \App\Models\BaseModel {
                   LEFT JOIN sd_school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code 
                   LEFT JOIN sd_participant_details AS PD ON PD.participant_id = RM.participant_id 
                   JOIN item_master AS IM ON IM.item_code = RM.item_code
-                  JOIN school_master AS SM ON SM.school_code = RM.school_code
+                  JOIN sd_school_master AS SM ON SM.school_code = RM.school_code
                   JOIN festival_master AS FM ON IM.fest_id = FM.fest_id
                   WHERE (SPD.is_withheld = 'N' OR SPD.is_withheld IS NULL) AND RM.is_finish = 'Y' AND RM.grade != ''
                   ORDER BY FM.fest_id, IM.item_code, RM.total_mark DESC";
@@ -44,7 +44,7 @@ class Afterresult_model extends \App\Models\BaseModel {
 
         $query = "SELECT SPD.school_code, SM.school_name, sum( SPD.point) AS cnt, FM.fest_id, FM.fest_name
 			FROM sd_school_point_details AS SPD
-			JOIN school_master AS SM ON SM.school_code = SPD.school_code
+			JOIN sd_school_master AS SM ON SM.school_code = SPD.school_code
 			LEFT JOIN item_master AS IM ON IM.item_code = SPD.item_code
 			LEFT JOIN festival_master AS FM ON IM.fest_id = FM.fest_id
 			GROUP BY SPD.school_code, FM.fest_id
@@ -89,7 +89,7 @@ class Afterresult_model extends \App\Models\BaseModel {
         $this->db->select('rs.item_code,rs.code_no,rs.marks,rs.total_mark,rs.percentage,rs.grade,   rs.point,rs.rank,im.item_name,sm.school_name,pd.participant_name,rs.participant_id,si.start_time,fm.fest_id,fm.fest_name,si.no_of_participant');
         $this->db->from('sd_result_master AS rs');
         $this->db->join('item_master AS im', 'im.item_code = rs.item_code');
-        $this->db->join('school_master AS sm', 'sm.school_code = rs.school_code');
+        $this->db->join('sd_school_master AS sm', 'sm.school_code = rs.school_code');
         $this->db->join('sd_participant_details AS pd', 'pd.participant_id = rs.participant_id', 'LEFT');
         $this->db->join('sd_stage_item_master AS si', 'si.item_code = rs.item_code');
         $this->db->join('festival_master AS fm', 'fm.fest_id = im.fest_id');
@@ -184,7 +184,7 @@ class Afterresult_model extends \App\Models\BaseModel {
                   LEFT JOIN sd_school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code
                   LEFT JOIN sd_participant_details AS PD ON PD.participant_id = RM.participant_id
                   JOIN item_master AS IM ON IM.item_code = RM.item_code
-                  JOIN school_master AS SM ON SM.school_code = RM.school_code
+                  JOIN sd_school_master AS SM ON SM.school_code = RM.school_code
                   JOIN festival_master AS FM ON IM.fest_id = FM.fest_id
                   WHERE (SPD.is_withheld = 'N' OR SPD.is_withheld IS NULL) AND RM.is_finish = 'Y' AND RM.grade != ''  
                   GROUP BY RM.rm_id
@@ -200,7 +200,7 @@ class Afterresult_model extends \App\Models\BaseModel {
                   LEFT JOIN sd_school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code
                   LEFT JOIN sd_participant_details AS PD ON PD.participant_id = RM.participant_id
                   JOIN item_master AS IM ON IM.item_code = RM.item_code
-                  JOIN school_master AS SM ON SM.school_code = RM.school_code
+                  JOIN sd_school_master AS SM ON SM.school_code = RM.school_code
                   JOIN festival_master AS FM ON IM.fest_id = FM.fest_id
                   WHERE (SPD.is_withheld = 'N' OR SPD.is_withheld IS NULL) AND RM.is_finish = 'Y' AND RM.grade != ''
                   GROUP BY RM.rm_id
@@ -214,7 +214,7 @@ class Afterresult_model extends \App\Models\BaseModel {
 
         $this->db->select('r.item_code, r.participant_id, r.school_code, r.grade, m.school_name, p.participant_name, p.class, f.fest_name,f.fest_id, i.item_name');
         $this->db->from('sd_result_publish AS r');
-        $this->db->join('school_master AS m', 'm.school_code = r.school_code');
+        $this->db->join('sd_school_master AS m', 'm.school_code = r.school_code');
         $this->db->join('sd_participant_details AS p', "p.participant_id = r.participant_id AND p.class > 4");
         $this->db->join('item_master AS i', 'i.item_code = r.item_code');
         $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id');
@@ -236,7 +236,7 @@ class Afterresult_model extends \App\Models\BaseModel {
     function schoolhigher_result($school) {
         $this->db->select('r.item_code, r.participant_id, r.school_code, r.grade, m.school_name, p.participant_name, p.class, f.fest_name,f.fest_id, i.item_name');
         $this->db->from('sd_result_publish AS r');
-        $this->db->join('school_master AS m', 'm.school_code = r.school_code');
+        $this->db->join('sd_school_master AS m', 'm.school_code = r.school_code');
         $this->db->join('sd_participant_details AS p', "p.participant_id = r.participant_id AND p.class > 4");
         $this->db->join('item_master AS i', 'i.item_code = r.item_code');
         $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id');
@@ -252,7 +252,7 @@ class Afterresult_model extends \App\Models\BaseModel {
     function schoolhigher_resultall() {
         $this->db->select('r.item_code, r.participant_id, r.school_code, r.grade, m.school_name, p.participant_name, p.class, f.fest_name,f.fest_id, i.item_name');
         $this->db->from('sd_result_publish AS r');
-        $this->db->join('school_master AS m', 'm.school_code = r.school_code');
+        $this->db->join('sd_school_master AS m', 'm.school_code = r.school_code');
         $this->db->join('sd_participant_details AS p', "p.participant_id = r.participant_id AND p.class > 4");
         $this->db->join('item_master AS i', 'i.item_code = r.item_code');
         $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id');

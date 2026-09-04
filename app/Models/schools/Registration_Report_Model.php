@@ -11,7 +11,7 @@ class Registration_Report_Model extends \App\Models\BaseModel {
 
     function get_school_details($school_code) {
         $this->db->where('SM.school_code', $school_code);
-        $this->db->from('school_master AS SM');
+        $this->db->from('sd_school_master AS SM');
         $this->db->join('sub_district_master AS SB', 'SB.sub_district_code = SM.sub_district_code');
         $this->db->join('sd_school_details AS SD', 'SM.school_code = SD.school_code', 'LEFT');
         $school_details = $this->db->get();

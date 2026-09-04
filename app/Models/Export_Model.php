@@ -23,7 +23,7 @@ class Export_Model  extends \App\Models\BaseModel {
 
         // School Master data
         $this->db->where('sub_district_code', $sub_district_code);
-        $school_master_result = $this->db->get('school_master');
+        $school_master_result = $this->db->get('sd_school_master');
         $school_master_rows = $school_master_result->getResultArray();
         $school_master_data = array();
         $i = 0;
@@ -50,7 +50,7 @@ class Export_Model  extends \App\Models\BaseModel {
 
         // School Details data
         $this->db->where('SM.sub_district_code', $sub_district_code);
-        $this->db->join('school_master AS SM', 'SD.school_code = SM.school_code');
+        $this->db->join('sd_school_master AS SM', 'SD.school_code = SM.school_code');
         $school_details_result = $this->db->get('sd_school_details AS SD');
         $school_details_rows = $school_details_result->getResultArray();
         $school_details_data = array();

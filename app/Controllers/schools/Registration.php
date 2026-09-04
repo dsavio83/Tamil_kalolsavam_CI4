@@ -153,7 +153,7 @@ class Registration extends \App\Controllers\BaseController {
             $this->Content['subdistrict_schools'] = $this->General_Model->get_school_details_combo($sub_district_code);
         } else {
             $db = \Config\Database::connect();
-            $schools_query = $db->table('school_master')->select('school_code, CONCAT(school_code, " - ", school_name) AS school', false)->orderBy('school_code', 'ASC')->get()->getResultArray();
+            $schools_query = $db->table('sd_school_master')->select('school_code, CONCAT(school_code, " - ", school_name) AS school', false)->orderBy('school_code', 'ASC')->get()->getResultArray();
             $subdistrict_array = [0 => '-- Select School --'];
             foreach ($schools_query as $sq) {
                 $subdistrict_array[$sq['school_code']] = $sq['school'];
@@ -539,7 +539,7 @@ class Registration extends \App\Controllers\BaseController {
         
         if (empty($school_details)) {
             $db = \Config\Database::connect();
-            $sm = $db->table('school_master')->where('school_code', $code)->get()->getRowArray();
+            $sm = $db->table('sd_school_master')->where('school_code', $code)->get()->getRowArray();
             if ($sm) {
                 $sd = $db->table('sd_school_details')->where('school_code', $code)->get()->getRowArray();
                 $school_details = [array_merge($sm, $sd ?: [])];
@@ -719,7 +719,7 @@ class Registration extends \App\Controllers\BaseController {
         if (!empty($_FILES['userfile']['name']) && !empty($admn_no) && $school_code > 0) {
             $subDistrict = $this->session->get('SUB_DISTRICT');
             if (!$subDistrict) {
-                $subDistrictData = $this->General_Model->get_data('school_master', 'sub_district_code', array('school_code' => $school_code));
+                $subDistrictData = $this->General_Model->get_data('sd_school_master', 'sub_district_code', array('school_code' => $school_code));
                 if (!empty($subDistrictData)) {
                     $subDistrict = $subDistrictData[0]['sub_district_code'];
                 }
@@ -953,7 +953,7 @@ class Registration extends \App\Controllers\BaseController {
         // Delete photo file
         $subDistrict = $this->session->get('SUB_DISTRICT');
         if (!$subDistrict) {
-            $subDistrictData = $this->General_Model->get_data('school_master', 'sub_district_code', array('school_code' => $school_code));
+            $subDistrictData = $this->General_Model->get_data('sd_school_master', 'sub_district_code', array('school_code' => $school_code));
             if (!empty($subDistrictData)) {
                 $subDistrict = $subDistrictData[0]['sub_district_code'];
             }

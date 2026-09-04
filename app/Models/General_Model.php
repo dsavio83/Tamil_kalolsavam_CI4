@@ -163,7 +163,7 @@ class General_Model extends \App\Models\BaseModel {
     public function get_school_details_combo($subdistrict_code) {
         $this->db->where('sub_district_code', $subdistrict_code);
         $this->db->select('school_code, CONCAT(school_code, " - ",school_name) AS school', FALSE);
-        $query = $this->db->get('school_master');
+        $query = $this->db->get('sd_school_master');
         $subdistricts = $query->getResultArray();
         $subdistrict_array[0] = 'Select School';
         for ($i = 0; $i < count($subdistricts); $i++) {

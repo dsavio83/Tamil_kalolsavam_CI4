@@ -8,7 +8,7 @@ class CreateSchoolTables extends Migration
 {
     public function up()
     {
-        // school_master - School master
+        // sd_school_master - School master
         $this->forge->addField([
             'school_code' => [
                 'type'       => 'DOUBLE',
@@ -55,7 +55,7 @@ class CreateSchoolTables extends Migration
         $this->forge->addKey('school_code', true);
         $this->forge->addKey('sub_district_code');
         $this->forge->addKey('rev_district_code');
-        $this->forge->createTable('school_master', true);
+        $this->forge->createTable('sd_school_master', true);
 
         // sd_school_details - School extended info
         $this->forge->addField([
@@ -163,6 +163,6 @@ class CreateSchoolTables extends Migration
     public function down()
     {
         $this->forge->dropTable('sd_school_details', true);
-        $this->forge->dropTable('school_master', true);
+        $this->forge->dropTable('sd_school_master', true);
     }
 }

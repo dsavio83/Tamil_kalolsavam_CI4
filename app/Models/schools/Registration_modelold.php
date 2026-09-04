@@ -18,7 +18,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
             $this->db->where('SM.rev_district_code', trim($this->session->get('DISTRICT')));
 
         $this->db->where('SM.school_code', $schoolCode);
-        $this->db->from('school_master AS SM');
+        $this->db->from('sd_school_master AS SM');
 
         /** check if the user is cluster user */
         if (trim($this->session->get('USER_TYPE')) == 5) {
@@ -359,7 +359,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
         $admnNo = $this->input->post('txtADNO');
 
         $this->db->where('school_code', $schoolCode);
-        $school_master = $this->db->get('school_master');
+        $school_master = $this->db->get('sd_school_master');
 
         if ($school_master->getNumRows() > 0) {
             $school = $school_master->getResultArray();
@@ -1537,10 +1537,10 @@ class Registration_Modelold extends \App\Models\BaseModel {
           return 'no';
           } */
         $this->db->where('school_code', $school_code);
-        $school_details = $this->db->get('school_master');
+        $school_details = $this->db->get('sd_school_master');
         if ($school_details->getNumRows() > 0) {
             $this->db->where('SM.school_code', $school_code);
-            $this->db->join('school_master AS SM', 'SM.school_code = SD.school_code', 'RIGHT');
+            $this->db->join('sd_school_master AS SM', 'SM.school_code = SD.school_code', 'RIGHT');
             $school_details = $this->db->get('sd_school_details AS SD');
             $school = $school_details->getResultArray();
             if (@$school[0]['is_finalize'] == 'Y' or @ $school[0]['master_confirm'] == 'Y') {

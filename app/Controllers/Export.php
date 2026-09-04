@@ -12,7 +12,7 @@ namespace App\Controllers;
  *   sub-district with encrypted checksums.
  *
  * Tables used: sd_result_publish, sd_result_master, sd_participant_item_details,
- *              sd_participant_details, school_master, school_details
+ *              sd_participant_details, sd_school_master, school_details
  *
  * Permission: 8 (enforced in each method)
  */
@@ -39,7 +39,7 @@ class Export extends \App\Controllers\BaseController {
     /**
      * Sub-District Data Export (POST-only CSV stream)
      *
-     * Exports school_master, school_details, sd_participant_details, and
+     * Exports sd_school_master, school_details, sd_participant_details, and
      * sd_participant_item_details for the logged-in user's sub-district.
      * Each row includes an encrypted checksum for data integrity.
      *
@@ -112,7 +112,7 @@ class Export extends \App\Controllers\BaseController {
                 $dist_name = $rev_dist_info['rev_district_name'] ?? 'District ' . $dist_code;
 
                 // Total active participating schools
-                $total_schools = $this->db->table('school_master')
+                $total_schools = $this->db->table('sd_school_master')
                     ->where('sub_district_code', $sub_dist_code)
                     ->where('school_status', 'A')
                     ->countAllResults();

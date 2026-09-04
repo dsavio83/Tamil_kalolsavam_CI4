@@ -11,7 +11,7 @@ function get_participant_details($reg_no,$sch_code)
 {
 $dist	=	$this->session->get('DISTRICT');
 //echo "<br />dist------>".$dist;
-$result=$this->db->query("select PD.*,SM.school_name from sd_participant_details as PD,school_master as SM where PD.admn_no=? and PD.school_code = ? and PD.school_code=SM.school_code and SM.rev_district_code=?", [$reg_no, $sch_code, $dist]);
+$result=$this->db->query("select PD.*,SM.school_name from sd_participant_details as PD,sd_school_master as SM where PD.admn_no=? and PD.school_code = ? and PD.school_code=SM.school_code and SM.rev_district_code=?", [$reg_no, $sch_code, $dist]);
 //echo $result;
 if(is_object($result))
 {
@@ -25,7 +25,7 @@ return $result->getResultArray();
 function get_item_details($reg_no,$sch_code)
 {
 $dist	=	$this->session->get('DISTRICT');
-$result=$this->db->query("select IM.item_name from sd_participant_item_details as PID,school_master as SM,item_master as IM where PID.admn_no=? and PID.school_code = ? and PID.school_code=SM.school_code and SM.rev_district_code=? and IM.item_code=PID.item_code", [$reg_no, $sch_code, $dist]);
+$result=$this->db->query("select IM.item_name from sd_participant_item_details as PID,sd_school_master as SM,item_master as IM where PID.admn_no=? and PID.school_code = ? and PID.school_code=SM.school_code and SM.rev_district_code=? and IM.item_code=PID.item_code", [$reg_no, $sch_code, $dist]);
 //echo $result;
 if(is_object($result))
 {
@@ -44,7 +44,7 @@ function get_Photo($name, $schoolcode, $sub_district_code = null)
         $sub_district_code = $this->session->get('SUB_DISTRICT');
     }
     if (empty($sub_district_code) && !empty($schoolcode)) {
-        $sch = $this->db->query("SELECT sub_district_code FROM school_master WHERE school_code = ? LIMIT 1", [$schoolcode]);
+        $sch = $this->db->query("SELECT sub_district_code FROM sd_school_master WHERE school_code = ? LIMIT 1", [$schoolcode]);
         if (is_object($sch) && $sch->getNumRows() > 0) {
             $row = $sch->getResultArray();
             $sub_district_code = $row[0]['sub_district_code'];
@@ -140,7 +140,7 @@ function get_count_schoolwise_participant_details($sch_code)
 {
 $dist	=	$this->session->get('DISTRICT');
 //echo "<br />dist------>".$dist;
-$result=$this->db->query("select PD.* from sd_participant_details as PD,school_master as SM where PD.school_code = ? and PD.school_code=SM.school_code and SM.rev_district_code=? order by PD.admn_no", [$sch_code, $dist]);
+$result=$this->db->query("select PD.* from sd_participant_details as PD,sd_school_master as SM where PD.school_code = ? and PD.school_code=SM.school_code and SM.rev_district_code=? order by PD.admn_no", [$sch_code, $dist]);
 //echo $result;
 if(is_object($result))
 {
@@ -155,7 +155,7 @@ function get_schoolwise_participant_details($num=1,$offset=4,$sch_code)
 {
 $dist	=	$this->session->get('DISTRICT');
 
-$result=$this->db->query("select PD.* from sd_participant_details as PD,school_master as SM where PD.school_code = ? and PD.school_code=SM.school_code and SM.rev_district_code=? order by PD.class,PD.participant_name LIMIT ?,?", [$sch_code, $dist, (int)$offset, (int)$num]);
+$result=$this->db->query("select PD.* from sd_participant_details as PD,sd_school_master as SM where PD.school_code = ? and PD.school_code=SM.school_code and SM.rev_district_code=? order by PD.class,PD.participant_name LIMIT ?,?", [$sch_code, $dist, (int)$offset, (int)$num]);
 //echo $result;
 if(is_object($result))
 {

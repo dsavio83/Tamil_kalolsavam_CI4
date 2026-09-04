@@ -27,7 +27,7 @@ class Registration_Model extends \App\Models\BaseModel {
             $this->db->where('SM.rev_district_code', trim($this->session->get('DISTRICT')));
 
         $this->db->where('SM.school_code', $schoolCode);
-        $this->db->from('school_master AS SM');
+        $this->db->from('sd_school_master AS SM');
 
         /** check if the user is cluster user */
         if (trim($this->session->get('USER_TYPE')) == 5) {
@@ -444,7 +444,7 @@ class Registration_Model extends \App\Models\BaseModel {
         $admnNo = $this->input->post('txtADNO');
 
         $this->db->where('school_code', $schoolCode);
-        $school_master = $this->db->get('school_master');
+        $school_master = $this->db->get('sd_school_master');
 
         if ($school_master->getNumRows() > 0) {
             $school = $school_master->getResultArray();
@@ -1592,10 +1592,10 @@ class Registration_Model extends \App\Models\BaseModel {
             return 'yes';
         }
         $this->db->where('school_code', $school_code);
-        $school_details = $this->db->get('school_master');
+        $school_details = $this->db->get('sd_school_master');
         if ($school_details->getNumRows() > 0) {
             $this->db->where('SM.school_code', $school_code);
-            $this->db->join('school_master AS SM', 'SM.school_code = SD.school_code', 'RIGHT');
+            $this->db->join('sd_school_master AS SM', 'SM.school_code = SD.school_code', 'RIGHT');
             $school_details = $this->db->get('sd_school_details AS SD');
             $school = $school_details->getResultArray();
             if (@$school[0]['is_finalize'] == 'Y' or @ $school[0]['master_confirm'] == 'Y') {
@@ -1881,7 +1881,7 @@ class Registration_Model extends \App\Models\BaseModel {
         // First get all school codes that have sd_school_details entries
         $this->db->select('SD.school_code');
         $this->db->from('sd_school_details AS SD');
-        $this->db->join('school_master AS SM', 'SD.school_code = SM.school_code');
+        $this->db->join('sd_school_master AS SM', 'SD.school_code = SM.school_code');
 
         // Apply district/sub-district filters if available
         if (trim($this->session->get('SUB_DISTRICT')) != 0) {
@@ -1928,7 +1928,7 @@ class Registration_Model extends \App\Models\BaseModel {
         }
         /** check if the user is cluster user ends */
 
-        $this->db->from('school_master AS SM');
+        $this->db->from('sd_school_master AS SM');
         $this->db->join('sd_school_details AS SD', 'SM.school_code = SD.school_code', 'LEFT');
         $this->db->select('SM.school_code, SM.school_name, SM.sub_district_code, SM.rev_district_code, SD.is_create_report, SD.is_finalize');
         $this->db->orderBy('SM.school_name', 'ASC');
@@ -1938,7 +1938,7 @@ class Registration_Model extends \App\Models\BaseModel {
     }
 
     function get_schools_by_sub_district($sub_district_code) {
-        // FIRST TASK: Get schools from school_master table based on sub_district_code
+        // FIRST TASK: Get schools from sd_school_master table based on sub_district_code
         $this->db->where('SM.sub_district_code', $sub_district_code);
 
         /** check if the user is cluster user */
@@ -1948,8 +1948,8 @@ class Registration_Model extends \App\Models\BaseModel {
         }
         /** check if the user is cluster user ends */
 
-        // Get basic school information from school_master
-        $this->db->from('school_master AS SM');
+        // Get basic school information from sd_school_master
+        $this->db->from('sd_school_master AS SM');
         $this->db->select('SM.school_code, SM.school_name, SM.sub_district_code, SM.rev_district_code');
         $this->db->orderBy('SM.school_name', 'ASC');
 
@@ -1985,7 +1985,7 @@ class Registration_Model extends \App\Models\BaseModel {
     }
 
     function get_schools_by_district($district_code) {
-        // FIRST TASK: Get schools from school_master table based on rev_district_code
+        // FIRST TASK: Get schools from sd_school_master table based on rev_district_code
         $this->db->where('SM.rev_district_code', $district_code);
 
         /** check if the user is cluster user */
@@ -1995,8 +1995,8 @@ class Registration_Model extends \App\Models\BaseModel {
         }
         /** check if the user is cluster user ends */
 
-        // Get basic school information from school_master
-        $this->db->from('school_master AS SM');
+        // Get basic school information from sd_school_master
+        $this->db->from('sd_school_master AS SM');
         $this->db->select('SM.school_code, SM.school_name, SM.sub_district_code, SM.rev_district_code');
         $this->db->orderBy('SM.school_name', 'ASC');
 
@@ -2079,7 +2079,7 @@ class Registration_Model extends \App\Models\BaseModel {
 
     function debug_schools_by_sub_district($sub_district_code) {
         $this->db->where('SM.sub_district_code', $sub_district_code);
-        $this->db->from('school_master AS SM');
+        $this->db->from('sd_school_master AS SM');
         $this->db->select('SM.school_code, SM.school_name, SM.sub_district_code, SM.rev_district_code');
         $this->db->orderBy('SM.school_name', 'ASC');
         $this->db->limit(5); // Just get first 5 for debugging
@@ -2090,7 +2090,7 @@ class Registration_Model extends \App\Models\BaseModel {
 
     function debug_schools_by_district($district_code) {
         $this->db->where('SM.rev_district_code', $district_code);
-        $this->db->from('school_master AS SM');
+        $this->db->from('sd_school_master AS SM');
         $this->db->select('SM.school_code, SM.school_name, SM.sub_district_code, SM.rev_district_code');
         $this->db->orderBy('SM.school_name', 'ASC');
         $this->db->limit(5); // Just get first 5 for debugging
@@ -2100,7 +2100,7 @@ class Registration_Model extends \App\Models\BaseModel {
     }
 
     function get_schools_from_master_only($sub_district_code = null, $district_code = null) {
-        $this->db->from('school_master AS SM');
+        $this->db->from('sd_school_master AS SM');
 
         if ($sub_district_code) {
             $this->db->where('SM.sub_district_code', $sub_district_code);
@@ -2126,9 +2126,9 @@ class Registration_Model extends \App\Models\BaseModel {
     }
 
     function test_database_connection() {
-        // Test basic query to school_master table
+        // Test basic query to sd_school_master table
         $this->db->select('COUNT(*) as count');
-        $this->db->from('school_master');
+        $this->db->from('sd_school_master');
         $result = $this->db->get();
         $count_data = $result->getResultArray();
 
@@ -2147,8 +2147,8 @@ class Registration_Model extends \App\Models\BaseModel {
     function get_comprehensive_school_debug_info($sub_district_code = null, $district_code = null) {
         $debug_info = array();
 
-        // Count schools in school_master only
-        $this->db->from('school_master AS SM');
+        // Count schools in sd_school_master only
+        $this->db->from('sd_school_master AS SM');
         if ($sub_district_code) {
             $this->db->where('SM.sub_district_code', $sub_district_code);
         }
@@ -2162,7 +2162,7 @@ class Registration_Model extends \App\Models\BaseModel {
         $debug_info['school_details_count'] = $this->db->countAllResults();
 
         // Count schools that exist in both tables (with details)
-        $this->db->from('school_master AS SM');
+        $this->db->from('sd_school_master AS SM');
         $this->db->join('sd_school_details AS SD', 'SM.school_code = SD.school_code', 'INNER');
         if ($sub_district_code) {
             $this->db->where('SM.sub_district_code', $sub_district_code);
@@ -2172,9 +2172,9 @@ class Registration_Model extends \App\Models\BaseModel {
         }
         $debug_info['schools_with_details_count'] = $this->db->countAllResults();
 
-        // Get sample schools from school_master
+        // Get sample schools from sd_school_master
         $this->db->select('SM.school_code, SM.school_name, SM.sub_district_code, SM.rev_district_code');
-        $this->db->from('school_master AS SM');
+        $this->db->from('sd_school_master AS SM');
         if ($sub_district_code) {
             $this->db->where('SM.sub_district_code', $sub_district_code);
         }
@@ -2187,7 +2187,7 @@ class Registration_Model extends \App\Models\BaseModel {
 
         // Get sample schools from sd_school_details with master info
         $this->db->select('SM.school_code, SM.school_name, SM.sub_district_code, SM.rev_district_code, SD.is_create_report, SD.is_finalize');
-        $this->db->from('school_master AS SM');
+        $this->db->from('sd_school_master AS SM');
         $this->db->join('sd_school_details AS SD', 'SM.school_code = SD.school_code', 'INNER');
         if ($sub_district_code) {
             $this->db->where('SM.sub_district_code', $sub_district_code);

@@ -13,7 +13,7 @@ function __construct () {
 
 function log_school_master($school_code, $status) {
     $this->db->where('school_code', $school_code);
-    $school_master = $this->db->get('school_master');
+    $school_master = $this->db->get('sd_school_master');
     if ($school_master->getNumRows() > 0) {
         $school = $school_master->getResultArray();
         $data = array();
@@ -55,7 +55,7 @@ function save_school_details() {
     $data['edu_district_code'] = $edu_district_code;
     $data['sub_district_code'] = $sub_district_code;
     $data['school_status'] = 'D';
-    $this->db->insert('school_master', $data);
+    $this->db->insert('sd_school_master', $data);
 
     $this->log_school_master($data['school_code'], 'A');
 }
@@ -63,7 +63,7 @@ function save_school_details() {
 
 function school_exists($school_code) {
     $this->db->where('school_code', $school_code);
-    $school_master = $this->db->get('school_master');
+    $school_master = $this->db->get('sd_school_master');
 
     if ($school_master->getNumRows() > 0) {
         return true;
@@ -80,7 +80,7 @@ function generate_school_code() {
     $this->db->where('rev_district_code', $rev_district_code);
     $this->db->where('edu_district_code', $edu_district_code);
     $this->db->where('sub_district_code', $sub_district_code);
-    $result = $this->db->get('school_master');
+    $result = $this->db->get('sd_school_master');
     $school_code_max = $result->getResultArray();
     $school_code_max = $school_code_max[0]['school_code'];
     $school_code = 0;
@@ -88,7 +88,7 @@ function generate_school_code() {
         $school_code_max++;
         if ($school_code_max % 100 != 0) {
             $this->db->where('school_code', $school_code_max);
-            $result = $this->db->get('school_master');
+            $result = $this->db->get('sd_school_master');
             if ($result->getNumRows() <= 0) {
                 $school_code = $school_code_max;
             }
@@ -111,7 +111,7 @@ function update_school_details() {
         ->where('rev_district_code', $rev_district_code)
         ->orWhere('edu_district_code', $edu_district_code)
         ->orWhere('sub_district_code', $sub_district_code)
-        ->get('school_master');
+        ->get('sd_school_master');
     if ($schoolCheck->getNumRows() == 0) {
         return ['error' => 'Unauthorized — school does not belong to your district.'];
     }
@@ -137,7 +137,7 @@ function update_school_details() {
     $data['sub_district_code'] = $sub_district_code;
 
     $this->db->where('school_code', $school_code);
-    $this->db->update('school_master', $data);
+    $this->db->update('sd_school_master', $data);
 
     $this->log_school_master($school_code, 'N');
 }
@@ -167,7 +167,7 @@ function exist_school_details() {
             $this->db->where('sub_district_code', $this->session->get('SUB_DISTRICT'));
         }
     }
-    $this->db->from('school_master AS SM');
+    $this->db->from('sd_school_master AS SM');
     $this->db->orderBy('school_code', 'ASC');
     $result = $this->db->get();
     return $result->getResultArray();
@@ -176,7 +176,7 @@ function exist_school_details() {
 
 function selected_school_details() {
     $this->db->where('school_code', $this->input->post('UserIdty'));
-    $this->db->from('school_master');
+    $this->db->from('sd_school_master');
     $result = $this->db->get();
     return $result->getResultArray();
 }

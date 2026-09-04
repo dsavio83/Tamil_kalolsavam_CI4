@@ -50,10 +50,10 @@ class Login extends \App\Controllers\BaseController {
                         }
                     }
 
-                    // Also resolve district and sub_district from school_master if still missing
+                    // Also resolve district and sub_district from sd_school_master if still missing
                     if (!empty($school_code) && (empty($sub_dist_code) || empty($dist_code))) {
                         $db = \Config\Database::connect();
-                        $sch = $db->table('school_master')->select('sub_district_code, rev_district_code, edu_district_code')->where('school_code', $school_code)->get()->getRowArray();
+                        $sch = $db->table('sd_school_master')->select('sub_district_code, rev_district_code, edu_district_code')->where('school_code', $school_code)->get()->getRowArray();
                         if ($sch) {
                             if (empty($sub_dist_code)) $sub_dist_code = $sch['sub_district_code'];
                             if (empty($dist_code)) $dist_code = $sch['rev_district_code'];
@@ -128,7 +128,7 @@ class Login extends \App\Controllers\BaseController {
                 ->orderBy('sub_district_name', 'ASC')
                 ->get()->getResultArray();
 
-            $schoolCount = $db->table('school_master')
+            $schoolCount = $db->table('sd_school_master')
                 ->where('rev_district_code', $dCode)
                 ->countAllResults();
 
@@ -184,7 +184,7 @@ class Login extends \App\Controllers\BaseController {
 
             if (!empty($school_code) && (empty($sub_dist_code) || empty($dist_code))) {
                 $db = \Config\Database::connect();
-                $sch = $db->table('school_master')->select('sub_district_code, rev_district_code, edu_district_code')->where('school_code', $school_code)->get()->getRowArray();
+                $sch = $db->table('sd_school_master')->select('sub_district_code, rev_district_code, edu_district_code')->where('school_code', $school_code)->get()->getRowArray();
                 if ($sch) {
                     if (empty($sub_dist_code)) $sub_dist_code = $sch['sub_district_code'];
                     if (empty($dist_code)) $dist_code = $sch['rev_district_code'];

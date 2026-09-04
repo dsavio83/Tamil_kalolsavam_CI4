@@ -13,7 +13,7 @@ $display_school_name = '';
 try {
     $db = \Config\Database::connect();
     if ($school_code && empty($sub_dist_code)) {
-        $sch = $db->table('school_master')->select('school_name, sub_district_code, rev_district_code')->where('school_code', $school_code)->get()->getRowArray();
+        $sch = $db->table('sd_school_master')->select('school_name, sub_district_code, rev_district_code')->where('school_code', $school_code)->get()->getRowArray();
         if ($sch) {
             $sub_dist_code = $sch['sub_district_code'];
             $dist_code = $sch['rev_district_code'];

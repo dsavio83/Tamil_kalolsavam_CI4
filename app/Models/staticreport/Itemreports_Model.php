@@ -16,7 +16,7 @@ class Itemreports_Model extends \App\Models\BaseModel {
         $this->db->where('PD.item_code', $itemcode);
         $this->db->where('PD.is_captain', 'Y');
         $this->db->join('sd_participant_details  AS PM ', 'PD.school_code = PM.school_code and PD.admn_no=PM.admn_no');
-        $this->db->join('school_master  AS SM ', 'SM.school_code = PM.school_code');
+        $this->db->join('sd_school_master  AS SM ', 'SM.school_code = PM.school_code');
 
         $participants_details = $this->db->get();
         return $participants_details->getResultArray();
@@ -40,7 +40,7 @@ class Itemreports_Model extends \App\Models\BaseModel {
 
     function item_details() {
         $this->db->from('school_details AS SM');
-        $this->db->join('school_master AS SD', 'SM.school_code = SD.school_code', 'LEFT');
+        $this->db->join('sd_school_master AS SD', 'SM.school_code = SD.school_code', 'LEFT');
         $school_details = $this->db->get();
         return $school_details->getResultArray();
     }
@@ -56,7 +56,7 @@ class Itemreports_Model extends \App\Models\BaseModel {
 
     function datewise_participants($date) {
 
-        $this->db->from('school_master AS SD');
+        $this->db->from('sd_school_master AS SD');
 
         $this->db->join('sd_participant_item_details  AS PD ', 'PD.school_code = SD.school_code');
 

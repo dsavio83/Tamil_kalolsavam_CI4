@@ -9,7 +9,7 @@ namespace App\Controllers\Report;
  * a selection form that POSTs to the corresponding Afterresultreportpdf
  * controller for PDF generation.
  *
- * Tables used: festival_master, school_master, item_master,
+ * Tables used: festival_master, sd_school_master, item_master,
  *              sd_result_master, sd_result_publish, participant_details,
  *              sd_school_point_details, sd_stage_item_master
  */
@@ -80,7 +80,7 @@ class Afterresultreport extends \App\Controllers\BaseController {
             $this->template->load();
             return;
         }
-        $school = $this->General_Model->prepare_select_box_data('school_master', 'school_code,school_code', '', 'Select School');
+        $school = $this->General_Model->prepare_select_box_data('sd_school_master', 'school_code,school_code', '', 'Select School');
         $this->Contents = array();
         $this->Contents['school'] = $school;
         $this->template->write_view('content', 'result/afterresult_report/school_wise_result_interface', $this->Contents);

@@ -175,10 +175,10 @@ if (!function_exists('is_import_data_finish')) {
         }
         $db = new \App\Libraries\CiDatabase(\Config\Database::connect());
         $db->where('sub_district_code', $sub_district_code);
-        $school_master = $db->get('school_master');
+        $school_master = $db->get('sd_school_master');
 
         $db->where('SM.sub_district_code', $sub_district_code);
-        $db->join('school_master AS SM', 'SM.school_code = SD.school_code');
+        $db->join('sd_school_master AS SM', 'SM.school_code = SD.school_code');
         $school_details = $db->get('sd_school_details AS SD');
 
         $db->where('sub_district_code', $sub_district_code);

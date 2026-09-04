@@ -70,7 +70,7 @@ class User_Cluster_Model extends \App\Models\BaseModel {
         $this->db->where('UM.user_type', '5');
         $this->db->from('user_master AS UM');
         $this->db->orderBy('user_name', 'ASC');
-        $this->db->select('user_id, user_name, is_change_password, (SELECT COUNT(uc_id) FROM sd_user_cluster UC WHERE UC.user_id = UM.user_id) AS total, (SELECT GROUP_CONCAT(SM.school_name SEPARATOR ", ") FROM sd_user_cluster UC INNER JOIN school_master SM ON UC.school_code = SM.school_code WHERE UC.user_id = UM.user_id) AS school_names');
+        $this->db->select('user_id, user_name, is_change_password, (SELECT COUNT(uc_id) FROM sd_user_cluster UC WHERE UC.user_id = UM.user_id) AS total, (SELECT GROUP_CONCAT(SM.school_name SEPARATOR ", ") FROM sd_user_cluster UC INNER JOIN sd_school_master SM ON UC.school_code = SM.school_code WHERE UC.user_id = UM.user_id) AS school_names');
         $result = $this->db->get();
         return $result->getResultArray();
     }
@@ -92,7 +92,7 @@ class User_Cluster_Model extends \App\Models\BaseModel {
     function get_Schools() {
         $this->db->where('sub_district_code', $this->session->get('SUB_DISTRICT'));
         $this->db->where('school_code NOT IN (SELECT UC.school_code FROM user_cluster AS UC WHERE UC.sub_district_code = "' . $this->session->get('SUB_DISTRICT') . '")');
-        $this->db->from('school_master');
+        $this->db->from('sd_school_master');
         $this->db->orderBy('school_code');
         $this->db->select('school_code, school_name');
         $result = $this->db->get();
@@ -102,7 +102,7 @@ class User_Cluster_Model extends \App\Models\BaseModel {
     /** function for fetch entered schools */
     function get_entered_school() {
         $this->db->where('SM.sub_district_code', $this->session->get('SUB_DISTRICT'));
-        $this->db->from('school_master AS SM');
+        $this->db->from('sd_school_master AS SM');
         $this->db->join('school_details AS SD', 'SM.school_code = SD.school_code');
         $this->db->select('SM.school_code');
         $result = $this->db->get();
@@ -126,7 +126,7 @@ class User_Cluster_Model extends \App\Models\BaseModel {
         $this->db->where('SM.sub_district_code', $this->session->get('SUB_DISTRICT'));
         $this->db->where('UC.user_id', $this->input->post('UserIdty'));
         $this->db->from('user_cluster UC');
-        $this->db->join('school_master SM', 'UC.school_code = SM.school_code');
+        $this->db->join('sd_school_master SM', 'UC.school_code = SM.school_code');
         $this->db->orderBy('SM.school_code');
         $this->db->select('SM.school_code, school_name');
         $result = $this->db->get();
@@ -173,14 +173,14 @@ class User_Cluster_Model extends \App\Models\BaseModel {
         $sub_district_code = $this->session->get('SUB_DISTRICT');
 
         $this->db->where('sub_district_code', $sub_district_code);
-        $cnt_school_master = $this->db->countAllResults('school_master');
+        $cnt_school_master = $this->db->countAllResults('sd_school_master');
 
 
 
 
         $this->db->where('SM.sub_district_code', $sub_district_code);
         $this->db->where('SD.is_finalize', 'Y');
-        $this->db->from('school_master AS SM');
+        $this->db->from('sd_school_master AS SM');
         $this->db->join('school_details AS SD', 'SM.school_code = SD.school_code');
         $cnt_finalize_school = $this->db->countAllResults();
         if ($cnt_school_master > $cnt_finalize_school) {
@@ -193,7 +193,7 @@ class User_Cluster_Model extends \App\Models\BaseModel {
             $data = array();
             $data['master_confirm'] = 'Y';
             $this->db->where('sub_district_code', $sub_district_code);
-            $this->db->update('school_master', $data);
+            $this->db->update('sd_school_master', $data);
 
             $data = array();
             $data['confirm_data_entry'] = 'Y';

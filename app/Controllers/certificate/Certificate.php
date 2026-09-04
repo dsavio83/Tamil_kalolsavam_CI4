@@ -696,7 +696,7 @@ class Certificate extends \App\Controllers\BaseController {
         if (!empty($school_code)) {
             $this->Contents['selected_school_code'] = $school_code;
             $this->Contents['fest'] = $this->Certificate_Model->get_school_festival_details($school_code);
-            $this->Contents['school_details'] = $this->General_Model->get_data('school_master', 'school_code, school_name', array('school_code' => $school_code));
+            $this->Contents['school_details'] = $this->General_Model->get_data('sd_school_master', 'school_code, school_name', array('school_code' => $school_code));
             $this->Contents['all_participants'] = $this->Certificate_Model->get_school_participant_details($school_code, '', '', '', '');
             $this->template->write_view('content', 'certificate/school_item_certificate_details', $this->Contents);
             $this->template->load();
