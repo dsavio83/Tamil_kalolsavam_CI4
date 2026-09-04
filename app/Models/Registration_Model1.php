@@ -28,7 +28,7 @@ class Registration_Model1 extends \App\Models\BaseModel {
         /** check if the user is cluster user ends */
         $this->db->select('SM.*, sd_id, class_start, class_end, school_phone, school_email, hm_name, hm_phone, principal_name, principal_phone,
             teachers, strength_lp, strength_up, strength_hs, strength_hss, strength_vhss, total_strength, is_create_report, is_finalize');
-        $this->db->join('school_details AS SD', 'SM.school_code = SD.school_code', 'LEFT');
+        $this->db->join('sd_school_details AS SD', 'SM.school_code = SD.school_code', 'LEFT');
         $result = $this->db->get();
         return $result->getResultArray();
     }
@@ -113,7 +113,7 @@ class Registration_Model1 extends \App\Models\BaseModel {
 
     function log_school_details($schoolCode, $status) {
         $this->db->where('school_code', $schoolCode);
-        $school_details = $this->db->get('school_details');
+        $school_details = $this->db->get('sd_school_details');
         if ($school_details->getNumRows() > 0) {
             $school = $school_details->getResultArray();
 
@@ -189,7 +189,7 @@ class Registration_Model1 extends \App\Models\BaseModel {
         $schoolCode = $this->input->post('hidSchoolId');
 
         $this->db->where('school_code', $schoolCode);
-        $old_school_details = $this->db->get('school_details');
+        $old_school_details = $this->db->get('sd_school_details');
         if ($old_school_details->getNumRows() > 0) {
             $this->log_school_details($schoolCode, 'O');
         }
@@ -207,7 +207,7 @@ class Registration_Model1 extends \App\Models\BaseModel {
 
 
         $this->db->where('school_code', $schoolCode);
-        $count = $this->db->countAllResults('school_details');
+        $count = $this->db->countAllResults('sd_school_details');
         if ($count > 0) {
             $this->db->where('school_code', $schoolCode);
         } else {
@@ -236,9 +236,9 @@ class Registration_Model1 extends \App\Models\BaseModel {
         $data['strength_vhss'] = (int) $this->input->post('txtTotalVHSS');
         $data['total_strength'] = (int) $this->input->post('txtTotal');
         if ($count > 0) {
-            $this->db->update('school_details', $data);
+            $this->db->update('sd_school_details', $data);
         } else {
-            $this->db->insert('school_details', $data);
+            $this->db->insert('sd_school_details', $data);
         }
         $this->log_school_details($schoolCode, 'N');
         return false;
@@ -1275,7 +1275,7 @@ class Registration_Model1 extends \App\Models\BaseModel {
          * * End Delete who is not participating any items
          */
         $this->db->where('school_code', $school_code);
-        $this->db->update('school_details', array('is_finalize' => 'Y'));
+        $this->db->update('sd_school_details', array('is_finalize' => 'Y'));
 
         $data = array();
         $data['school_code'] = $school_code;
@@ -1288,7 +1288,7 @@ class Registration_Model1 extends \App\Models\BaseModel {
     function create_csv_generation($school_code) {
         $this->db->where('school_code', $school_code);
         $this->db->where('is_finalize', 'Y');
-        $school_details = $this->db->get('school_details');
+        $school_details = $this->db->get('sd_school_details');
         if ($school_details->getNumRows() <= 0) {
             $error_array[] = "Please finalize the school details";
             $return_array['error_array'] = $error_array;
@@ -1312,10 +1312,10 @@ class Registration_Model1 extends \App\Models\BaseModel {
         }
 
         /* $this->db->where('school_code',$school_code);
-          $this->db->update('school_details',array('is_csv_taken' => 'Y'));
+          $this->db->update('sd_school_details',array('is_csv_taken' => 'Y'));
 
           $this->db->where('school_code',$school_code);
-          $school_details		=	$this->db->get('school_details');
+          $school_details		=	$this->db->get('sd_school_details');
           query_to_csv($school_details,true,'dddd.csv'); */
     }
 
@@ -1325,7 +1325,7 @@ class Registration_Model1 extends \App\Models\BaseModel {
         if ($school_details->getNumRows() > 0) {
             $this->db->where('SM.school_code', $school_code);
             $this->db->join('school_master AS SM', 'SM.school_code = SD.school_code', 'RIGHT');
-            $school_details = $this->db->get('school_details AS SD');
+            $school_details = $this->db->get('sd_school_details AS SD');
             $school = $school_details->getResultArray();
             if (@$school[0]['is_finalize'] == 'Y' or @ $school[0]['master_confirm'] == 'Y') {
                 return 'no';

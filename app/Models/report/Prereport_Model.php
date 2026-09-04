@@ -12,7 +12,7 @@ class Prereport_Model extends \App\Models\BaseModel {
     function participate_school_details() {
         $sessSubdistrictId = $this->session->get('SUB_DISTRICT');
         $sessDistrictId    = $this->session->get('DISTRICT');
-        $this->db->from('school_details AS SM');
+        $this->db->from('sd_school_details AS SM');
         $this->db->join('school_master AS SD', 'SM.school_code = SD.school_code', 'LEFT');
         $this->db->where('SD.sub_district_code', $sessSubdistrictId);
         $this->db->where('SD.rev_district_code', $sessDistrictId);
@@ -36,7 +36,7 @@ class Prereport_Model extends \App\Models\BaseModel {
 
     function schoolalldetails() {
         $this->db->select('sd.school_code, fm.fest_id, fm.fest_name, sm.school_name');
-        $this->db->from('school_details AS sd');
+        $this->db->from('sd_school_details AS sd');
         $this->db->join('sd_participant_item_details AS pd ', 'pd.school_code = sd.school_code');
         $this->db->join('item_master AS it', 'it.item_code = pd.item_code');
         $this->db->join('festival_master AS fm', 'fm.fest_id = it.fest_id');
@@ -64,7 +64,7 @@ class Prereport_Model extends \App\Models\BaseModel {
     function list_school_details() {
         $sessSubdistrictId = $this->session->get('SUB_DISTRICT');
         $sessDistrictId    = $this->session->get('DISTRICT');
-        $this->db->from('school_details AS SM');
+        $this->db->from('sd_school_details AS SM');
         $this->db->select('SM.*,SM.school_code,SD.school_name');
         $this->db->join('school_master AS SD', 'SM.school_code = SD.school_code', 'LEFT');
         $this->db->where('SD.sub_district_code', $sessSubdistrictId);
@@ -75,7 +75,7 @@ class Prereport_Model extends \App\Models\BaseModel {
  
 
     function get_fee_school_single($schoolCode) {
-        $this->db->from('school_details AS SM');
+        $this->db->from('sd_school_details AS SM');
         $this->db->where('school_code', $schoolCode);
         $school_details = $this->db->get();
         return $school_details->getResultArray();
@@ -178,7 +178,7 @@ class Prereport_Model extends \App\Models\BaseModel {
         $fest_detail1 = $this->db->query($qy);
         return $fest_detail1->getResultArray();
 
-        $this->db->from('school_details AS SM');
+        $this->db->from('sd_school_details AS SM');
         $this->db->join('school_master AS SD', 'SM.school_code = SD.school_code', 'LEFT');
         $this->db->where('SD.sub_district_code', $sessSubdistrictId);
         $this->db->where('SD.rev_district_code', $sessDistrictId);
@@ -277,7 +277,7 @@ class Prereport_Model extends \App\Models\BaseModel {
 
     function get_fees_details($school_code) {
         $this->db->where('school_code', $school_code);
-        $school_details = $this->db->get('school_details');
+        $school_details = $this->db->get('sd_school_details');
         $up_fee = 0;
         $hs_fee = 0;
         $hss_fee = 0;
@@ -347,7 +347,7 @@ class Prereport_Model extends \App\Models\BaseModel {
     function get_fees_details_all() {
         $this->db->where('s.school_code = d.school_code');
         $this->db->from('school_master AS s');
-        $this->db->from('school_details AS d');
+        $this->db->from('sd_school_details AS d');
         $this->db->orderBy('d.school_code');
         $school_details = $this->db->get();
         $school_struct = $school_details->getResultArray();
@@ -457,7 +457,7 @@ class Prereport_Model extends \App\Models\BaseModel {
     }
 
     function get_participant_card($schoolcode) {
-        $this->db->from('school_details   AS sd');
+        $this->db->from('sd_school_details   AS sd');
         $this->db->select('sd.school_code,mj.school_name, pd.participant_id, pd.school_code, pd.participant_name,
 pd.class, pd.gender, pid.item_code, pid.item_type, pid.is_captain, it.item_name, it.fest_id, sm.stage_id, date(sm.start_time) AS datee, ssm.stage_desc,ssm.stage_name, fm.fest_name,cpd.cluster_no');
         $this->db->join('school_master AS mj', 'mj.school_code = sd.school_code');
@@ -501,7 +501,7 @@ pd.class, pd.gender, pid.item_code, pid.item_type, pid.is_captain, it.item_name,
     }
 
     function get_participant_regno($regno) {
-        $this->db->from('school_details   AS sd');
+        $this->db->from('sd_school_details   AS sd');
         $this->db->select('sd.school_code,mj.school_name, pd.participant_id,pd.admn_no, pd.school_code, pd.participant_name,
 pd.class, pd.gender, pid.item_code, pid.item_type, pid.is_captain, it.item_name, it.fest_id, sm.stage_id, sm.start_time AS datee, ssm.stage_desc,ssm.stage_name, fm.fest_name,cpd.cluster_no,SUB.sub_district_name,mj.sub_district_code');
         $this->db->join('school_master AS mj', 'mj.school_code = sd.school_code');
@@ -918,7 +918,7 @@ ORDER BY  PD.participant_name,CM.start_time,CM.end_time";
     //========================================
     function school_lpdetails() {
         $this->db->select('d.school_code,m.school_name');
-        $this->db->from('school_details AS d');
+        $this->db->from('sd_school_details AS d');
         $this->db->join('school_master AS m', 'm.school_code=d.school_code');
         $this->db->orderBy('d.school_code');
         $participants_details = $this->db->get();
@@ -929,7 +929,7 @@ ORDER BY  PD.participant_name,CM.start_time,CM.end_time";
         $this->db->select('count(distinct p.participant_id ) AS cntlp, p.school_code, p.gender, s.school_name');
         $this->db->from('sd_participant_details AS p');
         $this->db->join('school_master  AS s', 's.school_code = p.school_code');
-        $this->db->join('school_details AS d', 'd.school_code=p.school_code', 'RIGHT');
+        $this->db->join('sd_school_details AS d', 'd.school_code=p.school_code', 'RIGHT');
         $this->db->where('p.class BETWEEN 1 AND 4');
         $this->db->groupBy('p.gender');
         $this->db->groupBy('p.school_code');
@@ -1315,7 +1315,7 @@ WHERE IM.`item_code` =?";
         $sessDistrictId    = $this->session->get('DISTRICT');
         $this->db->select('SD.*,SM.school_name');
         $this->db->from('school_master AS SM');
-        $this->db->join('school_details AS SD', 'SM.school_code = SD.school_code');
+        $this->db->join('sd_school_details AS SD', 'SM.school_code = SD.school_code');
         $this->db->where('SM.sub_district_code', $sessSubdistrictId);
         $this->db->where('SM.rev_district_code', $sessDistrictId);
         $school_details = $this->db->get();

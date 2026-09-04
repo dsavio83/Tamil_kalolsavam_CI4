@@ -112,7 +112,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         $festpart_school = $this->input->post('Festpart');
 
         if ($school_code > 0) {
-            $item_details = $this->db->where('school_code', $school_code)->limit(1)->get('school_details')->getResultArray();
+            $item_details = $this->db->where('school_code', $school_code)->limit(1)->get('sd_school_details')->getResultArray();
             if (count($item_details) > 0) {
                 $part_details = $this->Prereport_Model->part_item_details($school_code, $festpart_school);
                 $this->Content['subdistrict'] = $this->Prereport_Model->find_subdistrict();

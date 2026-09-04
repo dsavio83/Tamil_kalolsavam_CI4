@@ -56,7 +56,7 @@ class Import_Model extends \App\Models\BaseModel {
                             // transation begins
                             $this->db->transBegin();
                             $this->db->emptyTable('school_master');
-                            $this->db->emptyTable('school_details');
+                            $this->db->emptyTable('sd_school_details');
                             $this->db->emptyTable('sd_participant_details');
                             $this->db->emptyTable('sd_participant_item_details');
 
@@ -121,7 +121,7 @@ class Import_Model extends \App\Models\BaseModel {
                                             $data_array['is_create_report'] = trim($csvData[$i][16]);
                                             $data_array['is_finalize'] = trim($csvData[$i][17]);
 
-                                            if (!$this->db->insert('school_details', $data_array)) {
+                                            if (!$this->db->insert('sd_school_details', $data_array)) {
                                                 $this->db->transRollback();
                                             }
                                         } else {
@@ -464,7 +464,7 @@ class Import_Model extends \App\Models\BaseModel {
         $this->db->emptyTable('sd_item_absentee_master');
         $this->db->emptyTable('sd_result_master');
         $this->db->emptyTable('sd_result_publish');
-        $this->db->emptyTable('school_details');
+        $this->db->emptyTable('sd_school_details');
         $this->db->emptyTable('school_master');
         $this->db->emptyTable('sd_school_point_details');
         $this->db->emptyTable('sd_stage_item_master');

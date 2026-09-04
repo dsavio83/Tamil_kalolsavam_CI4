@@ -37,7 +37,7 @@ class Registration_Model extends \App\Models\BaseModel {
         /** check if the user is cluster user ends */
         $this->db->select('SM.*, sd_id, class_start, class_end, school_phone, school_email, hm_name, hm_phone, principal_name, principal_phone, 
 										teachers, strength_lp, strength_up, strength_hs, strength_hss, strength_vhss, total_strength, is_create_report, is_finalize');
-        $this->db->join('school_details AS SD', 'SM.school_code = SD.school_code', 'LEFT');
+        $this->db->join('sd_school_details AS SD', 'SM.school_code = SD.school_code', 'LEFT');
         $result = $this->db->get();
         return $result->getResultArray();
     }
@@ -199,7 +199,7 @@ class Registration_Model extends \App\Models\BaseModel {
 
     function log_school_details($schoolCode, $status) {
         $this->db->where('school_code', $schoolCode);
-        $school_details = $this->db->get('school_details');
+        $school_details = $this->db->get('sd_school_details');
         if ($school_details->getNumRows() > 0) {
             $school = $school_details->getResultArray();
 
@@ -275,7 +275,7 @@ class Registration_Model extends \App\Models\BaseModel {
         $schoolCode = $this->input->post('hidSchoolId');
 
         $this->db->where('school_code', $schoolCode);
-        $old_school_details = $this->db->get('school_details');
+        $old_school_details = $this->db->get('sd_school_details');
         if ($old_school_details->getNumRows() > 0) {
             $this->log_school_details($schoolCode, 'O');
         }
@@ -293,7 +293,7 @@ class Registration_Model extends \App\Models\BaseModel {
 
 
         $this->db->where('school_code', $schoolCode);
-        $count = $this->db->countAllResults('school_details');
+        $count = $this->db->countAllResults('sd_school_details');
         if ($count > 0) {
             $this->db->where('school_code', $schoolCode);
         } else {
@@ -322,9 +322,9 @@ class Registration_Model extends \App\Models\BaseModel {
         $data['strength_vhss'] = (int) $this->input->post('txtTotalVHSS');
         $data['total_strength'] = (int) $this->input->post('txtTotal');
         if ($count > 0) {
-            $this->db->update('school_details', $data);
+            $this->db->update('sd_school_details', $data);
         } else {
-            $this->db->insert('school_details', $data);
+            $this->db->insert('sd_school_details', $data);
         }
         $this->log_school_details($schoolCode, 'N');
         return false;
@@ -1542,7 +1542,7 @@ class Registration_Model extends \App\Models\BaseModel {
          * * End Delete who is not participating any items
          */
         $this->db->where('school_code', $school_code);
-        $this->db->update('school_details', array('is_finalize' => 'Y'));
+        $this->db->update('sd_school_details', array('is_finalize' => 'Y'));
 
         $data = array();
         $data['school_code'] = $school_code;
@@ -1555,7 +1555,7 @@ class Registration_Model extends \App\Models\BaseModel {
     function create_csv_generation($school_code) {
         $this->db->where('school_code', $school_code);
         $this->db->where('is_finalize', 'Y');
-        $school_details = $this->db->get('school_details');
+        $school_details = $this->db->get('sd_school_details');
         if ($school_details->getNumRows() <= 0) {
             $error_array[] = "Please finalize the school details";
             $return_array['error_array'] = $error_array;
@@ -1579,10 +1579,10 @@ class Registration_Model extends \App\Models\BaseModel {
         }
 
         /* $this->db->where('school_code',$school_code);
-          $this->db->update('school_details',array('is_csv_taken' => 'Y'));
+          $this->db->update('sd_school_details',array('is_csv_taken' => 'Y'));
 
           $this->db->where('school_code',$school_code);
-          $school_details		=	$this->db->get('school_details');
+          $school_details		=	$this->db->get('sd_school_details');
           query_to_csv($school_details,true,'dddd.csv'); */
     }
 
@@ -1596,7 +1596,7 @@ class Registration_Model extends \App\Models\BaseModel {
         if ($school_details->getNumRows() > 0) {
             $this->db->where('SM.school_code', $school_code);
             $this->db->join('school_master AS SM', 'SM.school_code = SD.school_code', 'RIGHT');
-            $school_details = $this->db->get('school_details AS SD');
+            $school_details = $this->db->get('sd_school_details AS SD');
             $school = $school_details->getResultArray();
             if (@$school[0]['is_finalize'] == 'Y' or @ $school[0]['master_confirm'] == 'Y') {
                 return 'no';
@@ -1878,9 +1878,9 @@ class Registration_Model extends \App\Models\BaseModel {
     }
 
     function get_all_schools_list() {
-        // First get all school codes that have school_details entries
+        // First get all school codes that have sd_school_details entries
         $this->db->select('SD.school_code');
-        $this->db->from('school_details AS SD');
+        $this->db->from('sd_school_details AS SD');
         $this->db->join('school_master AS SM', 'SD.school_code = SM.school_code');
 
         // Apply district/sub-district filters if available
@@ -1929,7 +1929,7 @@ class Registration_Model extends \App\Models\BaseModel {
         /** check if the user is cluster user ends */
 
         $this->db->from('school_master AS SM');
-        $this->db->join('school_details AS SD', 'SM.school_code = SD.school_code', 'LEFT');
+        $this->db->join('sd_school_details AS SD', 'SM.school_code = SD.school_code', 'LEFT');
         $this->db->select('SM.school_code, SM.school_name, SM.sub_district_code, SM.rev_district_code, SD.is_create_report, SD.is_finalize');
         $this->db->orderBy('SM.school_name', 'ASC');
         $result = $this->db->get();
@@ -1963,13 +1963,13 @@ class Registration_Model extends \App\Models\BaseModel {
         // Debug: Log how many schools found
         log_message('debug', 'Sub-district Schools Found: ' . count($schools) . ' for sub_district: ' . $sub_district_code);
 
-        // Add school_details information for each school
+        // Add sd_school_details information for each school
         foreach ($schools as &$school) {
             $school_code = $school['school_code'];
 
-            // Get school_details for this school
+            // Get sd_school_details for this school
             $this->db->where('school_code', $school_code);
-            $details_result = $this->db->get('school_details');
+            $details_result = $this->db->get('sd_school_details');
             $details = $details_result->getResultArray();
 
             if (!empty($details)) {
@@ -2010,13 +2010,13 @@ class Registration_Model extends \App\Models\BaseModel {
         // Debug: Log how many schools found
         log_message('debug', 'District Schools Found: ' . count($schools) . ' for district: ' . $district_code);
 
-        // Add school_details information for each school
+        // Add sd_school_details information for each school
         foreach ($schools as &$school) {
             $school_code = $school['school_code'];
 
-            // Get school_details for this school
+            // Get sd_school_details for this school
             $this->db->where('school_code', $school_code);
-            $details_result = $this->db->get('school_details');
+            $details_result = $this->db->get('sd_school_details');
             $details = $details_result->getResultArray();
 
             if (!empty($details)) {
@@ -2034,7 +2034,7 @@ class Registration_Model extends \App\Models\BaseModel {
     function update_confirmation_status($school_code, $action) {
         // First check current status
         $this->db->where('school_code', $school_code);
-        $current_details = $this->db->get('school_details');
+        $current_details = $this->db->get('sd_school_details');
         $current = $current_details->getResultArray();
 
         if (empty($current)) {
@@ -2059,7 +2059,7 @@ class Registration_Model extends \App\Models\BaseModel {
         }
 
         $this->db->where('school_code', $school_code);
-        $result = $this->db->update('school_details', $update_data);
+        $result = $this->db->update('sd_school_details', $update_data);
 
         if ($result) {
             // Log the action with more details
@@ -2132,9 +2132,9 @@ class Registration_Model extends \App\Models\BaseModel {
         $result = $this->db->get();
         $count_data = $result->getResultArray();
 
-        // Test query to school_details table
+        // Test query to sd_school_details table
         $this->db->select('COUNT(*) as count');
-        $this->db->from('school_details');
+        $this->db->from('sd_school_details');
         $result = $this->db->get();
         $details_count_data = $result->getResultArray();
 
@@ -2157,13 +2157,13 @@ class Registration_Model extends \App\Models\BaseModel {
         }
         $debug_info['school_master_count'] = $this->db->countAllResults();
 
-        // Count schools in school_details only
-        $this->db->from('school_details AS SD');
+        // Count schools in sd_school_details only
+        $this->db->from('sd_school_details AS SD');
         $debug_info['school_details_count'] = $this->db->countAllResults();
 
         // Count schools that exist in both tables (with details)
         $this->db->from('school_master AS SM');
-        $this->db->join('school_details AS SD', 'SM.school_code = SD.school_code', 'INNER');
+        $this->db->join('sd_school_details AS SD', 'SM.school_code = SD.school_code', 'INNER');
         if ($sub_district_code) {
             $this->db->where('SM.sub_district_code', $sub_district_code);
         }
@@ -2185,10 +2185,10 @@ class Registration_Model extends \App\Models\BaseModel {
         $this->db->limit(3);
         $debug_info['sample_schools_master'] = $this->db->get()->getResultArray();
 
-        // Get sample schools from school_details with master info
+        // Get sample schools from sd_school_details with master info
         $this->db->select('SM.school_code, SM.school_name, SM.sub_district_code, SM.rev_district_code, SD.is_create_report, SD.is_finalize');
         $this->db->from('school_master AS SM');
-        $this->db->join('school_details AS SD', 'SM.school_code = SD.school_code', 'INNER');
+        $this->db->join('sd_school_details AS SD', 'SM.school_code = SD.school_code', 'INNER');
         if ($sub_district_code) {
             $this->db->where('SM.sub_district_code', $sub_district_code);
         }

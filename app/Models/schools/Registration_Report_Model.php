@@ -13,7 +13,7 @@ class Registration_Report_Model extends \App\Models\BaseModel {
         $this->db->where('SM.school_code', $school_code);
         $this->db->from('school_master AS SM');
         $this->db->join('sub_district_master AS SB', 'SB.sub_district_code = SM.sub_district_code');
-        $this->db->join('school_details AS SD', 'SM.school_code = SD.school_code', 'LEFT');
+        $this->db->join('sd_school_details AS SD', 'SM.school_code = SD.school_code', 'LEFT');
         $school_details = $this->db->get();
         return $school_details->getResultArray();
     }
@@ -53,7 +53,7 @@ class Registration_Report_Model extends \App\Models\BaseModel {
 
     function get_fees_details($school_code) {
         $this->db->where('school_code', $school_code);
-        $school_details = $this->db->get('school_details');
+        $school_details = $this->db->get('sd_school_details');
         $up_fee = 0;
         $hs_fee = 0;
         $hss_fee = 0;
@@ -110,7 +110,7 @@ class Registration_Report_Model extends \App\Models\BaseModel {
         $this->db->where('school_code', $school_code);
         $data = array();
         $data['is_create_report'] = 'Y';
-        $this->db->update('school_details', $data);
+        $this->db->update('sd_school_details', $data);
 
         $data = array();
         $data['school_code'] = $school_code;

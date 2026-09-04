@@ -179,7 +179,7 @@ if (!function_exists('is_import_data_finish')) {
 
         $db->where('SM.sub_district_code', $sub_district_code);
         $db->join('school_master AS SM', 'SM.school_code = SD.school_code');
-        $school_details = $db->get('school_details AS SD');
+        $school_details = $db->get('sd_school_details AS SD');
 
         $db->where('sub_district_code', $sub_district_code);
         $participant_details = $db->get('sd_participant_details');

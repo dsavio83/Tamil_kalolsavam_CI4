@@ -10,7 +10,7 @@ class Stage_Report_Model extends \App\Models\BaseModel {
     }
 
     function participate_school_details() {
-        $this->db->from('school_details AS SM');
+        $this->db->from('sd_school_details AS SM');
         $this->db->join('school_master AS SD', 'SM.school_code = SD.school_code', 'LEFT');
         $school_details = $this->db->get();
         return $school_details->getResultArray();
@@ -32,7 +32,7 @@ class Stage_Report_Model extends \App\Models\BaseModel {
 
     function schoolalldetails() {
         $this->db->select('sd.school_code, pd.item_code, it.item_code, it.item_name, fm.fest_id, fm.fest_name,sm.school_name');
-        $this->db->from('school_details AS sd');
+        $this->db->from('sd_school_details AS sd');
         $this->db->join('sd_participant_item_details AS pd ', 'pd.school_code = sd.school_code');
         $this->db->join('item_master AS it', 'it.item_code = pd.item_code');
         $this->db->join('festival_master AS fm', 'fm.fest_id = it.fest_id');
@@ -58,7 +58,7 @@ class Stage_Report_Model extends \App\Models\BaseModel {
     }
 
     function list_school_details() {
-        $this->db->from('school_details AS SM');
+        $this->db->from('sd_school_details AS SM');
         $this->db->select('SM.*,SM.school_code,SD.school_name');
         $this->db->join('school_master AS SD', 'SM.school_code = SD.school_code', 'LEFT');
         $school_details = $this->db->get();
@@ -66,7 +66,7 @@ class Stage_Report_Model extends \App\Models\BaseModel {
     }
 
     function get_fee_school_single($schoolCode) {
-        $this->db->from('school_details AS SM');
+        $this->db->from('sd_school_details AS SM');
         $this->db->where('school_code', $schoolCode);
         $school_details = $this->db->get();
         return $school_details->getResultArray();
@@ -81,7 +81,7 @@ class Stage_Report_Model extends \App\Models\BaseModel {
 
     function part_item_details($schoolcode) {
         $this->db->select('d.school_code, m.school_name, p.participant_id, p.participant_name, p.class, p.gender, pd.item_code, im.item_name, ms.stage_desc, ms.stage_name, cp.cluster_no,fm.fest_name,date(sm.start_time) as ddt,im.max_time,im.time_type,sm.no_of_participant');
-        $this->db->from('school_details AS d');
+        $this->db->from('sd_school_details AS d');
         $this->db->join('school_master AS m', 'd.school_code = m.school_code');
         $this->db->join('sd_participant_details AS p', 'p.school_code = d.school_code');
         $this->db->join('sd_participant_item_details AS pd', 'p.participant_id = pd.participant_id');
@@ -102,7 +102,7 @@ class Stage_Report_Model extends \App\Models\BaseModel {
 
     function part_item_details_allschool() {
         $this->db->select('d.school_code, m.school_name, p.participant_id, p.participant_name, p.class, p.gender, pd.item_code, im.item_name, ms.stage_desc, ms.stage_name, cp.cluster_no,fm.fest_name,fm.fest_id,date(sm.start_time) as ddt,im.max_time,im.time_type,sm.no_of_participant ');
-        $this->db->from('school_details AS d');
+        $this->db->from('sd_school_details AS d');
         $this->db->join('school_master AS m', 'd.school_code = m.school_code');
         $this->db->join('sd_participant_details AS p', 'p.school_code = d.school_code');
         $this->db->join('sd_participant_item_details AS pd', 'p.participant_id = pd.participant_id');
@@ -123,7 +123,7 @@ class Stage_Report_Model extends \App\Models\BaseModel {
 
     function get_fees_details($school_code) {
         $this->db->where('school_code', $school_code);
-        $school_details = $this->db->get('school_details');
+        $school_details = $this->db->get('sd_school_details');
         $up_fee = 0;
         $hs_fee = 0;
         $hss_fee = 0;
@@ -193,7 +193,7 @@ class Stage_Report_Model extends \App\Models\BaseModel {
     function get_fees_details_all() {
         $this->db->where('s.school_code = d.school_code');
         $this->db->from('school_master AS s');
-        $this->db->from('school_details AS d');
+        $this->db->from('sd_school_details AS d');
         $school_details = $this->db->get();
         $school_struct = $school_details->getResultArray();
 
@@ -282,7 +282,7 @@ class Stage_Report_Model extends \App\Models\BaseModel {
     }
 
     function get_participant_card($schoolcode) {
-        $this->db->from('school_details   AS sd');
+        $this->db->from('sd_school_details   AS sd');
         $this->db->select('sd.school_code, pd.participant_id, pd.school_code, pd.participant_name,
 pd.class, pd.gender, pid.item_code, pid.item_type, pid.is_captain, it.item_name, it.fest_id, sm.stage_id, date(sm.start_time) AS datee, ssm.stage_desc,ssm.stage_name, fm.fest_name,cpd.cluster_no');
         $this->db->join('sd_participant_details AS pd', 'pd.school_code = sd.school_code');
@@ -355,7 +355,7 @@ pd.class, pd.gender, pid.item_code, pid.item_type, pid.is_captain, it.item_name,
     }
 
     function list_eligible_schools() {
-        $this->db->from('school_details AS d');
+        $this->db->from('sd_school_details AS d');
         $this->db->from('school_master AS m');
         $this->db->select('d.school_code, m.school_name, m.sub_district_code, m.edu_district_code, m.rev_district_code');
         $this->db->where('m.school_code = d.school_code');

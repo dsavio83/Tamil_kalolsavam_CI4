@@ -541,7 +541,7 @@ class Registration extends \App\Controllers\BaseController {
             $db = \Config\Database::connect();
             $sm = $db->table('school_master')->where('school_code', $code)->get()->getRowArray();
             if ($sm) {
-                $sd = $db->table('school_details')->where('school_code', $code)->get()->getRowArray();
+                $sd = $db->table('sd_school_details')->where('school_code', $code)->get()->getRowArray();
                 $school_details = [array_merge($sm, $sd ?: [])];
                 $school_details = $this->populateDefaultSchoolDetails($school_details);
             }

@@ -149,8 +149,8 @@ class Login_Model extends \App\Models\BaseModel {
 		COUNT(UC.school_code) AS total, COUNT(SD.school_code) AS data_entered, COUNT(SF.is_finalize) AS finialized');
         $this->db->from('sd_user_cluster AS UC');
         $this->db->join('user_master AS UM', 'UM.user_id = UC.user_id');
-        $this->db->join('school_details AS SD', 'SD.school_code = UC.school_code', 'LEFT');
-        $this->db->join('school_details AS SF', "SF.school_code = UC.school_code AND SF.is_finalize = 'Y'", 'LEFT');
+        $this->db->join('sd_school_details AS SD', 'SD.school_code = UC.school_code', 'LEFT');
+        $this->db->join('sd_school_details AS SF', "SF.school_code = UC.school_code AND SF.is_finalize = 'Y'", 'LEFT');
         //$this->db->where('UM.user_id',$user_id);
         $this->db->where('UM.sub_district_code', $subdist);
         $this->db->orderBy('data_entered');
@@ -172,18 +172,18 @@ class Login_Model extends \App\Models\BaseModel {
 
     function get_unclustersch_finentry($subdist) {
         $this->db->select('count( m.school_code ) AS ent, count( m2.school_code ) AS fin');
-        $this->db->from('school_details m');
+        $this->db->from('sd_school_details m');
         $this->db->join('school_master AS w', "w.school_code = m.school_code AND w.sub_district_code =?", [], 'LEFT');
-        $this->db->join('school_details AS m2', "m.school_code = m2.school_code AND m2.is_finalize = 'Y'", 'LEFT');
+        $this->db->join('sd_school_details AS m2', "m.school_code = m2.school_code AND m2.is_finalize = 'Y'", 'LEFT');
         $this->db->where("m.school_code NOT IN (SELECT c.school_code FROM user_cluster c JOIN school_master t ON c.school_code = t.school_code AND t.sub_district_code =?)", [$subdist]);
         $ret = $this->db->get();
         return $ret->getResultArray();
         /*
           $qrt="SELECT count( m.school_code ) AS ent, count( m2.school_code ) AS fin
-          FROM school_details m
+          FROM sd_school_details m
           JOIN school_master w ON w.school_code = m.school_code
           AND w.sub_district_code ='$subdist'
-          LEFT JOIN school_details AS m2 ON m.school_code = m2.school_code
+          LEFT JOIN sd_school_details AS m2 ON m.school_code = m2.school_code
           AND m2.is_finalize = 'Y'
           WHERE m.school_code NOT
           IN (
@@ -211,12 +211,12 @@ class Login_Model extends \App\Models\BaseModel {
         $cluster_school = $this->db->countAllResults('sd_user_cluster');
 
         $this->db->where('SM.sub_district_code', $subdist);
-        $this->db->join('school_details AS SD', 'SM.school_code = SD.school_code');
+        $this->db->join('sd_school_details AS SD', 'SM.school_code = SD.school_code');
         $data_entered = $this->db->countAllResults('school_master AS SM');
 
         $this->db->where('SM.sub_district_code', $subdist);
         $this->db->where('SD.is_finalize', 'Y');
-        $this->db->join('school_details AS SD', 'SM.school_code = SD.school_code');
+        $this->db->join('sd_school_details AS SD', 'SM.school_code = SD.school_code');
         $confirmed = $this->db->countAllResults('school_master AS SM');
 
 
@@ -253,7 +253,7 @@ class Login_Model extends \App\Models\BaseModel {
         $this->db->select('sd.school_code, sd.sub_district_code, sm.school_name,dt.is_finalize');
         $this->db->from('user_cluster AS sd');
         $this->db->join('school_master AS sm', 'sm.school_code = sd.school_code');
-        $this->db->join('school_details AS dt', 'dt.school_code=sd.school_code', 'LEFT');
+        $this->db->join('sd_school_details AS dt', 'dt.school_code=sd.school_code', 'LEFT');
         $this->db->where('sd.user_id', $user_id);
         $this->db->where('sd.sub_district_code', $subdist);
         $this->db->orderBy('sd.school_code');
@@ -276,7 +276,7 @@ class Login_Model extends \App\Models\BaseModel {
 
     function schoolpartcip() {
         $this->db->select('sd.school_code');
-        $this->db->from('school_details AS sd');
+        $this->db->from('sd_school_details AS sd');
         $this->db->orderBy('sd.school_code');
         $school_details = $this->db->get();
         return $school_details->getResultArray();
@@ -285,7 +285,7 @@ class Login_Model extends \App\Models\BaseModel {
     function get_confirmation_status($school_code) {
         $this->db->select('is_finalize');
         $this->db->where('school_code', $school_code);
-        $this->db->from('school_details');
+        $this->db->from('sd_school_details');
         $school_details = $this->db->get();
         return $school_details->getResultArray();
     }
@@ -295,9 +295,9 @@ class Login_Model extends \App\Models\BaseModel {
         $this->db->transStart();
 
         try {
-            // Update school_details table
+            // Update sd_school_details table
             $this->db->where('school_code', $school_code);
-            $details_updated = $this->db->update('school_details', array('is_finalize' => $status));
+            $details_updated = $this->db->update('sd_school_details', array('is_finalize' => $status));
 
             // Check if update was successful (even if no rows were affected, it might be because it's already at the target value)
             if (!$details_updated) {
@@ -307,7 +307,7 @@ class Login_Model extends \App\Models\BaseModel {
 
             // Verify the field was actually set to the correct value
             $this->db->where('school_code', $school_code);
-            $verify_details = $this->db->get('school_details');
+            $verify_details = $this->db->get('sd_school_details');
             if ($verify_details->getNumRows() > 0) {
                 $current_value = $verify_details->getRowArray()['is_finalize'];
                 if ($current_value !== $status) {
@@ -382,12 +382,12 @@ class Login_Model extends \App\Models\BaseModel {
         $cluster_school = $this->db->countAllResults('sd_user_cluster');
 
         $this->db->where("SM.sub_district_code IN (SELECT SDM.sub_district_code FROM sub_district_master SDM WHERE SDM.rev_district_code = {$dist})", null, false);
-        $this->db->join('school_details AS SD', 'SM.school_code = SD.school_code');
+        $this->db->join('sd_school_details AS SD', 'SM.school_code = SD.school_code');
         $data_entered = $this->db->countAllResults('school_master AS SM');
 
         $this->db->where("SM.sub_district_code IN (SELECT SDM.sub_district_code FROM sub_district_master SDM WHERE SDM.rev_district_code = {$dist})", null, false);
         $this->db->where('SD.is_finalize', 'Y');
-        $this->db->join('school_details AS SD', 'SM.school_code = SD.school_code');
+        $this->db->join('sd_school_details AS SD', 'SM.school_code = SD.school_code');
         $confirmed = $this->db->countAllResults('school_master AS SM');
 
         $return_array['total_school'] = $total_school;
@@ -402,7 +402,7 @@ class Login_Model extends \App\Models\BaseModel {
         if (empty($subdist))
             $subdist = $this->session->get('SUB_DISTRICT');
         $this->db->select('m.school_code, m2.school_name,m.is_finalize');
-        $this->db->from('school_details m');
+        $this->db->from('sd_school_details m');
         $this->db->join('school_master AS m2', "m.school_code = m2.school_code AND m2.sub_district_code =?", [$subdist]);
         $school_details = $this->db->get();
         return $school_details->getResultArray();

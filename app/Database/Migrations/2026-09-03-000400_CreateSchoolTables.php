@@ -57,7 +57,7 @@ class CreateSchoolTables extends Migration
         $this->forge->addKey('rev_district_code');
         $this->forge->createTable('school_master', true);
 
-        // school_details - School extended info
+        // sd_school_details - School extended info
         $this->forge->addField([
             'school_code' => [
                 'type'       => 'DOUBLE',
@@ -157,12 +157,12 @@ class CreateSchoolTables extends Migration
             ],
         ]);
         $this->forge->addKey('school_code', true);
-        $this->forge->createTable('school_details', true);
+        $this->forge->createTable('sd_school_details', true);
     }
 
     public function down()
     {
-        $this->forge->dropTable('school_details', true);
+        $this->forge->dropTable('sd_school_details', true);
         $this->forge->dropTable('school_master', true);
     }
 }

@@ -49,7 +49,7 @@ class Welcome extends \App\Controllers\BaseController {
 	}
 	public function index()
 	{
-		// Check if school_details entry exists for school user
+		// Check if sd_school_details entry exists for school user
 		$school_code = $this->session->get('SCHOOL_CODE');
 		if (!$school_code && (int)$this->session->get('USER_TYPE') == 5) {
 			$db = \Config\Database::connect();
@@ -61,7 +61,7 @@ class Welcome extends \App\Controllers\BaseController {
 		}
 		if ($school_code && $school_code != 0 && (int)$this->session->get('USER_TYPE') == 5) {
 			$db = \Config\Database::connect();
-			$builder = $db->table('school_details');
+			$builder = $db->table('sd_school_details');
 			$builder->where('school_code', $school_code);
 			if ($builder->countAllResults() == 0) {
 				session()->setFlashdata('message', 'Please fill out your school profile details first.');
@@ -404,7 +404,7 @@ class Welcome extends \App\Controllers\BaseController {
         
         $school_query = "SELECT sm.school_code, sm.school_name, sd.class_start, sd.class_end, sd.is_finalize
         FROM school_master sm
-        LEFT JOIN school_details sd ON sm.school_code = sd.school_code
+        LEFT JOIN sd_school_details sd ON sm.school_code = sd.school_code
         WHERE sm.sub_district_code = ? AND sm.school_status = 'A'";
         
         $schools = $this->db->query($school_query, array($sub_dist_code))->getResultArray();

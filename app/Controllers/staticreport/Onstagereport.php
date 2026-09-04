@@ -78,7 +78,7 @@ class Onstagereport  extends \App\Controllers\BaseController {
 
         $this->Contents = array();
         $fest_id = $this->input->post('txtSchoolCode');
-        $item_details = $this->db->where('school_code', $fest_id)->limit(1)->get('school_details')->getResultArray();
+        $item_details = $this->db->where('school_code', $fest_id)->limit(1)->get('sd_school_details')->getResultArray();
         if (count($item_details) > 0) {
             $school_det = $this->Stage_Report_Model->get_school_single($this->input->post('txtSchoolCode'));
             $part_details = $this->Stage_Report_Model->part_item_details($this->input->post('txtSchoolCode'));

@@ -86,7 +86,7 @@ class Login extends \App\Controllers\BaseController {
                             $schCode = $set_session_data['SCHOOL_CODE'] ?? 0;
                             if ($schCode) {
                                 $db = \Config\Database::connect();
-                                if ($db->table('school_details')->where('school_code', $schCode)->countAllResults() == 0) {
+                                if ($db->table('sd_school_details')->where('school_code', $schCode)->countAllResults() == 0) {
                                     session()->setFlashdata('message', 'Please complete your school profile details.');
                                     return redirect()->to(base_url('schools/profile'));
                                 }
@@ -221,7 +221,7 @@ class Login extends \App\Controllers\BaseController {
                 $schCode = $set_session_data['SCHOOL_CODE'] ?? 0;
                 if ($schCode) {
                     $db = \Config\Database::connect();
-                    if ($db->table('school_details')->where('school_code', $schCode)->countAllResults() == 0) {
+                    if ($db->table('sd_school_details')->where('school_code', $schCode)->countAllResults() == 0) {
                         $redirectUrl = base_url('schools/profile');
                     }
                 }
@@ -334,7 +334,7 @@ class Login extends \App\Controllers\BaseController {
                 }
                 if ($school_code && (int)$this->session->get('USER_TYPE') == 5) {
                     $db = \Config\Database::connect();
-                    if ($db->table('school_details')->where('school_code', $school_code)->countAllResults() == 0) {
+                    if ($db->table('sd_school_details')->where('school_code', $school_code)->countAllResults() == 0) {
                         session()->setFlashdata('message', 'Please complete your school profile details.');
                         return redirect()->to(base_url('schools/profile'));
                     }

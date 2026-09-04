@@ -91,7 +91,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         $festpart_school = $this->input->post('Festpart');
         // echo  $festpart_school;
 
-        $item_details = $this->db->where('school_code', $fest_id)->limit(1)->get('school_details')->getResultArray();
+        $item_details = $this->db->where('school_code', $fest_id)->limit(1)->get('sd_school_details')->getResultArray();
         if (count($item_details) > 0) {
             //$school_det			=	$this->Prereport_Model->get_school_single($this->input->post('txtSchoolCode'));
             $part_details = $this->Prereport_Model->part_item_details($this->input->post('txtSchoolCode'), $festpart_school);
