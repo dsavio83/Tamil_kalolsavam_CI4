@@ -48,7 +48,7 @@ class Itemreports_Model extends \App\Models\BaseModel {
     function timesheet($itemcode) {
         $this->db->from('item_master AS IT');
         $this->db->where('IT.item_code ', $itemcode);
-        $this->db->join('stage_item_master AS ST', 'ST.item_code = IT.item_code', 'LEFT');
+        $this->db->join('sd_stage_item_master AS ST', 'ST.item_code = IT.item_code', 'LEFT');
         $this->db->join('sd_stage_master AS SM', 'SM.stage_id = ST.stage_id', 'LEFT');
         $item_details = $this->db->get();
         return $item_details->getResultArray();
@@ -60,7 +60,7 @@ class Itemreports_Model extends \App\Models\BaseModel {
 
         $this->db->join('participant_item_details  AS PD ', 'PD.school_code = SD.school_code');
 
-        $this->db->join('stage_item_master  AS SIM ', 'SIM.item_code = PD.item_code');
+        $this->db->join('sd_stage_item_master  AS SIM ', 'SIM.item_code = PD.item_code');
 
         $this->db->where("DATE_FORMAT(SIM.start_time,'%Y-%m-%d')", $date);
 
@@ -74,7 +74,7 @@ class Itemreports_Model extends \App\Models\BaseModel {
 
     //stage report
     function datewise_stagereport($date) {
-        $this->db->from('stage_item_master  AS SIM');
+        $this->db->from('sd_stage_item_master  AS SIM');
         $this->db->join('item_master  AS IM ', 'SIM.item_code = IM.item_code');
         $this->db->join('festival_master AS FM ', 'FM.fest_id = IM.fest_id');
         $this->db->where("DATE_FORMAT(SIM.start_time,'%Y-%m-%d')", $date);

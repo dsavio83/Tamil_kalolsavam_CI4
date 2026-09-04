@@ -90,7 +90,7 @@ class CreateFestivalItemTables extends Migration
         $this->forge->addKey('stage_id', true);
         $this->forge->createTable('sd_stage_master', true);
 
-        // stage_item_master - Stage/item scheduling
+        // sd_stage_item_master - Stage/item scheduling
         $this->forge->addField([
             'item_code' => [
                 'type'       => 'MEDIUMINT',
@@ -118,12 +118,12 @@ class CreateFestivalItemTables extends Migration
         ]);
         $this->forge->addKey('item_code', true);
         $this->forge->addKey('stage_id');
-        $this->forge->createTable('stage_item_master', true);
+        $this->forge->createTable('sd_stage_item_master', true);
     }
 
     public function down()
     {
-        $this->forge->dropTable('stage_item_master', true);
+        $this->forge->dropTable('sd_stage_item_master', true);
         $this->forge->dropTable('sd_stage_master', true);
         $this->forge->dropTable('item_master', true);
         $this->forge->dropTable('festival_master', true);

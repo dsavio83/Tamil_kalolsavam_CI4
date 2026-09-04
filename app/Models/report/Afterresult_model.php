@@ -76,7 +76,7 @@ class Afterresult_model extends \App\Models\BaseModel {
     }
 
     function count_of_items_total() {
-        $query = "select count(distinct s.item_code) as c,f.fest_id from stage_item_master as s
+        $query = "select count(distinct s.item_code) as c,f.fest_id from sd_stage_item_master as s
 		  join item_master AS i on s.item_code=i.item_code 
 		  join festival_master AS f on i.fest_id=f.fest_id 
 		  group by f.fest_id ";
@@ -91,7 +91,7 @@ class Afterresult_model extends \App\Models\BaseModel {
         $this->db->join('item_master AS im', 'im.item_code = rs.item_code');
         $this->db->join('school_master AS sm', 'sm.school_code = rs.school_code');
         $this->db->join('participant_details AS pd', 'pd.participant_id = rs.participant_id', 'LEFT');
-        $this->db->join('stage_item_master AS si', 'si.item_code = rs.item_code');
+        $this->db->join('sd_stage_item_master AS si', 'si.item_code = rs.item_code');
         $this->db->join('festival_master AS fm', 'fm.fest_id = im.fest_id');
         $this->db->orderBy('rs.item_code');
         $this->db->orderBy('rs.rank');
@@ -117,7 +117,7 @@ class Afterresult_model extends \App\Models\BaseModel {
 
         $baseQuery = "SELECT RP.item_code, IM.item_name, FM.fest_name, FM.fest_id
                       FROM result_master AS RP
-                      LEFT JOIN stage_item_master AS sm ON sm.item_code = RP.item_code
+                      LEFT JOIN sd_stage_item_master AS sm ON sm.item_code = RP.item_code
                       LEFT JOIN item_master AS IM ON IM.item_code = RP.item_code
                       LEFT JOIN festival_master AS FM ON IM.fest_id = FM.fest_id
                       WHERE RP.is_finish = 'Y'";
@@ -145,7 +145,7 @@ class Afterresult_model extends \App\Models\BaseModel {
 
         $baseQuery = "SELECT IM.item_name, FM.fest_name, IM.item_code, FM.fest_id
                       FROM item_master AS IM
-                      JOIN stage_item_master AS sm ON sm.item_code = IM.item_code";
+                      JOIN sd_stage_item_master AS sm ON sm.item_code = IM.item_code";
 
         $params = [];
 

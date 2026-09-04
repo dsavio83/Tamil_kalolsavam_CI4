@@ -66,7 +66,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
 
     function festval_status1() {
         $this->db->select('count( s.item_code ) AS cnt, f.fest_name, f.fest_id');
-        $this->db->from('stage_item_master AS s');
+        $this->db->from('sd_stage_item_master AS s');
         $this->db->join('item_master AS m', 's.item_code = m.item_code');
         $this->db->join('festival_master AS f', 'f.fest_id = m.fest_id');
         $this->db->groupBy('f.fest_id');
@@ -180,7 +180,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
 
     function festval_allitems($festid) {
         $this->db->select('m.item_code,date(m.start_time) as ddt, sm.stage_name, m.no_of_cluster, m.no_of_participant, t.item_name, t.gender, t.item_type, t.max_time, t.time_type, f.fest_id, f.fest_name');
-        $this->db->from('stage_item_master AS m');
+        $this->db->from('sd_stage_item_master AS m');
         $this->db->join('item_master AS t', "t.item_code = m.item_code AND t.fest_id = '$festid'");
         $this->db->join('sd_stage_master AS sm', 'sm.stage_id=m.stage_id');
         $this->db->join('festival_master AS f', 'f.fest_id = t.fest_id');
@@ -204,7 +204,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
 
     function incomplete_allitems($festid) {
         $this->db->select('s.stage_id,date(s.start_time) as ddt,sm.stage_name,f.fest_name, s.item_code, s.start_time, s.no_of_cluster, s.no_of_participant, s.item_time, s.time_type, r.item_code as leftitem, i.item_name,i.item_type,i.max_time,i.time_type');
-        $this->db->from('stage_item_master AS s');
+        $this->db->from('sd_stage_item_master AS s');
         $this->db->join('item_master AS i', 'i.item_code = s.item_code');
         $this->db->join('sd_stage_master AS sm', 'sm.stage_id=s.stage_id');
         $this->db->join('festival_master AS f', 'f.fest_id=i.fest_id');

@@ -55,7 +55,7 @@ class Allotmentfest_Model extends \App\Models\BaseModel {
         $data['no_of_participant'] = $no_of_participant;
         $data['item_time'] = $item_time;
         $data['time_type'] = $time_type;
-        $this->db->insert('stage_item_master', $data);
+        $this->db->insert('sd_stage_item_master', $data);
         $si_id = $this->db->insertID();
         return $si_id;
     }
@@ -170,7 +170,7 @@ class Allotmentfest_Model extends \App\Models\BaseModel {
                 
                 
                 $this->db->where('item_code', $item_code);
-                $this->db->delete('stage_item_master');
+                $this->db->delete('sd_stage_item_master');
   
                 $this->db->where('item_code', $item_code);
                 $this->db->delete('sd_cluster_master');
@@ -190,7 +190,7 @@ class Allotmentfest_Model extends \App\Models\BaseModel {
 
     function is_item_to_be_stage_allot($item_code) {
         $this->db->where('item_code', $item_code);
-        $stage_item_master = $this->db->get('stage_item_master');
+        $stage_item_master = $this->db->get('sd_stage_item_master');
         if ($stage_item_master->getNumRows() > 0) {
             $stage_item = $stage_item_master->getResultArray();
             $stage_id = $stage_item[0]['stage_id'];

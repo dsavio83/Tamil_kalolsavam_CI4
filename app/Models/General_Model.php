@@ -415,7 +415,7 @@ class General_Model extends \App\Models\BaseModel {
 
         $this->db->select('item_code');
         $this->db->groupBy('item_code');
-        $stage_item_master = $this->db->get('stage_item_master');
+        $stage_item_master = $this->db->get('sd_stage_item_master');
         $stage_item = $stage_item_master->getNumRows();
 
         if ($participant_item > $stage_item) {
@@ -433,7 +433,7 @@ class General_Model extends \App\Models\BaseModel {
 
         $this->db->select('item_code');
         $this->db->groupBy('item_code');
-        $stage_item_master = $this->db->get('stage_item_master');
+        $stage_item_master = $this->db->get('sd_stage_item_master');
         $stage_item = $stage_item_master->getNumRows();
 
         if ($stage_item > $result_item) {

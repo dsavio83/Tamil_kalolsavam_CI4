@@ -649,7 +649,7 @@ class Festival_Scheduling_Model extends \App\Models\BaseModel {
     // Clear existing schedule for a festival (supports 'all')
     public function clear_festival_schedule($fest_id) {
         if ($fest_id === 'all' || $fest_id === '0' || empty($fest_id)) {
-            $this->db->table('stage_item_master')->emptyTable();
+            $this->db->table('sd_stage_item_master')->emptyTable();
             return true;
         }
         $items = $this->db->table('item_master')
@@ -658,14 +658,14 @@ class Festival_Scheduling_Model extends \App\Models\BaseModel {
             ->get()->getResultArray();
         if (!empty($items)) {
             $codes = array_column($items, 'item_code');
-            $this->db->table('stage_item_master')
+            $this->db->table('sd_stage_item_master')
                 ->whereIn('item_code', $codes)
                 ->delete();
         }
         return true;
     }
 
-    // Save schedule to database (stage_item_master)
+    // Save schedule to database (sd_stage_item_master)
     public function save_schedule($schedule, $fest_id) {
         $this->clear_festival_schedule($fest_id);
 
@@ -697,7 +697,7 @@ class Festival_Scheduling_Model extends \App\Models\BaseModel {
                 'time_type' => 'M'
             );
 
-            $this->db->table('stage_item_master')->insert($data);
+            $this->db->table('sd_stage_item_master')->insert($data);
             $saved_count++;
         }
 
@@ -715,7 +715,7 @@ class Festival_Scheduling_Model extends \App\Models\BaseModel {
                 im.is_off_stage,
                 fm.fest_name
             ');
-            $this->db->from('stage_item_master AS sim');
+            $this->db->from('sd_stage_item_master AS sim');
             $this->db->join('sd_stage_master AS sm', 'sm.stage_id = sim.stage_id');
             $this->db->join('item_master AS im', 'im.item_code = sim.item_code');
             $this->db->join('festival_master AS fm', 'fm.fest_id = im.fest_id', 'left');

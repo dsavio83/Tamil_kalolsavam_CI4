@@ -247,7 +247,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
 
     function stage_allot_new_participant_item($item_code, $participant_id) {
         $this->db->where('item_code', $item_code);
-        $stage_item_master = $this->db->get('stage_item_master');
+        $stage_item_master = $this->db->get('sd_stage_item_master');
         if ($stage_item_master->getNumRows() > 0) {
             $stage_item = $stage_item_master->getResultArray();
             $no_of_participant = $stage_item[0]['no_of_participant'];
@@ -255,7 +255,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
             $data_stage = array();
             $data_stage['no_of_participant'] = $no_of_participant;
             $this->db->where('item_code', $item_code);
-            $this->db->update('stage_item_master', $data_stage);
+            $this->db->update('sd_stage_item_master', $data_stage);
 
             $this->db->where('item_code', $item_code);
             $this->db->selectMax('cluster_no');
@@ -297,7 +297,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
          * * Change Stage Allot to captain
          */
         $this->db->where('item_code', $item_code);
-        $stage_item_master = $this->db->get('stage_item_master');
+        $stage_item_master = $this->db->get('sd_stage_item_master');
         if ($stage_item_master->getNumRows() > 0) {
             $this->db->where('item_code', $item_code);
             $this->db->where('participant_id', $old_participant_id);
@@ -313,7 +313,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
          * * Change Stage Allot to captain
          */
         $this->db->where('item_code', $item_code);
-        $stage_item_master = $this->db->get('stage_item_master');
+        $stage_item_master = $this->db->get('sd_stage_item_master');
         if ($stage_item_master->getNumRows() > 0) {
             $this->db->where('item_code', $item_code);
             $this->db->where('participant_id', $participant_id);
@@ -327,7 +327,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
                 $data_stage = array();
                 $data_stage['no_of_participant'] = $no_of_participant;
                 $this->db->where('item_code', $item_code);
-                $this->db->update('stage_item_master', $data_stage);
+                $this->db->update('sd_stage_item_master', $data_stage);
 
                 $cluster_participant = $sd_cluster_participant_details->getResultArray();
                 $cluster_no = $cluster_participant[0]['cluster_no'];

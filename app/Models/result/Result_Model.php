@@ -19,7 +19,7 @@ class Result_Model extends \App\Models\BaseModel {
         $this->db->select("SM.*, IM.*, (SELECT COUNT(PID.participant_id)
                         FROM participant_item_details PID WHERE PID.item_code = IM.item_code AND PID.is_captain = 'Y' ) AS total_participants ", FALSE);
         $this->db->from('item_master AS IM');
-        $this->db->join('stage_item_master AS SM', 'IM.item_code = SM.item_code');
+        $this->db->join('sd_stage_item_master AS SM', 'IM.item_code = SM.item_code');
         $this->db->where('IM.item_code', $item_code);
         $item_details = $this->db->get();
         if ($item_details && $item_details->getNumRows() > 0) {
@@ -599,7 +599,7 @@ class Result_Model extends \App\Models\BaseModel {
         $this->db->from('participant_item_details AS p');
         $this->db->join('item_master AS i', 'i.item_code = p.item_code');
         $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id');
-        //$this->db->join('stage_item_master AS s','s.item_code= p.item_code','LEFT');
+        //$this->db->join('sd_stage_item_master AS s','s.item_code= p.item_code','LEFT');
         //$this->db->join('sd_stage_master AS sm','sm.stage_id = s.stage_id','LEFT');
         //$this->db->join('result_master AS rm','rm.participant_id= p.participant_id','LEFT');
         $this->db->where('i.fest_id', $festtype);
@@ -630,7 +630,7 @@ class Result_Model extends \App\Models\BaseModel {
         $this->db->from('participant_item_details AS p');
         $this->db->join('item_master AS i', 'i.item_code = p.item_code');
         $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id');
-        //$this->db->join('stage_item_master AS s','s.item_code= p.item_code','LEFT');
+        //$this->db->join('sd_stage_item_master AS s','s.item_code= p.item_code','LEFT');
         //$this->db->join('sd_stage_master AS sm','sm.stage_id = s.stage_id','LEFT');
         $this->db->where('i.fest_id', $festtype);
         $this->db->where('i.item_type', 'S');

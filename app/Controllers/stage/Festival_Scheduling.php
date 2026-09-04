@@ -341,7 +341,7 @@ class Festival_Scheduling extends \App\Controllers\BaseController {
                 return;
             }
 
-            // Save generated schedule to database (stage_item_master)
+            // Save generated schedule to database (sd_stage_item_master)
             $saved_count = $this->Festival_Scheduling_Model->save_schedule($schedule, $fest_id);
 
             $fest_label = ($fest_id === 'all') ? 'All Festivals' : $this->get_festival_name($fest_id);
