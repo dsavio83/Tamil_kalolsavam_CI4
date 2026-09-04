@@ -94,7 +94,7 @@ class Cluster_Statistics_Model extends \App\Models\BaseModel {
 
     function get_venue_details($sub_district_code) {
         $query = "SELECT sub_dist_kalolsavam_name, venue, start_date, end_date 
-                  FROM sub_dist_kalolsavam_master 
+                  FROM sd_kalolsavam_master 
                   WHERE sub_district_code = ?";
         $result = $this->db->query($query, array($sub_district_code))->getRowArray();
         return $result ? $result : array('sub_dist_kalolsavam_name' => '', 'venue' => '', 'start_date' => '', 'end_date' => '');

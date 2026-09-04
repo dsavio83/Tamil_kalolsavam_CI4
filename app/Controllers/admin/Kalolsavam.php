@@ -42,7 +42,7 @@ class Kalolsavam extends \App\Controllers\BaseController {
             $this->template->write_view('content', 'admin/dist_kalolsavam_view', $this->Content);
         } else if (3 === $user_type) {
             $this->Content['edit_kalolsavam'] = 'no';
-            $this->Content['kalolsavam_details'] = $this->General_Model->get_data('sub_dist_kalolsavam_master', '*', array("sub_district_code" => $this->session->get('SUB_DISTRICT')), 'sub_dist_kalolsavam_id desc');
+            $this->Content['kalolsavam_details'] = $this->General_Model->get_data('sd_kalolsavam_master', '*', array("sub_district_code" => $this->session->get('SUB_DISTRICT')), 'sub_dist_kalolsavam_id desc');
             if (isset($this->Content['admin_action']) && $this->Content['admin_action'] == 'EDIT') {
                 $this->Content['edit_kalolsavam'] = 'Yes';
             }
@@ -92,7 +92,7 @@ class Kalolsavam extends \App\Controllers\BaseController {
             } else if (2 === $user_type) {
                 $this->Content['selected_kalolsavam'] = $this->General_Model->get_data('dist_kalolsavam_master', '*', array('dist_kalolsavam_id' => $id));
             } else if (3 === $user_type) {
-                $this->Content['selected_kalolsavam'] = $this->General_Model->get_data('sub_dist_kalolsavam_master', '*', array('sub_dist_kalolsavam_id' => $id));
+                $this->Content['selected_kalolsavam'] = $this->General_Model->get_data('sd_kalolsavam_master', '*', array('sub_dist_kalolsavam_id' => $id));
             }
             $this->index();
         } else {
@@ -117,7 +117,7 @@ class Kalolsavam extends \App\Controllers\BaseController {
                     $kalolsavam_id = (int)$active[0]['dist_kalolsavam_id'];
                 }
             } else if (3 === $user_type) {
-                $active = $this->General_Model->get_data('sub_dist_kalolsavam_master', 'sub_dist_kalolsavam_id', ['sub_district_code' => $this->session->get('SUB_DISTRICT'), 'status' => 'O']);
+                $active = $this->General_Model->get_data('sd_kalolsavam_master', 'sub_dist_kalolsavam_id', ['sub_district_code' => $this->session->get('SUB_DISTRICT'), 'status' => 'O']);
                 if (!empty($active)) {
                     $kalolsavam_id = (int)$active[0]['sub_dist_kalolsavam_id'];
                 }
@@ -186,7 +186,7 @@ class Kalolsavam extends \App\Controllers\BaseController {
                     }
                 }
             } else if (3 === $user_type) {
-                if ($this->General_Model->is_record_exists('sub_dist_kalolsavam_master', "status = 'O' AND sub_dist_kalolsavam_id = " . (int)$kalolsavam_id)) {
+                if ($this->General_Model->is_record_exists('sd_kalolsavam_master', "status = 'O' AND sub_dist_kalolsavam_id = " . (int)$kalolsavam_id)) {
                     $kalolsavam_name = trim((string)$this->request->getPost('txtKalolsavamName'));
                     if (!empty($kalolsavam_name)) {
                         $data['sub_dist_kalolsavam_name'] = $kalolsavam_name;
@@ -246,7 +246,7 @@ class Kalolsavam extends \App\Controllers\BaseController {
         } else if (3 === $user_type) {
             $level = 'sub_dist';
             $where = ($id > 0) ? ['sub_dist_kalolsavam_id' => $id] : ['sub_district_code' => $this->session->get('SUB_DISTRICT'), 'status' => 'O'];
-            $rows = $this->General_Model->get_data('sub_dist_kalolsavam_master', '*', $where);
+            $rows = $this->General_Model->get_data('sd_kalolsavam_master', '*', $where);
             if (!empty($rows)) {
                 $data = $rows[0];
             }
@@ -302,7 +302,7 @@ class Kalolsavam extends \App\Controllers\BaseController {
                     if (!$action) $action = 'EDIT';
                 }
             } else if (3 === $user_type) {
-                $active = $this->General_Model->get_data('sub_dist_kalolsavam_master', 'sub_dist_kalolsavam_id', ['sub_district_code' => $this->session->get('SUB_DISTRICT'), 'status' => 'O']);
+                $active = $this->General_Model->get_data('sd_kalolsavam_master', 'sub_dist_kalolsavam_id', ['sub_district_code' => $this->session->get('SUB_DISTRICT'), 'status' => 'O']);
                 if (!empty($active)) {
                     $kalolsavam_id = (int)$active[0]['sub_dist_kalolsavam_id'];
                     if (!$action) $action = 'EDIT';
@@ -421,7 +421,7 @@ class Kalolsavam extends \App\Controllers\BaseController {
             return $this->response->setJSON(['success' => false, 'message' => 'Failed to update District Kalolsavam.']);
         } else if (3 === $user_type) {
             // EDIT Sub-District Kalolsavam
-            if (!$this->General_Model->is_record_exists('sub_dist_kalolsavam_master', "sub_dist_kalolsavam_id = " . $kalolsavam_id)) {
+            if (!$this->General_Model->is_record_exists('sd_kalolsavam_master', "sub_dist_kalolsavam_id = " . $kalolsavam_id)) {
                 return $this->response->setJSON(['success' => false, 'message' => 'Sub-District Kalolsavam record not found.']);
             }
 
@@ -442,7 +442,7 @@ class Kalolsavam extends \App\Controllers\BaseController {
             if ($file_upload) {
                 $image_name = $this->General_Model->upload_logo_image('kalolsavamLogo', 'sub_dist_kalolsavam' . substr(fncUuid(), 10), 'sub_dist');
                 if ($image_name) {
-                    $prev_arr = $this->General_Model->get_single_column_value('sub_dist_kalolsavam_master', 'logo_name', 'sub_dist_kalolsavam_id = ' . $kalolsavam_id);
+                    $prev_arr = $this->General_Model->get_single_column_value('sd_kalolsavam_master', 'logo_name', 'sub_dist_kalolsavam_id = ' . $kalolsavam_id);
                     $prev_image_name = (is_array($prev_arr) && count($prev_arr) > 0) ? $prev_arr[0] : '';
                     $data['logo_name'] = $image_name;
                 }

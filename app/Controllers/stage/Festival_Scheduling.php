@@ -23,7 +23,7 @@ class Festival_Scheduling extends \App\Controllers\BaseController {
             $this->Content = array();
         }
 
-        // Get active festival dates from sub_dist_kalolsavam_master
+        // Get active festival dates from sd_kalolsavam_master
         $active_dates = $this->get_active_festival_dates();
         $this->Content['default_start_date'] = $active_dates['start_date'];
         $this->Content['default_end_date'] = $active_dates['end_date'];
@@ -47,7 +47,7 @@ class Festival_Scheduling extends \App\Controllers\BaseController {
     public function get_active_festival_dates() {
         try {
             $sub_district = session()->get('SUB_DISTRICT') ?: 213;
-            $row = $this->db->table('sub_dist_kalolsavam_master')
+            $row = $this->db->table('sd_kalolsavam_master')
                 ->where('sub_district_code', $sub_district)
                 ->where('start_date !=', '0000-00-00')
                 ->get()->getRowArray();
@@ -534,7 +534,7 @@ class Festival_Scheduling extends \App\Controllers\BaseController {
         if ($format == 'excel') {
             $this->export_to_excel($schedule, $fest_id);
         } else {
-            $this->export_to_pdf($schedule, $fest_id);
+            return $this->export_to_pdf($schedule, $fest_id);
         }
     }
 
@@ -570,14 +570,8 @@ class Festival_Scheduling extends \App\Controllers\BaseController {
 
     // Export to PDF format
     private function export_to_pdf($schedule, $fest_id) {
-        // This would require a PDF library like TCPDF or DomPDF
-        // For now, we'll show a simple HTML view
-        $this->Content['schedule'] = $schedule;
-        $this->Content['fest_id'] = $fest_id;
-        $this->Content['selected_festival'] = $this->get_festival_name($fest_id);
-
-        $this->template->write_view('content', 'stage/schedule_pdf', $this->Content);
-        $this->template->load();
+        // PDF library not bundled; redirect to printable full schedule view
+        return redirect()->to(site_url('stage/festival_scheduling/view_schedule?fest_id=' . $fest_id));
     }
 
     // Order of Events (English only)

@@ -283,7 +283,7 @@ class General_Model extends \App\Models\BaseModel {
     function get_fest_date_array() {
         if ($this->session->get('USER_TYPE') == 3) {
             $this->db->where('sub_district_code', $this->session->get('SUB_DISTRICT'));
-            $sub_dist_kalolsavam_master = $this->db->get('sub_dist_kalolsavam_master');
+            $sub_dist_kalolsavam_master = $this->db->get('sd_kalolsavam_master');
             if ($sub_dist_kalolsavam_master->getNumRows() > 0) {
                 $sub_dist = $sub_dist_kalolsavam_master->getResultArray();
                 $start_date = $sub_dist[0]['start_date'];
@@ -304,7 +304,7 @@ class General_Model extends \App\Models\BaseModel {
     function get_fest_master_details() {
         if ($this->session->get('USER_TYPE') == 3) {
             $this->db->where('sub_district_code', $this->session->get('SUB_DISTRICT'));
-            $sub_dist_kalolsavam_master = $this->db->get('sub_dist_kalolsavam_master');
+            $sub_dist_kalolsavam_master = $this->db->get('sd_kalolsavam_master');
             if ($sub_dist_kalolsavam_master->getNumRows() > 0) {
                 return $sub_dist_kalolsavam_master->getResultArray();
             }

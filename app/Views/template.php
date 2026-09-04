@@ -17,7 +17,7 @@ try {
     }
 
     if ($sub_dist_code) {
-        $sub_fest = $db->table('sub_dist_kalolsavam_master')->select('sub_dist_kalolsavam_name')->where('sub_district_code', $sub_dist_code)->get()->getRowArray();
+        $sub_fest = $db->table('sd_kalolsavam_master')->select('sub_dist_kalolsavam_name')->where('sub_district_code', $sub_dist_code)->get()->getRowArray();
         if (!empty($sub_fest['sub_dist_kalolsavam_name'])) {
             $dynamic_fest_title = $sub_fest['sub_dist_kalolsavam_name'];
         } else {
@@ -285,7 +285,7 @@ if (empty($dynamic_fest_title)) {
   <?php echo (isset($_styles)) ? $_styles : ''; ?>
         <script language="javascript" type="text/javascript">
             //<![CDATA[
-            var path = '<?php echo base_url(); ?>';
+            var path = '<?php echo site_url('/'); ?>';
             var image_path = '<?php echo base_url('images/'); ?>';
             //]]>
         </script>
@@ -616,17 +616,42 @@ if (empty($dynamic_fest_title)) {
 
   // CSRF Token Global AJAX Handler
   (function() {
-    var csrfMeta = document.querySelector('meta[name="csrf-token"]');
-    if (!csrfMeta) return;
-    var token = csrfMeta.getAttribute('content');
-    if (!token) return;
+    function getCsrfToken() {
+      // 1. Try to read from cookie 'csrf_cookie_name'
+      var cookieMatch = document.cookie.match(/(?:^|;\s*)csrf_cookie_name=([^;]+)/);
+      if (cookieMatch && cookieMatch[1]) {
+        return decodeURIComponent(cookieMatch[1]);
+      }
+      // 2. Fallback to meta tag
+      var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+      if (csrfMeta && csrfMeta.getAttribute('content')) {
+        return csrfMeta.getAttribute('content');
+      }
+      return '';
+    }
+
+    function updateCsrfToken(newToken) {
+      if (!newToken) return;
+      var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+      if (csrfMeta) {
+        csrfMeta.setAttribute('content', newToken);
+      }
+      var inputs = document.querySelectorAll('input[name="csrf_test_name"]');
+      for (var i = 0; i < inputs.length; i++) {
+        inputs[i].value = newToken;
+      }
+    }
+
+    window.getCsrfToken = getCsrfToken;
+    window.updateCsrfToken = updateCsrfToken;
 
     // Patch fetch() to include CSRF header on same-origin POST requests
     var _origFetch = window.fetch;
     window.fetch = function(url, opts) {
       opts = opts || {};
       var method = (opts.method || 'GET').toUpperCase();
-      if (method === 'POST' || method === 'PUT' || method === 'PATCH' || method === 'DELETE') {
+      var token = getCsrfToken();
+      if (token && (method === 'POST' || method === 'PUT' || method === 'PATCH' || method === 'DELETE')) {
         opts.headers = opts.headers || {};
         if (opts.headers instanceof Headers) {
           opts.headers.set('X-CSRF-TOKEN', token);
@@ -634,7 +659,14 @@ if (empty($dynamic_fest_title)) {
           opts.headers['X-CSRF-TOKEN'] = token;
         }
       }
-      return _origFetch.call(window, url, opts);
+      return _origFetch.call(window, url, opts).then(function(resp) {
+        var headerToken = resp && resp.headers && resp.headers.get ? resp.headers.get('X-CSRF-TOKEN') : null;
+        var refreshedToken = headerToken || getCsrfToken();
+        if (refreshedToken) {
+          updateCsrfToken(refreshedToken);
+        }
+        return resp;
+      });
     };
 
     // Patch Prototype.js Ajax.Request to include CSRF header on POST requests
@@ -643,7 +675,10 @@ if (empty($dynamic_fest_title)) {
       Ajax.Request.prototype.setRequestHeaders = function() {
         _origSetRequestHeaders.call(this);
         if (this.method === 'post') {
-          this.transport.setRequestHeader('X-CSRF-TOKEN', token);
+          var token = getCsrfToken();
+          if (token) {
+            this.transport.setRequestHeader('X-CSRF-TOKEN', token);
+          }
         }
       };
     }
@@ -652,7 +687,10 @@ if (empty($dynamic_fest_title)) {
     if (typeof jQuery !== 'undefined' && jQuery.ajaxSetup) {
       jQuery.ajaxSetup({
         beforeSend: function(xhr) {
-          xhr.setRequestHeader('X-CSRF-TOKEN', token);
+          var token = getCsrfToken();
+          if (token) {
+            xhr.setRequestHeader('X-CSRF-TOKEN', token);
+          }
         }
       });
     }
@@ -662,12 +700,16 @@ if (empty($dynamic_fest_title)) {
       var _origFormSubmit = HTMLFormElement.prototype.submit;
       HTMLFormElement.prototype.submit = function() {
         if ((this.method || '').toLowerCase() === 'post') {
-          if (!this.querySelector('input[name="csrf_test_name"]')) {
+          var token = getCsrfToken();
+          var csrfInput = this.querySelector('input[name="csrf_test_name"]');
+          if (!csrfInput) {
             var inp = document.createElement('input');
             inp.type = 'hidden';
             inp.name = 'csrf_test_name';
             inp.value = token;
             this.appendChild(inp);
+          } else if (token) {
+            csrfInput.value = token;
           }
         }
         return _origFormSubmit.apply(this, arguments);
@@ -676,15 +718,19 @@ if (empty($dynamic_fest_title)) {
 
     // Auto-inject CSRF hidden field into all POST forms on DOMContentLoaded
     document.addEventListener('DOMContentLoaded', function() {
+      var token = getCsrfToken();
       var forms = document.querySelectorAll('form[method="post"], form[method="POST"]');
       for (var i = 0; i < forms.length; i++) {
         var f = forms[i];
-        if (!f.querySelector('input[name="csrf_test_name"]')) {
+        var csrfInput = f.querySelector('input[name="csrf_test_name"]');
+        if (!csrfInput) {
           var inp = document.createElement('input');
           inp.type = 'hidden';
           inp.name = 'csrf_test_name';
           inp.value = token;
           f.appendChild(inp);
+        } else if (token) {
+          csrfInput.value = token;
         }
       }
     });

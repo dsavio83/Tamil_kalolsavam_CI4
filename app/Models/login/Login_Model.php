@@ -437,7 +437,7 @@ class Login_Model extends \App\Models\BaseModel {
 
         $data['sub_dist_kalolsavam_name'] = $sub_dist_name . '  Subdistrict Kalolsavam 2022 - 2024 ';
         $this->db->where('sub_district_code', $subdist);
-        if ($this->db->update('sub_dist_kalolsavam_master', $data))
+        if ($this->db->update('sd_kalolsavam_master', $data))
             return true;
         else
             return false;

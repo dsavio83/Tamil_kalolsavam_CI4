@@ -93,7 +93,7 @@ class CreateDistrictTables extends Migration
         $this->forge->addKey('rev_district_code');
         $this->forge->createTable('dist_kalolsavam_master', true);
 
-        // sub_dist_kalolsavam_master - Sub-district kalolsavam definition
+        // sd_kalolsavam_master - Sub-district kalolsavam definition
         $this->forge->addField([
             'sub_dist_kalolsavam_id' => [
                 'type'       => 'MEDIUMINT',
@@ -127,12 +127,12 @@ class CreateDistrictTables extends Migration
         ]);
         $this->forge->addKey('sub_dist_kalolsavam_id', true);
         $this->forge->addKey('sub_district_code');
-        $this->forge->createTable('sub_dist_kalolsavam_master', true);
+        $this->forge->createTable('sd_kalolsavam_master', true);
     }
 
     public function down()
     {
-        $this->forge->dropTable('sub_dist_kalolsavam_master', true);
+        $this->forge->dropTable('sd_kalolsavam_master', true);
         $this->forge->dropTable('dist_kalolsavam_master', true);
         $this->forge->dropTable('sub_district_master', true);
         $this->forge->dropTable('rev_district_master', true);

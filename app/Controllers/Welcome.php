@@ -109,7 +109,7 @@ class Welcome extends \App\Controllers\BaseController {
                 $this->Contents['statistics'] = $this->get_statistics($sub_dist_code);
                 if ($sub_dist_code) {
                     $kalolsavam_details = $this->db->select('sub_dist_kalolsavam_name, venue, start_date, end_date')
-                        ->from('sub_dist_kalolsavam_master')
+                        ->from('sd_kalolsavam_master')
                         ->where('sub_district_code', $sub_dist_code)
                         ->get()->getRowArray();
                     
@@ -286,7 +286,7 @@ class Welcome extends \App\Controllers\BaseController {
     }
     
     private function get_venue($sub_district_code) {
-        $result = $this->db->query("SELECT venue, start_date, end_date FROM sub_dist_kalolsavam_master WHERE sub_district_code = ?", array($sub_district_code));
+        $result = $this->db->query("SELECT venue, start_date, end_date FROM sd_kalolsavam_master WHERE sub_district_code = ?", array($sub_district_code));
         return ($result && $result->getNumRows() > 0) ? $result->getRowArray() : array('venue' => '', 'start_date' => '', 'end_date' => '');
     }
     

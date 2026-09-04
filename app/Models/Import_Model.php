@@ -485,7 +485,7 @@ class Import_Model extends \App\Models\BaseModel {
 UPDATE `kalolsavam_master` SET `logo_name` = NULL WHERE `kalolsavam_master`.`kalolsavam_id` =1 LIMIT 1");
         $query4 = $this->db->query("UPDATE `sub_district_master` set confirm_data_entry = 'N' WHERE 1");
         $query5 = $this->db->query("ALTER TABLE `participant_details`  AUTO_INCREMENT = 1001");
-        $query7 = $this->db->query("UPDATE `sub_dist_kalolsavam_master` set `venue` = '', `start_date` = '', `end_date` = '', `logo_name` = '' WHERE 1");
+        $query7 = $this->db->query("UPDATE `sd_kalolsavam_master` set `venue` = '', `start_date` = '', `end_date` = '', `logo_name` = '' WHERE 1");
         return true;
     }
 

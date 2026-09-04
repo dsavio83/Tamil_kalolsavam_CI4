@@ -141,7 +141,7 @@ class Festival_Scheduling_Model extends \App\Models\BaseModel {
         if (!$start_date || !$end_date) {
             try {
                 $sub_district = session()->get('SUB_DISTRICT') ?: 213;
-                $row = $this->db->table('sub_dist_kalolsavam_master')
+                $row = $this->db->table('sd_kalolsavam_master')
                     ->where('sub_district_code', $sub_district)
                     ->where('start_date !=', '0000-00-00')
                     ->get()->getRowArray();

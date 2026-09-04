@@ -13,7 +13,7 @@ class Kalolsavam_Model extends \App\Models\BaseModel {
         $this->db->transStart();
         if ('ADD' == $type && (0 == $this->session->get('USER_TYPE') || 1 == $this->session->get('USER_TYPE'))) {
             if ($this->General_Model->is_record_exists('dist_kalolsavam_master', "status = 'O'") ||
-                $this->General_Model->is_record_exists('sub_dist_kalolsavam_master', "status = 'O'")) {
+                $this->General_Model->is_record_exists('sd_kalolsavam_master', "status = 'O'")) {
                 return false;
             }
 
@@ -44,7 +44,7 @@ class Kalolsavam_Model extends \App\Models\BaseModel {
 
                             if (is_array($sub_dist_list) && count($sub_dist_list) > 0) {
                                 foreach ($sub_dist_list as $sub_dist_row) {
-                                    $this->db->insert('sub_dist_kalolsavam_master', array(
+                                    $this->db->insert('sd_kalolsavam_master', array(
                                         "sub_dist_kalolsavam_name" => $sub_dist_row['sub_district_name'] . ' Sub-District ' . $kalolsavam_name . $data['kalolsavam_year'],
                                         "sub_district_code" => $sub_dist_row['sub_district_code'],
                                         "rev_district_code" => $sub_dist_row['rev_district_code'],
@@ -87,7 +87,7 @@ class Kalolsavam_Model extends \App\Models\BaseModel {
 
                             if (is_array($sub_dist_list) && count($sub_dist_list) > 0) {
                                 foreach ($sub_dist_list as $sub_dist_row) {
-                                    $this->db->update('sub_dist_kalolsavam_master', array(
+                                    $this->db->update('sd_kalolsavam_master', array(
                                         "sub_dist_kalolsavam_name" => $sub_dist_row['sub_district_name'] . ' Sub-District ' . $kalolsavam_name . $data['kalolsavam_year']
                                     ), array("kalolsavam_id" => $kalolsavam_id, "sub_district_code" => $sub_dist_row['sub_district_code']));
                                 }
@@ -114,7 +114,7 @@ class Kalolsavam_Model extends \App\Models\BaseModel {
 
     function update_sub_dist_kalolsavam_details($data) {
         if (!empty($data['sub_dist_kalolsavam_id'])) {
-            return (bool)$this->db->update('sub_dist_kalolsavam_master', $data, array('sub_dist_kalolsavam_id' => $data['sub_dist_kalolsavam_id']));
+            return (bool)$this->db->update('sd_kalolsavam_master', $data, array('sub_dist_kalolsavam_id' => $data['sub_dist_kalolsavam_id']));
         }
         return FALSE;
     }

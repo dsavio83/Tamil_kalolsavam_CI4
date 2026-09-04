@@ -611,7 +611,7 @@ pd.class, pd.gender, pid.item_code, pid.item_type, pid.is_captain, it.item_name,
         if ($rev->sub_district_code != 0) {
 
             $this->db->select('sdm.sub_dist_kalolsavam_name as sub_dist, sdm.venue');
-            $this->db->from('sub_dist_kalolsavam_master  AS sdm');
+            $this->db->from('sd_kalolsavam_master  AS sdm');
             $this->db->where('sdm.sub_district_code', $subdist);
             $school_details = $this->db->get();
             return $school_details->getResultArray();
