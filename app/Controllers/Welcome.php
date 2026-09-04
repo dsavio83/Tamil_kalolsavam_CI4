@@ -277,7 +277,7 @@ class Welcome extends \App\Controllers\BaseController {
         $result = $this->db->query("SELECT COUNT(DISTINCT item_code) as count FROM participant_item_details WHERE school_code = ?", array($school_code));
         if ($result && $result->getNumRows() > 0) $stats['total_items_participated'] = (int)$result->getRowArray()['count'];
         
-        $result = $this->db->query("SELECT COUNT(*) as count FROM result_master WHERE school_code = ? AND grade IN ('A', 'B', 'C')", array($school_code));
+        $result = $this->db->query("SELECT COUNT(*) as count FROM sd_result_master WHERE school_code = ? AND grade IN ('A', 'B', 'C')", array($school_code));
         if ($result && $result->getNumRows() > 0) $stats['prizes_won'] = (int)$result->getRowArray()['count'];
         
         if ($stats['total_items_participated'] > 0) $stats['result_percentage'] = round(($stats['prizes_won'] / $stats['total_items_participated']) * 100, 2);
@@ -525,7 +525,7 @@ class Welcome extends \App\Controllers\BaseController {
         $item_query = "SELECT COUNT(DISTINCT im.item_code) as total_items,
             COUNT(DISTINCT CASE WHEN rm.is_finish = 'Y' THEN rm.item_code END) as completed_items
         FROM item_master im
-        LEFT JOIN result_master rm ON im.item_code = rm.item_code";
+        LEFT JOIN sd_result_master rm ON im.item_code = rm.item_code";
         $item_result = $this->db->query($item_query);
         if ($item_result) {
             $item_stats = $item_result->getRowArray();

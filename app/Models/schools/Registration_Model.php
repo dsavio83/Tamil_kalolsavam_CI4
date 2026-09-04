@@ -1264,7 +1264,7 @@ class Registration_Model extends \App\Models\BaseModel {
     function is_result_confirm_item($item_code) {
         $this->db->where('item_code', $item_code);
         $this->db->where('is_finish', 'Y');
-        $cnt_item = $this->db->countAllResults('result_master');
+        $cnt_item = $this->db->countAllResults('sd_result_master');
         if ($cnt_item > 0) {
             return "Result Confirmed";
         }

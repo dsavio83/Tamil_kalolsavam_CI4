@@ -8,7 +8,7 @@ class CreateResultTables extends Migration
 {
     public function up()
     {
-        // result_master - Main result records (raw scores)
+        // sd_result_master - Main result records (raw scores)
         $this->forge->addField([
             'rm_id' => [
                 'type'       => 'DOUBLE',
@@ -92,7 +92,7 @@ class CreateResultTables extends Migration
         $this->forge->addKey('participant_id');
         $this->forge->addKey('school_code');
         $this->forge->addKey(['item_code', 'participant_id'], false);
-        $this->forge->createTable('result_master', true);
+        $this->forge->createTable('sd_result_master', true);
 
         // sd_result_publish - Published/approved results
         $this->forge->addField([
@@ -205,6 +205,6 @@ class CreateResultTables extends Migration
         $this->forge->dropTable('special_order_master', true);
         $this->forge->dropTable('sd_school_point_details', true);
         $this->forge->dropTable('sd_result_publish', true);
-        $this->forge->dropTable('result_master', true);
+        $this->forge->dropTable('sd_result_master', true);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Result;
 
+use HTML2PDF;
 
 class Resultentry  extends \App\Controllers\BaseController {
 
@@ -15,8 +16,7 @@ class Resultentry  extends \App\Controllers\BaseController {
         $this->template->write_view('left_panel', 'menu_left', '');
         $this->load->model('result/Result_Model');
     }
-
-    function index($message = array(), $item_code = '') {
+function index($message = array(), $item_code = '') {
         if ($this->Session_Model->check_user_permission(12) == false) {
             $this->template->write('error', permission_warning());
             $this->template->load();
@@ -59,6 +59,10 @@ class Resultentry  extends \App\Controllers\BaseController {
             $this->Content['add_edit'] = ($this->Content['show_conirm_button'] == 'no') ? 'no' : 'yes';
         }
 
+        if (!empty($this->Content['selected_result'])) {
+            $this->Content['add_edit'] = 'yes';
+        }
+
         $this->Content['item_code'] = $this->Content['item_code'] ?? (string)$item_code;
         $this->Content['selected_item'] = $this->Content['selected_item'] ?? false;
         $this->Content['selected_item_list'] = $this->Content['selected_item_list'] ?? array();
@@ -86,6 +90,7 @@ class Resultentry  extends \App\Controllers\BaseController {
             $this->Content['show_conirm_button'] = 'yes';
             $this->Content['absentee_list'] = false;
             $this->Content['add_edit'] = 'yes';
+            $this->response->setHeader('X-CSRF-TOKEN', csrf_hash());
             return $this->response->setBody(view('result/resultentry', $this->Content));
         }
 
@@ -100,6 +105,7 @@ class Resultentry  extends \App\Controllers\BaseController {
         }
         $this->Content['absentee_list'] = $this->Result_Model->get_absentee_list($item_id);
         $this->Content['add_edit'] = ($this->Content['show_conirm_button'] == 'no') ? 'no' : 'yes';
+        $this->response->setHeader('X-CSRF-TOKEN', csrf_hash());
         return $this->response->setBody(view('result/resultentry', $this->Content));
     }
 
@@ -114,38 +120,45 @@ class Resultentry  extends \App\Controllers\BaseController {
         
         $code_no = $this->input->post('txt_code_no');
         $item_code = $this->input->post('hidItemId');
-        $codeSatatus = $this->Result_Model->checkCodeNoExists($code_no,$item_code);
-        if($codeSatatus==0){
-        	$message = $this->Result_Model->save_result_details();
-        }
-        else{ 
-        $this->template->write('error', $code_no . ' Code Number Already Exists in this Item !');
-        }
+        $message = $this->Result_Model->save_result_details($code_no, $item_code);
         $this->index($message);
     }
 
-    function edit_result_entry() {
+    function edit_result_entry($rm_id = '') {
         if ($this->Session_Model->check_user_permission(12) == false) {
             $this->template->write('error', permission_warning());
             $this->template->load();
             return;
         }
+        $rm_id = $rm_id ?: $this->input->post('hidResultId') ?: $this->request->getPost('hidResultId') ?: $this->request->getGet('id') ?: $this->request->getGet('hidResultId');
         $this->Content['show_conirm_button'] = 'yes';
         $this->Content['add_edit'] = 'yes';
-        $this->Content['selected_result'] = $this->Result_Model->get_selected_result_details();
-        $this->index();
+        $this->Content['selected_result'] = $this->Result_Model->get_selected_result_details($rm_id);
+        
+        $item_code = $this->input->post('hidItemId') ?: $this->request->getPost('hidItemId') ?: $this->request->getGet('item_code');
+        if (empty($item_code) && !empty($this->Content['selected_result'][0]['item_code'])) {
+            $item_code = $this->Content['selected_result'][0]['item_code'];
+        }
+        $this->index(array(), $item_code);
     }
 
-    function delete_result_entry() {
+    function delete_result_entry($rm_id = '') {
         if ($this->Session_Model->check_user_permission(12) == false) {
             $this->template->write('error', permission_warning());
             $this->template->load();
             return;
         }
+        $rm_id = $rm_id ?: $this->input->post('hidResultId') ?: $this->request->getPost('hidResultId') ?: $this->request->getGet('id') ?: $this->request->getGet('hidResultId');
+        if ($rm_id) {
+            $db = \Config\Database::connect();
+            $db->table('sd_result_master')->where('rm_id', $rm_id)->delete();
+        } else {
+            $this->Result_Model->delete_result();
+        }
         $this->Content['show_conirm_button'] = 'yes';
         $this->Content['add_edit'] = 'yes';
-        $this->Result_Model->delete_result();
-        $this->index();
+        $item_code = $this->input->post('hidItemId') ?: $this->request->getPost('hidItemId') ?: $this->request->getGet('item_code');
+        $this->index(array(), $item_code);
     }
 
     function confirm_result_entry() {

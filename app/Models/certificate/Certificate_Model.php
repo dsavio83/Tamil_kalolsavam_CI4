@@ -227,17 +227,17 @@ class Certificate_Model extends \App\Models\BaseModel {
 			(SELECT COUNT(cm.grade) FROM sd_certificate_master cm WHERE cm.is_withheld="N" AND cm.item_code=p.item_code AND cm.admn_no=cm.parent_admn_no  AND cm.grade = "A" GROUP BY cm.grade) AS a_grade,
 			(SELECT COUNT(cm.grade) FROM sd_certificate_master cm WHERE cm.is_withheld="N" AND cm.item_code=p.item_code AND cm.admn_no=cm.parent_admn_no  AND cm.grade = "B" GROUP BY cm.grade) AS b_grade,
 			(SELECT COUNT(cm.grade) FROM sd_certificate_master cm WHERE cm.is_withheld="N" AND cm.item_code=p.item_code AND cm.admn_no=cm.parent_admn_no  AND cm.grade = "C" GROUP BY cm.grade) AS c_grade,
-			 (SELECT count(rm.participant_id) FROM result_master rm WHERE rm.item_code=p.item_code) AS participated_no,
-			 IF((SELECT count(rm1.item_code) FROM result_master rm1 
+			 (SELECT count(rm.participant_id) FROM sd_result_master rm WHERE rm.item_code=p.item_code) AS participated_no,
+			 IF((SELECT count(rm1.item_code) FROM sd_result_master rm1 
 					WHERE rm1.item_code=p.item_code ) > 0 ,
-					IF((	SELECT count(rm1.item_code) FROM result_master rm1 
+					IF((	SELECT count(rm1.item_code) FROM sd_result_master rm1 
 							WHERE rm1.item_code=p.item_code AND rm1.is_finish ="N"
 						) > 0, "No", "Yes"
 					),
 					"No"
 			) AS is_confirmed', FALSE);
         $this->db->from('participant_item_details AS p');
-        $this->db->join('result_master AS rs', 'rs.item_code = p.item_code');
+        $this->db->join('sd_result_master AS rs', 'rs.item_code = p.item_code');
         $this->db->join('item_master AS i', 'i.item_code = p.item_code');
         $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id');
         if ('' == $school_code)
@@ -260,10 +260,10 @@ class Certificate_Model extends \App\Models\BaseModel {
 		(SELECT COUNT(cm.grade) FROM sd_certificate_master cm WHERE cm.item_code=p.item_code AND cm.grade = "A" GROUP BY cm.grade) AS a_grade,
 		(SELECT COUNT(cm.grade) FROM sd_certificate_master cm WHERE cm.item_code=p.item_code AND cm.grade = "B" GROUP BY cm.grade) AS b_grade,
 		(SELECT COUNT(cm.grade) FROM sd_certificate_master cm WHERE cm.item_code=p.item_code AND cm.grade = "C" GROUP BY cm.grade) AS c_grade,
-		(SELECT count(rm.participant_id) FROM result_master rm WHERE rm.item_code=p.item_code) AS participated_no,
-		 IF((SELECT count(rm1.item_code) FROM result_master rm1 
+		(SELECT count(rm.participant_id) FROM sd_result_master rm WHERE rm.item_code=p.item_code) AS participated_no,
+		 IF((SELECT count(rm1.item_code) FROM sd_result_master rm1 
 				WHERE rm1.item_code=p.item_code ) > 0 ,
-				IF((	SELECT count(rm1.item_code) FROM result_master rm1 
+				IF((	SELECT count(rm1.item_code) FROM sd_result_master rm1 
 						WHERE rm1.item_code=p.item_code AND rm1.is_finish ="N"
 					) > 0, "No", "Yes"
 				),
@@ -277,8 +277,8 @@ class Certificate_Model extends \App\Models\BaseModel {
         $this->db->where('i.fest_id', $festtype);
         $this->db->where('i.item_type', 'S');
         //$this->db->where('is_confirmed', "Yes");
-        /* $this->db->where('(SELECT count(rm1.item_code) FROM result_master rm1 WHERE rm1.item_code=p.item_code ) > 0', NULL, FALSE); 
-          $this->db->where('(SELECT count(rm1.item_code) FROM result_master rm1
+        /* $this->db->where('(SELECT count(rm1.item_code) FROM sd_result_master rm1 WHERE rm1.item_code=p.item_code ) > 0', NULL, FALSE); 
+          $this->db->where('(SELECT count(rm1.item_code) FROM sd_result_master rm1
           WHERE rm1.item_code=p.item_code AND rm1.is_finish ="Y") > 0', NULL, FALSE); */
         $this->db->groupBy('p.item_code');
         $this->db->having("is_confirmed = 'Yes'");
@@ -420,7 +420,7 @@ class Certificate_Model extends \App\Models\BaseModel {
         }
         $this->db->select('sm.school_name, sm.school_code, 
 				(SELECT SUM(spd.point) FROM sd_school_point_details spd WHERE spd.school_code=cm.school_code)  AS total_point, 
-				(SELECT COUNT(rm.participant_id) FROM result_master rm WHERE rm.school_code=sm.school_code) as no_participation, 
+				(SELECT COUNT(rm.participant_id) FROM sd_result_master rm WHERE rm.school_code=sm.school_code) as no_participation, 
 				
 				(SELECT COUNT(cm1.grade) FROM sd_certificate_master cm1 WHERE cm1.school_code=cm.school_code AND 
 				is_withheld = "N" AND cm1.parent_admn_no=cm1.admn_no AND cm1.grade = "A") AS a_grade,
@@ -430,7 +430,7 @@ class Certificate_Model extends \App\Models\BaseModel {
         $this->db->from('school_master AS sm');
         $this->db->join('sd_certificate_master AS cm', 'cm.school_code=sm.school_code');
         //	$this->db->join ('sd_school_point_details AS spd', 'spd.school_code=cm.school_code');
-        $this->db->join('result_master AS rm', 'rm.school_code=cm.school_code');
+        $this->db->join('sd_result_master AS rm', 'rm.school_code=cm.school_code');
         $this->db->orderBy('sm.school_code', 'ASC');
         $this->db->groupBy('sm.school_code, sm.school_name, cm.school_code');
         $result = $this->db->get();

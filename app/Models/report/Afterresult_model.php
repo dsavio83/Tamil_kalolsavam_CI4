@@ -12,7 +12,7 @@ class Afterresult_model extends \App\Models\BaseModel {
     function school_wise_result($school) {
         $school = (int)$school;
         $query = "SELECT RM.item_code, IM.item_name, RM.participant_id, RM.percentage, RM.total_mark, RM.grade, SPD.point, RM.rank, PD.participant_name, RM.school_code, SM.school_name, COALESCE(SPD.is_withheld, 'N') as is_withheld, FM.fest_name 
-                  FROM result_master AS RM
+                  FROM sd_result_master AS RM
                   LEFT JOIN sd_school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code 
                   LEFT JOIN participant_details AS PD ON PD.participant_id = RM.participant_id 
                   JOIN item_master AS IM ON IM.item_code = RM.item_code
@@ -27,7 +27,7 @@ class Afterresult_model extends \App\Models\BaseModel {
 
     function all_school_wise_result() {
         $query = "SELECT RM.item_code, IM.item_name, RM.participant_id, RM.percentage, RM.total_mark, RM.grade, SPD.point, RM.rank, PD.participant_name, RM.school_code, SM.school_name, COALESCE(SPD.is_withheld, 'N') as is_withheld, FM.fest_name, FM.fest_id
-                  FROM result_master AS RM
+                  FROM sd_result_master AS RM
                   LEFT JOIN sd_school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code 
                   LEFT JOIN participant_details AS PD ON PD.participant_id = RM.participant_id 
                   JOIN item_master AS IM ON IM.item_code = RM.item_code
@@ -56,7 +56,7 @@ class Afterresult_model extends \App\Models\BaseModel {
 
     function school_wise_gradedetails() {
         $rt = "SELECT count( r.grade ) as grd , r.school_code, r.grade, i.fest_id
-			FROM result_master AS r
+			FROM sd_result_master AS r
 			JOIN item_master AS i ON i.item_code = r.item_code
 			where r.is_finish='Y' and r.is_taken='Y' and r.grade!=''
 			GROUP BY r.grade, r.school_code, i.fest_id
@@ -66,7 +66,7 @@ class Afterresult_model extends \App\Models\BaseModel {
     }
 
     function count_of_items() {
-        $query = "select count(distinct r.item_code) as cn,f.fest_id from result_master as r
+        $query = "select count(distinct r.item_code) as cn,f.fest_id from sd_result_master as r
 		  join item_master AS i on r.item_code=i.item_code 
 		  join festival_master AS f on i.fest_id=f.fest_id 
 		  where r.is_finish = 'Y' 
@@ -87,7 +87,7 @@ class Afterresult_model extends \App\Models\BaseModel {
     function rankwise_participant_result($festival) {
         $this->db->where('fm.fest_id', $festival);
         $this->db->select('rs.item_code,rs.code_no,rs.marks,rs.total_mark,rs.percentage,rs.grade,   rs.point,rs.rank,im.item_name,sm.school_name,pd.participant_name,rs.participant_id,si.start_time,fm.fest_id,fm.fest_name,si.no_of_participant');
-        $this->db->from('result_master AS rs');
+        $this->db->from('sd_result_master AS rs');
         $this->db->join('item_master AS im', 'im.item_code = rs.item_code');
         $this->db->join('school_master AS sm', 'sm.school_code = rs.school_code');
         $this->db->join('participant_details AS pd', 'pd.participant_id = rs.participant_id', 'LEFT');
@@ -103,7 +103,7 @@ class Afterresult_model extends \App\Models\BaseModel {
     function prepare_select_box_data_special($festival) {
         $this->db->where('im.fest_id', $festival);
         $this->db->select('rs.rank');
-        $this->db->from('result_master AS rs');
+        $this->db->from('sd_result_master AS rs');
         $this->db->join('item_master AS im', 'im.item_code = rs.item_code');
         $this->db->groupBy('rs.rank');
         $details = $this->db->get();
@@ -116,7 +116,7 @@ class Afterresult_model extends \App\Models\BaseModel {
         $date = ($date !== 'All' && !empty($date)) ? (string)$date : 'All';
 
         $baseQuery = "SELECT RP.item_code, IM.item_name, FM.fest_name, FM.fest_id
-                      FROM result_master AS RP
+                      FROM sd_result_master AS RP
                       LEFT JOIN sd_stage_item_master AS sm ON sm.item_code = RP.item_code
                       LEFT JOIN item_master AS IM ON IM.item_code = RP.item_code
                       LEFT JOIN festival_master AS FM ON IM.fest_id = FM.fest_id
@@ -163,7 +163,7 @@ class Afterresult_model extends \App\Models\BaseModel {
 
         $baseQuery .= " AND IM.item_code NOT IN (
                             SELECT DISTINCT(RP.item_code)
-                            FROM result_master AS RP";
+                            FROM sd_result_master AS RP";
 
         if ($fest !== 'All') {
             $baseQuery .= " LEFT JOIN item_master AS IM2 ON IM2.item_code = RP.item_code
@@ -180,7 +180,7 @@ class Afterresult_model extends \App\Models\BaseModel {
 
     function total_points() {
         $query = "SELECT RM.item_code, IM.item_name, RM.participant_id, RM.percentage, RM.grade, SPD.point, RM.rank, PD.participant_name, RM.school_code, SM.school_name, COALESCE(SPD.is_withheld, 'N') as is_withheld, FM.fest_name, FM.fest_id
-                  FROM result_master AS RM
+                  FROM sd_result_master AS RM
                   LEFT JOIN sd_school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code
                   LEFT JOIN participant_details AS PD ON PD.participant_id = RM.participant_id
                   JOIN item_master AS IM ON IM.item_code = RM.item_code
@@ -196,7 +196,7 @@ class Afterresult_model extends \App\Models\BaseModel {
 
     function report_press() {
         $query = "SELECT RM.item_code, IM.item_name, RM.participant_id, RM.percentage, RM.grade, SPD.point, RM.rank, PD.participant_name, RM.school_code, SM.school_name, COALESCE(SPD.is_withheld, 'N') as is_withheld, FM.fest_name, FM.fest_id
-                  FROM result_master AS RM
+                  FROM sd_result_master AS RM
                   LEFT JOIN sd_school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code
                   LEFT JOIN participant_details AS PD ON PD.participant_id = RM.participant_id
                   JOIN item_master AS IM ON IM.item_code = RM.item_code
@@ -218,7 +218,7 @@ class Afterresult_model extends \App\Models\BaseModel {
         $this->db->join('participant_details AS p', "p.participant_id = r.participant_id AND p.class > 4");
         $this->db->join('item_master AS i', 'i.item_code = r.item_code');
         $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id');
-        $this->db->join('result_master AS rm', "rm.item_code = r.item_code and rm.is_taken = 'Y' and rm.is_finish = 'Y'");
+        $this->db->join('sd_result_master AS rm', "rm.item_code = r.item_code and rm.is_taken = 'Y' and rm.is_finish = 'Y'");
         $this->db->where("r.is_withheld", 'N');
         if ($festid != 'All')
             $this->db->where("f.fest_id", $festid);

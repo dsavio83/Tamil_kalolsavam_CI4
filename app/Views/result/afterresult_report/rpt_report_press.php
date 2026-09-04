@@ -28,7 +28,7 @@ $db = \Config\Database::connect();
 foreach ($retvalue AS $data) {
     if ($previous != $data['item_code']) {
         if (!empty($data['item_code'])) {
-            $db->table('result_master')->where('item_code', (int)$data['item_code'])->update(['is_printed' => 1]);
+            $db->table('sd_result_master')->where('item_code', (int)$data['item_code'])->update(['is_printed' => 1]);
         }
         $previous = $data['item_code'];
         $count = 0;

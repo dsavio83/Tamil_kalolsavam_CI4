@@ -420,7 +420,7 @@ class Certificate extends \App\Controllers\BaseController {
         if (!empty($item_id)) {
             $this->db->where('item_code', $item_id);
             $this->db->set('is_certificate_printed', 1);
-            $this->db->update('result_master');
+            $this->db->update('sd_result_master');
 
             $this->Contents['item_id'] = $item_id;
             $this->Contents['item_details'] = $this->General_Model->get_data('item_master', 'item_code, item_name, item_type, fest_id', array('item_code' => $item_id));

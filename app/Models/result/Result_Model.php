@@ -33,7 +33,7 @@ class Result_Model extends \App\Models\BaseModel {
         $cnt_result_publish = $this->db->countAllResults('sd_result_publish');
 
         $this->db->select('rm.*, spd.is_withheld');
-        $this->db->from('result_master rm');
+        $this->db->from('sd_result_master rm');
         $this->db->join('sd_school_point_details spd', 'spd.item_code=rm.item_code AND spd.participant_id=rm.participant_id', 'left');
         $this->db->where('rm.item_code', $item_code);
         //$this->db->orderBy('rank','ASC');
@@ -135,18 +135,18 @@ class Result_Model extends \App\Models\BaseModel {
         $hid_result_id = $this->input->post('hidResultId') ?: (isset($_POST['hidResultId']) ? $_POST['hidResultId'] : '');
         if (!empty($hid_result_id)) {
             $this->db->where('rm_id', $hid_result_id);
-            $this->db->update('result_master', $data);
+            $this->db->update('sd_result_master', $data);
             $success_array[] = 'Result updated successfully!';
         } else {
             $this->db->where('item_code', $participant_details[0]['item_code']);
             $this->db->where('participant_id', $participant_details[0]['participant_id']);
             $this->db->where('school_code', $participant_details[0]['school_code']);
-            $result_master = $this->db->get('result_master');
+            $result_master = $this->db->get('sd_result_master');
             $result_master = $result_master->getResultArray();
 
             if (count($result_master) > 0) {
                 $this->db->where('rm_id', $result_master[0]['rm_id']);
-                $this->db->update('result_master', $data);
+                $this->db->update('sd_result_master', $data);
                 $success_array[] = 'Result updated successfully!';
                 //swal("Good job!", "Result updated successfully!", "success");
             } else {
@@ -155,7 +155,7 @@ class Result_Model extends \App\Models\BaseModel {
 
                 if ($code_status == 0) {
                     $data['item_code'] = $item_code;
-                    $this->db->insert('result_master', $data);
+                    $this->db->insert('sd_result_master', $data);
                     $success_array[] = 'Result saved successfully!';
                     
                 } else {
@@ -180,13 +180,13 @@ class Result_Model extends \App\Models\BaseModel {
         $rank = array();
         $rank['rank'] = 0;
         $this->db->where('item_code', $this->input->post('hidItemId'));
-        $this->db->update('result_master', $rank);
+        $this->db->update('sd_result_master', $rank);
 
         $this->db->where('item_code', $this->input->post('hidItemId'));
         $this->db->where('point > 0');
         $this->db->select('total_mark, rm_id');
         $this->db->orderBy('total_mark', 'DESC');
-        $top_marks = $this->db->get('result_master');
+        $top_marks = $this->db->get('sd_result_master');
         $top_marks = $top_marks->getResultArray();
         $temp_mark = '';
         $rank_no = 0;
@@ -213,7 +213,7 @@ class Result_Model extends \App\Models\BaseModel {
                     #$this->template->write('message',"In second else  :<br> total mark = ".$top_marks[$i]['total_mark']." <br> temp mark = ".$temp_mark."<br> rank_no =  ".$rank_no."<br> ");
                 }
                 $this->db->where('rm_id', @$top_marks [$i]['rm_id']);
-                if (!$this->db->update('result_master', $rank)) {
+                if (!$this->db->update('sd_result_master', $rank)) {
                     //$this->db->transRollback();
                     return FALSE;
                 }
@@ -229,7 +229,7 @@ class Result_Model extends \App\Models\BaseModel {
         $this->db->where('item_code', $this->input->post('hidItemId'));
         $this->db->where('percentage > 50');
         $this->db->select('percentage, rm_id');
-        $grade_point = $this->db->get('result_master');
+        $grade_point = $this->db->get('sd_result_master');
 
         foreach ($grade_point->getResultArray() as $grade_point) {
             $percentage = $grade_point['percentage'];
@@ -251,7 +251,7 @@ class Result_Model extends \App\Models\BaseModel {
             $data_grade_point['point'] = $point;
             $data_grade_point['is_taken'] = 'Y';
             $this->db->where('rm_id', $grade_point['rm_id']);
-            $this->db->update('result_master', $data_grade_point);
+            $this->db->update('sd_result_master', $data_grade_point);
         }
         $this->db->transCommit();
         return TRUE;
@@ -263,7 +263,7 @@ class Result_Model extends \App\Models\BaseModel {
             return array();
         }
         $this->db->where('rm_id', $rm_id);
-        $result_master = $this->db->get('result_master');
+        $result_master = $this->db->get('sd_result_master');
         $result_array = array();
         if ($result_master->getNumRows() > 0) {
             $k = 0;
@@ -283,7 +283,7 @@ class Result_Model extends \App\Models\BaseModel {
 
     function delete_result() {
         $this->db->where('rm_id', $this->input->post('hidResultId'));
-        $this->db->delete('result_master');
+        $this->db->delete('sd_result_master');
     }
 
     function set_confirm_result($item_code) {
@@ -294,7 +294,7 @@ class Result_Model extends \App\Models\BaseModel {
 
             // get all participant (captain only), collect special order entry if any
             $this->db->select('RM.*, PID.spo_id, SOM.is_publish', FALSE);
-            $this->db->from('result_master RM');
+            $this->db->from('sd_result_master RM');
             $this->db->join("participant_item_details PID", "PID.participant_id=RM.participant_id AND PID.item_code=RM.item_code");
             $this->db->join("special_order_master SOM", "SOM.spo_id=PID.spo_id", "LEFT");
             $this->db->where('RM.item_code', $item_code);
@@ -330,7 +330,7 @@ class Result_Model extends \App\Models\BaseModel {
                                 //$this->template->write('message', $i.'in same school'.$all_participant_master[$i]['participant_id'].'--'.$all_participant_master[$i]['rev_district_code'].'<br>');
                                 $this->db->where('participant_id', $all_participant_master[$i]['participant_id']);
                                 $this->db->where('item_code', $all_participant_master[$i]['item_code']);
-                                $this->db->update('result_master', $data_clear);
+                                $this->db->update('sd_result_master', $data_clear);
                                 continue;
                             } else {
                                 $data_clear = array();
@@ -341,7 +341,7 @@ class Result_Model extends \App\Models\BaseModel {
                                 //$this->template->write('message', $i.'in same school'.$all_participant_master[$i]['participant_id'].'--'.$all_participant_master[$i]['rev_district_code'].'<br>');
                                 $this->db->where('participant_id', $all_participant_master[$i]['participant_id']);
                                 $this->db->where('item_code', $all_participant_master[$i]['item_code']);
-                                $this->db->update('result_master', $data_clear);
+                                $this->db->update('sd_result_master', $data_clear);
                                 continue;
                             }
 
@@ -350,7 +350,7 @@ class Result_Model extends \App\Models\BaseModel {
                             $data_clear['is_taken'] = 'N';
                             $this->db->where('participant_id', $all_participant_master[$i]['participant_id']);
                             $this->db->where('item_code', $all_participant_master[$i]['item_code']);
-                            $this->db->update('result_master', $data_clear);
+                            $this->db->update('sd_result_master', $data_clear);
 
 
                             $school_point_array['point'] = 0;
@@ -373,14 +373,14 @@ class Result_Model extends \App\Models\BaseModel {
                         $data_clear['is_taken'] = 'N';
                         $this->db->where('participant_id', $all_participant_master[$i]['participant_id']);
                         $this->db->where('item_code', $all_participant_master[$i]['item_code']);
-                        $this->db->update('result_master', $data_clear);
+                        $this->db->update('sd_result_master', $data_clear);
                         continue;
                     } else {
                         $data_clear = array();
                         $data_clear['is_taken'] = 'N';
                         $this->db->where('participant_id', $all_participant_master[$i]['participant_id']);
                         $this->db->where('item_code', $all_participant_master[$i]['item_code']);
-                        $this->db->update('result_master', $data_clear);
+                        $this->db->update('sd_result_master', $data_clear);
 
                         $school_point_array['point'] = 0;
                         $school_point_array['not_point'] = $all_participant_master[$i]['point'];
@@ -397,7 +397,7 @@ class Result_Model extends \App\Models\BaseModel {
 
             // Change the status of data entry of pariculat item.
             $this->db->where('item_code', $item_code);
-            if (!$this->db->update('result_master', array('is_finish' => 'Y'))) {
+            if (!$this->db->update('sd_result_master', array('is_finish' => 'Y'))) {
                 $this->db->transRollback();
                 return FALSE;
             } else {
@@ -439,7 +439,7 @@ class Result_Model extends \App\Models\BaseModel {
                 }
 
                 $this->db->select('RM.*, SPD.is_withheld');
-                $this->db->from('result_master RM');
+                $this->db->from('sd_result_master RM');
                 $this->db->where('RM.item_code', $item_code);
                 $this->db->join('sd_school_point_details SPD', 'SPD.participant_id=RM.participant_id AND SPD.item_code=RM.item_code');
                 $this->db->where('RM.rank', 1);
@@ -496,7 +496,7 @@ class Result_Model extends \App\Models\BaseModel {
                                         PID.parent_admn_no, IF(IFNULL(TRIM(SOM.is_publish), "Y")="Y", "N", "Y") AS is_withheld', FALSE);
                 $this->db->where('RM.item_code', $item_code);
                 $this->db->where('PID.item_code', $item_code);
-                $this->db->from('result_master RM');
+                $this->db->from('sd_result_master RM');
 
                 $this->db->join("participant_item_details PID", "PID.parent_admn_no=RM.admn_no AND PID.school_code=RM.school_code
                             AND PID.item_code=RM.item_code");
@@ -541,7 +541,7 @@ class Result_Model extends \App\Models\BaseModel {
             $this->db->select('item_code');
             $this->db->where('item_code', $item_code);
             $this->db->where('is_finish', 'N');
-            $result = $this->db->get('result_master');
+            $result = $this->db->get('sd_result_master');
             $result = $result->getResultArray();
             if (is_array($result) && count($result) > 0)
                 return TRUE;
@@ -552,7 +552,7 @@ class Result_Model extends \App\Models\BaseModel {
 
     function get_absentee_list_select($item_code) {
         $this->db->select('PID.participant_id', FALSE);
-        $this->db->from('result_master RM');
+        $this->db->from('sd_result_master RM');
         $this->db->join('participant_item_details PID', 'PID.item_code = RM.item_code AND PID.participant_id=RM.participant_id', 'right');
         $this->db->where('PID.item_code', $item_code);
         $this->db->where('PID.is_captain', 'Y');
@@ -587,10 +587,10 @@ class Result_Model extends \App\Models\BaseModel {
 
         $this->db->select('count( p.participant_id ) AS cpt, p.item_code, i.item_type, 
             i.item_name, f.fest_name,
-             (SELECT count(rm.participant_id) FROM result_master rm WHERE rm.item_code=p.item_code) AS participated_no,
-             IF((SELECT count(rm1.item_code) FROM result_master rm1 
+             (SELECT count(rm.participant_id) FROM sd_result_master rm WHERE rm.item_code=p.item_code) AS participated_no,
+             IF((SELECT count(rm1.item_code) FROM sd_result_master rm1 
                     WHERE rm1.item_code=p.item_code ) > 0 ,
-                    IF((    SELECT count(rm1.item_code) FROM result_master rm1 
+                    IF((    SELECT count(rm1.item_code) FROM sd_result_master rm1 
                             WHERE rm1.item_code=p.item_code AND rm1.is_finish ="N"
                         ) > 0, "No", "Yes"
                     ),
@@ -601,7 +601,7 @@ class Result_Model extends \App\Models\BaseModel {
         $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id');
         //$this->db->join('sd_stage_item_master AS s','s.item_code= p.item_code','LEFT');
         //$this->db->join('sd_stage_master AS sm','sm.stage_id = s.stage_id','LEFT');
-        //$this->db->join('result_master AS rm','rm.participant_id= p.participant_id','LEFT');
+        //$this->db->join('sd_result_master AS rm','rm.participant_id= p.participant_id','LEFT');
         $this->db->where('i.fest_id', $festtype);
         $this->db->where('p.is_captain', 'Y');
         $this->db->where('i.item_type', 'G');
@@ -617,10 +617,10 @@ class Result_Model extends \App\Models\BaseModel {
 
         $this->db->select('count( p.participant_id) AS cpt, p.item_code, i.item_type, i.item_name, 
         f.fest_name,
-        (SELECT count(rm.participant_id) FROM result_master rm WHERE rm.item_code=p.item_code) AS participated_no,
-         IF((SELECT count(rm1.item_code) FROM result_master rm1 
+        (SELECT count(rm.participant_id) FROM sd_result_master rm WHERE rm.item_code=p.item_code) AS participated_no,
+         IF((SELECT count(rm1.item_code) FROM sd_result_master rm1 
                 WHERE rm1.item_code=p.item_code ) > 0 ,
-                IF((    SELECT count(rm1.item_code) FROM result_master rm1 
+                IF((    SELECT count(rm1.item_code) FROM sd_result_master rm1 
                         WHERE rm1.item_code=p.item_code AND rm1.is_finish ="N"
                     ) > 0, "No", "Yes"
                 ),
@@ -665,7 +665,7 @@ class Result_Model extends \App\Models\BaseModel {
         $this->db->where('item_code', $item_code);
         $update_array['rank'] = 0;
         $update_array['is_finish'] = 'N';
-        if (!$this->db->update('result_master', $update_array)) {
+        if (!$this->db->update('sd_result_master', $update_array)) {
             $this->db->transRollback();
             return FALSE;
         }
@@ -679,7 +679,7 @@ class Result_Model extends \App\Models\BaseModel {
         $this->db->select('count(participant_id) as firstRanks');
         $this->db->where('item_code', $item_code);
         $this->db->where('rank', '1');
-        $result = $this->db->get('result_master');
+        $result = $this->db->get('sd_result_master');
         $result = $result->getResultArray();
         return $result;
     }
@@ -691,7 +691,7 @@ class Result_Model extends \App\Models\BaseModel {
         $this->db->where('item_code', $itemCode);
         $this->db->where('school_code', $schoolcode);
         $this->db->where('spo_id', '0');
-        $result = $this->db->get('result_master');
+        $result = $this->db->get('sd_result_master');
         $result = $result->getResultArray();
         if (is_array($result) && count($result) > 0) {
 
@@ -710,7 +710,7 @@ class Result_Model extends \App\Models\BaseModel {
         $this->db->select('count(code_no) as cnt');
         $this->db->where('item_code', $item_code);
         $this->db->where('code_no', $code_no); 
-        $result = $this->db->get('result_master');
+        $result = $this->db->get('sd_result_master');
         return $result->getRow()->cnt; 
     }
 

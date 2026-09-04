@@ -428,7 +428,7 @@ class General_Model extends \App\Models\BaseModel {
         $this->db->select('item_code');
         $this->db->groupBy('item_code');
         $this->db->where('is_finish', 'Y');
-        $result_master = $this->db->get('result_master');
+        $result_master = $this->db->get('sd_result_master');
         $result_item = $result_master->getNumRows();
 
         $this->db->select('item_code');

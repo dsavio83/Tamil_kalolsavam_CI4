@@ -11,7 +11,7 @@ namespace App\Controllers;
  * export_sub_district_data: Exports full school/participant data for a
  *   sub-district with encrypted checksums.
  *
- * Tables used: sd_result_publish, result_master, participant_item_details,
+ * Tables used: sd_result_publish, sd_result_master, participant_item_details,
  *              participant_details, school_master, school_details
  *
  * Permission: 8 (enforced in each method)
@@ -81,7 +81,7 @@ class Export extends \App\Controllers\BaseController {
      *
      * Permission: 8, USER_GROUP='A', USER_TYPE=3
      * Uses: Export_Model::get_district_export_data()
-     *   -> Queries sd_result_publish JOIN result_master, participant_item_details,
+     *   -> Queries sd_result_publish JOIN sd_result_master, participant_item_details,
      *      participant_details (grade A, is_withheld N, class > 4)
      */
     function export_district_data() {

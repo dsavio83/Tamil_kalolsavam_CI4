@@ -367,7 +367,7 @@ $routes->match(['GET', 'POST'], 'report/timefestreportpdf/datewisepart', 'Report
 //   competitions (class > 4, grade A). Form POSTs to PDF endpoint.
 //   Uses Afterresult_model::higherlevel_result() which queries
 //   sd_result_publish JOIN school_master, participant_details, item_master,
-//   festival_master, result_master.
+//   festival_master, sd_result_master.
 // schoolhigher_result / schoolhigher_resultall: School-wise higher-level.
 // All methods enforce login + permission 8.
 // ------------------------------------------------------------------
@@ -402,7 +402,7 @@ $routes->match(['GET', 'POST'], 'report/afterresultreportpdf/datewisepart', 'Rep
 // EXPORT MODULE — District & Sub-District Data Export
 // export/export_district_data: GET renders export form; POST with
 //   hidExport=TRUE streams CSV via Export_Model::get_district_export_data().
-//   Queries sd_result_publish JOIN result_master, participant_item_details,
+//   Queries sd_result_publish JOIN sd_result_master, participant_item_details,
 //   participant_details (grade A, class > 4). Encrypted row integrity.
 // export/export_sub_district_data: POST-only CSV stream for sub-district.
 //   Includes school_master, school_details, participant_details,
