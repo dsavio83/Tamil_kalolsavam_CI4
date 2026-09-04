@@ -61,7 +61,7 @@ class Timefest_model  extends \App\Models\BaseModel {
     function fetch_resultNo($item_num) {
         $this->db->where('rt.item_code', $item_num);
         $this->db->select('rt.result_no');
-        $this->db->from('result_time AS rt');
+        $this->db->from('sd_result_time AS rt');
         $details = $this->db->get();
         return $details->getResultArray();
     }

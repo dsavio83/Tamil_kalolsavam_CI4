@@ -297,7 +297,7 @@ class Resultindex_Model extends \App\Models\BaseModel {
         }
 
         $query = "SELECT RT.item_code, RT.confirm_date, RT.confirm_time, RT.result_no, IM.item_name, FM.fest_name, FM.fest_id
-                  FROM result_time AS RT
+                  FROM sd_result_time AS RT
                   JOIN result_master AS RM ON RT.item_code = RM.item_code
                   JOIN item_master AS IM ON RT.item_code = IM.item_code
                   JOIN festival_master AS FM ON IM.fest_id = FM.fest_id
@@ -326,7 +326,7 @@ class Resultindex_Model extends \App\Models\BaseModel {
                     $parti_count += count($parti_det->getResultArray());
                     $confirm_date = $row['confirm_date'];
                     $confirm_time = $row['confirm_time'];
-                    $query1 = "SELECT RT.item_code,RT.confirm_date,RT.confirm_time,RT.result_no from  result_time AS RT	where  RT.confirm_date =? and RT.confirm_time >? and  RT.is_finalized='Y'";
+                    $query1 = "SELECT RT.item_code,RT.confirm_date,RT.confirm_time,RT.result_no from  sd_result_time AS RT	where  RT.confirm_date =? and RT.confirm_time >? and  RT.is_finalized='Y'";
                     $disc_code = $this->db->query($query1, [$to_date, $to_time . ":00:00"]);
                     $details['disc_code'] = $disc_code->getResultArray();
                     //echo "<br /><br /><br />item_code-->".$item_code;
@@ -358,7 +358,7 @@ class Resultindex_Model extends \App\Models\BaseModel {
                       JOIN item_master AS IM ON IM.item_code = RM.item_code
                       JOIN school_master AS SM ON SM.school_code = RM.school_code
                       JOIN festival_master AS FM ON IM.fest_id = FM.fest_id
-                      JOIN result_time AS RT ON RM.item_code = RT.item_code
+                      JOIN sd_result_time AS RT ON RM.item_code = RT.item_code
                       WHERE RM.is_finish = 'Y' AND RM.grade != '' AND RT.result_no = ?
                       GROUP BY RM.rm_id
                       ORDER BY FM.fest_id ASC, IM.item_code, RM.total_mark DESC";

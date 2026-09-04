@@ -447,7 +447,7 @@ class General_Model extends \App\Models\BaseModel {
         $this->db->distinct('confirm_date');
         $this->db->select('confirm_date');
         $this->db->orderBy('confirm_date', 'DESC');
-        $result_time_master = $this->db->get('result_time');
+        $result_time_master = $this->db->get('sd_result_time');
         if ($result_time_master->getNumRows() > 0) {
             foreach ($result_time_master->getResultArray() as $date_time) {
                 $start_date = $date_time['confirm_date'];

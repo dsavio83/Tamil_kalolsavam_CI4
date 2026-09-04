@@ -183,7 +183,7 @@ class CreateResultTables extends Migration
         $this->forge->addKey('spo_id', true);
         $this->forge->createTable('special_order_master', true);
 
-        // result_time - Result confirmation timestamps
+        // sd_result_time - Result confirmation timestamps
         $this->forge->addField([
             'item_code' => [
                 'type'       => 'MEDIUMINT',
@@ -196,12 +196,12 @@ class CreateResultTables extends Migration
             ],
         ]);
         $this->forge->addKey('item_code', true);
-        $this->forge->createTable('result_time', true);
+        $this->forge->createTable('sd_result_time', true);
     }
 
     public function down()
     {
-        $this->forge->dropTable('result_time', true);
+        $this->forge->dropTable('sd_result_time', true);
         $this->forge->dropTable('special_order_master', true);
         $this->forge->dropTable('school_point_details', true);
         $this->forge->dropTable('result_publish', true);

@@ -408,7 +408,7 @@ class Result_Model extends \App\Models\BaseModel {
 
                 $this->db->select('item_code');
                 $this->db->where('item_code', $item_code);
-                $query = $this->db->get('result_time');
+                $query = $this->db->get('sd_result_time');
                 $itemcode_query = $query->getResultArray();
                 //var_dump();
                 if (is_array($itemcode_query) && count($itemcode_query)) {
@@ -416,13 +416,13 @@ class Result_Model extends \App\Models\BaseModel {
                     $rank_time_array['is_reset'] = 1;
                     $rank_time_array['confirm_date'] = date("Y-m-d");
                     $rank_time_array['confirm_time'] = date("H:i:s a");
-                    if (!$this->db->update('result_time', $rank_time_array, array('item_code' => $item_code))) {
+                    if (!$this->db->update('sd_result_time', $rank_time_array, array('item_code' => $item_code))) {
                         $this->db->transRollback();
                         return FALSE;
                     }
                 } else {
                     $this->db->selectMax('result_no');
-                    $query = $this->db->get('result_time');
+                    $query = $this->db->get('sd_result_time');
                     foreach ($query->getResult() as $row) {
                         $result_max = $row->result_no;
                         $result_max++;
@@ -432,7 +432,7 @@ class Result_Model extends \App\Models\BaseModel {
                     $rank_time_array['is_finalized'] = 'Y';
                     $rank_time_array['confirm_date'] = date("Y-m-d");
                     $rank_time_array['confirm_time'] = date("H:i:s");
-                    if (!$this->db->insert('result_time', $rank_time_array)) {
+                    if (!$this->db->insert('sd_result_time', $rank_time_array)) {
                         $this->db->transRollback();
                         return FALSE;
                     }
