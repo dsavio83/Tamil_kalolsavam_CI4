@@ -89,7 +89,7 @@ class Certificate_Model extends \App\Models\BaseModel {
         $this->db->where('sub_district_code', $sub_dist_code);
         $this->db->where('district_code', $dist_code);
 
-        $certificate_template = $this->db->get('certificate_template');
+        $certificate_template = $this->db->get('sd_certificate_template');
         $result = $certificate_template->getResultArray();
         if (is_array($result) && count($result) > 0 && (!empty($result[0]['name_x']) || !empty($result[0]['name_y']))) {
             return $result;
@@ -207,15 +207,15 @@ class Certificate_Model extends \App\Models\BaseModel {
         $this->db->where('sub_district_code', $sub_dist_code);
         $this->db->where('district_code', $dist_code);
 
-        $certificate_template = $this->db->get('certificate_template');
+        $certificate_template = $this->db->get('sd_certificate_template');
         if ($certificate_template->getNumRows() > 0) {
             $this->db->where('sub_district_code', $sub_dist_code);
             $this->db->where('district_code', $dist_code);
-            $this->db->update('certificate_template', $data);
+            $this->db->update('sd_certificate_template', $data);
         } else {
             $data['sub_district_code'] = $sub_dist_code;
             $data['district_code'] = $dist_code;
-            $this->db->insert('certificate_template', $data);
+            $this->db->insert('sd_certificate_template', $data);
         }
     }
 
@@ -587,7 +587,7 @@ class Certificate_Model extends \App\Models\BaseModel {
         $this->db->where('sub_district_code', $sub_dist_code);
         $this->db->where('district_code', $dist_code);
         $this->db->select('type_id');
-        $certificate_type = $this->db->get('certificate_template');
+        $certificate_type = $this->db->get('sd_certificate_template');
         $where = '';
         if ($certificate_type->getNumRows() > 0) {
             $certificate = $certificate_type->getResultArray();

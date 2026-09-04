@@ -400,7 +400,7 @@ class General_Model extends \App\Models\BaseModel {
         $this->db->where('sub_district_code', $sub_dist_code);
         $this->db->where('district_code', $dist_code);
 
-        $certificate_template = $this->db->get('certificate_template');
+        $certificate_template = $this->db->get('sd_certificate_template');
         if ($certificate_template->getNumRows() > 0) {
             return true;
         }
