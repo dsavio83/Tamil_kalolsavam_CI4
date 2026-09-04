@@ -466,7 +466,7 @@ class Import_Model extends \App\Models\BaseModel {
         $this->db->emptyTable('sd_result_publish');
         $this->db->emptyTable('school_details');
         $this->db->emptyTable('school_master');
-        $this->db->emptyTable('school_point_details');
+        $this->db->emptyTable('sd_school_point_details');
         $this->db->emptyTable('sd_stage_item_master');
         $this->db->emptyTable('sd_stage_master');
         $this->db->emptyTable('user_rights');

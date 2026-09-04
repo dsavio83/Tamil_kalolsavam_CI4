@@ -34,7 +34,7 @@ class Result_Model extends \App\Models\BaseModel {
 
         $this->db->select('rm.*, spd.is_withheld');
         $this->db->from('result_master rm');
-        $this->db->join('school_point_details spd', 'spd.item_code=rm.item_code AND spd.participant_id=rm.participant_id', 'left');
+        $this->db->join('sd_school_point_details spd', 'spd.item_code=rm.item_code AND spd.participant_id=rm.participant_id', 'left');
         $this->db->where('rm.item_code', $item_code);
         //$this->db->orderBy('rank','ASC');
         //$this->db->orderBy('rm.total_mark','DESC');
@@ -290,7 +290,7 @@ class Result_Model extends \App\Models\BaseModel {
         $this->db->transBegin();
         if ($this->update_point_grade()) {
             $this->db->where('item_code', $item_code);
-            $this->db->delete('school_point_details');
+            $this->db->delete('sd_school_point_details');
 
             // get all participant (captain only), collect special order entry if any
             $this->db->select('RM.*, PID.spo_id, SOM.is_publish', FALSE);
@@ -388,7 +388,7 @@ class Result_Model extends \App\Models\BaseModel {
                         $school_point_array['is_withheld'] = 'Y';
                     }
                 }
-                if (!$this->db->insert('school_point_details', $school_point_array)) {
+                if (!$this->db->insert('sd_school_point_details', $school_point_array)) {
                     $this->db->transRollback();
                     return FALSE;
                 }
@@ -441,7 +441,7 @@ class Result_Model extends \App\Models\BaseModel {
                 $this->db->select('RM.*, SPD.is_withheld');
                 $this->db->from('result_master RM');
                 $this->db->where('RM.item_code', $item_code);
-                $this->db->join('school_point_details SPD', 'SPD.participant_id=RM.participant_id AND SPD.item_code=RM.item_code');
+                $this->db->join('sd_school_point_details SPD', 'SPD.participant_id=RM.participant_id AND SPD.item_code=RM.item_code');
                 $this->db->where('RM.rank', 1);
                 $result_publish_master = $this->db->get();
                 $result_publish_master = $result_publish_master->getResultArray();
@@ -653,7 +653,7 @@ class Result_Model extends \App\Models\BaseModel {
             return FALSE;
         }
         $this->db->where('item_code', $item_code);
-        if (!$this->db->delete('school_point_details')) {
+        if (!$this->db->delete('sd_school_point_details')) {
             $this->db->transRollback();
             return FALSE;
         }

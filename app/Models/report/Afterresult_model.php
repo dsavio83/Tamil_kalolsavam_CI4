@@ -13,7 +13,7 @@ class Afterresult_model extends \App\Models\BaseModel {
         $school = (int)$school;
         $query = "SELECT RM.item_code, IM.item_name, RM.participant_id, RM.percentage, RM.total_mark, RM.grade, SPD.point, RM.rank, PD.participant_name, RM.school_code, SM.school_name, COALESCE(SPD.is_withheld, 'N') as is_withheld, FM.fest_name 
                   FROM result_master AS RM
-                  LEFT JOIN school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code 
+                  LEFT JOIN sd_school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code 
                   LEFT JOIN participant_details AS PD ON PD.participant_id = RM.participant_id 
                   JOIN item_master AS IM ON IM.item_code = RM.item_code
                   JOIN school_master AS SM ON SM.school_code = RM.school_code
@@ -28,7 +28,7 @@ class Afterresult_model extends \App\Models\BaseModel {
     function all_school_wise_result() {
         $query = "SELECT RM.item_code, IM.item_name, RM.participant_id, RM.percentage, RM.total_mark, RM.grade, SPD.point, RM.rank, PD.participant_name, RM.school_code, SM.school_name, COALESCE(SPD.is_withheld, 'N') as is_withheld, FM.fest_name, FM.fest_id
                   FROM result_master AS RM
-                  LEFT JOIN school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code 
+                  LEFT JOIN sd_school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code 
                   LEFT JOIN participant_details AS PD ON PD.participant_id = RM.participant_id 
                   JOIN item_master AS IM ON IM.item_code = RM.item_code
                   JOIN school_master AS SM ON SM.school_code = RM.school_code
@@ -43,7 +43,7 @@ class Afterresult_model extends \App\Models\BaseModel {
     function school_wise_result_all() {
 
         $query = "SELECT SPD.school_code, SM.school_name, sum( SPD.point) AS cnt, FM.fest_id, FM.fest_name
-			FROM school_point_details AS SPD
+			FROM sd_school_point_details AS SPD
 			JOIN school_master AS SM ON SM.school_code = SPD.school_code
 			LEFT JOIN item_master AS IM ON IM.item_code = SPD.item_code
 			LEFT JOIN festival_master AS FM ON IM.fest_id = FM.fest_id
@@ -181,7 +181,7 @@ class Afterresult_model extends \App\Models\BaseModel {
     function total_points() {
         $query = "SELECT RM.item_code, IM.item_name, RM.participant_id, RM.percentage, RM.grade, SPD.point, RM.rank, PD.participant_name, RM.school_code, SM.school_name, COALESCE(SPD.is_withheld, 'N') as is_withheld, FM.fest_name, FM.fest_id
                   FROM result_master AS RM
-                  LEFT JOIN school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code
+                  LEFT JOIN sd_school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code
                   LEFT JOIN participant_details AS PD ON PD.participant_id = RM.participant_id
                   JOIN item_master AS IM ON IM.item_code = RM.item_code
                   JOIN school_master AS SM ON SM.school_code = RM.school_code
@@ -197,7 +197,7 @@ class Afterresult_model extends \App\Models\BaseModel {
     function report_press() {
         $query = "SELECT RM.item_code, IM.item_name, RM.participant_id, RM.percentage, RM.grade, SPD.point, RM.rank, PD.participant_name, RM.school_code, SM.school_name, COALESCE(SPD.is_withheld, 'N') as is_withheld, FM.fest_name, FM.fest_id
                   FROM result_master AS RM
-                  LEFT JOIN school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code
+                  LEFT JOIN sd_school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code
                   LEFT JOIN participant_details AS PD ON PD.participant_id = RM.participant_id
                   JOIN item_master AS IM ON IM.item_code = RM.item_code
                   JOIN school_master AS SM ON SM.school_code = RM.school_code

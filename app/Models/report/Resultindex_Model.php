@@ -31,7 +31,7 @@ class Resultindex_Model extends \App\Models\BaseModel {
 
     function schoolpoints($festid) {
         $this->db->select('s.school_code, sum( point ) AS spoint, m.school_name,f.fest_name,f.fest_id');
-        $this->db->from('school_point_details AS s');
+        $this->db->from('sd_school_point_details AS s');
         $this->db->join('school_master AS m', 's.school_code = m.school_code');
         $this->db->join('item_master AS I', 'I.item_code = s.item_code');
         $this->db->join('festival_master AS f', "f.fest_id=I.fest_id and f.fest_id='$festid'");
@@ -217,7 +217,7 @@ class Resultindex_Model extends \App\Models\BaseModel {
 
     function allfestschoolpoints() {
         $this->db->select('s.school_code, sum( point ) AS spoint, m.school_name,f.fest_name,f.fest_id');
-        $this->db->from('school_point_details AS s');
+        $this->db->from('sd_school_point_details AS s');
         $this->db->join('school_master AS m', 's.school_code = m.school_code');
         $this->db->join('item_master AS I', 'I.item_code = s.item_code');
         $this->db->join('festival_master AS f', "f.fest_id=I.fest_id");
@@ -314,7 +314,7 @@ class Resultindex_Model extends \App\Models\BaseModel {
                     $item_code = $row['item_code'];
                     $parti_query = "SELECT RM.participant_id, RM.percentage, RM.grade, SPD.point, RM.rank, PD.participant_name, RM.school_code, SM.school_name, COALESCE(SPD.is_withheld, 'N') as is_withheld
                                     FROM result_master AS RM
-                                    LEFT JOIN school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code
+                                    LEFT JOIN sd_school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code
                                     LEFT JOIN participant_details AS PD ON PD.participant_id = RM.participant_id
                                     JOIN item_master AS IM ON IM.item_code = RM.item_code
                                     JOIN school_master AS SM ON SM.school_code = RM.school_code
@@ -353,7 +353,7 @@ class Resultindex_Model extends \App\Models\BaseModel {
             if ($result_no === '') continue;
             $query = "SELECT RM.item_code, RT.result_no, IM.item_name, RM.participant_id, RM.percentage, RM.grade, RM.point, RM.rank, PD.participant_name, RM.school_code, SM.school_name, COALESCE(SPD.is_withheld, 'N') as is_withheld, FM.fest_name, FM.fest_id
                       FROM result_master AS RM
-                      LEFT JOIN school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code
+                      LEFT JOIN sd_school_point_details AS SPD ON RM.participant_id = SPD.participant_id AND RM.item_code = SPD.item_code
                       LEFT JOIN participant_details AS PD ON PD.participant_id = RM.participant_id
                       JOIN item_master AS IM ON IM.item_code = RM.item_code
                       JOIN school_master AS SM ON SM.school_code = RM.school_code

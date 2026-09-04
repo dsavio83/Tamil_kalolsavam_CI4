@@ -32,7 +32,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
 
     function schoolpoints($festid) {
         $this->db->select('s.school_code, sum( point ) AS spoint, m.school_name,f.fest_name,f.fest_id');
-        $this->db->from('school_point_details AS s');
+        $this->db->from('sd_school_point_details AS s');
         $this->db->join('school_master AS m', 's.school_code = m.school_code');
         $this->db->join('item_master AS I', 'I.item_code = s.item_code');
         $this->db->join('festival_master AS f', "f.fest_id=I.fest_id and f.fest_id='$festid'");
@@ -218,7 +218,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
 
     function allfestschoolpoints() {
         /* $this->db->select('s.school_code, sum( point ) AS spoint, m.school_name,f.fest_name,f.fest_id');
-          $this->db->from('school_point_details AS s');
+          $this->db->from('sd_school_point_details AS s');
           $this->db->join('school_master AS m','s.school_code = m.school_code');
           $this->db->join('item_master AS I','I.item_code = s.item_code');
           $this->db->join('festival_master AS f',"f.fest_id=I.fest_id");
@@ -230,7 +230,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
           return $retvalue->getResultArray(); */
 
         $this->db->select('s.school_code, sum( s.point ) AS spoint, m.school_name');
-        $this->db->from('school_point_details AS s');
+        $this->db->from('sd_school_point_details AS s');
         $this->db->join('school_master AS m', 's.school_code = m.school_code');
         $this->db->groupBy('s.school_code');
         $this->db->orderBy('spoint desc');
@@ -239,7 +239,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
     }
 
     function leading_subdistricts($dist_code = null, $festid = null, $limit = 5) {
-        $builder = $this->db->table('school_point_details AS s')
+        $builder = $this->db->table('sd_school_point_details AS s')
             ->select('sdm.sub_district_code, sdm.sub_district_name, SUM(s.point) AS total_points')
             ->join('school_master AS m', 'm.school_code = s.school_code')
             ->join('sub_district_master AS sdm', 'sdm.sub_district_code = m.sub_district_code');
@@ -260,7 +260,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
     }
 
     function leading_schools($dist_code = null, $sub_dist_code = null, $festid = null, $limit = 5) {
-        $builder = $this->db->table('school_point_details AS s')
+        $builder = $this->db->table('sd_school_point_details AS s')
             ->select('s.school_code, m.school_name, sdm.sub_district_name, SUM(s.point) AS total_points')
             ->join('school_master AS m', 'm.school_code = s.school_code')
             ->join('sub_district_master AS sdm', 'sdm.sub_district_code = m.sub_district_code', 'LEFT');
@@ -305,7 +305,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
     }
 
     function subdistrictpoints($festid, $dist_code = null) {
-        $builder = $this->db->table('school_point_details AS s')
+        $builder = $this->db->table('sd_school_point_details AS s')
             ->select('sdm.sub_district_code, sdm.sub_district_name, f.fest_name, f.fest_id, SUM(s.point) AS total_points')
             ->join('school_master AS m', 'm.school_code = s.school_code')
             ->join('sub_district_master AS sdm', 'sdm.sub_district_code = m.sub_district_code')
@@ -368,7 +368,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
     }
 
     function get_school_points_breakdown($dist_code = null, $sub_dist_code = null, $limit = 50) {
-        $builder = $this->db->table('school_point_details AS s')
+        $builder = $this->db->table('sd_school_point_details AS s')
             ->select('m.school_code, m.school_name, sdm.sub_district_name,
                       SUM(CASE WHEN i.fest_id = 1 THEN s.point ELSE 0 END) AS lp_points,
                       SUM(CASE WHEN i.fest_id = 2 THEN s.point ELSE 0 END) AS up_points,
@@ -394,7 +394,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
     }
 
     function get_subdistrict_points_breakdown($dist_code) {
-        $builder = $this->db->table('school_point_details AS s')
+        $builder = $this->db->table('sd_school_point_details AS s')
             ->select('sdm.sub_district_code, sdm.sub_district_name,
                       SUM(CASE WHEN i.fest_id = 1 THEN s.point ELSE 0 END) AS lp_points,
                       SUM(CASE WHEN i.fest_id = 2 THEN s.point ELSE 0 END) AS up_points,

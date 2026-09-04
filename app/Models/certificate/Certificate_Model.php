@@ -419,7 +419,7 @@ class Certificate_Model extends \App\Models\BaseModel {
             $this->db->where('sm.sub_district_code', $this->session->get('SUB_DISTRICT'));
         }
         $this->db->select('sm.school_name, sm.school_code, 
-				(SELECT SUM(spd.point) FROM school_point_details spd WHERE spd.school_code=cm.school_code)  AS total_point, 
+				(SELECT SUM(spd.point) FROM sd_school_point_details spd WHERE spd.school_code=cm.school_code)  AS total_point, 
 				(SELECT COUNT(rm.participant_id) FROM result_master rm WHERE rm.school_code=sm.school_code) as no_participation, 
 				
 				(SELECT COUNT(cm1.grade) FROM sd_certificate_master cm1 WHERE cm1.school_code=cm.school_code AND 
@@ -429,7 +429,7 @@ class Certificate_Model extends \App\Models\BaseModel {
 				(SELECT COUNT(cm1.grade) FROM sd_certificate_master cm1 WHERE cm1.school_code=cm.school_code AND is_withheld = "N"  AND cm1.parent_admn_no=cm1.admn_no AND cm1.grade = "C") AS c_grade', FALSE);
         $this->db->from('school_master AS sm');
         $this->db->join('sd_certificate_master AS cm', 'cm.school_code=sm.school_code');
-        //	$this->db->join ('school_point_details AS spd', 'spd.school_code=cm.school_code');
+        //	$this->db->join ('sd_school_point_details AS spd', 'spd.school_code=cm.school_code');
         $this->db->join('result_master AS rm', 'rm.school_code=cm.school_code');
         $this->db->orderBy('sm.school_code', 'ASC');
         $this->db->groupBy('sm.school_code, sm.school_name, cm.school_code');

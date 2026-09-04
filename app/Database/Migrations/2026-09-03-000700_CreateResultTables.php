@@ -130,7 +130,7 @@ class CreateResultTables extends Migration
         $this->forge->addKey('school_code');
         $this->forge->createTable('sd_result_publish', true);
 
-        // school_point_details - Points earned per school per item
+        // sd_school_point_details - Points earned per school per item
         $this->forge->addField([
             'participant_id' => [
                 'type'       => 'DOUBLE',
@@ -158,7 +158,7 @@ class CreateResultTables extends Migration
         ]);
         $this->forge->addKey(['participant_id', 'item_code'], true);
         $this->forge->addKey('school_code');
-        $this->forge->createTable('school_point_details', true);
+        $this->forge->createTable('sd_school_point_details', true);
 
         // special_order_master - Special order/withholding
         $this->forge->addField([
@@ -203,7 +203,7 @@ class CreateResultTables extends Migration
     {
         $this->forge->dropTable('sd_result_time', true);
         $this->forge->dropTable('special_order_master', true);
-        $this->forge->dropTable('school_point_details', true);
+        $this->forge->dropTable('sd_school_point_details', true);
         $this->forge->dropTable('sd_result_publish', true);
         $this->forge->dropTable('result_master', true);
     }
