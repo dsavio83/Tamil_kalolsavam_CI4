@@ -22,7 +22,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
 
         /** check if the user is cluster user */
         if (trim($this->session->get('USER_TYPE')) == 5) {
-            $this->db->join('user_cluster AS UC', 'SM.school_code = UC.school_code', 'INNER');
+            $this->db->join('sd_user_cluster AS UC', 'SM.school_code = UC.school_code', 'INNER');
             $this->db->where('UC.user_id', trim($this->session->get('USERID')));
         }
         /** check if the user is cluster user ends */

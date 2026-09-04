@@ -91,7 +91,7 @@ class User_Cluster_Model extends \App\Models\BaseModel {
     /** function for fetch schools */
     function get_Schools() {
         $this->db->where('sub_district_code', $this->session->get('SUB_DISTRICT'));
-        $this->db->where('school_code NOT IN (SELECT UC.school_code FROM user_cluster AS UC WHERE UC.sub_district_code = "' . $this->session->get('SUB_DISTRICT') . '")');
+        $this->db->where('school_code NOT IN (SELECT UC.school_code FROM sd_user_cluster AS UC WHERE UC.sub_district_code = "' . $this->session->get('SUB_DISTRICT') . '")');
         $this->db->from('sd_school_master');
         $this->db->orderBy('school_code');
         $this->db->select('school_code, school_name');
@@ -103,7 +103,7 @@ class User_Cluster_Model extends \App\Models\BaseModel {
     function get_entered_school() {
         $this->db->where('SM.sub_district_code', $this->session->get('SUB_DISTRICT'));
         $this->db->from('sd_school_master AS SM');
-        $this->db->join('school_details AS SD', 'SM.school_code = SD.school_code');
+        $this->db->join('sd_school_details AS SD', 'SM.school_code = SD.school_code');
         $this->db->select('SM.school_code');
         $result = $this->db->get();
 
@@ -125,7 +125,7 @@ class User_Cluster_Model extends \App\Models\BaseModel {
     function get_selected_Schools() {
         $this->db->where('SM.sub_district_code', $this->session->get('SUB_DISTRICT'));
         $this->db->where('UC.user_id', $this->input->post('UserIdty'));
-        $this->db->from('user_cluster UC');
+        $this->db->from('sd_user_cluster UC');
         $this->db->join('sd_school_master SM', 'UC.school_code = SM.school_code');
         $this->db->orderBy('SM.school_code');
         $this->db->select('SM.school_code, school_name');
@@ -181,7 +181,7 @@ class User_Cluster_Model extends \App\Models\BaseModel {
         $this->db->where('SM.sub_district_code', $sub_district_code);
         $this->db->where('SD.is_finalize', 'Y');
         $this->db->from('sd_school_master AS SM');
-        $this->db->join('school_details AS SD', 'SM.school_code = SD.school_code');
+        $this->db->join('sd_school_details AS SD', 'SM.school_code = SD.school_code');
         $cnt_finalize_school = $this->db->countAllResults();
         if ($cnt_school_master > $cnt_finalize_school) {
             $nt_confirm_school = $cnt_school_master - $cnt_finalize_school;

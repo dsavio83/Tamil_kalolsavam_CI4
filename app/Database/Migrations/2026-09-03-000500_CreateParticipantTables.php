@@ -121,7 +121,7 @@ class CreateParticipantTables extends Migration
         $this->forge->addKey('item_code');
         $this->forge->createTable('sd_participant_item_details', true);
 
-        // cluster_participant_details - Cluster participant data
+        // sd_cluster_participant_details - Cluster participant data
         $this->forge->addField([
             'participant_id' => [
                 'type'       => 'DOUBLE',
@@ -160,7 +160,7 @@ class CreateParticipantTables extends Migration
         $this->forge->addKey('participant_id', true);
         $this->forge->addKey('school_code');
         $this->forge->addKey('sub_district_code');
-        $this->forge->createTable('cluster_participant_details', true);
+        $this->forge->createTable('sd_cluster_participant_details', true);
 
         // temp_dist_participant_details - Temporary import staging table
         $this->forge->addField([
@@ -212,7 +212,7 @@ class CreateParticipantTables extends Migration
     public function down()
     {
         $this->forge->dropTable('temp_dist_participant_details', true);
-        $this->forge->dropTable('cluster_participant_details', true);
+        $this->forge->dropTable('sd_cluster_participant_details', true);
         $this->forge->dropTable('sd_participant_item_details', true);
         $this->forge->dropTable('sd_participant_details', true);
     }

@@ -8,7 +8,7 @@ class CreateCertificateTables extends Migration
 {
     public function up()
     {
-        // certificate_master
+        // sd_certificate_master
         $this->forge->addField([
             'certificate_id' => [
                 'type'           => 'DOUBLE',
@@ -56,9 +56,9 @@ class CreateCertificateTables extends Migration
         ]);
         $this->forge->addKey('certificate_id', true);
         $this->forge->addKey('item_code');
-        $this->forge->createTable('certificate_master', true);
+        $this->forge->createTable('sd_certificate_master', true);
 
-        // certificate_template
+        // sd_certificate_template
         $this->forge->addField([
             'ct_id' => [
                 'type'           => 'MEDIUMINT',
@@ -137,9 +137,9 @@ class CreateCertificateTables extends Migration
             'label_print' => ['type' => 'CHAR', 'constraint' => 1, 'null' => false, 'default' => 'N'],
         ]);
         $this->forge->addKey('ct_id', true);
-        $this->forge->createTable('certificate_template', true);
+        $this->forge->createTable('sd_certificate_template', true);
 
-        // certificate_type
+        // sd_certificate_type
         $this->forge->addField([
             'ct_id' => [
                 'type'           => 'INT',
@@ -154,10 +154,10 @@ class CreateCertificateTables extends Migration
         ]);
         $this->forge->addKey('ct_id', true);
 
-        $this->forge->createTable('certificate_type', true);
-        // Seed the certificate_type lookup rows if empty
-        if ($this->db->table('certificate_type')->countAllResults() === 0) {
-            $this->db->table('certificate_type')->insertBatch([
+        $this->forge->createTable('sd_certificate_type', true);
+        // Seed the sd_certificate_type lookup rows if empty
+        if ($this->db->table('sd_certificate_type')->countAllResults() === 0) {
+            $this->db->table('sd_certificate_type')->insertBatch([
                 ['ct_id' => 1, 'type' => 'A Grade Only'],
                 ['ct_id' => 2, 'type' => 'A Grade & B Grade Only'],
                 ['ct_id' => 3, 'type' => 'All Grades'],
@@ -173,8 +173,8 @@ class CreateCertificateTables extends Migration
 
     public function down()
     {
-        $this->forge->dropTable('certificate_type', true);
-        $this->forge->dropTable('certificate_template', true);
-        $this->forge->dropTable('certificate_master', true);
+        $this->forge->dropTable('sd_certificate_type', true);
+        $this->forge->dropTable('sd_certificate_template', true);
+        $this->forge->dropTable('sd_certificate_master', true);
     }
 }

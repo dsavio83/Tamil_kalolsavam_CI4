@@ -10,10 +10,10 @@ class SyncCertificateMaster extends Migration
     {
         $db = \Config\Database::connect();
         
-        // Sync confirmed results from sd_result_master into certificate_master if empty
-        $countRow = $db->query("SELECT COUNT(*) as c FROM certificate_master")->getRowArray();
+        // Sync confirmed results from sd_result_master into sd_certificate_master if empty
+        $countRow = $db->query("SELECT COUNT(*) as c FROM sd_certificate_master")->getRowArray();
         if ((int)($countRow['c'] ?? 0) === 0) {
-            $syncSql = "INSERT INTO certificate_master (`item_code`, `school_code`, `participant_id`, `admn_no`, `grade`, `rank`, `parent_admn_no`, `is_withheld`)
+            $syncSql = "INSERT INTO sd_certificate_master (`item_code`, `school_code`, `participant_id`, `admn_no`, `grade`, `rank`, `parent_admn_no`, `is_withheld`)
             SELECT RM.item_code, RM.school_code, PID.participant_id, PID.admn_no, RM.grade, RM.rank,
                    PID.parent_admn_no, IF(IFNULL(TRIM(SOM.is_publish), 'Y')='Y', 'N', 'Y') AS is_withheld
             FROM sd_result_master RM

@@ -175,7 +175,7 @@ class Login_Model extends \App\Models\BaseModel {
         $this->db->from('sd_school_details m');
         $this->db->join('sd_school_master AS w', "w.school_code = m.school_code AND w.sub_district_code =?", [], 'LEFT');
         $this->db->join('sd_school_details AS m2', "m.school_code = m2.school_code AND m2.is_finalize = 'Y'", 'LEFT');
-        $this->db->where("m.school_code NOT IN (SELECT c.school_code FROM user_cluster c JOIN sd_school_master t ON c.school_code = t.school_code AND t.sub_district_code =?)", [$subdist]);
+        $this->db->where("m.school_code NOT IN (SELECT c.school_code FROM sd_user_cluster c JOIN sd_school_master t ON c.school_code = t.school_code AND t.sub_district_code =?)", [$subdist]);
         $ret = $this->db->get();
         return $ret->getResultArray();
         /*
@@ -189,7 +189,7 @@ class Login_Model extends \App\Models\BaseModel {
           IN (
 
           SELECT c.school_code
-          FROM user_cluster c
+          FROM sd_user_cluster c
           JOIN sd_school_master t ON c.school_code = t.school_code
           AND t.sub_district_code ='$subdist'
           ) ";
@@ -245,13 +245,13 @@ class Login_Model extends \App\Models\BaseModel {
             $this->db->select('sub_district_code');
             $this->db->where('user_id', $user_id);
             $this->db->groupBy('user_id, sub_district_code');
-            $result = $this->db->get('user_cluster');
+            $result = $this->db->get('sd_user_cluster');
             $result = $result->getResultArray();
             $subdist = $result[0]['sub_district_code'] ?? $subdist;
         }
 
         $this->db->select('sd.school_code, sd.sub_district_code, sm.school_name,dt.is_finalize');
-        $this->db->from('user_cluster AS sd');
+        $this->db->from('sd_user_cluster AS sd');
         $this->db->join('sd_school_master AS sm', 'sm.school_code = sd.school_code');
         $this->db->join('sd_school_details AS dt', 'dt.school_code=sd.school_code', 'LEFT');
         $this->db->where('sd.user_id', $user_id);

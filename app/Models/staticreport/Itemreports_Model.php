@@ -39,7 +39,7 @@ class Itemreports_Model extends \App\Models\BaseModel {
     }
 
     function item_details() {
-        $this->db->from('school_details AS SM');
+        $this->db->from('sd_school_details AS SM');
         $this->db->join('sd_school_master AS SD', 'SM.school_code = SD.school_code', 'LEFT');
         $school_details = $this->db->get();
         return $school_details->getResultArray();

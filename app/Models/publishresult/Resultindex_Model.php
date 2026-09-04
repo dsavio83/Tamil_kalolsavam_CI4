@@ -12,7 +12,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
     function result_rank($festid, $itemid = null) {
         $this->db->select(' R.item_code, R.participant_id, R.school_code, R.code_no, R.total_mark, R.grade, R.point, R.rank, M.school_name, M.sub_district_code, P.participant_name, P.class, I.item_name, F.fest_name,pd.spo_id, sp.is_publish, P.admn_no');
         $this->db->from('sd_result_master AS R');
-        $this->db->join('school_master AS M', 'M.school_code = R.school_code');
+        $this->db->join('sd_school_master AS M', 'M.school_code = R.school_code');
         $this->db->join('sd_participant_details AS P', 'P.participant_id = R.participant_id');
         $this->db->join('item_master AS I', "I.item_code = R.item_code AND I.fest_id ='$festid'");
         $this->db->join('festival_master AS F', " F.fest_id = I.fest_id AND F.fest_id='$festid'");
@@ -33,7 +33,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
     function schoolpoints($festid) {
         $this->db->select('s.school_code, sum( point ) AS spoint, m.school_name,f.fest_name,f.fest_id');
         $this->db->from('sd_school_point_details AS s');
-        $this->db->join('school_master AS m', 's.school_code = m.school_code');
+        $this->db->join('sd_school_master AS m', 's.school_code = m.school_code');
         $this->db->join('item_master AS I', 'I.item_code = s.item_code');
         $this->db->join('festival_master AS f', "f.fest_id=I.fest_id and f.fest_id='$festid'");
         $this->db->where('I.fest_id', $festid);
@@ -47,7 +47,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
     function allresults() {
         $this->db->select('R.item_code , R.participant_id , R.school_code , R.code_no , R.total_mark , R.grade , R.point , R.rank , M.school_name , P.participant_name ,P.admn_no, P.class , I.item_name , F.fest_name , F.fest_id,pd.spo_id, sp.is_publish,sdm.sub_district_code,sdm.sub_district_name,rdm.rev_district_code,rdm.rev_district_name');
         $this->db->from('sd_result_master AS R');
-        $this->db->join('school_master AS M', 'M.school_code = R.school_code');
+        $this->db->join('sd_school_master AS M', 'M.school_code = R.school_code');
         $this->db->join('sub_district_master AS sdm', 'M.sub_district_code = sdm.sub_district_code');
         $this->db->join('rev_district_master AS rdm', 'M.rev_district_code = rdm.rev_district_code');
         $this->db->join('sd_participant_details AS P', 'P.participant_id = R.participant_id');
@@ -92,7 +92,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
         $this->db->from('sd_result_master AS R');
         $this->db->join('sd_participant_details AS pd', 'pd.participant_id = R.participant_id');
         $this->db->join('item_master AS I', 'I.item_code = R.item_code');
-        $this->db->join('school_master AS s', 's.school_code = R.school_code');
+        $this->db->join('sd_school_master AS s', 's.school_code = R.school_code');
         $this->db->join('festival_master AS f', 'f.fest_id = I.fest_id');
         $this->db->join('sd_participant_item_details AS p', 'p.participant_id = R.participant_id AND p.item_code = R.item_code');
         $this->db->join('special_order_master AS sp', "p.spo_id = sp.spo_id AND sp.is_publish = 'N'", 'LEFT');
@@ -115,7 +115,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
         $this->db->from('sd_result_master AS R');
         $this->db->join('sd_participant_details AS pd', 'pd.participant_id = R.participant_id');
         $this->db->join('item_master AS I', 'I.item_code = R.item_code');
-        $this->db->join('school_master AS s', 's.school_code = R.school_code');
+        $this->db->join('sd_school_master AS s', 's.school_code = R.school_code');
         $this->db->join('festival_master AS f', 'f.fest_id = I.fest_id');
         $this->db->join('sd_participant_item_details AS p', 'p.participant_id = R.participant_id AND p.item_code = R.item_code');
         $this->db->join('special_order_master AS sp', "p.spo_id = sp.spo_id AND sp.is_publish = 'N'", 'LEFT');
@@ -135,7 +135,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
         $this->db->join('sd_participant_item_details AS p', 'p.participant_id = R.participant_id AND p.item_code = R.item_code');
         $this->db->join('sd_participant_details AS pd', 'pd.participant_id = R.participant_id');
         $this->db->join('item_master AS I', 'I.item_code = R.item_code');
-        $this->db->join('school_master AS s', 's.school_code = R.school_code');
+        $this->db->join('sd_school_master AS s', 's.school_code = R.school_code');
         $this->db->join('festival_master AS f', 'f.fest_id = I.fest_id');
         $this->db->join('special_order_master AS sp', "sp.spo_id = p.spo_id AND sp.is_publish = 'N'", 'LEFT');
         if ($rank == 'ALL') {
@@ -158,7 +158,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
         $this->db->join('sd_participant_item_details AS p', 'p.participant_id = R.participant_id AND p.item_code = R.item_code');
         $this->db->join('sd_participant_details AS pd', 'pd.participant_id = R.participant_id');
         $this->db->join('item_master AS I', 'I.item_code = R.item_code');
-        $this->db->join('school_master AS s', 's.school_code = R.school_code');
+        $this->db->join('sd_school_master AS s', 's.school_code = R.school_code');
         $this->db->join('festival_master AS f', 'f.fest_id = I.fest_id');
         $this->db->join('special_order_master AS sp', "sp.spo_id = p.spo_id AND sp.is_publish = 'N'", 'LEFT');
         if ($grade == 'ALL') {
@@ -219,7 +219,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
     function allfestschoolpoints() {
         /* $this->db->select('s.school_code, sum( point ) AS spoint, m.school_name,f.fest_name,f.fest_id');
           $this->db->from('sd_school_point_details AS s');
-          $this->db->join('school_master AS m','s.school_code = m.school_code');
+          $this->db->join('sd_school_master AS m','s.school_code = m.school_code');
           $this->db->join('item_master AS I','I.item_code = s.item_code');
           $this->db->join('festival_master AS f',"f.fest_id=I.fest_id");
           $this->db->groupBy('s.school_code');
@@ -231,7 +231,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
 
         $this->db->select('s.school_code, sum( s.point ) AS spoint, m.school_name');
         $this->db->from('sd_school_point_details AS s');
-        $this->db->join('school_master AS m', 's.school_code = m.school_code');
+        $this->db->join('sd_school_master AS m', 's.school_code = m.school_code');
         $this->db->groupBy('s.school_code');
         $this->db->orderBy('spoint desc');
         $retvalue = $this->db->get();
@@ -241,7 +241,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
     function leading_subdistricts($dist_code = null, $festid = null, $limit = 5) {
         $builder = $this->db->table('sd_school_point_details AS s')
             ->select('sdm.sub_district_code, sdm.sub_district_name, SUM(s.point) AS total_points')
-            ->join('school_master AS m', 'm.school_code = s.school_code')
+            ->join('sd_school_master AS m', 'm.school_code = s.school_code')
             ->join('sub_district_master AS sdm', 'sdm.sub_district_code = m.sub_district_code');
         
         if ($dist_code) {
@@ -262,7 +262,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
     function leading_schools($dist_code = null, $sub_dist_code = null, $festid = null, $limit = 5) {
         $builder = $this->db->table('sd_school_point_details AS s')
             ->select('s.school_code, m.school_name, sdm.sub_district_name, SUM(s.point) AS total_points')
-            ->join('school_master AS m', 'm.school_code = s.school_code')
+            ->join('sd_school_master AS m', 'm.school_code = s.school_code')
             ->join('sub_district_master AS sdm', 'sdm.sub_district_code = m.sub_district_code', 'LEFT');
         
         if ($dist_code) {
@@ -288,7 +288,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
             ->select('r.item_code, i.item_name, f.fest_name, f.fest_id, MAX(r.rm_id) AS max_rm_id')
             ->join('item_master AS i', 'i.item_code = r.item_code')
             ->join('festival_master AS f', 'f.fest_id = i.fest_id')
-            ->join('school_master AS m', 'm.school_code = r.school_code', 'LEFT');
+            ->join('sd_school_master AS m', 'm.school_code = r.school_code', 'LEFT');
         
         if ($dist_code) {
             $builder->where('m.rev_district_code', $dist_code);
@@ -307,7 +307,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
     function subdistrictpoints($festid, $dist_code = null) {
         $builder = $this->db->table('sd_school_point_details AS s')
             ->select('sdm.sub_district_code, sdm.sub_district_name, f.fest_name, f.fest_id, SUM(s.point) AS total_points')
-            ->join('school_master AS m', 'm.school_code = s.school_code')
+            ->join('sd_school_master AS m', 'm.school_code = s.school_code')
             ->join('sub_district_master AS sdm', 'sdm.sub_district_code = m.sub_district_code')
             ->join('item_master AS i', 'i.item_code = s.item_code')
             ->join('festival_master AS f', 'f.fest_id = i.fest_id')
@@ -331,7 +331,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
             ->join('sd_participant_details AS p', 'p.participant_id = r.participant_id')
             ->join('item_master AS i', 'i.item_code = r.item_code')
             ->join('festival_master AS f', 'f.fest_id = i.fest_id')
-            ->join('school_master AS m', 'm.school_code = r.school_code')
+            ->join('sd_school_master AS m', 'm.school_code = r.school_code')
             ->join('sub_district_master AS sdm', 'sdm.sub_district_code = m.sub_district_code')
             ->whereIn('r.rank', [1, 2, 3]);
 
@@ -375,7 +375,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
                       SUM(CASE WHEN i.fest_id = 3 THEN s.point ELSE 0 END) AS hs_points,
                       SUM(CASE WHEN i.fest_id = 4 THEN s.point ELSE 0 END) AS hss_points,
                       SUM(s.point) AS total_points')
-            ->join('school_master AS m', 'm.school_code = s.school_code')
+            ->join('sd_school_master AS m', 'm.school_code = s.school_code')
             ->join('sub_district_master AS sdm', 'sdm.sub_district_code = m.sub_district_code')
             ->join('item_master AS i', 'i.item_code = s.item_code');
 
@@ -401,7 +401,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
                       SUM(CASE WHEN i.fest_id = 3 THEN s.point ELSE 0 END) AS hs_points,
                       SUM(CASE WHEN i.fest_id = 4 THEN s.point ELSE 0 END) AS hss_points,
                       SUM(s.point) AS total_points')
-            ->join('school_master AS m', 'm.school_code = s.school_code')
+            ->join('sd_school_master AS m', 'm.school_code = s.school_code')
             ->join('sub_district_master AS sdm', 'sdm.sub_district_code = m.sub_district_code')
             ->join('item_master AS i', 'i.item_code = s.item_code')
             ->where('m.rev_district_code', $dist_code)
@@ -420,10 +420,10 @@ class Resultindex_Model  extends \App\Models\BaseModel {
             ->join('sd_result_master AS r', 'r.item_code = i.item_code', 'LEFT');
 
         if ($sub_dist_code) {
-            $builder->join('school_master AS m', 'm.school_code = r.school_code', 'LEFT');
+            $builder->join('sd_school_master AS m', 'm.school_code = r.school_code', 'LEFT');
             $builder->where('m.sub_district_code', $sub_dist_code);
         } elseif ($dist_code) {
-            $builder->join('school_master AS m', 'm.school_code = r.school_code', 'LEFT');
+            $builder->join('sd_school_master AS m', 'm.school_code = r.school_code', 'LEFT');
             $builder->where('m.rev_district_code', $dist_code);
         }
 
@@ -443,7 +443,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
             ->join('sd_participant_details AS p', 'p.participant_id = r.participant_id')
             ->join('item_master AS i', 'i.item_code = r.item_code')
             ->join('festival_master AS f', 'f.fest_id = i.fest_id')
-            ->join('school_master AS m', 'm.school_code = r.school_code')
+            ->join('sd_school_master AS m', 'm.school_code = r.school_code')
             ->join('sub_district_master AS sdm', 'sdm.sub_district_code = m.sub_district_code')
             ->where('r.item_code', $item_code);
 

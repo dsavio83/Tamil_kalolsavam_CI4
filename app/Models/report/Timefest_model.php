@@ -14,7 +14,7 @@ class Timefest_model  extends \App\Models\BaseModel {
         $this->db->select('rs.item_code,Sd.stage_name,rs.code_no,rs.marks,rs.total_mark,rs.percentage,rs.grade,rs.point,rs.rank,im.item_name,sm.school_code,sm.school_name,pd.participant_name,rs.participant_id,si.start_time,sp.is_publish,pi.spo_id,si.no_of_judges,fm.fest_name,rs.is_taken');
         $this->db->from('sd_result_master AS rs');
         $this->db->join('item_master AS im', 'im.item_code = rs.item_code');
-        $this->db->join('school_master AS sm', 'sm.school_code = rs.school_code');
+        $this->db->join('sd_school_master AS sm', 'sm.school_code = rs.school_code');
         $this->db->join('sd_participant_details AS pd', 'pd.participant_id = rs.participant_id', 'LEFT');
         $this->db->join('sd_participant_item_details AS pi', "pi.participant_id = rs.participant_id AND pi.item_code = rs.item_code", 'LEFT');
         $this->db->join('special_order_master AS sp', "sp.spo_id = pi.spo_id AND sp.is_publish = 'N'", 'LEFT');
@@ -71,7 +71,7 @@ class Timefest_model  extends \App\Models\BaseModel {
         $this->db->select('rs.item_code,Sd.stage_name,rs.code_no,rs.marks,rs.total_mark,rs.percentage,rs.grade,sp.is_publish,pi.spo_id, rs.point,rs.rank,im.item_name,sm.school_code,sm.school_name,pd.participant_name,rs.participant_id,si.start_time,fm.fest_id,fm.fest_name,si.no_of_participant,si.no_of_judges');
         $this->db->from('sd_result_master AS rs');
         $this->db->join('item_master AS im', 'im.item_code = rs.item_code');
-        $this->db->join('school_master AS sm', 'sm.school_code = rs.school_code');
+        $this->db->join('sd_school_master AS sm', 'sm.school_code = rs.school_code');
         $this->db->join('sd_participant_details AS pd', 'pd.participant_id = rs.participant_id', 'LEFT');
         $this->db->join('sd_participant_item_details AS pi', 'pi.participant_id = rs.participant_id AND pi.item_code = rs.item_code', 'LEFT');
         $this->db->join('special_order_master AS sp', "sp.spo_id = pi.spo_id AND sp.is_publish = 'N'", 'LEFT');
