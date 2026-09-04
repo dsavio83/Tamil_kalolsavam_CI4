@@ -162,8 +162,8 @@ class Festival_Scheduling_Model extends \App\Models\BaseModel {
             'slot_duration' => (int)($slot_duration ?: 30) // default 30 min step
         );
 
-        // 2. Fetch configured stages and rooms from stage_master
-        $stage_records = $this->db->table('stage_master')->orderBy('stage_id', 'ASC')->get()->getResultArray();
+        // 2. Fetch configured stages and rooms from sd_stage_master
+        $stage_records = $this->db->table('sd_stage_master')->orderBy('stage_id', 'ASC')->get()->getResultArray();
         $stages = array();
         $rooms = array();
         foreach ($stage_records as $stg) {
@@ -630,7 +630,7 @@ class Festival_Scheduling_Model extends \App\Models\BaseModel {
     public function get_or_create_stage($stage_name) {
         // Check if stage exists
         $this->db->where('stage_name', $stage_name);
-        $existing = $this->db->get('stage_master')->getRowArray();
+        $existing = $this->db->get('sd_stage_master')->getRowArray();
 
         if ($existing) {
             return $existing['stage_id'];
@@ -641,7 +641,7 @@ class Festival_Scheduling_Model extends \App\Models\BaseModel {
             'stage_name' => $stage_name,
             'stage_desc' => $stage_name . ' - Auto Generated'
         );
-        $this->db->table('stage_master')->insert($stage_data);
+        $this->db->table('sd_stage_master')->insert($stage_data);
         return $this->db->insertID();
     }
 
@@ -716,7 +716,7 @@ class Festival_Scheduling_Model extends \App\Models\BaseModel {
                 fm.fest_name
             ');
             $this->db->from('stage_item_master AS sim');
-            $this->db->join('stage_master AS sm', 'sm.stage_id = sim.stage_id');
+            $this->db->join('sd_stage_master AS sm', 'sm.stage_id = sim.stage_id');
             $this->db->join('item_master AS im', 'im.item_code = sim.item_code');
             $this->db->join('festival_master AS fm', 'fm.fest_id = im.fest_id', 'left');
             if ($fest_id && $fest_id !== 'all' && $fest_id !== '0') {

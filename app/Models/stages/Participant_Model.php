@@ -15,7 +15,7 @@ class Participant_Model extends \App\Models\BaseModel {
         $this->db->join('item_master AS i', 'i.item_code = p.item_code');
         $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id');
         $this->db->join('stage_item_master AS s', 's.item_code= p.item_code', 'LEFT');
-        $this->db->join('stage_master AS sm', 'sm.stage_id = s.stage_id', 'LEFT');
+        $this->db->join('sd_stage_master AS sm', 'sm.stage_id = s.stage_id', 'LEFT');
         $this->db->where('i.fest_id', $festtype);
         $this->db->where('p.is_captain', 'Y');
         $this->db->where('i.item_type', 'G');
@@ -32,7 +32,7 @@ class Participant_Model extends \App\Models\BaseModel {
         $this->db->join('item_master AS i', 'i.item_code = p.item_code');
         $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id');
         $this->db->join('stage_item_master AS s', 's.item_code= p.item_code', 'LEFT');
-        $this->db->join('stage_master AS sm', 'sm.stage_id = s.stage_id', 'LEFT');
+        $this->db->join('sd_stage_master AS sm', 'sm.stage_id = s.stage_id', 'LEFT');
         $this->db->where('i.fest_id', $festtype);
         $this->db->where('i.item_type', 'S');
         $this->db->where('p.is_captain', 'Y');

@@ -99,7 +99,7 @@ class Prereport_Model extends \App\Models\BaseModel {
           LEFT JOIN sd_cluster_participant_details AS c ON p.participant_id = c.participant_id
           AND c.item_code = p.item_code
           LEFT JOIN stage_item_master AS s ON s.item_code = c.item_code
-          LEFT JOIN stage_master AS ss ON ss.stage_id = s.stage_id
+          LEFT JOIN sd_stage_master AS ss ON ss.stage_id = s.stage_id
           where p.school_code='$schoolcode'
           GROUP BY p.participant_id, p.item_code
           ORDER BY p.school_code, F.fest_id, p.item_code";
@@ -112,7 +112,7 @@ class Prereport_Model extends \App\Models\BaseModel {
         $this->db->join('participant_details AS d', 'd.participant_id = p.participant_id');
         $this->db->join('sd_cluster_participant_details AS c', 'p.participant_id = c.participant_id and c.item_code = p.item_code', 'LEFT');
         $this->db->join('stage_item_master AS s', 's.item_code = c.item_code', 'LEFT');
-        $this->db->join('stage_master AS ss', 'ss.stage_id = s.stage_id', 'LEFT');
+        $this->db->join('sd_stage_master AS ss', 'ss.stage_id = s.stage_id', 'LEFT');
         $this->db->where('p.school_code', $schoolcode);
         if ($festid != 0) {
             $this->db->where('F.fest_id', $festid);
@@ -139,7 +139,7 @@ class Prereport_Model extends \App\Models\BaseModel {
           $this->db->join('item_master AS im',' im.item_code = pd.item_code');
           $this->db->join('festival_master AS fm','fm.fest_id=im.fest_id');
           $this->db->join('stage_item_master AS sm','pd.item_code = sm.item_code');
-          $this->db->join('stage_master AS ms',' ms.stage_id = sm.stage_id');
+          $this->db->join('sd_stage_master AS ms',' ms.stage_id = sm.stage_id');
           $this->db->join('sd_cluster_participant_details AS cp','cp.item_code = sm.item_code');
           $this->db->where('cp.participant_id = p.participant_id');
           $this->db->groupBy('p.participant_id');
@@ -171,7 +171,7 @@ class Prereport_Model extends \App\Models\BaseModel {
               JOIN participant_details AS d ON d.participant_id = p.participant_id
               LEFT JOIN sd_cluster_participant_details AS c ON p.participant_id = c.participant_id AND c.item_code = p.item_code
               LEFT JOIN stage_item_master AS s ON s.item_code = c.item_code
-              LEFT JOIN stage_master AS ss ON ss.stage_id = s.stage_id  
+              LEFT JOIN sd_stage_master AS ss ON ss.stage_id = s.stage_id  
               WHERE 1=1 $subdist_where $where
               GROUP BY p.participant_id, p.item_code
               ORDER BY p.school_code, F.fest_id, p.item_code, p.is_captain desc";
@@ -199,7 +199,7 @@ class Prereport_Model extends \App\Models\BaseModel {
              LEFT JOIN sd_cluster_participant_details AS c ON p.participant_id = c.participant_id
              AND c.item_code = p.item_code
              LEFT JOIN stage_item_master AS s ON s.item_code = c.item_code
-             LEFT JOIN stage_master AS ss ON ss.stage_id = s.stage_id
+             LEFT JOIN sd_stage_master AS ss ON ss.stage_id = s.stage_id
              GROUP BY p.participant_id, p.item_code
              ORDER BY p.school_code, F.fest_id, p.item_code";
 
@@ -214,7 +214,7 @@ class Prereport_Model extends \App\Models\BaseModel {
 
         $this->db->join('item_master  AS  im', 'im.item_code = cm.item_code');
         $this->db->join('festival_master  AS fm', 'fm.fest_id = im.fest_id');
-        $this->db->join('stage_master AS sm', 'sm.stage_id = cm.stage_id');
+        $this->db->join('sd_stage_master AS sm', 'sm.stage_id = cm.stage_id');
         if ($date != 'All') {
             $this->db->where('date(sim.start_time)', $date);
         }
@@ -238,7 +238,7 @@ class Prereport_Model extends \App\Models\BaseModel {
 
         $this->db->join('item_master  AS  im', 'im.item_code = cm.item_code');
         $this->db->join('festival_master  AS fm', 'fm.fest_id = im.fest_id');
-        $this->db->join('stage_master AS sm', 'sm.stage_id = cm.stage_id');
+        $this->db->join('sd_stage_master AS sm', 'sm.stage_id = cm.stage_id');
         if ($date != 'All') {
             $this->db->where('date(sim.start_time)', $date);
         }
@@ -257,7 +257,7 @@ class Prereport_Model extends \App\Models\BaseModel {
         $this->db->select('SM.stage_name,SM.stage_id, SM.stage_desc, IM.item_code, IM.item_name, FM.fest_id, FM.fest_name, CP.participant_id, CP.cluster_no, SIM.start_time, SIM.item_time, SIM.time_type,SIM.no_of_participant,pd.spo_id,so.is_publish');
         $this->db->where('SIM.item_code = CP.item_code');
         $this->db->from('stage_item_master  AS SIM');
-        $this->db->join('stage_master AS SM ', 'SM.stage_id = SIM.stage_id');
+        $this->db->join('sd_stage_master AS SM ', 'SM.stage_id = SIM.stage_id');
         $this->db->join('item_master    AS IM ', 'IM.item_code = SIM.item_code');
         $this->db->join('festival_master  AS FM', 'FM.fest_id = IM.fest_id');
         $this->db->join('sd_cluster_participant_details  AS CP', 'SIM.stage_id = CP.stage_id AND CP.item_code = SIM.item_code');
@@ -423,7 +423,7 @@ class Prereport_Model extends \App\Models\BaseModel {
         $this->db->select(' SM.stage_name, SM.stage_desc, IM.item_code, IM.item_name, FM.fest_id, FM.fest_name, CP.participant_id, CP.cluster_no, SIM.start_time, SIM.item_time, SIM.time_type,SIM.no_of_participant,pd.spo_id,so.is_publish');
         $this->db->where('SIM.item_code = CP.item_code');
         $this->db->from('stage_item_master  AS SIM');
-        $this->db->join('stage_master AS SM ', 'SM.stage_id = SIM.stage_id');
+        $this->db->join('sd_stage_master AS SM ', 'SM.stage_id = SIM.stage_id');
         $this->db->join('item_master    AS IM ', 'IM.item_code = SIM.item_code');
         $this->db->join('festival_master  AS FM', 'FM.fest_id = IM.fest_id');
         $this->db->join('sd_cluster_participant_details  AS CP', 'SIM.stage_id = CP.stage_id');
@@ -441,7 +441,7 @@ class Prereport_Model extends \App\Models\BaseModel {
         $this->db->select(' SM.stage_name, SM.stage_desc, IM.item_code, IM.item_name, FM.fest_id, FM.fest_name, CP.participant_id, CP.cluster_no, SIM.start_time, SIM.item_time, SIM.time_type,SIM.no_of_participant,pd.spo_id,so.is_publish');
         $this->db->where('SIM.item_code = CP.item_code');
         $this->db->from('stage_item_master  AS SIM');
-        $this->db->join('stage_master AS SM ', 'SM.stage_id = SIM.stage_id');
+        $this->db->join('sd_stage_master AS SM ', 'SM.stage_id = SIM.stage_id');
         $this->db->join('item_master    AS IM ', 'IM.item_code = SIM.item_code');
         $this->db->join('festival_master  AS FM', 'FM.fest_id = IM.fest_id');
         $this->db->join('sd_cluster_participant_details  AS CP', 'SIM.stage_id = CP.stage_id AND CP.item_code = SIM.item_code');
@@ -466,7 +466,7 @@ pd.class, pd.gender, pid.item_code, pid.item_type, pid.is_captain, it.item_name,
         $this->db->join('item_master AS it', 'it.item_code = pid.item_code');
         $this->db->join('festival_master AS fm', 'fm.fest_id = it.fest_id');
         $this->db->join('stage_item_master AS sm', 'sm.item_code = it.item_code');
-        $this->db->join('stage_master AS ssm', 'ssm.stage_id = sm.stage_id');
+        $this->db->join('sd_stage_master AS ssm', 'ssm.stage_id = sm.stage_id');
         $this->db->join('sd_cluster_participant_details AS cpd', 'cpd.item_code = pid.item_code AND cpd.participant_id = pid.participant_id');
         $this->db->where('sd.school_code', $schoolcode);
         $this->db->orderBy('it.fest_id');
@@ -494,7 +494,7 @@ pd.class, pd.gender, pid.item_code, pid.item_type, pid.is_captain, it.item_name,
         $this->db->join('item_master AS IM', 'IM.item_code = PD.item_code');
         $this->db->join('stage_item_master AS SM', 'IM.item_code = SM.item_code', 'LEFT');
         $this->db->join('sd_cluster_participant_details AS CP', 'CP.item_code = IM.item_code AND CP.participant_id = PD.participant_id', 'LEFT');
-        $this->db->join('stage_master AS ST', 'ST.stage_id = SM.stage_id', 'LEFT');
+        $this->db->join('sd_stage_master AS ST', 'ST.stage_id = SM.stage_id', 'LEFT');
         $this->db->select('PD.*,IM.item_name,ST.stage_name,ST.stage_desc,CP.cluster_no,SM.start_time');
         $participant = $this->db->get('participant_item_details AS PD');
         return $participant->getResultArray();
@@ -510,7 +510,7 @@ pd.class, pd.gender, pid.item_code, pid.item_type, pid.is_captain, it.item_name,
         $this->db->join('item_master AS it', 'it.item_code = pid.item_code');
         $this->db->join('festival_master AS fm', 'fm.fest_id = it.fest_id');
         $this->db->join('stage_item_master AS sm', 'sm.item_code = it.item_code');
-        $this->db->join('stage_master AS ssm', 'ssm.stage_id = sm.stage_id');
+        $this->db->join('sd_stage_master AS ssm', 'ssm.stage_id = sm.stage_id');
         $this->db->join('sd_cluster_participant_details AS cpd', 'cpd.item_code = pid.item_code AND cpd.participant_id = pid.participant_id');
         $this->db->join('sub_district_master AS SUB', 'SUB.sub_district_code = mj.sub_district_code');
         $this->db->where('pd.participant_id', $regno);
@@ -587,7 +587,7 @@ pd.class, pd.gender, pid.item_code, pid.item_type, pid.is_captain, it.item_name,
             $this->db->from('participant_item_details AS PID');
             $this->db->join('item_master AS IM', 'IM.item_code = PID.item_code');
             $this->db->join('stage_item_master AS SIM', 'SIM.item_code = PID.item_code', 'LEFT');
-            $this->db->join('stage_master AS SM', 'SM.stage_id = SIM.stage_id', 'LEFT');
+            $this->db->join('sd_stage_master AS SM', 'SM.stage_id = SIM.stage_id', 'LEFT');
             $this->db->where('PID.participant_id', $p['participant_id']);
             if (!empty($festid) && $festid !== 'ALL' && $festid !== '0') {
                 $this->db->where('IM.fest_id', (int)$festid);
@@ -661,7 +661,7 @@ pd.class, pd.gender, pid.item_code, pid.item_type, pid.is_captain, it.item_name,
         $this->db->join('sd_cluster_participant_details AS cpd', 'cm.item_code = cpd.item_code AND cm.cluster_id = cpd.cluster_id');
         $this->db->join('item_master  AS  im', 'im.item_code = cpd.item_code');
         $this->db->join('festival_master  AS fm', 'fm.fest_id = im.fest_id');
-        $this->db->join('stage_master AS sm', 'sm.stage_id = cm.stage_id');
+        $this->db->join('sd_stage_master AS sm', 'sm.stage_id = cm.stage_id');
         $this->db->orderBy('cpd.cluster_no');
         $fest_details = $this->db->get();
         return $fest_details->getResultArray();
@@ -674,7 +674,7 @@ pd.class, pd.gender, pid.item_code, pid.item_type, pid.is_captain, it.item_name,
         $this->db->join('sd_cluster_participant_details AS cpd', 'cm.item_code = cpd.item_code AND cm.cluster_id = cpd.cluster_id');
         $this->db->join('item_master  AS  im', 'im.item_code = cpd.item_code');
         $this->db->join('festival_master  AS fm', 'fm.fest_id = im.fest_id');
-        $this->db->join('stage_master AS sm', 'sm.stage_id = cm.stage_id');
+        $this->db->join('sd_stage_master AS sm', 'sm.stage_id = cm.stage_id');
         $this->db->orderBy('cm.stage_id');
         $this->db->orderBy('cm_start_time');
         $this->db->orderBy('cm.item_code');
@@ -690,7 +690,7 @@ pd.class, pd.gender, pid.item_code, pid.item_type, pid.is_captain, it.item_name,
         $this->db->join('sd_cluster_participant_details AS cpd', 'cm.item_code = cpd.item_code AND cm.cluster_id = cpd.cluster_id');
         $this->db->join('item_master  AS  im', 'im.item_code = cpd.item_code');
         $this->db->join('festival_master  AS fm', 'fm.fest_id = im.fest_id');
-        $this->db->join('stage_master AS sm', 'sm.stage_id = cm.stage_id');
+        $this->db->join('sd_stage_master AS sm', 'sm.stage_id = cm.stage_id');
         if ($date != 'All') {
             $this->db->where('date(sim.start_time)', $date);
         }
@@ -712,7 +712,7 @@ pd.class, pd.gender, pid.item_code, pid.item_type, pid.is_captain, it.item_name,
         $this->db->join('sd_cluster_participant_details AS cpd', 'cm.item_code = cpd.item_code AND cm.cluster_id = cpd.cluster_id');
         $this->db->join('item_master  AS  im', 'im.item_code = cpd.item_code');
         $this->db->join('festival_master  AS fm', 'fm.fest_id = im.fest_id');
-        $this->db->join('stage_master AS sm', 'sm.stage_id = cm.stage_id');
+        $this->db->join('sd_stage_master AS sm', 'sm.stage_id = cm.stage_id');
         if ($date != 'All') {
             $this->db->where('date(sim.start_time)', $date);
         }
@@ -1000,7 +1000,7 @@ ORDER BY  PD.participant_name,CM.start_time,CM.end_time";
 
     //find stage name
     function Stagename($stageid) {
-        $this->db->from('stage_master AS SM');
+        $this->db->from('sd_stage_master AS SM');
         $this->db->where('SM.stage_id', $stageid);
 
         $stagedetails = $this->db->get();
@@ -1011,7 +1011,7 @@ ORDER BY  PD.participant_name,CM.start_time,CM.end_time";
         $this->db->from('item_master AS IT');
         $this->db->where('IT.item_code ', $itemcode);
         $this->db->join('stage_item_master AS ST', 'ST.item_code = IT.item_code', 'LEFT');
-        $this->db->join('stage_master AS SM', 'SM.stage_id = ST.stage_id', 'LEFT');
+        $this->db->join('sd_stage_master AS SM', 'SM.stage_id = ST.stage_id', 'LEFT');
         $this->db->select('IT.*,SM.stage_name,date(ST.start_time) as ttime');
         $item_details = $this->db->get();
         return $item_details->getResultArray();
@@ -1023,7 +1023,7 @@ ORDER BY  PD.participant_name,CM.start_time,CM.end_time";
 FROM `item_master` AS IM
 JOIN festival_master AS FM ON IM.`fest_id` = FM.`fest_id`
 LEFT JOIN stage_item_master AS SM ON IM.`item_code` = SM.`item_code`
-LEFT JOIN stage_master AS ST ON ST.`stage_id` = SM.`stage_id`
+LEFT JOIN sd_stage_master AS ST ON ST.`stage_id` = SM.`stage_id`
 WHERE IM.`item_code` =?";
 
         $fest_data = $this->db->query($que, [$item_id]);
@@ -1063,7 +1063,7 @@ WHERE IM.`item_code` =?";
         $this->db->from('festival_master AS f');
         $this->db->from('item_master AS m');
         $this->db->join('stage_item_master  AS sm', 'sm.item_code = m.item_code', 'LEFT');
-        $this->db->join('stage_master  AS st', 'st.stage_id = sm.stage_id', 'LEFT');
+        $this->db->join('sd_stage_master  AS st', 'st.stage_id = sm.stage_id', 'LEFT');
         $this->db->groupBy('m.item_code');
         $fest_data = $this->db->get();
         return $fest_data->getResultArray();
@@ -1073,7 +1073,7 @@ WHERE IM.`item_code` =?";
 
         $this->db->select('s.stage_id, s.item_code, date(s.start_time) AS ddt, time(s.start_time) AS dtm, s.no_of_cluster,                   s.no_of_participant, im.item_name, f.fest_id, f.fest_name,sm.stage_name, sm.stage_desc,im.is_off_stage,im.item_type,im.max_time,im.time_type,s.no_of_participant');
         $this->db->from('stage_item_master AS s');
-        $this->db->join('stage_master AS sm', ' s.stage_id = sm.stage_id');
+        $this->db->join('sd_stage_master AS sm', ' s.stage_id = sm.stage_id');
         $this->db->join('item_master AS im', 'im.item_code = s.item_code');
         $this->db->join('festival_master AS f', 'f.fest_id = im.fest_id');
         $this->db->groupBy('s.item_code');
@@ -1154,7 +1154,7 @@ WHERE IM.`item_code` =?";
     function alldate_stagereport($stage) {
         $this->db->select('s.stage_id, s.item_code, date(s.start_time)as ddt,time(s.start_time)as dtm, s.no_of_participant, t.item_name,t.time_type, m.stage_name, m.stage_desc,f.fest_name,t.item_type,t.max_time,t.is_off_stage');
         $this->db->from('stage_item_master AS s');
-        $this->db->join('stage_master AS m', ' m.stage_id = s.stage_id');
+        $this->db->join('sd_stage_master AS m', ' m.stage_id = s.stage_id');
         $this->db->join('item_master AS t', 't.item_code = s.item_code');
         $this->db->join('festival_master AS f', 'f.fest_id = t.fest_id');
         $this->db->where('s.stage_id', $stage);
@@ -1186,7 +1186,7 @@ WHERE IM.`item_code` =?";
 
         $this->db->join('item_master  AS  im', 'im.item_code = cm.item_code');
         $this->db->join('festival_master  AS fm', 'fm.fest_id = im.fest_id');
-        $this->db->join('stage_master AS sm', 'sm.stage_id = cm.stage_id');
+        $this->db->join('sd_stage_master AS sm', 'sm.stage_id = cm.stage_id');
         if ($date != 'All') {
             $this->db->where('date(sim.start_time)', $date);
         }
@@ -1212,7 +1212,7 @@ WHERE IM.`item_code` =?";
         $this->db->join('participant_details AS d', 'd.participant_id = p.participant_id');
         //$this->db->join('sd_cluster_participant_details AS c','p.participant_id = c.participant_id and c.item_code = p.item_code','LEFT');
         $this->db->join('stage_item_master AS s', 's.item_code = p.item_code');
-        $this->db->join('stage_master AS ss', 'ss.stage_id = s.stage_id');
+        $this->db->join('sd_stage_master AS ss', 'ss.stage_id = s.stage_id');
         $this->db->join('special_order_master AS so', 'so.spo_id=p.spo_id', 'LEFT');
         //$this->db->where('p.school_code',$schoolcode);
         //$this->db->where('m.rev_district_code',$rev_district_code);
@@ -1244,7 +1244,7 @@ WHERE IM.`item_code` =?";
         //$this->db->join('sd_cluster_participant_details AS c','p.participant_id = c.participant_id and c.item_code = p.item_code','LEFT');
         $this->db->join('stage_item_master AS s', 's.item_code = p.item_code');
         $this->db->join('special_order_master AS so', 'so.spo_id=p.spo_id', 'LEFT');
-        //$this->db->join('stage_master AS ss','ss.stage_id = s.stage_id','LEFT');
+        //$this->db->join('sd_stage_master AS ss','ss.stage_id = s.stage_id','LEFT');
         //$this->db->where('p.school_code',$schoolcode);
         //$this->db->where('m.rev_district_code',$rev_district_code);
         $this->db->where('p.is_captain', 'Y');
@@ -1271,7 +1271,7 @@ WHERE IM.`item_code` =?";
 		FROM `item_master` AS IM
 		JOIN festival_master AS FM ON IM.`fest_id` = FM.`fest_id`
 		JOIN stage_item_master AS SM ON IM.`item_code` = SM.`item_code`
-		JOIN stage_master AS ST ON ST.`stage_id` = SM.`stage_id`
+		JOIN sd_stage_master AS ST ON ST.`stage_id` = SM.`stage_id`
 		WHERE date(SM.start_time) =? and FM.fest_id=?";
 
             $fest_data = $this->db->query($que, [$date, $festival]);
@@ -1283,7 +1283,7 @@ WHERE IM.`item_code` =?";
 		FROM `item_master` AS IM
 		JOIN festival_master AS FM ON IM.`fest_id` = FM.`fest_id`
 		JOIN stage_item_master AS SM ON IM.`item_code` = SM.`item_code`
-		JOIN stage_master AS ST ON ST.`stage_id` = SM.`stage_id`
+		JOIN sd_stage_master AS ST ON ST.`stage_id` = SM.`stage_id`
 		WHERE FM.fest_id=?";
 
             $fest_data = $this->db->query($que, [$festival]);
@@ -1298,7 +1298,7 @@ WHERE IM.`item_code` =?";
         $this->db->from('stage_item_master AS sm');
         $this->db->join('item_master AS im', 'im.item_code = sm.item_code');
         $this->db->join('festival_master as f', 'f.fest_id=im.fest_id');
-        $this->db->join('stage_master as ms', 'ms.stage_id=sm.stage_id');
+        $this->db->join('sd_stage_master as ms', 'ms.stage_id=sm.stage_id');
         $this->db->groupBy('im.fest_id');
         $this->db->groupBy('date(start_time)');
         $this->db->groupBy('sm.stage_id');

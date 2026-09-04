@@ -92,7 +92,7 @@ class Prereport  extends \App\Controllers\BaseController {
         }
         $this->template->write('title', 'Stage Reports');
         $fest = $this->General_Model->prepare_select_box_data('festival_master', 'fest_id,fest_name', '', 'Select Festival', 'fest_id');
-        $stage = $this->General_Model->prepare_select_box_data('stage_master', 'stage_id,stage_name', '', 'Select Stage', 'stage_id');
+        $stage = $this->General_Model->prepare_select_box_data('sd_stage_master', 'stage_id,stage_name', '', 'Select Stage', 'stage_id');
         $stage['All'] = 'All Stages';
         $date_array = $this->General_Model->get_fest_date_array();
         $date_array['All'] = 'All Dates';
@@ -222,7 +222,7 @@ class Prereport  extends \App\Controllers\BaseController {
         $this->Contents['fest'] = $fest;
         //print_r($fest);
         $this->template->write_view('content', 'report/prereport/cluster_report_all', $this->Contents);
-        $stage = $this->General_Model->prepare_select_box_data('stage_master', 'stage_id,stage_name', '', '', 'stage_id');
+        $stage = $this->General_Model->prepare_select_box_data('sd_stage_master', 'stage_id,stage_name', '', '', 'stage_id');
         $stage['All'] = 'All Stages';
         $this->Contents = array();
         $this->Contents['stage'] = $stage;
@@ -253,7 +253,7 @@ class Prereport  extends \App\Controllers\BaseController {
         }
         $this->template->write('title', 'Stage Reports');
         $fest = $this->General_Model->prepare_select_box_data('festival_master', 'fest_id,fest_name', '', 'Select Festival', 'fest_id');
-        $stage = $this->General_Model->prepare_select_box_data('stage_master', 'stage_id,stage_name', '', 'Select Stage', 'stage_id');
+        $stage = $this->General_Model->prepare_select_box_data('sd_stage_master', 'stage_id,stage_name', '', 'Select Stage', 'stage_id');
         $stage['All'] = 'All Stages';
         $date_array = $this->General_Model->get_fest_date_array();
         $date_array['All'] = 'All Dates';
@@ -284,7 +284,7 @@ class Prereport  extends \App\Controllers\BaseController {
         }
         $this->template->write('title', 'Stage Reports');
         $fest = $this->General_Model->prepare_select_box_data('festival_master', 'fest_id,fest_name', '', 'Select Festival', 'fest_id');
-        $stage = $this->General_Model->prepare_select_box_data('stage_master', 'stage_id,stage_name', '', 'Select Stage', 'stage_id');
+        $stage = $this->General_Model->prepare_select_box_data('sd_stage_master', 'stage_id,stage_name', '', 'Select Stage', 'stage_id');
         $stage['All'] = 'All Stages';
         $date_array = $this->General_Model->get_fest_date_array();
         $date_array['All'] = 'All Dates';
@@ -356,7 +356,7 @@ class Prereport  extends \App\Controllers\BaseController {
         $this->template->write('title', 'Stage Reports');
         $this->load->model('staticreport/Itemreports_Model');
         $fest = $this->General_Model->prepare_select_box_data('festival_master', 'fest_id,fest_name', '', 'Select Festival', 'fest_id');
-        $stage = $this->General_Model->prepare_select_box_data('stage_master', 'stage_id,stage_name', '', 'Select Stage', 'stage_id');
+        $stage = $this->General_Model->prepare_select_box_data('sd_stage_master', 'stage_id,stage_name', '', 'Select Stage', 'stage_id');
         $stage['All'] = 'All Stages';
         $date_array = $this->General_Model->get_fest_date_array();
         $date_array['All'] = 'All Dates';
@@ -401,7 +401,7 @@ class Prereport  extends \App\Controllers\BaseController {
         $this->template->add_js('js/popcalendar.js');
         $this->template->add_css('style/calendar.css');
 
-        $stage = $this->General_Model->prepare_select_box_data('stage_master', 'stage_id,stage_name', '', '');
+        $stage = $this->General_Model->prepare_select_box_data('sd_stage_master', 'stage_id,stage_name', '', '');
         $this->Contents = array();
 
         $this->Contents['stage'] = $stage;
@@ -450,7 +450,7 @@ class Prereport  extends \App\Controllers\BaseController {
         $this->Contents['date_array'] = $date_array;
         //print_r($fest);
         $this->template->write_view('content', 'report/prereport/list_participants_datewise', $this->Contents);
-        $stage = $this->General_Model->prepare_select_box_data('stage_master', 'stage_id,stage_name', '', '', 'stage_id');
+        $stage = $this->General_Model->prepare_select_box_data('sd_stage_master', 'stage_id,stage_name', '', '', 'stage_id');
         $this->Contents = array();
         $stage['All'] = 'All Stages';
         $this->Contents['stage'] = $stage;

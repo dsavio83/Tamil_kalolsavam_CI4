@@ -127,7 +127,7 @@ class Welcome extends \App\Controllers\BaseController {
                 $schedule = $this->db->query("
                     SELECT sm.stage_id, sm.stage_name, im.item_name, sim.start_time, sim.item_time, im.gender, im.item_code
                     FROM stage_item_master sim
-                    INNER JOIN stage_master sm ON sim.stage_id = sm.stage_id
+                    INNER JOIN sd_stage_master sm ON sim.stage_id = sm.stage_id
                     INNER JOIN item_master im ON sim.item_code = im.item_code
                     ORDER BY sm.stage_name ASC, sim.start_time ASC
                 ")->getResultArray();

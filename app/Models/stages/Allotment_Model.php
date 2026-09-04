@@ -10,7 +10,7 @@ class Allotment_Model extends \App\Models\BaseModel {
     }
 
     function get_stages() {
-        $this->db->from('stage_master');
+        $this->db->from('sd_stage_master');
         $this->db->orderBy('stage_name', 'ASC');
         $this->db->select('*');
         $result = $this->db->get();
@@ -353,7 +353,7 @@ class Allotment_Model extends \App\Models\BaseModel {
         $item_code = ($item_code != '') ? $item_code : $this->input->post('code');
         $this->db->where('CM.item_code', $item_code);
         $this->db->orderBy('CM.cluster_no');
-        $this->db->join('stage_master AS SM', 'CM.stage_id = SM.stage_id');
+        $this->db->join('sd_stage_master AS SM', 'CM.stage_id = SM.stage_id');
         $this->db->select('CM.*,SM.stage_name');
         $cluster_master = $this->db->get('sd_cluster_master AS CM');
         return $cluster_master->getResultArray();

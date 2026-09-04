@@ -12,7 +12,7 @@ class Stage_Model extends \App\Models\BaseModel {
     function save_stage_details() {
         $data['stage_name'] = $this->input->post('txtStageName');
         $data['stage_desc'] = $this->input->post('txtStageDescription');
-        $this->db->insert('stage_master', $data);
+        $this->db->insert('sd_stage_master', $data);
         return $this->db->insertID();
     }
 
@@ -21,11 +21,11 @@ class Stage_Model extends \App\Models\BaseModel {
         $data['stage_name'] = $this->input->post('txtStageName');
         $data['stage_desc'] = $this->input->post('txtStageDescription');
         $this->db->where('stage_id', $stageId);
-        $this->db->update('stage_master', $data);
+        $this->db->update('sd_stage_master', $data);
     }
 
     function get_stages() {
-        $this->db->from('stage_master');
+        $this->db->from('sd_stage_master');
         $this->db->orderBy('stage_name', 'ASC');
         $this->db->select('*');
         $result = $this->db->get();
@@ -34,7 +34,7 @@ class Stage_Model extends \App\Models\BaseModel {
 
     function select_stage_details() {
         $this->db->where('stage_id', $this->input->post('hidStageId'));
-        $this->db->from('stage_master');
+        $this->db->from('sd_stage_master');
         $this->db->select('*');
         $result = $this->db->get();
         return $result->getResultArray();
@@ -42,7 +42,7 @@ class Stage_Model extends \App\Models\BaseModel {
 
     function delete_stage_details() {
         $this->db->where('stage_id', $this->input->post('hidStageId'));
-        $this->db->delete('stage_master');
+        $this->db->delete('sd_stage_master');
     }
 
     function check_stagename_exists($id = '', $stagename) {
@@ -50,7 +50,7 @@ class Stage_Model extends \App\Models\BaseModel {
             $this->db->where('stage_id !=', (int) $id);
         $this->db->where('stage_name', $stagename);
         $this->db->select('stage_id');
-        $this->db->from('stage_master');
+        $this->db->from('sd_stage_master');
         $result = $this->db->get();
         if (count($result->getResultArray()) > 0) {
             return true;

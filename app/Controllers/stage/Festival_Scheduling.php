@@ -268,8 +268,8 @@ class Festival_Scheduling extends \App\Controllers\BaseController {
             $ai_used = false;
             $gemini_key = $this->get_gemini_key();
 
-            // Fetch physical stage and room names from stage_master
-            $db_stages = $this->db->table('stage_master')->orderBy('stage_id', 'ASC')->get()->getResultArray();
+            // Fetch physical stage and room names from sd_stage_master
+            $db_stages = $this->db->table('sd_stage_master')->orderBy('stage_id', 'ASC')->get()->getResultArray();
             $stage_names = array();
             $room_names = array();
             foreach ($db_stages as $stg) {

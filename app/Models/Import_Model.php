@@ -468,7 +468,7 @@ class Import_Model extends \App\Models\BaseModel {
         $this->db->emptyTable('school_master');
         $this->db->emptyTable('school_point_details');
         $this->db->emptyTable('stage_item_master');
-        $this->db->emptyTable('stage_master');
+        $this->db->emptyTable('sd_stage_master');
         $this->db->emptyTable('user_rights');
         $this->db->emptyTable('z_login_log');
         $this->db->emptyTable('z_participant_details_log');

@@ -49,7 +49,7 @@ class Itemreports_Model extends \App\Models\BaseModel {
         $this->db->from('item_master AS IT');
         $this->db->where('IT.item_code ', $itemcode);
         $this->db->join('stage_item_master AS ST', 'ST.item_code = IT.item_code', 'LEFT');
-        $this->db->join('stage_master AS SM', 'SM.stage_id = ST.stage_id', 'LEFT');
+        $this->db->join('sd_stage_master AS SM', 'SM.stage_id = ST.stage_id', 'LEFT');
         $item_details = $this->db->get();
         return $item_details->getResultArray();
     }
@@ -84,7 +84,7 @@ class Itemreports_Model extends \App\Models\BaseModel {
 
     //find stage name
     function Stagename($stageid) {
-        $this->db->from('stage_master AS SM');
+        $this->db->from('sd_stage_master AS SM');
         $this->db->where('SM.stage_id', $stageid);
 
         $stagedetails = $this->db->get();

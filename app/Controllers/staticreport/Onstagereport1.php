@@ -95,7 +95,7 @@ class Onstagereport1  extends \App\Controllers\BaseController {
     function stagereportinterface() {//ratheesh
         $this->load->model('staticreport/Itemreports_Model');
 
-        $stage = $this->General_Model->prepare_select_box_data('stage_master', 'stage_id,stage_name', '', 'Select Stage');
+        $stage = $this->General_Model->prepare_select_box_data('sd_stage_master', 'stage_id,stage_name', '', 'Select Stage');
         $this->Contents = array();
         $this->Contents['stage'] = $stage;
         $this->template->write_view('content', 'staticreport/stagereportinterface', $this->Contents);
