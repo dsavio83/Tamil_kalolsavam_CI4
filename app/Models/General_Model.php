@@ -175,7 +175,7 @@ class General_Model extends \App\Models\BaseModel {
     public function get_participant_details_combo($school_code) {
         $this->db->where('school_code', $school_code);
         $this->db->select('admn_no, CONCAT_WS(" - ",admn_no,participant_name) AS participant', FALSE);
-        $query = $this->db->get('participant_details');
+        $query = $this->db->get('sd_participant_details');
         $subdistricts = $query->getResultArray();
         $Participant_array[0] = 'Select Participant';
         for ($i = 0; $i < count($subdistricts); $i++) {

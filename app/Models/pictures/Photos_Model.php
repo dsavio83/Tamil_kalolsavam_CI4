@@ -11,7 +11,7 @@ function get_participant_details($reg_no,$sch_code)
 {
 $dist	=	$this->session->get('DISTRICT');
 //echo "<br />dist------>".$dist;
-$result=$this->db->query("select PD.*,SM.school_name from participant_details as PD,school_master as SM where PD.admn_no=? and PD.school_code = ? and PD.school_code=SM.school_code and SM.rev_district_code=?", [$reg_no, $sch_code, $dist]);
+$result=$this->db->query("select PD.*,SM.school_name from sd_participant_details as PD,school_master as SM where PD.admn_no=? and PD.school_code = ? and PD.school_code=SM.school_code and SM.rev_district_code=?", [$reg_no, $sch_code, $dist]);
 //echo $result;
 if(is_object($result))
 {
@@ -140,7 +140,7 @@ function get_count_schoolwise_participant_details($sch_code)
 {
 $dist	=	$this->session->get('DISTRICT');
 //echo "<br />dist------>".$dist;
-$result=$this->db->query("select PD.* from participant_details as PD,school_master as SM where PD.school_code = ? and PD.school_code=SM.school_code and SM.rev_district_code=? order by PD.admn_no", [$sch_code, $dist]);
+$result=$this->db->query("select PD.* from sd_participant_details as PD,school_master as SM where PD.school_code = ? and PD.school_code=SM.school_code and SM.rev_district_code=? order by PD.admn_no", [$sch_code, $dist]);
 //echo $result;
 if(is_object($result))
 {
@@ -155,7 +155,7 @@ function get_schoolwise_participant_details($num=1,$offset=4,$sch_code)
 {
 $dist	=	$this->session->get('DISTRICT');
 
-$result=$this->db->query("select PD.* from participant_details as PD,school_master as SM where PD.school_code = ? and PD.school_code=SM.school_code and SM.rev_district_code=? order by PD.class,PD.participant_name LIMIT ?,?", [$sch_code, $dist, (int)$offset, (int)$num]);
+$result=$this->db->query("select PD.* from sd_participant_details as PD,school_master as SM where PD.school_code = ? and PD.school_code=SM.school_code and SM.rev_district_code=? order by PD.class,PD.participant_name LIMIT ?,?", [$sch_code, $dist, (int)$offset, (int)$num]);
 //echo $result;
 if(is_object($result))
 {
@@ -289,7 +289,7 @@ return $PhotoReturn;
 function get_special_entry_photo($arr)
 {
 $PhotoReturn	=	false;
-foreach($arr['participant_details'] as $stud_row)
+foreach($arr['sd_participant_details'] as $stud_row)
 {
 $regno							=	$stud_row['admn_no'];
 $schoolcode						=	$stud_row['school_code'];

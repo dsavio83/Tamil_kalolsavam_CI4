@@ -298,7 +298,7 @@ class Certificate_Model extends \App\Models\BaseModel {
 
         $this->db->select('cm.participant_id, pd.participant_name');
         $this->db->from('sd_certificate_master cm');
-        $this->db->join('participant_details AS pd', 'pd.participant_id=cm.participant_id');
+        $this->db->join('sd_participant_details AS pd', 'pd.participant_id=cm.participant_id');
         $this->db->join('sd_participant_item_details AS p', 'cm.item_code=p.item_code AND  p.participant_id=cm.participant_id');
         $this->db->where('cm.item_code', $item_code);
         $this->db->where('cm.is_withheld', 'N');
@@ -331,7 +331,7 @@ class Certificate_Model extends \App\Models\BaseModel {
         $this->db->select('cm.item_code, cm.participant_id, pd.participant_name, sm.school_code, sm.school_name, sd.sub_district_name, 
 							i.item_name, f.fest_name, pd.class, pd.gender,cm.rank, pd.admn_no, cm.grade, cm.is_withheld,p.spo_id');
         $this->db->from('sd_certificate_master cm');
-        $this->db->join('participant_details AS pd', 'pd.participant_id=cm.participant_id');
+        $this->db->join('sd_participant_details AS pd', 'pd.participant_id=cm.participant_id');
         $this->db->join('school_master AS sm', 'sm.school_code=pd.school_code');
         $this->db->join('sub_district_master AS sd', 'sm.sub_district_code=sd.sub_district_code');
         if ('S' == $item_type)
@@ -392,7 +392,7 @@ class Certificate_Model extends \App\Models\BaseModel {
 
         $this->db->select('cm.participant_id, pd.participant_name');
         $this->db->from('sd_certificate_master cm');
-        $this->db->join('participant_details AS pd', 'pd.participant_id=cm.participant_id');
+        $this->db->join('sd_participant_details AS pd', 'pd.participant_id=cm.participant_id');
         $this->db->where('cm.item_code', $item_code);
         if (!empty($captain_id) && 0 != $captain_id)
             $this->db->where('cm.parent_admn_no =(SELECT parent_admn_no FROM sd_certificate_master WHERE participant_id=? AND item_code=? GROUP BY participant_id)', [$captain_id, $item_code]);
@@ -511,7 +511,7 @@ class Certificate_Model extends \App\Models\BaseModel {
         $this->db->join('item_master i', 'i.item_code=cm.item_code');
         $this->db->join('school_master sm', 'sm.school_code=cm.school_code');
         $this->db->join('sub_district_master AS sd', 'sm.sub_district_code=sd.sub_district_code');
-        $this->db->join('participant_details AS pd', 'pd.participant_id=cm.participant_id');
+        $this->db->join('sd_participant_details AS pd', 'pd.participant_id=cm.participant_id');
         $this->db->join('festival_master f', 'f.fest_id=i.fest_id');
         if (!empty($school_code) && 0 != $school_code) {
             $this->db->where('sm.school_code', $school_code);
@@ -547,7 +547,7 @@ class Certificate_Model extends \App\Models\BaseModel {
         }
         $this->db->select('cm.participant_id, pd.participant_name, sm.school_code, sm.school_name, pd.admn_no');
         $this->db->from('sd_certificate_master cm');
-        $this->db->join('participant_details pd', 'pd.participant_id=cm.participant_id');
+        $this->db->join('sd_participant_details pd', 'pd.participant_id=cm.participant_id');
         $this->db->join('school_master sm', 'sm.school_code=cm.school_code');
         $this->db->where('cm.participant_id', $participant_id);
         $this->db->groupBy('cm.participant_id');

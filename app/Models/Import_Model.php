@@ -57,7 +57,7 @@ class Import_Model extends \App\Models\BaseModel {
                             $this->db->transBegin();
                             $this->db->emptyTable('school_master');
                             $this->db->emptyTable('school_details');
-                            $this->db->emptyTable('participant_details');
+                            $this->db->emptyTable('sd_participant_details');
                             $this->db->emptyTable('sd_participant_item_details');
 
                             for ($i = 3; $i < count($csvData); $i++) {
@@ -164,7 +164,7 @@ class Import_Model extends \App\Models\BaseModel {
                                             $data_array['ifsc_code'] = $this->sanitizeCsvFormula(trim($csvData[$i][10]));
                                             //echo "tttt" ;print_r($data_array);exit;
                                             
-                                            if (!$this->db->insert('participant_details', $data_array)) {
+                                            if (!$this->db->insert('sd_participant_details', $data_array)) {
                                                 $this->db->transRollback();
                                                 return FALSE;
                                             }
@@ -456,7 +456,7 @@ class Import_Model extends \App\Models\BaseModel {
 
     function initialize_tables() {
 
-        $this->db->emptyTable('participant_details');
+        $this->db->emptyTable('sd_participant_details');
         $this->db->emptyTable('sd_participant_item_details');
         $this->db->emptyTable('sd_certificate_master');
         $this->db->emptyTable('sd_cluster_master');
@@ -484,7 +484,7 @@ class Import_Model extends \App\Models\BaseModel {
         $query2 = $this->db->query("
 UPDATE `kalolsavam_master` SET `logo_name` = NULL WHERE `kalolsavam_master`.`kalolsavam_id` =1 LIMIT 1");
         $query4 = $this->db->query("UPDATE `sub_district_master` set confirm_data_entry = 'N' WHERE 1");
-        $query5 = $this->db->query("ALTER TABLE `participant_details`  AUTO_INCREMENT = 1001");
+        $query5 = $this->db->query("ALTER TABLE `sd_participant_details`  AUTO_INCREMENT = 1001");
         $query7 = $this->db->query("UPDATE `sd_kalolsavam_master` set `venue` = '', `start_date` = '', `end_date` = '', `logo_name` = '' WHERE 1");
         return true;
     }

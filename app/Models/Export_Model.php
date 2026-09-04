@@ -88,7 +88,7 @@ class Export_Model  extends \App\Models\BaseModel {
 
         // Participant Details data
         $this->db->where('sub_district_code', $sub_district_code);
-        $participant_details_result = $this->db->get('participant_details');
+        $participant_details_result = $this->db->get('sd_participant_details');
         $participant_details_rows = $participant_details_result->getResultArray();
         $participant_details_data = array();
         $i = 0;
@@ -116,7 +116,7 @@ class Export_Model  extends \App\Models\BaseModel {
 
         // Participant Item Details data
         $this->db->where('PM.sub_district_code', $sub_district_code);
-        $this->db->join('participant_details AS PM', 'PM.school_code = PD.school_code AND PM.admn_no = PD.admn_no');
+        $this->db->join('sd_participant_details AS PM', 'PM.school_code = PD.school_code AND PM.admn_no = PD.admn_no');
         $this->db->select('PD.*');
         $participant_item_result = $this->db->get('sd_participant_item_details AS PD');
         $participant_item_rows = $participant_item_result->getResultArray();
@@ -174,7 +174,7 @@ class Export_Model  extends \App\Models\BaseModel {
         $this->db->from('sd_result_publish rp');
         $this->db->join('sd_result_master rm', 'rm.participant_id=rp.participant_id AND rp.item_code=rm.item_code');
         $this->db->join('sd_participant_item_details pid', 'pid.parent_admn_no=rm.admn_no AND pid.school_code=rm.school_code AND rp.item_code=pid.item_code');
-        $this->db->join('participant_details pd', 'pid.participant_id=pd.participant_id');
+        $this->db->join('sd_participant_details pd', 'pid.participant_id=pd.participant_id');
         $this->db->where('pd.sub_district_code', $sub_district_code);
         $this->db->orderBy('pid.participant_id', 'ASC');
         $this->db->where('rp.grade', 'A');

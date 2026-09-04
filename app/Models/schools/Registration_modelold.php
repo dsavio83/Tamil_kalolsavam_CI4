@@ -35,7 +35,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
 
     function get_participant_details($schoolCode) {
         $this->db->where('PD.school_code', $schoolCode);
-        $this->db->from('participant_details AS PD');
+        $this->db->from('sd_participant_details AS PD');
         $this->db->select('PD.*');
         //$this->db->join('sd_participant_item_details AS ID','PD.participant_id = ID.participant_id','RIGHT');
         $result = $this->db->get();
@@ -66,7 +66,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
                 $this->db->where('PD.item_code', $groups['item_code']);
                 $this->db->where('PD.spo_id', '0');
                 $this->db->from('sd_participant_item_details AS PD');
-                $this->db->join('participant_details AS PM', 'PM.school_code = PD.school_code AND PM.admn_no = PD.admn_no');
+                $this->db->join('sd_participant_details AS PM', 'PM.school_code = PD.school_code AND PM.admn_no = PD.admn_no');
                 $this->db->select("PM.admn_no,PM.participant_name,PD.is_captain");
                 $participant_details = $this->db->get();
 
@@ -145,7 +145,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
     function log_participant_details($schoolCode, $admnNo, $status) {
         $this->db->where('school_code', $schoolCode);
         $this->db->where('admn_no', $admnNo);
-        $participant_details = $this->db->get('participant_details');
+        $participant_details = $this->db->get('sd_participant_details');
         if ($participant_details->getNumRows() > 0) {
             $participant = $participant_details->getResultArray();
             $data = array();
@@ -199,7 +199,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
         $this->db->where('school_code', $schoolCode);
         $this->db->where("(class < '" . (int) $this->input->post('txtStandardFrom') . "' OR class > '" . (int) $this->input->post('txtStandardTo') . "')");
         //$this->db->where('class >',(int)$this->input->post('txtStandardTo'));
-        $cnt_participant = $this->db->countAllResults('participant_details');
+        $cnt_participant = $this->db->countAllResults('sd_participant_details');
         if ($cnt_participant > 0) {
             $error_array[] = 'Please select valid standards as participants from other category is already added';
             $return_array['error_array'] = $error_array;
@@ -366,7 +366,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
             $sub_district_code = $school[0]['sub_district_code'];
             $this->db->where('sub_district_code', $sub_district_code);
             $this->db->selectMax('participant_id');
-            $participant_details = $this->db->get('participant_details');
+            $participant_details = $this->db->get('sd_participant_details');
             $participant_id = 0;
             if ($participant_details->getNumRows() > 0) {
                 $participant = $participant_details->getResultArray();
@@ -380,7 +380,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
             $this->db->where('school_code', $schoolCode);
             $this->db->where('admn_no', $admnNo);
             $this->db->select('participant_id');
-            $result = $this->db->get('participant_details');
+            $result = $this->db->get('sd_participant_details');
             $participant = $result->getResultArray();
             //$data['participant_id']		=	(int)$participant_id;
             $data['school_code'] = (int) $schoolCode;
@@ -391,19 +391,19 @@ class Registration_Modelold extends \App\Models\BaseModel {
             $data['gender'] = $this->input->post('txtGender');
             if (count($participant) > 0) {
                 //$participant_id	=	$participant[0]['participant_id'];
-                //$this->db->update('participant_details',$data);
+                //$this->db->update('sd_participant_details',$data);
                 $error_array[] = 'Participant already registered';
                 $return_array['error_array'] = $error_array;
                 return $return_array;
             } else {
-                $this->db->insert('participant_details', $data);
+                $this->db->insert('sd_participant_details', $data);
                 $participant_id = $this->db->insertID();
             }
 
 
             $this->db->where('school_code', $schoolCode);
             $this->db->where('admn_no', $admnNo);
-            $participant_details = $this->db->get('participant_details');
+            $participant_details = $this->db->get('sd_participant_details');
             $participant = $participant_details->getResultArray();
             $class = $participant[0]['class'];
 
@@ -530,7 +530,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
             $this->db->where('school_code', $schoolCode);
             $this->db->where('admn_no', $admnNo);
             $this->db->select('participant_id');
-            $result = $this->db->get('participant_details');
+            $result = $this->db->get('sd_participant_details');
             $participant = $result->getResultArray();
             if (count($participant) > 0) {
                 $participant_id = $participant[0]['participant_id'];
@@ -543,7 +543,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
             $this->db->where('school_code', $schoolCode);
             $this->db->where('admn_no', $admnNo);
             $this->db->select('participant_id');
-            $result = $this->db->get('participant_details');
+            $result = $this->db->get('sd_participant_details');
             $participant = $result->getResultArray();
             if (count($participant) > 0) {
                 $error_array[] = 'Participant already registered';
@@ -555,13 +555,13 @@ class Registration_Modelold extends \App\Models\BaseModel {
             $data['participant_name'] = $this->input->post('txtParticipantName');
             $data['class'] = $this->input->post('txtClass');
             $data['gender'] = $this->input->post('txtGender');
-            $this->db->insert('participant_details', $data);
+            $this->db->insert('sd_participant_details', $data);
             $participant_id = $this->db->insertID();
         }
 
         $this->db->where('school_code', $schoolCode);
         $this->db->where('admn_no', $admnNo);
-        $participant_details = $this->db->get('participant_details');
+        $participant_details = $this->db->get('sd_participant_details');
         $participant = $participant_details->getResultArray();
         $class = $participant[0]['class'];
 
@@ -692,7 +692,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
             $this->db->where('school_code', $schoolCode);
             $this->db->where('admn_no', $admnNo);
             $this->db->select('participant_id');
-            $result = $this->db->get('participant_details');
+            $result = $this->db->get('sd_participant_details');
             $participant = $result->getResultArray();
             if (count($participant) > 0) {
                 $error_array[] = 'Participant already registered';
@@ -716,7 +716,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
         $this->db->where('school_code', $schoolCode);
         $this->db->where('admn_no', $this->input->post('hidADNO'));
         $this->db->select('participant_id');
-        $result = $this->db->get('participant_details');
+        $result = $this->db->get('sd_participant_details');
         $participant = $result->getResultArray();
         $data = array();
         $data['school_code'] = $schoolCode;
@@ -728,7 +728,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
             $participant_id = $participant[0]['participant_id'];
             $this->db->where('school_code', $schoolCode);
             $this->db->where('admn_no', $this->input->post('hidADNO'));
-            $this->db->update('participant_details', $data);
+            $this->db->update('sd_participant_details', $data);
         } else {
             $error_array[] = 'Invalid details.';
         }
@@ -774,7 +774,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
 
         $this->db->where('school_code', $schoolCode);
         $this->db->where('admn_no', $admnNo);
-        $participant_details = $this->db->get('participant_details');
+        $participant_details = $this->db->get('sd_participant_details');
         $participant = $participant_details->getResultArray();
         $class = $participant[0]['class'];
 
@@ -936,7 +936,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
          */
         $this->db->where('school_code', $schoolCode);
         $this->db->where('admn_no', $admnNo);
-        $participant_details = $this->db->get('participant_details');
+        $participant_details = $this->db->get('sd_participant_details');
         $participant = $participant_details->getResultArray();
         $old_participant_id = $participant[0]['participant_id'];
 
@@ -983,7 +983,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
 
                 $this->db->where('school_code', $schoolCode);
                 $this->db->where('admn_no', $new_capt_adno);
-                $participant_details = $this->db->get('participant_details');
+                $participant_details = $this->db->get('sd_participant_details');
                 $participant = $participant_details->getResultArray();
                 $new_participant_id = $participant[0]['participant_id'];
 
@@ -1204,7 +1204,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
             $this->db->where('admn_no', $admn_no);
             $this->db->where('school_code', $school_code);
             $this->db->where('gender', $item->gender);
-            $participant_details = $this->db->get('participant_details');
+            $participant_details = $this->db->get('sd_participant_details');
             if ($participant_details->getNumRows() <= 0) {
                 return "Wrong Gender";
             }
@@ -1475,13 +1475,13 @@ class Registration_Modelold extends \App\Models\BaseModel {
          */
         $this->db->where('PD.school_code', $school_code);
         $this->db->where('PI.pi_id IS NULL');
-        $this->db->from('participant_details AS PD');
+        $this->db->from('sd_participant_details AS PD');
         $this->db->join('sd_participant_item_details AS PI', 'PD.participant_id = PI.participant_id', 'LEFT');
         $this->db->select('PD.participant_id');
         $pd_details = $this->db->get();
         foreach ($pd_details->getResultArray() as $pd) {
             $this->db->where('participant_id', $pd['participant_id']);
-            $this->db->delete('participant_details');
+            $this->db->delete('sd_participant_details');
         }
         /**
          * * End Delete who is not participating any items
@@ -1597,7 +1597,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
 
         $this->db->where('school_code', $school_code);
         $this->db->where('admn_no', $admn_no);
-        $this->db->delete('participant_details');
+        $this->db->delete('sd_participant_details');
     }
 
     function get_special_order_participant_details($schoolCode, $pi_id = '') {
@@ -1605,7 +1605,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
             $this->db->where('PID.pi_id', $pi_id);
         $this->db->where('PD.school_code', $schoolCode);
         $this->db->where('PID.spo_id != 0');
-        $this->db->from('participant_details AS PD');
+        $this->db->from('sd_participant_details AS PD');
         $this->db->join('sd_participant_item_details AS PID', "PD.participant_id = PID.participant_id", 'INNER');
         $this->db->join('item_master AS IM', "IM.item_code = PID.item_code", 'INNER');
         $this->db->join('special_order_master AS SOM', "SOM.spo_id = PID.spo_id", 'INNER');
@@ -1652,7 +1652,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
             if (count($participants_other_items) == 0) {
                 $this->db->where('school_code', $school_id);
                 $this->db->where('admn_no', $participants[$i]['admn_no']);
-                $this->db->delete('participant_details');
+                $this->db->delete('sd_participant_details');
             }
 
             $this->log_participant_details($school_id, $participants[$i]['admn_no'], 'N');
@@ -1684,7 +1684,7 @@ class Registration_Modelold extends \App\Models\BaseModel {
                 $this->db->where('PD.school_code', $school_code);
                 $this->db->where('PD.item_code', $item_code);
                 $this->db->where("PD.is_captain ='Y'");
-                $this->db->join('participant_details as PM', 'PD.school_code = PM.school_code AND PD.admn_no = PM.admn_no');
+                $this->db->join('sd_participant_details as PM', 'PD.school_code = PM.school_code AND PD.admn_no = PM.admn_no');
                 $this->db->select('PM.participant_name');
                 $captian_details = $this->db->get('sd_participant_item_details AS PD');
                 if ($captian_details->getNumRows() > 0) {

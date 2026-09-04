@@ -13,7 +13,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
         $this->db->select(' R.item_code, R.participant_id, R.school_code, R.code_no, R.total_mark, R.grade, R.point, R.rank, M.school_name, M.sub_district_code, P.participant_name, P.class, I.item_name, F.fest_name,pd.spo_id, sp.is_publish, P.admn_no');
         $this->db->from('sd_result_master AS R');
         $this->db->join('school_master AS M', 'M.school_code = R.school_code');
-        $this->db->join('participant_details AS P', 'P.participant_id = R.participant_id');
+        $this->db->join('sd_participant_details AS P', 'P.participant_id = R.participant_id');
         $this->db->join('item_master AS I', "I.item_code = R.item_code AND I.fest_id ='$festid'");
         $this->db->join('festival_master AS F', " F.fest_id = I.fest_id AND F.fest_id='$festid'");
 
@@ -50,7 +50,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
         $this->db->join('school_master AS M', 'M.school_code = R.school_code');
         $this->db->join('sub_district_master AS sdm', 'M.sub_district_code = sdm.sub_district_code');
         $this->db->join('rev_district_master AS rdm', 'M.rev_district_code = rdm.rev_district_code');
-        $this->db->join('participant_details AS P', 'P.participant_id = R.participant_id');
+        $this->db->join('sd_participant_details AS P', 'P.participant_id = R.participant_id');
         $this->db->join('item_master AS I', "I.item_code = R.item_code");
         $this->db->join('festival_master AS F', " F.fest_id = I.fest_id");
         $this->db->join('sd_participant_item_details AS pd', 'pd.participant_id = R.participant_id AND pd.item_code = R.item_code');
@@ -90,7 +90,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
     function gradewise_report($schoolcode) {
         $this->db->select('R.item_code, R.participant_id, R.school_code, R.rank, R.point, R.grade, R.total_mark , pd.participant_name, p.spo_id, I.item_name, s.school_name, f.fest_id, f.fest_name,p.spo_id, sp.is_publish');
         $this->db->from('sd_result_master AS R');
-        $this->db->join('participant_details AS pd', 'pd.participant_id = R.participant_id');
+        $this->db->join('sd_participant_details AS pd', 'pd.participant_id = R.participant_id');
         $this->db->join('item_master AS I', 'I.item_code = R.item_code');
         $this->db->join('school_master AS s', 's.school_code = R.school_code');
         $this->db->join('festival_master AS f', 'f.fest_id = I.fest_id');
@@ -113,7 +113,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
     function itemwise_report($festid, $itemid) {
         $this->db->select('R.item_code, R.participant_id, R.school_code, R.rank, R.point, R.grade, pd.participant_name, p.spo_id, I.item_name, s.school_name, f.fest_id, f.fest_name, R.percentage, p.spo_id, sp.is_publish');
         $this->db->from('sd_result_master AS R');
-        $this->db->join('participant_details AS pd', 'pd.participant_id = R.participant_id');
+        $this->db->join('sd_participant_details AS pd', 'pd.participant_id = R.participant_id');
         $this->db->join('item_master AS I', 'I.item_code = R.item_code');
         $this->db->join('school_master AS s', 's.school_code = R.school_code');
         $this->db->join('festival_master AS f', 'f.fest_id = I.fest_id');
@@ -133,7 +133,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
         $this->db->select('R.item_code, R.participant_id, R.school_code, R.rank, R.point, R.grade, pd.participant_name, p.spo_id, I.item_name, s.school_name, f.fest_id, f.fest_name, R.percentage, p.spo_id, sp.is_publish');
         $this->db->from('sd_result_master AS R');
         $this->db->join('sd_participant_item_details AS p', 'p.participant_id = R.participant_id AND p.item_code = R.item_code');
-        $this->db->join('participant_details AS pd', 'pd.participant_id = R.participant_id');
+        $this->db->join('sd_participant_details AS pd', 'pd.participant_id = R.participant_id');
         $this->db->join('item_master AS I', 'I.item_code = R.item_code');
         $this->db->join('school_master AS s', 's.school_code = R.school_code');
         $this->db->join('festival_master AS f', 'f.fest_id = I.fest_id');
@@ -156,7 +156,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
         $this->db->select('R.item_code, R.participant_id, R.school_code, R.rank, R.point, R.grade, pd.participant_name, p.spo_id, I.item_name, s.school_name, f.fest_id, f.fest_name, R.percentage, p.spo_id, sp.is_publish');
         $this->db->from('sd_result_master AS R');
         $this->db->join('sd_participant_item_details AS p', 'p.participant_id = R.participant_id AND p.item_code = R.item_code');
-        $this->db->join('participant_details AS pd', 'pd.participant_id = R.participant_id');
+        $this->db->join('sd_participant_details AS pd', 'pd.participant_id = R.participant_id');
         $this->db->join('item_master AS I', 'I.item_code = R.item_code');
         $this->db->join('school_master AS s', 's.school_code = R.school_code');
         $this->db->join('festival_master AS f', 'f.fest_id = I.fest_id');
@@ -328,7 +328,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
                       i.item_name, f.fest_id, f.fest_name,
                       m.school_name, m.sub_district_code, m.rev_district_code,
                       sdm.sub_district_name')
-            ->join('participant_details AS p', 'p.participant_id = r.participant_id')
+            ->join('sd_participant_details AS p', 'p.participant_id = r.participant_id')
             ->join('item_master AS i', 'i.item_code = r.item_code')
             ->join('festival_master AS f', 'f.fest_id = i.fest_id')
             ->join('school_master AS m', 'm.school_code = r.school_code')
@@ -440,7 +440,7 @@ class Resultindex_Model  extends \App\Models\BaseModel {
                       p.participant_name, p.class,
                       i.item_name, f.fest_name,
                       m.school_name, sdm.sub_district_name')
-            ->join('participant_details AS p', 'p.participant_id = r.participant_id')
+            ->join('sd_participant_details AS p', 'p.participant_id = r.participant_id')
             ->join('item_master AS i', 'i.item_code = r.item_code')
             ->join('festival_master AS f', 'f.fest_id = i.fest_id')
             ->join('school_master AS m', 'm.school_code = r.school_code')

@@ -8,7 +8,7 @@ class CreateParticipantTables extends Migration
 {
     public function up()
     {
-        // participant_details - Participant master
+        // sd_participant_details - Participant master
         $this->forge->addField([
             'participant_id' => [
                 'type'       => 'DOUBLE',
@@ -67,7 +67,7 @@ class CreateParticipantTables extends Migration
         $this->forge->addKey('participant_id', true);
         $this->forge->addKey('school_code');
         $this->forge->addKey('sub_district_code');
-        $this->forge->createTable('participant_details', true);
+        $this->forge->createTable('sd_participant_details', true);
 
         // sd_participant_item_details - Participant-to-item mapping
         $this->forge->addField([
@@ -214,6 +214,6 @@ class CreateParticipantTables extends Migration
         $this->forge->dropTable('temp_dist_participant_details', true);
         $this->forge->dropTable('cluster_participant_details', true);
         $this->forge->dropTable('sd_participant_item_details', true);
-        $this->forge->dropTable('participant_details', true);
+        $this->forge->dropTable('sd_participant_details', true);
     }
 }

@@ -342,7 +342,7 @@ class Allotment_Model extends \App\Models\BaseModel {
         $this->db->from('sd_cluster_participant_details PD');
         $this->db->join('sd_cluster_master CM', 'CM.cluster_id = PD.cluster_id', 'INNER');
         $this->db->join('sd_stage_item_master IM', 'CM.si_id = IM.si_id', 'INNER');
-        $this->db->join('participant_details PDT', 'PDT.participant_id = PD.participant_id', 'INNER');
+        $this->db->join('sd_participant_details PDT', 'PDT.participant_id = PD.participant_id', 'INNER');
         $this->db->where('PD.item_code', $item_code);
         $this->db->orderBy('PD.cluster_no');
         $result = $this->db->get();

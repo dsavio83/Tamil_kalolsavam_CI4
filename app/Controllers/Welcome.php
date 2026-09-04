@@ -232,7 +232,7 @@ class Welcome extends \App\Controllers\BaseController {
             'hss_total' => 0, 'hss_boys' => 0, 'hss_girls' => 0,
             'result_percentage' => 0, 'total_items_participated' => 0, 'prizes_won' => 0, 'class_wise' => array());
         
-        $result = $this->db->query("SELECT gender, COUNT(*) as count FROM participant_details WHERE school_code = ? GROUP BY gender", array($school_code));
+        $result = $this->db->query("SELECT gender, COUNT(*) as count FROM sd_participant_details WHERE school_code = ? GROUP BY gender", array($school_code));
         if ($result) {
             foreach ($result->getResultArray() as $row) {
                 $stats['total_students'] += (int)$row['count'];
@@ -241,7 +241,7 @@ class Welcome extends \App\Controllers\BaseController {
             }
         }
         
-        $result = $this->db->query("SELECT class, gender, COUNT(*) as count FROM participant_details WHERE school_code = ? GROUP BY class, gender", array($school_code));
+        $result = $this->db->query("SELECT class, gender, COUNT(*) as count FROM sd_participant_details WHERE school_code = ? GROUP BY class, gender", array($school_code));
         if ($result) {
             foreach ($result->getResultArray() as $row) {
                 $class = trim($row['class']);
@@ -472,7 +472,7 @@ class Welcome extends \App\Controllers\BaseController {
         }
         
         $participant_query = "SELECT pd.gender, COUNT(*) as count
-        FROM participant_details pd
+        FROM sd_participant_details pd
         INNER JOIN school_master sm ON pd.school_code = sm.school_code
         WHERE sm.sub_district_code = ?
         GROUP BY pd.gender";
@@ -487,7 +487,7 @@ class Welcome extends \App\Controllers\BaseController {
         }
         
         $category_query = "SELECT pd.class, pd.gender, COUNT(*) as count
-        FROM participant_details pd
+        FROM sd_participant_details pd
         INNER JOIN school_master sm ON pd.school_code = sm.school_code
         WHERE sm.sub_district_code = ?
         GROUP BY pd.class, pd.gender";

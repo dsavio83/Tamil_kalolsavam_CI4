@@ -20,7 +20,7 @@ class Registration_Report_Model extends \App\Models\BaseModel {
 
     function get_participant_details($school_code) {
         $this->db->where('PD.school_code', $school_code);
-        $this->db->from('participant_details AS PD');
+        $this->db->from('sd_participant_details AS PD');
         $this->db->join('sd_participant_item_details AS PI', 'PD.school_code = PI.school_code AND PD.admn_no = PI.admn_no', 'LEFT');
         $this->db->select('PI.*,PD.participant_name,PD.admn_no,PD.gender,PD.class');
         $participant_details = $this->db->get();
@@ -65,7 +65,7 @@ class Registration_Report_Model extends \App\Models\BaseModel {
                     $this->db->where('school_code', $school_code);
                     $this->db->where('class >= 5');
                     $this->db->where('class <= 7');
-                    $cnt_participants = $this->db->countAllResults('participant_details');
+                    $cnt_participants = $this->db->countAllResults('sd_participant_details');
 
 
                     $up_fee = $this->get_fee_div('UP', (int) $school->strength_up, (int) $cnt_participants);
@@ -74,7 +74,7 @@ class Registration_Report_Model extends \App\Models\BaseModel {
                     $this->db->where('school_code', $school_code);
                     $this->db->where('class >= 8');
                     $this->db->where('class <= 10');
-                    $cnt_participants = $this->db->countAllResults('participant_details');
+                    $cnt_participants = $this->db->countAllResults('sd_participant_details');
 
                     $hs_fee = $this->get_fee_div('HS', (int) $school->strength_hs, (int) $cnt_participants);
                 }

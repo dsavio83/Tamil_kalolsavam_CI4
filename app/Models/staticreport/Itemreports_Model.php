@@ -15,7 +15,7 @@ class Itemreports_Model extends \App\Models\BaseModel {
         $this->db->from('sd_participant_item_details AS PD');
         $this->db->where('PD.item_code', $itemcode);
         $this->db->where('PD.is_captain', 'Y');
-        $this->db->join('participant_details  AS PM ', 'PD.school_code = PM.school_code and PD.admn_no=PM.admn_no');
+        $this->db->join('sd_participant_details  AS PM ', 'PD.school_code = PM.school_code and PD.admn_no=PM.admn_no');
         $this->db->join('school_master  AS SM ', 'SM.school_code = PM.school_code');
 
         $participants_details = $this->db->get();

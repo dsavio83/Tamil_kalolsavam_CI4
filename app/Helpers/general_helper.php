@@ -182,10 +182,10 @@ if (!function_exists('is_import_data_finish')) {
         $school_details = $db->get('school_details AS SD');
 
         $db->where('sub_district_code', $sub_district_code);
-        $participant_details = $db->get('participant_details');
+        $participant_details = $db->get('sd_participant_details');
 
         $db->where('PM.sub_district_code', $sub_district_code);
-        $db->join('participant_details AS PM', 'PM.participant_id = PD.participant_id');
+        $db->join('sd_participant_details AS PM', 'PM.participant_id = PD.participant_id');
         $participant_item_details = $db->get('sd_participant_item_details AS PD');
 
         if ($school_master->getNumRows() > 0 and $school_details->getNumRows() > 0 and $participant_details->getNumRows() > 0 and $participant_item_details->getNumRows() > 0) {

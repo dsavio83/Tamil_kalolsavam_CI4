@@ -25,7 +25,7 @@ class Cluster_Statistics_Model extends \App\Models\BaseModel {
         );
 
         // Get total students by gender
-        $query = "SELECT gender, COUNT(*) as count FROM participant_details WHERE school_code = ? GROUP BY gender";
+        $query = "SELECT gender, COUNT(*) as count FROM sd_participant_details WHERE school_code = ? GROUP BY gender";
         $result = $this->db->query($query, array($school_code))->getResultArray();
         
         foreach ($result as $row) {
@@ -36,7 +36,7 @@ class Cluster_Statistics_Model extends \App\Models\BaseModel {
         }
 
         // Get class-wise distribution
-        $query = "SELECT class, gender, COUNT(*) as count FROM participant_details WHERE school_code = ? GROUP BY class, gender ORDER BY class";
+        $query = "SELECT class, gender, COUNT(*) as count FROM sd_participant_details WHERE school_code = ? GROUP BY class, gender ORDER BY class";
         $result = $this->db->query($query, array($school_code))->getResultArray();
         
         foreach ($result as $row) {

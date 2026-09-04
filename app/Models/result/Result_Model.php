@@ -77,7 +77,7 @@ class Result_Model extends \App\Models\BaseModel {
 
     $this->db->where('CP.participant_id', $this->input->post('txt_reg_no'));
     $this->db->where('item_code', $this->input->post('hidItemId'));
-    $this->db->join('participant_details PD', 'PD.participant_id = CP.participant_id');
+    $this->db->join('sd_participant_details PD', 'PD.participant_id = CP.participant_id');
     $this->db->select('CP.*, PD.school_code, PD.admn_no');
     $result = $this->db->get('sd_cluster_participant_details CP');
     $participant_details = $result->getResultArray();

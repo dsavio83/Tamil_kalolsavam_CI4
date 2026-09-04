@@ -15,7 +15,7 @@ class Timefest_model  extends \App\Models\BaseModel {
         $this->db->from('sd_result_master AS rs');
         $this->db->join('item_master AS im', 'im.item_code = rs.item_code');
         $this->db->join('school_master AS sm', 'sm.school_code = rs.school_code');
-        $this->db->join('participant_details AS pd', 'pd.participant_id = rs.participant_id', 'LEFT');
+        $this->db->join('sd_participant_details AS pd', 'pd.participant_id = rs.participant_id', 'LEFT');
         $this->db->join('sd_participant_item_details AS pi', "pi.participant_id = rs.participant_id AND pi.item_code = rs.item_code", 'LEFT');
         $this->db->join('special_order_master AS sp', "sp.spo_id = pi.spo_id AND sp.is_publish = 'N'", 'LEFT');
         $this->db->join('sd_stage_item_master AS si', 'si.item_code = rs.item_code', 'LEFT');
@@ -72,7 +72,7 @@ class Timefest_model  extends \App\Models\BaseModel {
         $this->db->from('sd_result_master AS rs');
         $this->db->join('item_master AS im', 'im.item_code = rs.item_code');
         $this->db->join('school_master AS sm', 'sm.school_code = rs.school_code');
-        $this->db->join('participant_details AS pd', 'pd.participant_id = rs.participant_id', 'LEFT');
+        $this->db->join('sd_participant_details AS pd', 'pd.participant_id = rs.participant_id', 'LEFT');
         $this->db->join('sd_participant_item_details AS pi', 'pi.participant_id = rs.participant_id AND pi.item_code = rs.item_code', 'LEFT');
         $this->db->join('special_order_master AS sp', "sp.spo_id = pi.spo_id AND sp.is_publish = 'N'", 'LEFT');
         $this->db->join('sd_stage_item_master AS si', 'si.item_code = rs.item_code', 'LEFT');

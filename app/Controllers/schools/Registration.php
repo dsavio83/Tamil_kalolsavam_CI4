@@ -780,7 +780,7 @@ class Registration extends \App\Controllers\BaseController {
             return;
         }
 
-        $this->Content['selected_participant'] = $this->General_Model->get_data('participant_details', '*', 'school_code = "' . $this->input->post('hidSchoolId') . '" AND admn_no = "' . $this->input->post('hidADNO') . '"');
+        $this->Content['selected_participant'] = $this->General_Model->get_data('sd_participant_details', '*', 'school_code = "' . $this->input->post('hidSchoolId') . '" AND admn_no = "' . $this->input->post('hidADNO') . '"');
         if (!empty($this->Content['selected_participant'])) {
             $this->Content['selected_participant_items'] = $this->Registration_Model->get_participant_item_details($this->Content['selected_participant'][0]['participant_id'], $this->Content['selected_participant'][0]['admn_no']);
         }
@@ -900,7 +900,7 @@ class Registration extends \App\Controllers\BaseController {
             return;
         }
 
-        $participant = $this->General_Model->get_data('participant_details', '*', 'school_code = "' . $school_code . '" AND admn_no = "' . $admn_no . '"');
+        $participant = $this->General_Model->get_data('sd_participant_details', '*', 'school_code = "' . $school_code . '" AND admn_no = "' . $admn_no . '"');
         if (!empty($participant)) {
             $data = $participant[0];
             $items = $this->Registration_Model->get_participant_item_details($data['participant_id'], $data['admn_no'], '', '', $data['school_code']);
@@ -1044,7 +1044,7 @@ class Registration extends \App\Controllers\BaseController {
         $real_participant_id = null;
         if ($participant_id && $school_code) {
             $db = \Config\Database::connect();
-            $builder = $db->table('participant_details');
+            $builder = $db->table('sd_participant_details');
             $builder->select('participant_id');
             $builder->where('school_code', $school_code);
             $builder->where('admn_no', $participant_id);
