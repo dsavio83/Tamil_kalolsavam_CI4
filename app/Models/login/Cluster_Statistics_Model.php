@@ -73,13 +73,13 @@ class Cluster_Statistics_Model extends \App\Models\BaseModel {
         }
 
         // Get total items participated
-        $query = "SELECT COUNT(DISTINCT item_code) as count FROM participant_item_details WHERE school_code = ?";
+        $query = "SELECT COUNT(DISTINCT item_code) as count FROM sd_participant_item_details WHERE school_code = ?";
         $result = $this->db->query($query, array($school_code))->getRowArray();
         $stats['total_items_participated'] = (int)$result['count'];
 
         // Get prizes won
         $query = "SELECT COUNT(*) as count FROM result_details rd 
-                  INNER JOIN participant_item_details pid ON rd.reg_no = pid.reg_no 
+                  INNER JOIN sd_participant_item_details pid ON rd.reg_no = pid.reg_no 
                   WHERE pid.school_code = ? AND rd.grade IN ('A', 'B', 'C')";
         $result = $this->db->query($query, array($school_code))->getRowArray();
         $stats['prizes_won'] = (int)$result['count'];

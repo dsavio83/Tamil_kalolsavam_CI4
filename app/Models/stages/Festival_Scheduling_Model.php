@@ -24,7 +24,7 @@ class Festival_Scheduling_Model extends \App\Models\BaseModel {
         ');
         $this->db->from('item_master AS i');
         $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id', 'left');
-        $this->db->join('participant_item_details AS p', "p.item_code = i.item_code AND p.is_captain = 'Y'", 'left');
+        $this->db->join('sd_participant_item_details AS p', "p.item_code = i.item_code AND p.is_captain = 'Y'", 'left');
         
         if ($fest_id && $fest_id !== 'all' && $fest_id !== '0') {
             $this->db->where('i.fest_id', $fest_id);
@@ -47,7 +47,7 @@ class Festival_Scheduling_Model extends \App\Models\BaseModel {
     // Get participants for a specific item
     function get_item_participants($item_code) {
         $this->db->select('participant_id');
-        $this->db->from('participant_item_details');
+        $this->db->from('sd_participant_item_details');
         $this->db->where('item_code', $item_code);
         return $this->db->get()->getResultArray();
     }
@@ -60,7 +60,7 @@ class Festival_Scheduling_Model extends \App\Models\BaseModel {
             GROUP_CONCAT(DISTINCT pid.item_code ORDER BY pid.item_code) as items,
             GROUP_CONCAT(DISTINCT im.item_name ORDER BY im.item_code) as item_names
         ');
-        $this->db->from('participant_item_details AS pid');
+        $this->db->from('sd_participant_item_details AS pid');
         $this->db->join('item_master AS im', 'im.item_code = pid.item_code');
         
         if ($fest_id && $fest_id !== 'all' && $fest_id !== '0') {
@@ -86,7 +86,7 @@ class Festival_Scheduling_Model extends \App\Models\BaseModel {
         ');
         $this->db->from('item_master AS i');
         $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id', 'left');
-        $this->db->join('participant_item_details AS p', "p.item_code = i.item_code AND p.is_captain = 'Y'", 'left');
+        $this->db->join('sd_participant_item_details AS p', "p.item_code = i.item_code AND p.is_captain = 'Y'", 'left');
         
         if ($fest_id && $fest_id !== 'all' && $fest_id !== '0') {
             $this->db->where('i.fest_id', $fest_id);
@@ -111,7 +111,7 @@ class Festival_Scheduling_Model extends \App\Models\BaseModel {
         ');
         $this->db->from('item_master AS i');
         $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id', 'left');
-        $this->db->join('participant_item_details AS p', "p.item_code = i.item_code AND p.is_captain = 'Y'", 'left');
+        $this->db->join('sd_participant_item_details AS p', "p.item_code = i.item_code AND p.is_captain = 'Y'", 'left');
         
         if ($fest_id && $fest_id !== 'all' && $fest_id !== '0') {
             $this->db->where('i.fest_id', $fest_id);

@@ -512,7 +512,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         $festival = $this->input->post('cmbFestType');
         $this->Contents['itemtime'] = $this->Prereport_Model->timesheet($itemcode);
 
-        $this->Contents['item_count'] = $this->db->where('item_code', $itemcode)->where('is_captain', 'Y')->countAllResults('participant_item_details');
+        $this->Contents['item_count'] = $this->db->where('item_code', $itemcode)->where('is_captain', 'Y')->countAllResults('sd_participant_item_details');
 
         $this->Contents['festname'] = $this->Prereport_Model->Festname($festival);
         $content = $this->load->view('report/prereportpdf/timesheet', $this->Contents, true);

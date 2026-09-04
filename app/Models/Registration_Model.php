@@ -37,7 +37,7 @@ class Registration_Model extends \App\Models\BaseModel {
         $this->db->where('PD.school_code', $schoolCode);
         $this->db->from('participant_details AS PD');
         $this->db->select('PD.*');
-        //$this->db->join('participant_item_details AS ID','PD.participant_id = ID.participant_id','RIGHT');
+        //$this->db->join('sd_participant_item_details AS ID','PD.participant_id = ID.participant_id','RIGHT');
         $result = $this->db->get();
         return $result->getResultArray();
     }
@@ -50,7 +50,7 @@ class Registration_Model extends \App\Models\BaseModel {
           } */
         $this->db->where('PD.school_code', $schoolCode);
         $this->db->where('PD.item_type', 'G');
-        $this->db->from('participant_item_details AS PD');
+        $this->db->from('sd_participant_item_details AS PD');
         $this->db->join('item_master AS IM', 'PD.item_code = IM.item_code');
         $this->db->select('IM.item_code,IM.item_name,PD.admn_no');
         $this->db->groupBy('PD.item_code');
@@ -64,7 +64,7 @@ class Registration_Model extends \App\Models\BaseModel {
                 $this->db->where('PD.school_code', $schoolCode);
                 $this->db->where('PD.item_type', 'G');
                 $this->db->where('PD.item_code', $groups['item_code']);
-                $this->db->from('participant_item_details AS PD');
+                $this->db->from('sd_participant_item_details AS PD');
                 $this->db->join('participant_details AS PM', 'PM.school_code = PD.school_code AND PM.admn_no = PD.admn_no');
                 $this->db->select("PM.admn_no,PM.participant_name,PD.is_captain");
                 $participant_details = $this->db->get();
@@ -104,7 +104,7 @@ class Registration_Model extends \App\Models\BaseModel {
         $this->db->where('PD.school_code', $schoolCode);
         $this->db->where('PD.participant_id', $id);
         $this->db->where('PD.admn_no', $adno);
-        $this->db->from('participant_item_details AS PD');
+        $this->db->from('sd_participant_item_details AS PD');
         $this->db->join('item_master AS IM', 'IM.item_code = PD.item_code');
         $this->db->select('PD.*,IM.item_name');
         $result = $this->db->get();
@@ -168,7 +168,7 @@ class Registration_Model extends \App\Models\BaseModel {
 
         $this->db->where('school_code', $schoolCode);
         $this->db->where('admn_no', $admnNo);
-        $participant_item_details = $this->db->get('participant_item_details');
+        $participant_item_details = $this->db->get('sd_participant_item_details');
         foreach ($participant_item_details->getResultArray() as $participant_item) {
             $data = array();
             $data['pi_id'] = $participant_item['pi_id'];
@@ -318,7 +318,7 @@ class Registration_Model extends \App\Models\BaseModel {
                             $this->db->where('spo_id', '0');
 
                             $this->db->select('admn_no');
-                            $result = $this->db->get('participant_item_details');
+                            $result = $this->db->get('sd_participant_item_details');
                             $caption = $result->getResultArray();
                             if (count($caption) > 0) {
                                 $is_captain = 'N';
@@ -334,7 +334,7 @@ class Registration_Model extends \App\Models\BaseModel {
                         $items['item_type'] = $itemcode[0]['item_type'];
                         $items['parent_admn_no'] = $parent_admn_no;
                         $items['is_captain'] = $is_captain;
-                        $this->db->insert('participant_item_details', $items);
+                        $this->db->insert('sd_participant_item_details', $items);
                     } else {
                         $error_array[] = 'Invalid Item Code : ' . $_POST['txtItemCode_' . $i] . '.';
                     }
@@ -364,7 +364,7 @@ class Registration_Model extends \App\Models\BaseModel {
                         $this->db->where('spo_id', '0');
 
                         $this->db->select('admn_no');
-                        $result = $this->db->get('participant_item_details');
+                        $result = $this->db->get('sd_participant_item_details');
                         $caption = $result->getResultArray();
                         if (count($caption) > 0) {
                             $is_captain = 'N';
@@ -384,7 +384,7 @@ class Registration_Model extends \App\Models\BaseModel {
                             $items['parent_admn_no'] = $parent_admn_no;
                             $items['is_captain'] = $is_captain;
 
-                            $this->db->insert('participant_item_details', $items);
+                            $this->db->insert('sd_participant_item_details', $items);
                         } else {
                             $error_array[] = $_POST['txtPinnanyCode_' . $i] . ' pinnany has no main participants';
                         }
@@ -471,7 +471,7 @@ class Registration_Model extends \App\Models\BaseModel {
                         $this->db->where('item_code', $item_code);
                         $this->db->where('spo_id', $this->input->post('cmbOrder'));
                         $this->db->select('pi_id');
-                        $result = $this->db->get('participant_item_details');
+                        $result = $this->db->get('sd_participant_item_details');
                         $caption = $result->getResultArray();
                         if (count($caption) > 0) {
                             $item_type = 'P';
@@ -494,7 +494,7 @@ class Registration_Model extends \App\Models\BaseModel {
                             $this->db->where('item_code', $item_code);
                             $this->db->where('spo_id', $this->input->post('cmbOrder'));
                             $this->db->select('pi_id');
-                            $result = $this->db->get('participant_item_details');
+                            $result = $this->db->get('sd_participant_item_details');
                             $caption = $result->getResultArray();
                             if (count($caption) > 0) {
 
@@ -509,7 +509,7 @@ class Registration_Model extends \App\Models\BaseModel {
                                 $items['spo_id'] = $this->input->post('cmbOrder');
                                 $items['spo_remarks'] = $this->input->post('txtRemarks');
                                 $items['is_captain'] = 'N';
-                                $this->db->insert('participant_item_details', $items);
+                                $this->db->insert('sd_participant_item_details', $items);
                             } else {
                                 if ($this->input->post('txtCaptionAdNo') == $admnNo) {
                                     $items = array();
@@ -522,7 +522,7 @@ class Registration_Model extends \App\Models\BaseModel {
                                     $items['spo_id'] = $this->input->post('cmbOrder');
                                     $items['spo_remarks'] = $this->input->post('txtRemarks');
                                     $items['is_captain'] = 'Y';
-                                    $this->db->insert('participant_item_details', $items);
+                                    $this->db->insert('sd_participant_item_details', $items);
                                 } else {
                                     $error_array[] = 'Caption AD NO or special order is wrong';
                                 }
@@ -542,7 +542,7 @@ class Registration_Model extends \App\Models\BaseModel {
                         $items['spo_id'] = $this->input->post('cmbOrder');
                         $items['spo_remarks'] = $this->input->post('txtRemarks');
                         $items['is_captain'] = $is_caption;
-                        $this->db->insert('participant_item_details', $items);
+                        $this->db->insert('sd_participant_item_details', $items);
                     }
                 } else {
                     $error_array[] = 'Invalid Item Code : ' . $_POST['txtItemCode_1'] . '.';
@@ -575,13 +575,13 @@ class Registration_Model extends \App\Models\BaseModel {
             $this->db->where('parent_admn_no', $this->input->post('hidADNO'));
             $data = array();
             $data['parent_admn_no'] = $admnNo;
-            $this->db->update('participant_item_details', $data);
+            $this->db->update('sd_participant_item_details', $data);
 
             $this->db->where('school_code', $schoolCode);
             $this->db->where('admn_no', $this->input->post('hidADNO'));
             $data = array();
             $data['admn_no'] = $admnNo;
-            $this->db->update('participant_item_details', $data);
+            $this->db->update('sd_participant_item_details', $data);
         }
 
 
@@ -611,7 +611,7 @@ class Registration_Model extends \App\Models\BaseModel {
         $this->db->where('is_captain', 'Y');
         $this->db->where('spo_id', '0');
         $this->db->select('item_code');
-        $exist_item_details = $this->db->get('participant_item_details');
+        $exist_item_details = $this->db->get('sd_participant_item_details');
         $exist_item_array = array();
         foreach ($exist_item_details->getResultArray() as $exist_item) {
             $exist_item_array[] = $exist_item['item_code'];
@@ -639,7 +639,7 @@ class Registration_Model extends \App\Models\BaseModel {
         $this->db->where("is_captain != 'Y'");
         //$this->db->where('item_type !=', 'G');
         $this->db->where('spo_id', '0');
-        $this->db->delete('participant_item_details');
+        $this->db->delete('sd_participant_item_details');
 
         $this->db->where('school_code', $schoolCode);
         $this->db->where('admn_no', $admnNo);
@@ -668,7 +668,7 @@ class Registration_Model extends \App\Models\BaseModel {
                         $this->db->where("is_captain  != 'Y'");
                         $this->db->where('item_code', $item_code);
                         $this->db->where('spo_id', '0');
-                        $this->db->delete('participant_item_details');
+                        $this->db->delete('sd_participant_item_details');
                         if ($not_valid_item_fest) {
                             $error_array[] = $item_code . " " . $not_valid_item_fest;
                         } else {
@@ -704,7 +704,7 @@ class Registration_Model extends \App\Models\BaseModel {
                                 $this->db->where('spo_id', '0');
 
                                 $this->db->select('admn_no');
-                                $result = $this->db->get('participant_item_details');
+                                $result = $this->db->get('sd_participant_item_details');
                                 $caption = $result->getResultArray();
                                 if (count($caption) > 0) {
                                     $is_captain = 'N';
@@ -722,7 +722,7 @@ class Registration_Model extends \App\Models\BaseModel {
                             $items['parent_admn_no'] = $parent_admn_no;
                             $items['is_captain'] = $is_captain;
 
-                            $this->db->insert('participant_item_details', $items);
+                            $this->db->insert('sd_participant_item_details', $items);
                         } else {
                             $error_array[] = 'Invalid Item Code : ' . $_POST['txtItemCode_' . $i] . '.';
                         }
@@ -758,7 +758,7 @@ class Registration_Model extends \App\Models\BaseModel {
                         $this->db->where('spo_id', '0');
 
                         $this->db->select('admn_no');
-                        $result = $this->db->get('participant_item_details');
+                        $result = $this->db->get('sd_participant_item_details');
                         $caption = $result->getResultArray();
                         if (count($caption) > 0) {
                             $is_captain = 'N';
@@ -777,7 +777,7 @@ class Registration_Model extends \App\Models\BaseModel {
                             $items['parent_admn_no'] = $parent_admn_no;
                             $items['is_captain'] = $is_captain;
 
-                            $this->db->insert('participant_item_details', $items);
+                            $this->db->insert('sd_participant_item_details', $items);
                         } else {
                             $error_array[] = $_POST['txtPinnanyCode_' . $i] . ' pinnany has no main participants';
                         }
@@ -807,7 +807,7 @@ class Registration_Model extends \App\Models\BaseModel {
             $this->db->where('is_captain !=', 'Y');
             $this->db->where('item_type !=', 'P');
             $this->db->where('spo_id', '0');
-            $part_item_deta = $this->db->get('participant_item_details');
+            $part_item_deta = $this->db->get('sd_participant_item_details');
             if ($part_item_deta->getNumRows() > 0) {
                 $part_item = $part_item_deta->getResultArray();
                 $new_capt_adno = $part_item[0]['admn_no'];
@@ -818,7 +818,7 @@ class Registration_Model extends \App\Models\BaseModel {
                 $this->db->where('spo_id', '0');
                 $up_captain_data['parent_admn_no'] = $new_capt_adno;
                 $up_captain_data['is_captain'] = 'Y';
-                $this->db->update('participant_item_details', $up_captain_data);
+                $this->db->update('sd_participant_item_details', $up_captain_data);
 
                 $this->db->where('school_code', $schoolCode);
                 $this->db->where('item_code', $balance_item);
@@ -827,7 +827,7 @@ class Registration_Model extends \App\Models\BaseModel {
 
                 $up_all_captain_data['parent_admn_no'] = $new_capt_adno;
 
-                $this->db->update('participant_item_details', $up_all_captain_data);
+                $this->db->update('sd_participant_item_details', $up_all_captain_data);
             }
 
             /**
@@ -837,7 +837,7 @@ class Registration_Model extends \App\Models\BaseModel {
             $this->db->where('item_code', $balance_item);
             $this->db->where('is_captain', 'Y');
             $this->db->where('spo_id', '0');
-            $pinnany_no_mn_part = $this->db->get('participant_item_details');
+            $pinnany_no_mn_part = $this->db->get('sd_participant_item_details');
             if ($pinnany_no_mn_part->getNumRows() <= 0) {
                 $this->db->where('school_code', $schoolCode);
                 $this->db->where('admn_no !=', $admnNo);
@@ -846,7 +846,7 @@ class Registration_Model extends \App\Models\BaseModel {
                 $this->db->where('is_captain !=', 'Y');
                 $this->db->where('item_type', 'P');
                 $this->db->where('spo_id', '0');
-                $part_item_deta = $this->db->delete('participant_item_details');
+                $part_item_deta = $this->db->delete('sd_participant_item_details');
             }
 
 
@@ -857,7 +857,7 @@ class Registration_Model extends \App\Models\BaseModel {
             $this->db->where('admn_no', $admnNo);
             $this->db->where('item_code', $balance_item);
             $this->db->where('spo_id', '0');
-            $part_item_deta = $this->db->delete('participant_item_details');
+            $part_item_deta = $this->db->delete('sd_participant_item_details');
         }
         /**
          * * End Removing and changing the captain for deleteing item codes
@@ -960,7 +960,7 @@ class Registration_Model extends \App\Models\BaseModel {
             $this->db->where('item_code', '204');
             $this->db->where('admn_no', $admn_no);
             $this->db->where('school_code', $school_code);
-            $cnt_item_details = $this->db->countAllResults('participant_item_details');
+            $cnt_item_details = $this->db->countAllResults('sd_participant_item_details');
             if ($cnt_item_details > 0) {
                 return "Both Arbic and general Padyamchollal not provide";
             }
@@ -969,7 +969,7 @@ class Registration_Model extends \App\Models\BaseModel {
             $this->db->where('item_code', '103');
             $this->db->where('admn_no', $admn_no);
             $this->db->where('school_code', $school_code);
-            $cnt_item_details = $this->db->countAllResults('participant_item_details');
+            $cnt_item_details = $this->db->countAllResults('sd_participant_item_details');
             if ($cnt_item_details > 0) {
                 return "Both Arbic and general Padyamchollal not provide";
             }
@@ -978,7 +978,7 @@ class Registration_Model extends \App\Models\BaseModel {
             $this->db->where('item_code', '403');
             $this->db->where('admn_no', $admn_no);
             $this->db->where('school_code', $school_code);
-            $cnt_item_details = $this->db->countAllResults('participant_item_details');
+            $cnt_item_details = $this->db->countAllResults('sd_participant_item_details');
             if ($cnt_item_details > 0) {
                 return "Both Arbic and general Padyamchollal not provide";
             }
@@ -987,7 +987,7 @@ class Registration_Model extends \App\Models\BaseModel {
             $this->db->where('item_code', '306');
             $this->db->where('admn_no', $admn_no);
             $this->db->where('school_code', $school_code);
-            $cnt_item_details = $this->db->countAllResults('participant_item_details');
+            $cnt_item_details = $this->db->countAllResults('sd_participant_item_details');
             if ($cnt_item_details > 0) {
                 return "Both Arbic and general Padyamchollal not provide";
             }
@@ -996,7 +996,7 @@ class Registration_Model extends \App\Models\BaseModel {
             $this->db->where('(item_code = 706 OR item_code = 707)');
             $this->db->where('admn_no', $admn_no);
             $this->db->where('school_code', $school_code);
-            $cnt_item_details = $this->db->countAllResults('participant_item_details');
+            $cnt_item_details = $this->db->countAllResults('sd_participant_item_details');
             if ($cnt_item_details > 0) {
                 return "Both Arbic and general Padyamchollal not provide";
             }
@@ -1005,7 +1005,7 @@ class Registration_Model extends \App\Models\BaseModel {
             $this->db->where('item_code', '652');
             $this->db->where('admn_no', $admn_no);
             $this->db->where('school_code', $school_code);
-            $cnt_item_details = $this->db->countAllResults('participant_item_details');
+            $cnt_item_details = $this->db->countAllResults('sd_participant_item_details');
             if ($cnt_item_details > 0) {
                 return "Both Arbic and general Padyamchollal not provide";
             }
@@ -1033,7 +1033,7 @@ class Registration_Model extends \App\Models\BaseModel {
         $this->db->where('item_code', $item_code);
         $this->db->where('admn_no', $admn_no);
         $this->db->where('school_code', $school_code);
-        $cnt_item = $this->db->countAllResults('participant_item_details');
+        $cnt_item = $this->db->countAllResults('sd_participant_item_details');
         if ($cnt_item > 0) {
             return "repeated item code";
         }
@@ -1053,7 +1053,7 @@ class Registration_Model extends \App\Models\BaseModel {
                 $this->db->where('PD.school_code', $school_code);
                 $this->db->where('PD.admn_no', $admn_no);
                 $this->db->where('FM.fest_id', '8');
-                $this->db->from('participant_item_details AS PD');
+                $this->db->from('sd_participant_item_details AS PD');
                 $this->db->join('item_master AS IM', 'IM.item_code = PD.item_code');
                 $this->db->join('festival_master AS FM', 'IM.fest_id = FM.fest_id');
                 $fest_details = $this->db->get();
@@ -1068,7 +1068,7 @@ class Registration_Model extends \App\Models\BaseModel {
                 $this->db->where('PD.school_code', $school_code);
                 $this->db->where('PD.admn_no', $admn_no);
                 $this->db->where('FM.fest_id', '5');
-                $this->db->from('participant_item_details AS PD');
+                $this->db->from('sd_participant_item_details AS PD');
                 $this->db->join('item_master AS IM', 'IM.item_code = PD.item_code');
                 $this->db->join('festival_master AS FM', 'IM.fest_id = FM.fest_id');
                 $fest_details = $this->db->get();
@@ -1083,7 +1083,7 @@ class Registration_Model extends \App\Models\BaseModel {
                 $this->db->where('PD.school_code', $school_code);
                 $this->db->where('PD.admn_no', $admn_no);
                 $this->db->where('FM.fest_id', '9');
-                $this->db->from('participant_item_details AS PD');
+                $this->db->from('sd_participant_item_details AS PD');
                 $this->db->join('item_master AS IM', 'IM.item_code = PD.item_code');
                 $this->db->join('festival_master AS FM', 'IM.fest_id = FM.fest_id');
                 $fest_details = $this->db->get();
@@ -1098,7 +1098,7 @@ class Registration_Model extends \App\Models\BaseModel {
                 $this->db->where('PD.school_code', $school_code);
                 $this->db->where('PD.admn_no', $admn_no);
                 $this->db->where('FM.fest_id', '6');
-                $this->db->from('participant_item_details AS PD');
+                $this->db->from('sd_participant_item_details AS PD');
                 $this->db->join('item_master AS IM', 'IM.item_code = PD.item_code');
                 $this->db->join('festival_master AS FM', 'IM.fest_id = FM.fest_id');
                 $fest_details = $this->db->get();
@@ -1150,11 +1150,11 @@ class Registration_Model extends \App\Models\BaseModel {
             $this->db->where('PD.school_code', $school_code);
             $this->db->where('IM.item_type', $item_type);
           //  $this->db->where('IM.fest_id', $fest_id);
-            $this->db->from('participant_item_details AS PD');
+            $this->db->from('sd_participant_item_details AS PD');
             $this->db->join('item_master AS IM', 'PD.item_code = IM.item_code');
             $this->db->groupBy('PD.item_code');
 
-            $item = $this->db->get('participant_item_details');
+            $item = $this->db->get('sd_participant_item_details');
             if ($item->getNumRows() >= $max_no) {
                 return "Maximum number of " . $type . " limit was exceed";
             } else {
@@ -1180,7 +1180,7 @@ class Registration_Model extends \App\Models\BaseModel {
         } else {
             $this->db->where("item_type != 'P'");
         }
-        $cnt_item = $this->db->countAllResults('participant_item_details');
+        $cnt_item = $this->db->countAllResults('sd_participant_item_details');
 
         if ($cnt_item >= $max_no) {
             if ($item_type == 'P') {
@@ -1213,7 +1213,7 @@ class Registration_Model extends \App\Models\BaseModel {
         $this->db->where('IM.vibhagam_id', $vibhagam_id);
         $this->db->where('PD.item_code !=', $item_code);
         //$this->db->where('PD.item_type !=',$item_type);
-        $this->db->from('participant_item_details AS PD');
+        $this->db->from('sd_participant_item_details AS PD');
         $this->db->join('item_master AS IM', 'PD.item_code = IM.item_code');
         $this->db->groupBy('PD.item_code');
         $item_details = $this->db->get();
@@ -1235,12 +1235,12 @@ class Registration_Model extends \App\Models\BaseModel {
 
                 $this->db->where('school_code', $schoolCode);
                 $this->db->where('item_code', $item_code);
-                $this->db->update('participant_item_details', array('is_captain' => 'N', 'parent_admn_no' => $admn_no));
+                $this->db->update('sd_participant_item_details', array('is_captain' => 'N', 'parent_admn_no' => $admn_no));
 
                 $this->db->where('school_code', $schoolCode);
                 $this->db->where('item_code', $item_code);
                 $this->db->where('admn_no', $admn_no);
-                $this->db->update('participant_item_details', array('is_captain' => 'Y', 'parent_admn_no' => $admn_no));
+                $this->db->update('sd_participant_item_details', array('is_captain' => 'Y', 'parent_admn_no' => $admn_no));
             }
         }
     }
@@ -1251,14 +1251,14 @@ class Registration_Model extends \App\Models\BaseModel {
          */
         $this->db->where('school_code', $school_code);
         $this->db->where('item_type', 'G');
-        $group_details = $this->db->get('participant_item_details');
+        $group_details = $this->db->get('sd_participant_item_details');
         foreach ($group_details->getResultArray() as $group) {
             $item_code = $group['item_code'];
             $this->db->where('school_code', $school_code);
             $this->db->where('item_code', $item_code);
             $this->db->where('is_captain', 'Y');
             $this->db->where('spo_id', '0');
-            $count = $this->db->countAllResults('participant_item_details');
+            $count = $this->db->countAllResults('sd_participant_item_details');
             if ($count <= 0) {
                 $error_array[] = "Please fix a captain for all group items";
                 $return_array['error_array'] = $error_array;
@@ -1275,7 +1275,7 @@ class Registration_Model extends \App\Models\BaseModel {
         $this->db->where('PD.school_code', $school_code);
         $this->db->where('PI.pi_id IS NULL');
         $this->db->from('participant_details AS PD');
-        $this->db->join('participant_item_details AS PI', 'PD.participant_id = PI.participant_id', 'LEFT');
+        $this->db->join('sd_participant_item_details AS PI', 'PD.participant_id = PI.participant_id', 'LEFT');
         $this->db->select('PD.participant_id');
         $pd_details = $this->db->get();
         foreach ($pd_details->getResultArray() as $pd) {
@@ -1308,13 +1308,13 @@ class Registration_Model extends \App\Models\BaseModel {
 
         $this->db->where('school_code', $school_code);
         $this->db->where('item_type', 'G');
-        $group_details = $this->db->get('participant_item_details');
+        $group_details = $this->db->get('sd_participant_item_details');
         foreach ($group_details->getResultArray() as $group) {
             $item_code = $group['item_code'];
             $this->db->where('school_code', $school_code);
             $this->db->where('item_code', $item_code);
             $this->db->where('is_captain', 'Y');
-            $count = $this->db->countAllResults('participant_item_details');
+            $count = $this->db->countAllResults('sd_participant_item_details');
             if ($count <= 0) {
                 $error_array[] = "Please fix a captain for all group items";
                 $return_array['error_array'] = $error_array;
@@ -1352,7 +1352,7 @@ class Registration_Model extends \App\Models\BaseModel {
         $this->db->where('school_code', $school_code);
         $this->db->where('admn_no', $admn_no);
         $this->db->where('spo_id > 0');
-        $cnt_special_order = $this->db->countAllResults('participant_item_details');
+        $cnt_special_order = $this->db->countAllResults('sd_participant_item_details');
         if ($cnt_special_order > 0) {
             $error_array[] = 'This Participant has special order items';
             $return_array['error_array'] = $error_array;
@@ -1363,7 +1363,7 @@ class Registration_Model extends \App\Models\BaseModel {
         $this->db->where('parent_admn_no', $admn_no);
         $this->db->where('admn_no !=', $admn_no);
         //$this->db->where('is_captain','Y');
-        $cnt_captains = $this->db->countAllResults('participant_item_details');
+        $cnt_captains = $this->db->countAllResults('sd_participant_item_details');
 
         if ($cnt_captains > 0) {
             $error_array[] = 'This Participant has a team captain ';
@@ -1374,7 +1374,7 @@ class Registration_Model extends \App\Models\BaseModel {
 
         $this->db->where('school_code', $school_code);
         $this->db->where('admn_no', $admn_no);
-        $this->db->delete('participant_item_details');
+        $this->db->delete('sd_participant_item_details');
 
         $this->db->where('school_code', $school_code);
         $this->db->where('admn_no', $admn_no);
@@ -1387,7 +1387,7 @@ class Registration_Model extends \App\Models\BaseModel {
         $this->db->where('PD.school_code', $schoolCode);
         $this->db->where('PID.spo_id != 0');
         $this->db->from('participant_details AS PD');
-        $this->db->join('participant_item_details AS PID', "PD.participant_id = PID.participant_id", 'INNER');
+        $this->db->join('sd_participant_item_details AS PID', "PD.participant_id = PID.participant_id", 'INNER');
         $this->db->join('item_master AS IM', "IM.item_code = PID.item_code", 'INNER');
         $this->db->join('special_order_master AS SOM', "SOM.spo_id = PID.spo_id", 'INNER');
         $this->db->select('PD.*, PID.spo_id, PID.parent_admn_no, PID.item_type, PID.pi_id, PID.item_code, IM.item_name, SOM.spo_title');
@@ -1405,7 +1405,7 @@ class Registration_Model extends \App\Models\BaseModel {
         $this->db->where('item_code', $item_code);
         $this->db->where('spo_id != 0');
         $this->db->select('admn_no');
-        $participants = $this->db->get('participant_item_details');
+        $participants = $this->db->get('sd_participant_item_details');
         $participants = $participants->getResultArray();
         for ($i = 0; $i < count($participants); $i++) {
 
@@ -1414,12 +1414,12 @@ class Registration_Model extends \App\Models\BaseModel {
             $this->db->where('school_code', $school_id);
             $this->db->where('item_code', $item_code);
             $this->db->where('admn_no', $participants[$i]['admn_no']);
-            $this->db->delete('participant_item_details');
+            $this->db->delete('sd_participant_item_details');
 
             $this->db->where('school_code', $school_id);
             $this->db->where('admn_no', $participants[$i]['admn_no']);
             $this->db->select('admn_no');
-            $participants_other_items = $this->db->get('participant_item_details');
+            $participants_other_items = $this->db->get('sd_participant_item_details');
             $participants_other_items = $participants_other_items->getResultArray();
             if (count($participants_other_items) == 0) {
                 $this->db->where('school_code', $school_id);
@@ -1436,7 +1436,7 @@ class Registration_Model extends \App\Models\BaseModel {
         $this->db->groupBy('PD.item_code');
         $this->db->select('PD.item_code,IM.item_name');
         $this->db->join('item_master AS IM', 'PD.item_code = IM.item_code');
-        $participant_item_details = $this->db->get('participant_item_details AS PD');
+        $participant_item_details = $this->db->get('sd_participant_item_details AS PD');
         $item_details_array = array();
         if ($participant_item_details->getNumRows() > 0) {
             $count = 0;
@@ -1446,19 +1446,19 @@ class Registration_Model extends \App\Models\BaseModel {
                 $this->db->where('school_code', $school_code);
                 $this->db->where('item_code', $item_code);
                 $this->db->where("(item_type ='G' OR item_type = 'S')");
-                $cnt_participant = $this->db->countAllResults('participant_item_details');
+                $cnt_participant = $this->db->countAllResults('sd_participant_item_details');
 
                 $this->db->where('school_code', $school_code);
                 $this->db->where('item_code', $item_code);
                 $this->db->where("item_type ='P'");
-                $cnt_pinnany = $this->db->countAllResults('participant_item_details');
+                $cnt_pinnany = $this->db->countAllResults('sd_participant_item_details');
 
                 $this->db->where('PD.school_code', $school_code);
                 $this->db->where('PD.item_code', $item_code);
                 $this->db->where("PD.is_captain ='Y'");
                 $this->db->join('participant_details as PM', 'PD.school_code = PM.school_code AND PD.admn_no = PM.admn_no');
                 $this->db->select('PM.participant_name');
-                $captian_details = $this->db->get('participant_item_details AS PD');
+                $captian_details = $this->db->get('sd_participant_item_details AS PD');
                 if ($captian_details->getNumRows() > 0) {
                     $captian = $captian_details->getResultArray();
                     $item_details_array[$count]['captian'] = $captian[0]['participant_name'];

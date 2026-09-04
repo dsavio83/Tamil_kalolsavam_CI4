@@ -16,7 +16,7 @@ class Timefest_model  extends \App\Models\BaseModel {
         $this->db->join('item_master AS im', 'im.item_code = rs.item_code');
         $this->db->join('school_master AS sm', 'sm.school_code = rs.school_code');
         $this->db->join('participant_details AS pd', 'pd.participant_id = rs.participant_id', 'LEFT');
-        $this->db->join('participant_item_details AS pi', "pi.participant_id = rs.participant_id AND pi.item_code = rs.item_code", 'LEFT');
+        $this->db->join('sd_participant_item_details AS pi', "pi.participant_id = rs.participant_id AND pi.item_code = rs.item_code", 'LEFT');
         $this->db->join('special_order_master AS sp', "sp.spo_id = pi.spo_id AND sp.is_publish = 'N'", 'LEFT');
         $this->db->join('sd_stage_item_master AS si', 'si.item_code = rs.item_code', 'LEFT');
         $this->db->join('sd_stage_master AS Sd', 'si.stage_id = Sd.stage_id', 'LEFT');
@@ -31,7 +31,7 @@ class Timefest_model  extends \App\Models\BaseModel {
     function timeoffest_count($itemcode) {
         $this->db->where('pi.item_code', $itemcode);
         $this->db->select('count(pi.item_code) as picount');
-        $this->db->from('participant_item_details AS pi');
+        $this->db->from('sd_participant_item_details AS pi');
         $details = $this->db->get()->getResultArray();
         if (!empty($details[0]['picount']) && $details[0]['picount'] > 0) {
             return $details;
@@ -73,7 +73,7 @@ class Timefest_model  extends \App\Models\BaseModel {
         $this->db->join('item_master AS im', 'im.item_code = rs.item_code');
         $this->db->join('school_master AS sm', 'sm.school_code = rs.school_code');
         $this->db->join('participant_details AS pd', 'pd.participant_id = rs.participant_id', 'LEFT');
-        $this->db->join('participant_item_details AS pi', 'pi.participant_id = rs.participant_id AND pi.item_code = rs.item_code', 'LEFT');
+        $this->db->join('sd_participant_item_details AS pi', 'pi.participant_id = rs.participant_id AND pi.item_code = rs.item_code', 'LEFT');
         $this->db->join('special_order_master AS sp', "sp.spo_id = pi.spo_id AND sp.is_publish = 'N'", 'LEFT');
         $this->db->join('sd_stage_item_master AS si', 'si.item_code = rs.item_code', 'LEFT');
         $this->db->join('sd_stage_master AS Sd', 'si.stage_id = Sd.stage_id', 'LEFT');
@@ -89,7 +89,7 @@ class Timefest_model  extends \App\Models\BaseModel {
     function fetch_fest_all_result_count($itemcode) {
         $this->db->where('pi.item_code', $itemcode);
         $this->db->select('count(pi.item_code) as cnt');
-        $this->db->from('participant_item_details AS pi');
+        $this->db->from('sd_participant_item_details AS pi');
         $details = $this->db->get();
         return $details->getResultArray();
     }
@@ -98,7 +98,7 @@ class Timefest_model  extends \App\Models\BaseModel {
       {
       $this->db->where("pi.participant_id NOT IN (select   participant_id from  sd_result_master AS rs where  pi.item_code=rs.item_code AND rs.item_code='$itemcode') AND pi.item_code ='$itemcode'");
       $this->db->select('pi.participant_id');
-      $this->db->from('participant_item_details AS pi');
+      $this->db->from('sd_participant_item_details AS pi');
 
       $details	=	$this->db->get();
       return  $details->getResultArray();
@@ -122,7 +122,7 @@ class Timefest_model  extends \App\Models\BaseModel {
     function timeoffest_result_absentee_all($festival) {
         $this->db->where("pi.participant_id NOT IN (select   participant_id from  sd_result_master AS rs where  pi.item_code=rs.item_code ) AND fm.fest_id ='$festival'");
         $this->db->select('pi.participant_id,fm.fest_id,pi.item_code');
-        $this->db->from('participant_item_details AS pi,festival_master AS fm');
+        $this->db->from('sd_participant_item_details AS pi,festival_master AS fm');
         $this->db->orderBy('pi.item_code');
         $details = $this->db->get();
         return $details->getResultArray();

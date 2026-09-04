@@ -410,7 +410,7 @@ class General_Model extends \App\Models\BaseModel {
     function is_all_stage_alloted() {
         $this->db->select('item_code');
         $this->db->groupBy('item_code');
-        $participant_item_details = $this->db->get('participant_item_details');
+        $participant_item_details = $this->db->get('sd_participant_item_details');
         $participant_item = $participant_item_details->getNumRows();
 
         $this->db->select('item_code');

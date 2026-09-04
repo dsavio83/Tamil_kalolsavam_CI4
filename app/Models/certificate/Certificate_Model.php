@@ -236,7 +236,7 @@ class Certificate_Model extends \App\Models\BaseModel {
 					),
 					"No"
 			) AS is_confirmed', FALSE);
-        $this->db->from('participant_item_details AS p');
+        $this->db->from('sd_participant_item_details AS p');
         $this->db->join('sd_result_master AS rs', 'rs.item_code = p.item_code');
         $this->db->join('item_master AS i', 'i.item_code = p.item_code');
         $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id');
@@ -271,7 +271,7 @@ class Certificate_Model extends \App\Models\BaseModel {
 		) AS is_confirmed', FALSE);
 
         $this->db->from('sd_certificate_master cm');
-        $this->db->join('participant_item_details AS p', 'cm.item_code=p.item_code AND  p.participant_id=cm.participant_id');
+        $this->db->join('sd_participant_item_details AS p', 'cm.item_code=p.item_code AND  p.participant_id=cm.participant_id');
         $this->db->join('item_master AS i', 'i.item_code = p.item_code');
         $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id');
         $this->db->where('i.fest_id', $festtype);
@@ -299,7 +299,7 @@ class Certificate_Model extends \App\Models\BaseModel {
         $this->db->select('cm.participant_id, pd.participant_name');
         $this->db->from('sd_certificate_master cm');
         $this->db->join('participant_details AS pd', 'pd.participant_id=cm.participant_id');
-        $this->db->join('participant_item_details AS p', 'cm.item_code=p.item_code AND  p.participant_id=cm.participant_id');
+        $this->db->join('sd_participant_item_details AS p', 'cm.item_code=p.item_code AND  p.participant_id=cm.participant_id');
         $this->db->where('cm.item_code', $item_code);
         $this->db->where('cm.is_withheld', 'N');
         $this->db->where('p.is_captain', 'Y');
@@ -335,9 +335,9 @@ class Certificate_Model extends \App\Models\BaseModel {
         $this->db->join('school_master AS sm', 'sm.school_code=pd.school_code');
         $this->db->join('sub_district_master AS sd', 'sm.sub_district_code=sd.sub_district_code');
         if ('S' == $item_type)
-            $this->db->join('participant_item_details AS p', 'cm.item_code=p.item_code AND p.participant_id=cm.participant_id');
+            $this->db->join('sd_participant_item_details AS p', 'cm.item_code=p.item_code AND p.participant_id=cm.participant_id');
         else if ('G' == $item_type)
-            $this->db->join('participant_item_details AS p', 'cm.item_code=p.item_code AND p.admn_no=cm.parent_admn_no');
+            $this->db->join('sd_participant_item_details AS p', 'cm.item_code=p.item_code AND p.admn_no=cm.parent_admn_no');
 
         $this->db->join('item_master AS i', 'i.item_code = p.item_code');
         $this->db->join('festival_master AS f', 'i.fest_id = f.fest_id');

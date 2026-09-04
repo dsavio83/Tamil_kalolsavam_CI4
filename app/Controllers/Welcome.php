@@ -274,7 +274,7 @@ class Welcome extends \App\Controllers\BaseController {
             }
         }
         
-        $result = $this->db->query("SELECT COUNT(DISTINCT item_code) as count FROM participant_item_details WHERE school_code = ?", array($school_code));
+        $result = $this->db->query("SELECT COUNT(DISTINCT item_code) as count FROM sd_participant_item_details WHERE school_code = ?", array($school_code));
         if ($result && $result->getNumRows() > 0) $stats['total_items_participated'] = (int)$result->getRowArray()['count'];
         
         $result = $this->db->query("SELECT COUNT(*) as count FROM sd_result_master WHERE school_code = ? AND grade IN ('A', 'B', 'C')", array($school_code));

@@ -125,7 +125,7 @@ $total_ready = $total_items - $total_printed;
                 $slno++;
                 $isGroup = ($row['item_type'] === 'G');
                 $isPrinted = (!empty($row['is_certificate_printed']) && $row['is_certificate_printed'] == 1);
-                $cpt = $this->General_Model->get_record_count('participant_item_details', 'is_captain="Y" AND item_code=' . (int)$row['item_code'], 'participant_id');
+                $cpt = $this->General_Model->get_record_count('sd_participant_item_details', 'is_captain="Y" AND item_code=' . (int)$row['item_code'], 'participant_id');
           ?>
           <tr>
             <td class="text-center fw-semibold text-muted py-3 px-3"><?php echo $slno; ?></td>

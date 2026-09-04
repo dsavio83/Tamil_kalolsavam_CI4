@@ -452,9 +452,13 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         }
         $this->Content = array();
 
-        //	$partcard		            =	$this->Prereport_Model->get_participant_card($this->input->post('txtSchoolCode'));
-        $participant_details = $this->Prereport_Model->get_participant_details($this->input->post('txtSchoolCode'));
-        $school_code = $this->input->post('txtSchoolCode');
+        $school_code = $this->input->get_post('txtSchoolCode');
+        if (empty($school_code)) {
+            redirect('report/prereport/participant_cardindex_photo');
+            return;
+        }
+
+        $participant_details = $this->Prereport_Model->get_participant_details($school_code);
         $this->Content['participant_details'] = $participant_details;
         $DataReturn1['participant_det'] = $participant_details;
         //print_r($this->Content['participant_details']);
@@ -468,6 +472,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
             $html2pdf->pdf->SetDisplayMode('fullpage');
             $html2pdf->WriteHTML($content, '');
             $html2pdf->Output('participantcard.pdf', 'I');
+            return;
         } else {
             redirect('test/nodata');
         }
@@ -507,8 +512,12 @@ class Prereportpdf  extends \App\Controllers\BaseController {
             return;
         }
         $this->Content = array();
-        //	$partcard		            =	$this->Prereport_Model->get_participant_card($this->input->post('txtSchoolCode'));
-        $participant_details = $this->Prereport_Model->get_participant_details($this->input->post('txtSchoolCode'));
+        $school_code = $this->input->get_post('txtSchoolCode');
+        if (empty($school_code)) {
+            redirect('report/prereport/participant_cardindex2');
+            return;
+        }
+        $participant_details = $this->Prereport_Model->get_participant_details($school_code);
         $this->Content['participant_details'] = $participant_details;
         //print_r($fees_details);
 
@@ -520,6 +529,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
             $html2pdf->pdf->SetDisplayMode('fullpage');
             $html2pdf->WriteHTML($content, '');
             $html2pdf->Output('participantcard.pdf', 'I');
+            return;
         } else {
             redirect('test/nodata');
         }
@@ -821,7 +831,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         $festival = $this->input->post('cmbFestType');
         $this->Contents['itemtime'] = $this->Prereport_Model->timesheet($itemcode);
 
-        $this->Contents['item_count'] = $this->db->where('item_code', $itemcode)->where('is_captain', 'Y')->countAllResults('participant_item_details');
+        $this->Contents['item_count'] = $this->db->where('item_code', $itemcode)->where('is_captain', 'Y')->countAllResults('sd_participant_item_details');
 
         $this->Contents['festname'] = $this->Prereport_Model->Festname($festival);
         $content = $this->load->view('report/prereportpdf/timesheet', $this->Contents, true);
@@ -1156,7 +1166,7 @@ class Prereportpdf  extends \App\Controllers\BaseController {
         } elseif ($time == 'Time Sheet') {
             $this->Contents = array();
             $this->Contents['itemtime'] = $this->Prereport_Model->timesheet($item_code);
-            $this->Contents['item_count'] = $this->db->where('item_code', $item_code)->where('is_captain', 'Y')->countAllResults('participant_item_details');
+            $this->Contents['item_count'] = $this->db->where('item_code', $item_code)->where('is_captain', 'Y')->countAllResults('sd_participant_item_details');
             $this->Contents['festname'] = $this->Prereport_Model->Festname($festId);
             if (!empty($this->Contents['itemtime'])) {
                 $content = $this->load->view('report/prereportpdf/timesheet', $this->Contents, true);

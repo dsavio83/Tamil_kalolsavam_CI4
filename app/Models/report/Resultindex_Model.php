@@ -17,7 +17,7 @@ class Resultindex_Model extends \App\Models\BaseModel {
         $this->db->join('item_master AS I', "I.item_code = R.item_code AND I.fest_id ='$festid'");
         $this->db->join('festival_master AS F', " F.fest_id = I.fest_id AND F.fest_id='$festid'");
 
-        $this->db->join('participant_item_details AS pd', 'pd.participant_id = R.participant_id AND pd.item_code = R.item_code', 'LEFT');
+        $this->db->join('sd_participant_item_details AS pd', 'pd.participant_id = R.participant_id AND pd.item_code = R.item_code', 'LEFT');
         $this->db->join('special_order_master AS sp', "pd.spo_id = sp.spo_id AND sp.is_publish = 'N'", 'LEFT');
 
         $this->db->where("R.rank IN (1, 2, 3)");
@@ -50,7 +50,7 @@ class Resultindex_Model extends \App\Models\BaseModel {
         $this->db->join('participant_details AS P', 'P.participant_id = R.participant_id', 'LEFT');
         $this->db->join('item_master AS I', "I.item_code = R.item_code");
         $this->db->join('festival_master AS F', " F.fest_id = I.fest_id");
-        $this->db->join('participant_item_details AS pd', 'pd.participant_id = R.participant_id AND pd.item_code = R.item_code', 'LEFT');
+        $this->db->join('sd_participant_item_details AS pd', 'pd.participant_id = R.participant_id AND pd.item_code = R.item_code', 'LEFT');
         $this->db->join('special_order_master AS sp', "pd.spo_id = sp.spo_id AND sp.is_publish = 'N'", 'LEFT');
         $this->db->where("R.grade IN ('A','B','C')");
         $this->db->where("R.is_finish = 'Y'");
@@ -92,7 +92,7 @@ class Resultindex_Model extends \App\Models\BaseModel {
         $this->db->join('item_master AS I', 'I.item_code = R.item_code');
         $this->db->join('school_master AS s', 's.school_code = R.school_code');
         $this->db->join('festival_master AS f', 'f.fest_id = I.fest_id');
-        $this->db->join('participant_item_details AS p', 'p.participant_id = R.participant_id AND p.item_code = R.item_code', 'LEFT');
+        $this->db->join('sd_participant_item_details AS p', 'p.participant_id = R.participant_id AND p.item_code = R.item_code', 'LEFT');
         $this->db->join('special_order_master AS sp', "p.spo_id = sp.spo_id AND sp.is_publish = 'N'", 'LEFT');
         if ($schoolcode != "") {
             $this->db->where('R.school_code', $schoolcode);
@@ -114,7 +114,7 @@ class Resultindex_Model extends \App\Models\BaseModel {
         $this->db->join('item_master AS I', 'I.item_code = R.item_code');
         $this->db->join('school_master AS s', 's.school_code = R.school_code');
         $this->db->join('festival_master AS f', 'f.fest_id = I.fest_id');
-        $this->db->join('participant_item_details AS p', 'p.participant_id = R.participant_id AND p.item_code = R.item_code', 'LEFT');
+        $this->db->join('sd_participant_item_details AS p', 'p.participant_id = R.participant_id AND p.item_code = R.item_code', 'LEFT');
         $this->db->join('special_order_master AS sp', "p.spo_id = sp.spo_id AND sp.is_publish = 'N'", 'LEFT');
         $this->db->where('R.item_code', $itemid);
         $this->db->where("R.is_finish = 'Y'");
@@ -133,7 +133,7 @@ class Resultindex_Model extends \App\Models\BaseModel {
         $this->db->join('item_master AS I', 'I.item_code = R.item_code');
         $this->db->join('school_master AS s', 's.school_code = R.school_code');
         $this->db->join('festival_master AS f', 'f.fest_id = I.fest_id');
-        $this->db->join('participant_item_details AS p', 'p.participant_id = R.participant_id AND p.item_code = R.item_code', 'LEFT');
+        $this->db->join('sd_participant_item_details AS p', 'p.participant_id = R.participant_id AND p.item_code = R.item_code', 'LEFT');
         $this->db->join('special_order_master AS sp', "sp.spo_id = p.spo_id AND sp.is_publish = 'N'", 'LEFT');
         if ($rank == 'ALL') {
             $this->db->where("R.rank IN(1,2,3)");
@@ -158,7 +158,7 @@ class Resultindex_Model extends \App\Models\BaseModel {
         $this->db->join('item_master AS I', 'I.item_code = R.item_code');
         $this->db->join('school_master AS s', 's.school_code = R.school_code');
         $this->db->join('festival_master AS f', 'f.fest_id = I.fest_id');
-        $this->db->join('participant_item_details AS p', 'p.participant_id = R.participant_id AND p.item_code = R.item_code', 'LEFT');
+        $this->db->join('sd_participant_item_details AS p', 'p.participant_id = R.participant_id AND p.item_code = R.item_code', 'LEFT');
         $this->db->join('special_order_master AS sp', "sp.spo_id = p.spo_id AND sp.is_publish = 'N'", 'LEFT');
         if ($grade == 'ALL') {
             $this->db->where("R.grade IN('A','B','C')");
@@ -236,7 +236,7 @@ class Resultindex_Model extends \App\Models\BaseModel {
         $this->db->join('school_master AS s', 's.school_code = R.school_code');
         $this->db->join('festival_master AS f', 'f.fest_id = I.fest_id');
         $this->db->join('participant_details AS pd', 'pd.participant_id = R.participant_id', 'LEFT');
-        $this->db->join('participant_item_details AS p', 'p.participant_id = R.participant_id AND p.item_code = R.item_code', 'LEFT');
+        $this->db->join('sd_participant_item_details AS p', 'p.participant_id = R.participant_id AND p.item_code = R.item_code', 'LEFT');
         $this->db->join('special_order_master AS sp', "sp.spo_id = p.spo_id AND (sp.is_publish = 'N' OR sp.is_publish IS NULL)", 'LEFT');
         $this->db->join('sub_district_master AS sdm', 's.sub_district_code = sdm.sub_district_code', 'LEFT');
         $this->db->join('rev_district_master AS rdm', 's.rev_district_code = rdm.rev_district_code', 'LEFT');

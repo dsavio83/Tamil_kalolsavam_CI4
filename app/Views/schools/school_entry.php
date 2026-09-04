@@ -1034,7 +1034,7 @@ if (empty($raw_items)) {
 $target_sch = !empty($school_details[0]['school_code']) ? $school_details[0]['school_code'] : $active_code;
 $registered_school_items = [];
 if (!empty($target_sch)) {
-	$registered_school_items = $db->table('participant_item_details PD')
+	$registered_school_items = $db->table('sd_participant_item_details PD')
 		->select('PD.item_code, IM.item_type, IM.max_participants, PD.admn_no')
 		->join('item_master IM', 'IM.item_code = PD.item_code', 'left')
 		->where('PD.school_code', $target_sch)
@@ -3063,7 +3063,7 @@ $show_participants_initial = !empty($active_code) || empty($initial_show_school_
 									$count = 1;
 									for ($j = 0; $j < count($participant_details); $j++) {
 										$target_sch = !empty($school_details[0]['school_code']) ? $school_details[0]['school_code'] : $active_code;
-										$items = $db->table('participant_item_details PD')
+										$items = $db->table('sd_participant_item_details PD')
 											->select('PD.*, IM.item_name')
 											->join('item_master IM', 'IM.item_code = PD.item_code')
 											->where('PD.school_code', $target_sch)

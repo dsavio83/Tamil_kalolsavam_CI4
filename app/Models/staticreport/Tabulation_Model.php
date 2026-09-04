@@ -12,7 +12,7 @@ class Tabulation_Model extends \App\Models\BaseModel {
     function tabulation_details($itemcode) {
 
         //echo $itemcode;
-        $query = "SELECT IM.item_code, IM.item_name FROM (`item_master` AS IM) LEFT JOIN participant_item_details AS PD ON IM.item_code =PD.item_code GROUP BY IM.item_code HAVING IM.item_code =?";
+        $query = "SELECT IM.item_code, IM.item_name FROM (`item_master` AS IM) LEFT JOIN sd_participant_item_details AS PD ON IM.item_code =PD.item_code GROUP BY IM.item_code HAVING IM.item_code =?";
 
         $tabulation_detail = $this->db->query($query, [$itemcode]);
         return $tabulation_detail->getResultArray();

@@ -72,7 +72,7 @@ class Stage_Model extends \App\Models\BaseModel {
             $this->db->where('item_type != "P"');
             $this->db->where('item_code', $this->input->post('code'));
             $this->db->select('COUNT(pi_id) as count');
-            $this->db->from('participant_item_details');
+            $this->db->from('sd_participant_item_details');
             $result2 = $this->db->get();
             $result2 = $result2->getResultArray();
             if (count($result2) > 0) {

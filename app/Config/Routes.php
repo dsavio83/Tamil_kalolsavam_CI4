@@ -402,11 +402,11 @@ $routes->match(['GET', 'POST'], 'report/afterresultreportpdf/datewisepart', 'Rep
 // EXPORT MODULE — District & Sub-District Data Export
 // export/export_district_data: GET renders export form; POST with
 //   hidExport=TRUE streams CSV via Export_Model::get_district_export_data().
-//   Queries sd_result_publish JOIN sd_result_master, participant_item_details,
+//   Queries sd_result_publish JOIN sd_result_master, sd_participant_item_details,
 //   participant_details (grade A, class > 4). Encrypted row integrity.
 // export/export_sub_district_data: POST-only CSV stream for sub-district.
 //   Includes school_master, school_details, participant_details,
-//   participant_item_details with encrypted checksums.
+//   sd_participant_item_details with encrypted checksums.
 // welcome/export_photo: ZIP photo export.
 // All methods enforce login + permission 8 in the Export controller.
 // ------------------------------------------------------------------

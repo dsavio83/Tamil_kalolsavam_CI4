@@ -17,7 +17,7 @@ class SyncCertificateMaster extends Migration
             SELECT RM.item_code, RM.school_code, PID.participant_id, PID.admn_no, RM.grade, RM.rank,
                    PID.parent_admn_no, IF(IFNULL(TRIM(SOM.is_publish), 'Y')='Y', 'N', 'Y') AS is_withheld
             FROM sd_result_master RM
-            JOIN participant_item_details PID ON PID.parent_admn_no=RM.admn_no AND PID.school_code=RM.school_code AND PID.item_code=RM.item_code
+            JOIN sd_participant_item_details PID ON PID.parent_admn_no=RM.admn_no AND PID.school_code=RM.school_code AND PID.item_code=RM.item_code
             LEFT JOIN special_order_master SOM ON SOM.spo_id=PID.spo_id
             GROUP BY PID.participant_id, RM.item_code, RM.school_code, PID.admn_no, RM.grade, RM.rank, PID.parent_admn_no, SOM.is_publish";
             

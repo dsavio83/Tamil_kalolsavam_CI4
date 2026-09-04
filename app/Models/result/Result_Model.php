@@ -17,7 +17,7 @@ class Result_Model extends \App\Models\BaseModel {
         }
 
         $this->db->select("SM.*, IM.*, (SELECT COUNT(PID.participant_id)
-                        FROM participant_item_details PID WHERE PID.item_code = IM.item_code AND PID.is_captain = 'Y' ) AS total_participants ", FALSE);
+                        FROM sd_participant_item_details PID WHERE PID.item_code = IM.item_code AND PID.is_captain = 'Y' ) AS total_participants ", FALSE);
         $this->db->from('item_master AS IM');
         $this->db->join('sd_stage_item_master AS SM', 'IM.item_code = SM.item_code');
         $this->db->where('IM.item_code', $item_code);
@@ -115,7 +115,7 @@ class Result_Model extends \App\Models\BaseModel {
         $this->db->select('spo_id');
         $this->db->where('item_code', $participant_details[0]['item_code']);
         $this->db->where('participant_id', $participant_details[0]['participant_id']);
-        $participant_master = $this->db->get('participant_item_details');
+        $participant_master = $this->db->get('sd_participant_item_details');
         $participant_master = $participant_master->getResultArray();
 
         $spoId = $participant_master[0]['spo_id'];
@@ -295,7 +295,7 @@ class Result_Model extends \App\Models\BaseModel {
             // get all participant (captain only), collect special order entry if any
             $this->db->select('RM.*, PID.spo_id, SOM.is_publish', FALSE);
             $this->db->from('sd_result_master RM');
-            $this->db->join("participant_item_details PID", "PID.participant_id=RM.participant_id AND PID.item_code=RM.item_code");
+            $this->db->join("sd_participant_item_details PID", "PID.participant_id=RM.participant_id AND PID.item_code=RM.item_code");
             $this->db->join("special_order_master SOM", "SOM.spo_id=PID.spo_id", "LEFT");
             $this->db->where('RM.item_code', $item_code);
             $this->db->where('PID.item_code', $item_code);
@@ -498,7 +498,7 @@ class Result_Model extends \App\Models\BaseModel {
                 $this->db->where('PID.item_code', $item_code);
                 $this->db->from('sd_result_master RM');
 
-                $this->db->join("participant_item_details PID", "PID.parent_admn_no=RM.admn_no AND PID.school_code=RM.school_code
+                $this->db->join("sd_participant_item_details PID", "PID.parent_admn_no=RM.admn_no AND PID.school_code=RM.school_code
                             AND PID.item_code=RM.item_code");
                 $this->db->join("special_order_master SOM", "SOM.spo_id=PID.spo_id", "LEFT");
                 $this->db->groupBy('PID.participant_id, RM.item_code, RM.school_code, PID.admn_no, RM.grade, RM.rank, PID.parent_admn_no, SOM.is_publish');
@@ -553,7 +553,7 @@ class Result_Model extends \App\Models\BaseModel {
     function get_absentee_list_select($item_code) {
         $this->db->select('PID.participant_id', FALSE);
         $this->db->from('sd_result_master RM');
-        $this->db->join('participant_item_details PID', 'PID.item_code = RM.item_code AND PID.participant_id=RM.participant_id', 'right');
+        $this->db->join('sd_participant_item_details PID', 'PID.item_code = RM.item_code AND PID.participant_id=RM.participant_id', 'right');
         $this->db->where('PID.item_code', $item_code);
         $this->db->where('PID.is_captain', 'Y');
         $this->db->where('RM.rm_id', NULL);
@@ -596,7 +596,7 @@ class Result_Model extends \App\Models\BaseModel {
                     ),
                     "No"
             ) AS is_confirmed', FALSE);
-        $this->db->from('participant_item_details AS p');
+        $this->db->from('sd_participant_item_details AS p');
         $this->db->join('item_master AS i', 'i.item_code = p.item_code');
         $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id');
         //$this->db->join('sd_stage_item_master AS s','s.item_code= p.item_code','LEFT');
@@ -627,7 +627,7 @@ class Result_Model extends \App\Models\BaseModel {
                 "No"
         ) AS is_confirmed', FALSE);
 
-        $this->db->from('participant_item_details AS p');
+        $this->db->from('sd_participant_item_details AS p');
         $this->db->join('item_master AS i', 'i.item_code = p.item_code');
         $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id');
         //$this->db->join('sd_stage_item_master AS s','s.item_code= p.item_code','LEFT');

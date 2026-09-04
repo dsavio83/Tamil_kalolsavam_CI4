@@ -58,7 +58,7 @@ class Import_Model extends \App\Models\BaseModel {
                             $this->db->emptyTable('school_master');
                             $this->db->emptyTable('school_details');
                             $this->db->emptyTable('participant_details');
-                            $this->db->emptyTable('participant_item_details');
+                            $this->db->emptyTable('sd_participant_item_details');
 
                             for ($i = 3; $i < count($csvData); $i++) {
                                 if (is_array($csvData[$i])) {
@@ -198,7 +198,7 @@ class Import_Model extends \App\Models\BaseModel {
                                             $data_array['spo_remarks'] = $this->sanitizeCsvFormula(trim($csvData[$i][7]));
                                             $data_array['is_captain'] = trim($csvData[$i][8]);
 
-                                            if (!$this->db->insert('participant_item_details', $data_array)) {
+                                            if (!$this->db->insert('sd_participant_item_details', $data_array)) {
                                                 $this->db->transRollback();
                                                 return FALSE;
                                             }
@@ -457,7 +457,7 @@ class Import_Model extends \App\Models\BaseModel {
     function initialize_tables() {
 
         $this->db->emptyTable('participant_details');
-        $this->db->emptyTable('participant_item_details');
+        $this->db->emptyTable('sd_participant_item_details');
         $this->db->emptyTable('sd_certificate_master');
         $this->db->emptyTable('sd_cluster_master');
         $this->db->emptyTable('sd_cluster_participant_details');

@@ -234,7 +234,7 @@ class Allotmentfest_Model extends \App\Models\BaseModel {
             $this->db->select('participant_id');
             //$this->db->orderBy('participant_id');
             $this->db->orderBy('RAND()');
-            $this->db->from('participant_item_details');
+            $this->db->from('sd_participant_item_details');
 
 
             $result2 = $this->db->get();

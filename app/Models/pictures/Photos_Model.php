@@ -25,7 +25,7 @@ return $result->getResultArray();
 function get_item_details($reg_no,$sch_code)
 {
 $dist	=	$this->session->get('DISTRICT');
-$result=$this->db->query("select IM.item_name from participant_item_details as PID,school_master as SM,item_master as IM where PID.admn_no=? and PID.school_code = ? and PID.school_code=SM.school_code and SM.rev_district_code=? and IM.item_code=PID.item_code", [$reg_no, $sch_code, $dist]);
+$result=$this->db->query("select IM.item_name from sd_participant_item_details as PID,school_master as SM,item_master as IM where PID.admn_no=? and PID.school_code = ? and PID.school_code=SM.school_code and SM.rev_district_code=? and IM.item_code=PID.item_code", [$reg_no, $sch_code, $dist]);
 //echo $result;
 if(is_object($result))
 {
