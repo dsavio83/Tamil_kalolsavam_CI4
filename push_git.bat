@@ -44,8 +44,8 @@ echo [*] Committing changes...
 git commit -m "!msg!"
 
 echo.
-echo [*] Pushing to GitHub (origin/master)...
-git push origin master
+echo [*] Pushing to GitHub (origin/main)...
+git push origin main
 
 if %ERRORLEVEL% EQU 0 (
     echo.
