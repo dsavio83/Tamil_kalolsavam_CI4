@@ -1,0 +1,17 @@
+{
+  "name": "tamil-kalolsavam-ci4",
+  "version": "1.0.0",
+  "description": "Tamil Kalolsavam Management System - CodeIgniter 4",
+  "private": true,
+  "scripts": {
+    "start": "php spark serve",
+    "test": "phpunit"
+  },
+  "keywords": [
+    "codeigniter4",
+    "php",
+    "kalolsavam"
+  ],
+  "author": "dsavio83",
+  "license": "MIT"
+}
