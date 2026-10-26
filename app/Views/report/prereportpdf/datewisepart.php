@@ -16,6 +16,8 @@
     }
     -->
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 <?php
 if (!function_exists('fmt_datewise_count')) {
     function fmt_datewise_count($val) {
@@ -66,7 +68,7 @@ if (!empty($hss) && is_array($hss)) {
 
     <table align="center" style="width: 100%;">
         <tr>
-            <td align="center" class="style1" style="font-size: 13px; font-weight: bold; color: #000000; padding-bottom: 8px;">
+            <td align="center" class="report-pdf-title" style="padding-bottom: 3px;">
                 Total participants list<?php
                 if (!empty($date)) {
                     echo ' on ' . datetophpmodel($date);

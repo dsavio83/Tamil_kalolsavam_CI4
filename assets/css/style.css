@@ -10,6 +10,7 @@
 # General
 --------------------------------------------------------------*/
 :root {
+  color-scheme: light !important;
   scroll-behavior: smooth;
   --sidebar-width: 270px;
   --sidebar-collapsed-width: 75px;
@@ -20,6 +21,13 @@
   --primary-light: rgba(65, 84, 241, 0.08);
   --primary-gradient: linear-gradient(135deg, #4154f1 0%, #2b39b0 100%);
   --transition-speed: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input, select, textarea, button,
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  color-scheme: light !important;
 }
 
 body {

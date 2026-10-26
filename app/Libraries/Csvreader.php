@@ -1,6 +1,6 @@
 <?php
 
-if (!defined('BASEPATH'))
+if (!defined('BASEPATH') && !defined('FCPATH') && !defined('SYSTEMPATH'))
     exit('No direct script access allowed');
 
 /**

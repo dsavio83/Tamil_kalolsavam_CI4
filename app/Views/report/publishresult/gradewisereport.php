@@ -21,6 +21,8 @@
         color: #000000;
     }
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 <style>
     @media print
     {
@@ -73,7 +75,7 @@ if (!empty($grade)) {
 
                 <table width="77%" border="0" cellspacing="0" cellpadding="0" align="center" >
                     <tr>
-                        <td height="30" align="center" class="style1">Grade Wise Report</td>
+                        <td height="30" align="center" class="report-pdf-title">Grade Wise Report</td>
                     </tr>
                 </table>
 

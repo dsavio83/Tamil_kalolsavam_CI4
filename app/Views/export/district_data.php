@@ -1,3 +1,32 @@
+<style>
+.export-card-header {
+  padding: 1rem 1.25rem !important;
+}
+.export-card-body {
+  padding: 1.25rem 1.25rem !important;
+}
+.export-info-box {
+  padding: 0.85rem 1.1rem !important;
+}
+.export-info-row {
+  padding: 0.35rem 0 !important;
+}
+.export-guidelines-box {
+  padding: 1.25rem 1.5rem !important;
+  background-color: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+}
+.stat-card-icon {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
+
 <div class="pagetitle mb-4">
   <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
     <div>
@@ -15,12 +44,6 @@
         </ol>
       </nav>
     </div>
-    <div>
-      <button type="button" onclick="window.history.back();" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5 d-inline-flex align-items-center gap-1.5 shadow-sm">
-        <i class="bi bi-arrow-left"></i>
-        <span>Back</span>
-      </button>
-    </div>
   </div>
 </div>
 
@@ -30,7 +53,7 @@
     <div class="row align-items-center g-3">
       <div class="col-12 col-md-7">
         <div class="d-flex align-items-center gap-3">
-          <div class="bg-white bg-opacity-20 rounded-circle p-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 58px; height: 58px; min-width: 58px;">
+          <div class="bg-white bg-opacity-20 rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 58px; height: 58px; min-width: 58px;">
             <i class="bi bi-database-check fs-2 text-white"></i>
           </div>
           <div>
@@ -56,7 +79,7 @@
   <div class="col-6 col-lg-3">
     <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
       <div class="d-flex align-items-center gap-3">
-        <div class="rounded-3 bg-warning-subtle text-warning p-2.5 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+        <div class="rounded-3 bg-warning-subtle text-warning stat-card-icon">
           <i class="bi bi-trophy-fill fs-4"></i>
         </div>
         <div>
@@ -70,7 +93,7 @@
   <div class="col-6 col-lg-3">
     <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
       <div class="d-flex align-items-center gap-3">
-        <div class="rounded-3 bg-primary-subtle text-primary p-2.5 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+        <div class="rounded-3 bg-primary-subtle text-primary stat-card-icon">
           <i class="bi bi-building fs-4"></i>
         </div>
         <div>
@@ -84,12 +107,15 @@
   <div class="col-6 col-lg-3">
     <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
       <div class="d-flex align-items-center gap-3">
-        <div class="rounded-3 bg-info-subtle text-info p-2.5 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+        <div class="rounded-3 bg-info-subtle text-info stat-card-icon">
           <i class="bi bi-images fs-4"></i>
         </div>
         <div>
           <div class="small text-muted fw-semibold">Participant Photos</div>
           <div class="fs-4 fw-bold text-info font-monospace"><?php echo (int)($photo_count ?? 0); ?></div>
+          <?php if (isset($qualifier_photo_count, $total_qualifiers) && $total_qualifiers > 0): ?>
+            <div class="text-muted mt-1" style="font-size: 0.75rem;">Qualifiers: <strong><?php echo (int)$qualifier_photo_count; ?> / <?php echo (int)$total_qualifiers; ?></strong></div>
+          <?php endif; ?>
         </div>
       </div>
     </div>
@@ -98,12 +124,12 @@
   <div class="col-6 col-lg-3">
     <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
       <div class="d-flex align-items-center gap-3">
-        <div class="rounded-3 bg-success-subtle text-success p-2.5 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+        <div class="rounded-3 bg-success-subtle text-success stat-card-icon">
           <i class="bi bi-patch-check-fill fs-4"></i>
         </div>
         <div>
           <div class="small text-muted fw-semibold">Export Format</div>
-          <div class="fs-6 fw-bold text-success font-monospace">CSV & ZIP (Sync)</div>
+          <div class="fs-6 fw-bold text-success font-monospace">CSV &amp; ZIP (Sync)</div>
         </div>
       </div>
     </div>
@@ -115,116 +141,211 @@
 <input type="hidden" name="hidExport" id="hidExport" value="" />
 
 <div class="row g-4 mb-4">
-  <!-- Package 1: Certified District CSV Data -->
-  <div class="col-12 col-md-6">
-    <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
-      <div class="card-header bg-white border-bottom p-3.5 d-flex align-items-center justify-content-between">
-        <div class="d-flex align-items-center gap-2.5">
-          <div class="rounded-circle bg-success-subtle text-success p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-            <i class="bi bi-filetype-csv fs-4"></i>
+  <!-- Package 1: District Official Dataset (CSV) -->
+  <div class="col-12 col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden" style="border: 2px solid #10b981 !important;">
+      <div class="card-header bg-success bg-opacity-10 border-bottom export-card-header d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+          <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-xs" style="width: 38px; height: 38px; min-width: 38px;">
+            <i class="bi bi-table fs-5"></i>
           </div>
           <div>
-            <h6 class="fw-bold mb-0 text-dark">Result Data Package (CSV)</h6>
-            <small class="text-muted">Direct dataset for District Kalolsavam software</small>
+            <h6 class="fw-bold mb-0 text-dark">District Official CSV</h6>
+            <small class="text-success fw-semibold">First with A Grade Only</small>
           </div>
         </div>
-        <span class="badge bg-success-subtle text-success rounded-pill px-2.5 py-1 small font-monospace">OFFICIAL</span>
+        <span class="badge bg-success text-white rounded-pill px-2.5 py-1 small font-monospace">OFFICIAL</span>
       </div>
 
-      <div class="card-body p-4 d-flex flex-column justify-content-between">
+      <div class="card-body export-card-body d-flex flex-column justify-content-between">
         <div>
-          <p class="text-muted small mb-3">
-            Compiles all qualifying Grade 'A' student participants (Classes 5 to 12) across UP, HS, and HSS competitions into a secured, tamper-proof CSV spreadsheet with cryptographic row checksums.
+          <p class="text-muted small mb-3" style="line-height: 1.55;">
+            Exports structured official data for District Kalolsavam: School Profiles, School Infrastructure, First with Grade 'A' Qualifying Participants, and their Event Registrations.
           </p>
 
-          <div class="bg-light p-3 rounded-3 border mb-3">
-            <div class="d-flex align-items-center justify-content-between small text-muted mb-1">
-              <span>Target File:</span>
-              <span class="font-monospace fw-bold text-dark"><?php echo esc($filename_csv ?? 'dist_data.csv'); ?></span>
+          <div class="bg-light export-info-box rounded-3 border mb-3 small">
+            <div class="d-flex align-items-center justify-content-between export-info-row">
+              <span class="text-muted">Filter:</span>
+              <span class="badge bg-success-subtle text-success fw-bold">First with A Grade</span>
             </div>
-            <div class="d-flex align-items-center justify-content-between small text-muted mb-1">
-              <span>Qualification:</span>
-              <span class="badge bg-success-subtle text-success">Grade A Only</span>
+            <div class="d-flex align-items-center justify-content-between export-info-row">
+              <span class="text-muted">Data Scope:</span>
+              <span class="fw-bold text-dark font-monospace">Schools, Students &amp; Events</span>
             </div>
-            <div class="d-flex align-items-center justify-content-between small text-muted">
-              <span>Withheld Items:</span>
-              <span class="badge bg-secondary-subtle text-secondary">Filtered & Excluded</span>
+            <div class="d-flex align-items-center justify-content-between export-info-row">
+              <span class="text-muted">Target:</span>
+              <span class="text-primary fw-semibold">District Kalolsavam</span>
             </div>
           </div>
         </div>
 
         <div class="pt-3 border-top">
-          <button type="button" id="btnExportData" class="btn btn-success w-100 rounded-pill py-2.5 fw-semibold shadow-sm d-inline-flex align-items-center justify-content-center gap-2" onclick="triggerDistrictExport();">
+          <button type="button" id="btnExportData" onclick="triggerDistrictExport();" class="btn btn-success w-100 rounded-pill py-2 px-3 fw-semibold shadow-sm d-inline-flex align-items-center justify-content-center gap-2">
             <i class="bi bi-download fs-5"></i>
-            <span>Export & Download CSV Data</span>
+            <span>Export Official Dataset</span>
           </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Package 2: Participant Photos Archive (ZIP) -->
-  <div class="col-12 col-md-6">
+  <!-- Package 2: Standard Flat Winners Dataset (CSV) -->
+  <div class="col-12 col-md-6 col-xl-3">
     <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
-      <div class="card-header bg-white border-bottom p-3.5 d-flex align-items-center justify-content-between">
-        <div class="d-flex align-items-center gap-2.5">
-          <div class="rounded-circle bg-info-subtle text-info p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-            <i class="bi bi-file-earmark-zip-fill fs-4"></i>
+      <div class="card-header bg-white border-bottom export-card-header d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+          <div class="rounded-circle bg-primary-subtle text-primary p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; min-width: 38px;">
+            <i class="bi bi-filetype-csv fs-5"></i>
           </div>
           <div>
-            <h6 class="fw-bold mb-0 text-dark">Participant Photos Archive (ZIP)</h6>
-            <small class="text-muted">Student passport photos for accreditation & ID cards</small>
+            <h6 class="fw-bold mb-0 text-dark">Winners CSV (V1)</h6>
+            <small class="text-muted">Standardized flat format</small>
           </div>
         </div>
-        <span class="badge bg-info-subtle text-info rounded-pill px-2.5 py-1 small font-monospace">ZIP BUNDLE</span>
+        <span class="badge bg-primary-subtle text-primary rounded-pill px-2.5 py-1 small font-monospace">V1 SPEC</span>
       </div>
 
-      <div class="card-body p-4 d-flex flex-column justify-content-between">
+      <div class="card-body export-card-body d-flex flex-column justify-content-between">
         <div>
-          <p class="text-muted small mb-3">
-            Bundles all student passport photographs into an indexed ZIP archive named with the Sub-District code (<code><?php echo esc($sub_dist_code ?? session()->get('SUB_DISTRICT')); ?></code>) for seamless photo badge and certificate generation at the District level.
+          <p class="text-muted small mb-3" style="line-height: 1.55;">
+            Compiles all qualifying First Rank with Grade 'A' students (Classes 5-12) into a single flat CSV with cryptographic row HMAC checksums.
           </p>
 
-          <div class="bg-light p-3 rounded-3 border mb-3">
-            <div class="d-flex align-items-center justify-content-between small text-muted mb-1">
-              <span>Target File:</span>
-              <span class="font-monospace fw-bold text-dark"><?php echo esc($filename_zip ?? 'photos.zip'); ?></span>
+          <div class="bg-light export-info-box rounded-3 border mb-3 small">
+            <div class="d-flex align-items-center justify-content-between export-info-row">
+              <span class="text-muted">Format:</span>
+              <span class="font-monospace fw-bold text-dark">TK25-CSV-V1</span>
             </div>
-            <div class="d-flex align-items-center justify-content-between small text-muted mb-1">
-              <span>Total Available Photos:</span>
-              <span class="badge bg-info-subtle text-info font-monospace"><?php echo (int)($photo_count ?? 0); ?> Images</span>
+            <div class="d-flex align-items-center justify-content-between export-info-row">
+              <span class="text-muted">Qualification:</span>
+              <span class="badge bg-success-subtle text-success">Rank 1 + Grade A</span>
             </div>
-            <div class="d-flex align-items-center justify-content-between small text-muted">
-              <span>Indexing:</span>
-              <span class="badge bg-primary-subtle text-primary">By Admission Number</span>
+            <div class="d-flex align-items-center justify-content-between export-info-row">
+              <span class="text-muted">LP Section:</span>
+              <span class="badge bg-danger-subtle text-danger">Excluded</span>
             </div>
           </div>
         </div>
 
         <div class="pt-3 border-top">
-          <button type="button" id="btnExportPhotos" class="btn btn-info text-white w-100 rounded-pill py-2.5 fw-semibold shadow-sm d-inline-flex align-items-center justify-content-center gap-2" onclick="triggerPhotosExport();">
+          <a href="<?php echo base_url('export/export_district_winners_csv'); ?>" class="btn btn-outline-primary w-100 rounded-pill py-2 px-3 fw-semibold shadow-xs d-inline-flex align-items-center justify-content-center gap-2">
+            <i class="bi bi-download fs-5"></i>
+            <span>Download CSV (V1)</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Package 3: Participant Photos Archive (ZIP) -->
+  <div class="col-12 col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
+      <div class="card-header bg-white border-bottom export-card-header d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+          <div class="rounded-circle bg-info-subtle text-info p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; min-width: 38px;">
+            <i class="bi bi-file-earmark-zip-fill fs-5"></i>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-0 text-dark">Winners Photos (ZIP)</h6>
+            <small class="text-muted">Rank 1 Grade A photos</small>
+          </div>
+        </div>
+        <span class="badge bg-info-subtle text-info rounded-pill px-2.5 py-1 small font-monospace">PHOTOS</span>
+      </div>
+
+      <div class="card-body export-card-body d-flex flex-column justify-content-between">
+        <div>
+          <p class="text-muted small mb-3" style="line-height: 1.55;">
+            Bundles photographs of only those student participants who qualified (First with A Grade) for the District competition into an indexed archive.
+          </p>
+
+          <div class="bg-light export-info-box rounded-3 border mb-3 small">
+            <div class="d-flex align-items-center justify-content-between export-info-row">
+              <span class="text-muted">Naming:</span>
+              <span class="font-monospace fw-bold text-dark">{sch}_{admn}.jpg</span>
+            </div>
+            <div class="d-flex align-items-center justify-content-between export-info-row">
+              <span class="text-muted">Filter:</span>
+              <span class="badge bg-info-subtle text-info font-monospace">Qualifiers Only</span>
+            </div>
+            <div class="d-flex align-items-center justify-content-between export-info-row">
+              <span class="text-muted">Structure:</span>
+              <span class="badge bg-primary-subtle text-primary">photos/</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-3 border-top">
+          <a href="<?php echo base_url('export/export_winner_photos_zip'); ?>" class="btn btn-outline-info text-info-emphasis w-100 rounded-pill py-2 px-3 fw-semibold shadow-xs d-inline-flex align-items-center justify-content-center gap-2">
             <i class="bi bi-file-zip fs-5"></i>
-            <span>Export & Download Photos (ZIP)</span>
-          </button>
+            <span>Download Photos ZIP</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Package 4: Complete Unified Winner Package (ZIP) -->
+  <div class="col-12 col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden border-primary" style="border: 2px solid #2563eb !important;">
+      <div class="card-header bg-primary bg-opacity-10 border-bottom export-card-header d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+          <div class="rounded-circle bg-primary text-white p-2 d-flex align-items-center justify-content-center shadow-xs" style="width: 38px; height: 38px; min-width: 38px;">
+            <i class="bi bi-box-seam-fill fs-5"></i>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-0 text-dark">Unified Winner Bundle</h6>
+            <small class="text-primary fw-semibold">CSV + Photos + Schools</small>
+          </div>
+        </div>
+        <span class="badge bg-primary text-white rounded-pill px-2.5 py-1 small font-monospace">ALL-IN-ONE</span>
+      </div>
+
+      <div class="card-body export-card-body d-flex flex-column justify-content-between">
+        <div>
+          <p class="text-muted small mb-3" style="line-height: 1.55;">
+            Packs <code>winners.csv</code>, qualifying <code>schools.json</code>, all verified photo files, and <code>manifest.json</code> into a single secured bundle.
+          </p>
+
+          <div class="bg-light export-info-box rounded-3 border mb-3 small">
+            <div class="d-flex align-items-center justify-content-between export-info-row">
+              <span class="text-muted">Contents:</span>
+              <span class="font-monospace fw-bold text-dark">CSV+Schools+Photos</span>
+            </div>
+            <div class="d-flex align-items-center justify-content-between export-info-row">
+              <span class="text-muted">Verification:</span>
+              <span class="badge bg-success-subtle text-success">Automated Matching</span>
+            </div>
+            <div class="d-flex align-items-center justify-content-between export-info-row">
+              <span class="text-muted">Integrity:</span>
+              <span class="badge bg-primary-subtle text-primary">Cryptographic</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-3 border-top">
+          <a href="<?php echo base_url('export/export_winner_package'); ?>" class="btn btn-primary w-100 rounded-pill py-2 px-3 fw-semibold shadow-sm d-inline-flex align-items-center justify-content-center gap-2">
+            <i class="bi bi-download fs-5"></i>
+            <span>Download Unified Bundle</span>
+          </a>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<?php echo form_close(); ?>
 
 <!-- Security & Compliance Guidelines -->
-<div class="card border-0 shadow-sm rounded-4 bg-light p-3.5">
+<div class="card border-0 shadow-sm rounded-4 export-guidelines-box mb-4">
   <div class="d-flex align-items-start gap-3">
-    <div class="rounded-circle bg-secondary-subtle text-secondary p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; min-width: 36px;">
+    <div class="rounded-circle bg-secondary-subtle text-secondary p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; min-width: 40px;">
       <i class="bi bi-info-circle-fill fs-5"></i>
     </div>
     <div>
-      <h6 class="fw-bold mb-1 text-dark">Data Verification Guidelines for District Upload</h6>
-      <ul class="small text-muted mb-0 ps-3">
-        <li>Ensure all competition result entries are completed and officially published before performing the final export.</li>
-        <li>Do not rename the generated CSV file (<code><?php echo esc($filename_csv ?? 'dist_data.csv'); ?></code>), as the District Kalolsavam import wizard validates the sub-district prefix.</li>
+      <h6 class="fw-bold mb-2 text-dark">Data Verification Guidelines for District Upload</h6>
+      <ul class="small text-muted mb-0 ps-3" style="line-height: 1.7;">
+        <li class="mb-1">Ensure all competition result entries are completed and officially published before performing the final export.</li>
+        <li class="mb-1">Do not rename the generated CSV file (<code><?php echo esc($filename_csv ?? 'dist_data.csv'); ?></code>), as the District Kalolsavam import wizard validates the sub-district prefix.</li>
         <li>The accompanying photo archive must be extracted into the District server's photo directory without modifying file names.</li>
       </ul>
     </div>

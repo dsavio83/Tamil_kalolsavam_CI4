@@ -90,23 +90,39 @@ function fncCheckAllotmentDeatils(update)
         $('cmbStage').focus();
         return false;
     }
-    if ($('txtDate').value == '')
-    {
-        swal("Oops!", "Please select date", "error");
-        $('txtDate').focus();
-        return false;
-    }
-    if ($('txtHour').value == '' || $('txtHour').value == 'HH')
-    {
-        swal("Oops!", "Please enter hour", "error");
-        $('txtHour').focus();
-        return false;
-    }
-    if ($('txtMin').value == '' || $('txtMin').value == 'MM')
-    {
-        swal("Oops!", "Please enter minute", "error");
-        $('txtMin').focus();
-        return false;
+    if ($('txtDateTime')) {
+        var dtVal = $('txtDateTime').value.trim();
+        if (!dtVal) {
+            swal("Oops!", "Please select Start Time", "error");
+            $('txtDateTime').focus();
+            return false;
+        }
+        var parts = dtVal.split('T');
+        if (parts.length === 2) {
+            if ($('txtDate')) $('txtDate').value = parts[0];
+            var timeParts = parts[1].split(':');
+            if ($('txtHour')) $('txtHour').value = timeParts[0] || '00';
+            if ($('txtMin')) $('txtMin').value = timeParts[1] || '00';
+        }
+    } else {
+        if ($('txtDate').value == '')
+        {
+            swal("Oops!", "Please select date", "error");
+            $('txtDate').focus();
+            return false;
+        }
+        if ($('txtHour').value == '' || $('txtHour').value == 'HH')
+        {
+            swal("Oops!", "Please enter hour", "error");
+            $('txtHour').focus();
+            return false;
+        }
+        if ($('txtMin').value == '' || $('txtMin').value == 'MM')
+        {
+            swal("Oops!", "Please enter minute", "error");
+            $('txtMin').focus();
+            return false;
+        }
     }
     if ($('cmbNoOfCluster').value == '0')
     {
@@ -186,22 +202,26 @@ function showFormSpinner(btn, label) {
     if (typeof btn === 'string') {
         btn = document.getElementById(btn);
     }
-    if (!btn || btn.disabled) {
+    if (!btn) {
         return true;
     }
     if (label === undefined) {
         label = btn.value || btn.textContent || 'Please wait';
     }
-    btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>' + label;
+    btn.style.pointerEvents = 'none';
+    setTimeout(function() {
+        btn.disabled = true;
+    }, 50);
     return true;
 }
 
 /* ══════════════════════════════════════════════
-   STAGE MODAL — Add / Edit / Delete via AJAX
+   STAGE MODAL & INTERACTIVITY — Add / Edit / Delete / View Toggle / Live Search
    ══════════════════════════════════════════════ */
 
 var sdStageModal = null;
+var sdActiveFilter = 'all';
 
 function sdGetModal() {
     if (!sdStageModal) {
@@ -211,16 +231,144 @@ function sdGetModal() {
     return sdStageModal;
 }
 
-function sdOpenAddModal() {
+function sdSwitchView(mode) {
+    var gridView = document.getElementById('sdGridView');
+    var tableView = document.getElementById('sdTableView');
+    var btnGrid = document.getElementById('sdBtnGridView');
+    var btnTable = document.getElementById('sdBtnTableView');
+
+    if (!gridView || !tableView) return;
+
+    if (mode === 'table') {
+        gridView.style.display = 'none';
+        tableView.style.display = 'block';
+        if (btnGrid) btnGrid.classList.remove('active');
+        if (btnTable) btnTable.classList.add('active');
+    } else {
+        gridView.style.display = 'grid';
+        tableView.style.display = 'none';
+        if (btnGrid) btnGrid.classList.add('active');
+        if (btnTable) btnTable.classList.remove('active');
+    }
+    try {
+        localStorage.setItem('tk_stage_view_mode', mode);
+    } catch(e) {}
+}
+
+function sdSetFilter(filterType, btnEl) {
+    sdActiveFilter = filterType;
+    var pills = document.querySelectorAll('.sd-filter-btn');
+    pills.forEach(function(p) { p.classList.remove('active'); });
+    if (btnEl) btnEl.classList.add('active');
+
+    var searchVal = (document.getElementById('sdLiveSearch') || {}).value || '';
+    sdHandleLiveSearch(searchVal);
+}
+
+function sdHandleLiveSearch(query) {
+    var q = (query || '').toLowerCase().trim();
+    var clearBtn = document.getElementById('sdSearchClearBtn');
+    if (clearBtn) {
+        clearBtn.style.display = q ? 'block' : 'none';
+    }
+
+    var cards = document.querySelectorAll('.sd-stage-card');
+    var rows = document.querySelectorAll('#sdMainDataTable tbody tr');
+    var visibleCount = 0;
+
+    // Filter Cards
+    cards.forEach(function(card) {
+        var name = (card.getAttribute('data-stage-name') || '').toLowerCase();
+        var desc = (card.getAttribute('data-stage-desc') || '').toLowerCase();
+        var fType = card.getAttribute('data-filter-type') || '';
+
+        var matchesFilter = (sdActiveFilter === 'all') || (sdActiveFilter === fType);
+        var matchesSearch = !q || name.indexOf(q) > -1 || desc.indexOf(q) > -1;
+
+        if (matchesFilter && matchesSearch) {
+            card.style.display = '';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    // Filter Table rows
+    rows.forEach(function(row) {
+        var name = (row.getAttribute('data-stage-name') || '').toLowerCase();
+        var desc = (row.getAttribute('data-stage-desc') || '').toLowerCase();
+        var fType = row.getAttribute('data-filter-type') || '';
+
+        var matchesFilter = (sdActiveFilter === 'all') || (sdActiveFilter === fType);
+        var matchesSearch = !q || name.indexOf(q) > -1 || desc.indexOf(q) > -1;
+
+        if (matchesFilter && matchesSearch) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    // Empty state handling
+    var emptyBox = document.getElementById('sdEmptyState');
+    var emptyTitle = document.getElementById('sdEmptyTitle');
+    var emptyText = document.getElementById('sdEmptyText');
+    if (emptyBox) {
+        if (visibleCount === 0 && (q || sdActiveFilter !== 'all')) {
+            emptyBox.style.display = 'block';
+            if (emptyTitle) emptyTitle.textContent = 'No matching stages found';
+            if (emptyText) emptyText.textContent = 'No stages match your search "' + (q || sdActiveFilter) + '".';
+        } else if (cards.length === 0) {
+            emptyBox.style.display = 'block';
+            if (emptyTitle) emptyTitle.textContent = 'No Stages Defined Yet';
+            if (emptyText) emptyText.textContent = 'To schedule festival competitions, start by creating your first stage using the button below.';
+        } else {
+            emptyBox.style.display = 'none';
+        }
+    }
+}
+
+function sdClearSearch() {
+    var input = document.getElementById('sdLiveSearch');
+    if (input) {
+        input.value = '';
+        input.focus();
+    }
+    sdHandleLiveSearch('');
+}
+
+function sdPickPreset(presetText) {
+    var descInput = document.getElementById('sdTxtStageDescription');
+    if (descInput) {
+        descInput.value = presetText;
+        descInput.focus();
+        descInput.classList.add('is-valid');
+        setTimeout(function() {
+            descInput.classList.remove('is-valid');
+        }, 1200);
+    }
+}
+
+function sdOpenAddModal(defaultStageName) {
     var modal = sdGetModal();
     if (!modal) return;
-    document.getElementById('sdModalIcon').className = 'bi bi-plus-circle';
-    document.getElementById('sdModalTitle').textContent = 'Add Stage';
-    document.getElementById('sdSubmitBtnText').textContent = 'Add Stage';
+    document.getElementById('sdModalIcon').className = 'bi bi-plus-circle-fill';
+    document.getElementById('sdModalTitle').textContent = 'Add New Stage';
+    document.getElementById('sdSubmitBtnText').textContent = 'Save Stage';
     document.getElementById('sdStageForm').action = path + 'stage/stage_details/add_stage';
     document.getElementById('sdHidStId').value = '';
-    document.getElementById('sdTxtStageName').value = '';
-    document.getElementById('sdTxtStageDescription').value = '';
+
+    var nameSelect = document.getElementById('sdTxtStageName');
+    if (nameSelect) {
+        if (defaultStageName) {
+            nameSelect.value = defaultStageName;
+        } else {
+            nameSelect.value = '';
+        }
+    }
+    var descInput = document.getElementById('sdTxtStageDescription');
+    if (descInput) descInput.value = '';
+
     modal.show();
 }
 
@@ -228,12 +376,17 @@ function sdOpenEditModal(stageId, stageName, stageDesc) {
     var modal = sdGetModal();
     if (!modal) return;
     document.getElementById('sdModalIcon').className = 'bi bi-pencil-square';
-    document.getElementById('sdModalTitle').textContent = 'Edit Stage';
+    document.getElementById('sdModalTitle').textContent = 'Edit Stage Details';
     document.getElementById('sdSubmitBtnText').textContent = 'Update Stage';
     document.getElementById('sdStageForm').action = path + 'stage/stage_details/update_stage_detials';
     document.getElementById('sdHidStId').value = stageId;
-    document.getElementById('sdTxtStageName').value = stageName;
-    document.getElementById('sdTxtStageDescription').value = stageDesc;
+
+    var nameSelect = document.getElementById('sdTxtStageName');
+    if (nameSelect) nameSelect.value = stageName;
+
+    var descInput = document.getElementById('sdTxtStageDescription');
+    if (descInput) descInput.value = stageDesc;
+
     modal.show();
 }
 
@@ -246,14 +399,21 @@ function sdSubmitStage() {
         document.getElementById('sdTxtStageName').focus();
         return;
     }
-    if (!stageDesc) {
-        showErrorAlert('Please enter a stage description');
+    if (!stageDesc || !stageDesc.trim()) {
+        showErrorAlert('Please enter a stage description / venue');
         document.getElementById('sdTxtStageDescription').focus();
         return;
     }
 
     var form = document.getElementById('sdStageForm');
     var formData = new FormData(form);
+    if (typeof getCsrfToken === 'function') {
+        var csrf = getCsrfToken();
+        if (csrf && !formData.has('csrf_test_name')) {
+            formData.append('csrf_test_name', csrf);
+        }
+    }
+
     var submitBtn = document.getElementById('sdModalSubmitBtn');
     var originalText = submitBtn.innerHTML;
     var submitLabel = (document.getElementById('sdSubmitBtnText') || {}).textContent || 'Saving';
@@ -262,7 +422,10 @@ function sdSubmitStage() {
 
     fetch(form.action, {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
     })
     .then(function(response) { return response.json(); })
     .then(function(data) {
@@ -272,10 +435,10 @@ function sdSubmitStage() {
         if (data.success) {
             var modal = sdGetModal();
             if (modal) modal.hide();
-            showSuccessAlert(data.message || 'Stage saved successfully');
-            setTimeout(function() { location.reload(); }, 1200);
+            showSuccessAlert(data.message || 'Stage details saved successfully!');
+            setTimeout(function() { location.reload(); }, 1000);
         } else {
-            showErrorAlert(data.message || 'An error occurred');
+            showErrorAlert(data.message || 'An error occurred. Please try again.');
         }
     })
     .catch(function() {
@@ -296,33 +459,58 @@ function sdDeleteStage(stageId, triggerEl) {
         confirmButtonText: 'Yes, Delete',
         cancelButtonText: 'Cancel'
     }).then(function(result) {
-        if (result.isConfirmed) {
+        if (result.isConfirmed || result === true) {
             if (triggerEl) {
                 triggerEl.style.pointerEvents = 'none';
                 triggerEl.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
             }
             var formData = new FormData();
             formData.append('hidStageId', stageId);
+            if (typeof getCsrfToken === 'function') {
+                var csrf = getCsrfToken();
+                if (csrf) {
+                    formData.append('csrf_test_name', csrf);
+                }
+            }
 
             fetch(path + 'stage/stage_details/delete_stage_detials', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             })
             .then(function(response) { return response.json(); })
             .then(function(data) {
                 if (data.success) {
-                    showSuccessAlert(data.message || 'Stage deleted successfully');
-                    setTimeout(function() { location.reload(); }, 1200);
+                    showSuccessAlert(data.message || 'Stage deleted successfully!');
+                    setTimeout(function() { location.reload(); }, 1000);
                 } else {
-                    showErrorAlert(data.message || 'Failed to delete stage');
+                    showErrorAlert(data.message || 'Failed to delete stage.');
+                    if (triggerEl) {
+                        triggerEl.style.pointerEvents = '';
+                        triggerEl.innerHTML = '<i class="bi bi-trash3-fill"></i>';
+                    }
                 }
             })
             .catch(function() {
                 showErrorAlert('Network error. Please try again.');
+                if (triggerEl) {
+                    triggerEl.style.pointerEvents = '';
+                    triggerEl.innerHTML = '<i class="bi bi-trash3-fill"></i>';
+                }
             });
         }
     });
 }
+
+// Restore saved view mode on page load
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        var savedMode = localStorage.getItem('tk_stage_view_mode') || 'grid';
+        sdSwitchView(savedMode);
+    } catch(e) {}
+});
 
 /* ══════════════════════════════════════════════
    LEGACY — Keep for backward compatibility

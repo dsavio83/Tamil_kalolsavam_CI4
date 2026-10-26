@@ -7,7 +7,8 @@ function getItemCertificate(itemcode) {
     var form = getEl('formIWPq');
     if (hid && form) {
         hid.value = itemcode;
-        form.action = path + 'certificate/certificate/get_certificate_itemwise';
+        var isDistrict = window.location.pathname.indexOf('/district/') !== -1;
+        form.action = path + (isDistrict ? 'district/certificate/get_certificate_itemwise' : 'certificate/certificate/get_certificate_itemwise');
         form.submit();
     }
 }
@@ -41,7 +42,8 @@ function getSchoolWiseCertificate(schoolCode) {
     var form = getEl('formIWPq');
     if (hid && form) {
         hid.value = schoolCode;
-        form.action = path + 'certificate/certificate/get_certificate_school_wise';
+        var isDistrict = window.location.pathname.indexOf('/district/') !== -1;
+        form.action = path + (isDistrict ? 'district/certificate/get_certificate_school_wise' : 'certificate/certificate/get_certificate_school_wise');
         form.submit();
     }
 }

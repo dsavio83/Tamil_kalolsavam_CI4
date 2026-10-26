@@ -4690,5 +4690,14 @@ if (!class_exists('App\Controllers\Result\HTML2PDF', false)) {
 if (!class_exists('App\Controllers\HTML2PDF', false)) {
     class_alias('HTML2PDF', 'App\Controllers\HTML2PDF');
 }
+if (!class_exists('App\Controllers\User\HTML2PDF', false)) {
+    class_alias('HTML2PDF', 'App\Controllers\User\HTML2PDF');
+}
+if (!class_exists('App\Controllers\Staticreport\HTML2PDF', false)) {
+    class_alias('HTML2PDF', 'App\Controllers\Staticreport\HTML2PDF');
+}
+if (!class_exists('App\Controllers\Schools\HTML2PDF', false)) {
+    class_alias('HTML2PDF', 'App\Controllers\Schools\HTML2PDF');
+}
 
 

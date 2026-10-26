@@ -1,3 +1,15 @@
+<?php
+$total_events_count = 0;
+if (!empty($order_by_date) && is_array($order_by_date)) {
+    foreach ($order_by_date as $d => $stgs) {
+        if (!is_array($stgs)) continue;
+        foreach ($stgs as $stg => $evts) {
+            if (is_array($evts)) $total_events_count += count($evts);
+        }
+    }
+}
+?>
+
 <div class="pagetitle mb-3 d-print-none">
   <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
     <div>
@@ -5,7 +17,7 @@
         <i class="bi bi-list-ol text-primary"></i>
         <span>Order of Events</span>
       </h1>
-      <p class="text-muted small mb-0">Chronological timetable of events and stage allotments for <strong><?php echo esc($selected_festival); ?></strong></p>
+      <p class="text-muted small mb-0">Chronological timetable of events for <strong><?php echo esc($selected_festival); ?></strong></p>
     </div>
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb mb-0 bg-light px-3 py-1.5 rounded-pill border">
@@ -40,7 +52,7 @@
               <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-0.5 small">Live Timetable</span>
             </div>
             <div class="text-muted small mt-1">
-              Showing chronological event sequence across all designated stages
+              Showing chronological event sequence arranged by start time
             </div>
           </div>
         </div>
@@ -80,34 +92,36 @@
 
     <hr class="my-3 text-muted opacity-25">
 
-    <!-- Search Box & Filter Stats -->
+    <!-- Search Box, Time Filter & Filter Stats -->
     <div class="row g-3 align-items-center justify-content-between">
       <div class="col-12 col-md-6 col-lg-5">
         <div class="input-group input-group-sm shadow-2xs">
           <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
           <input type="text" id="orderFilterInput" class="form-control border-start-0 border-end-0 ps-0" placeholder="Search event name, code, time, or stage..." autocomplete="off">
-          <button class="btn btn-white bg-white border border-start-0 text-muted" type="button" onclick="document.getElementById('orderFilterInput').value=''; document.getElementById('orderFilterInput').dispatchEvent(new Event('input'));" title="Clear">
+          <button class="btn btn-white bg-white border border-start-0 text-muted" type="button" onclick="document.getElementById('orderFilterInput').value=''; applyOrderFilters();" title="Clear Search">
             <i class="bi bi-x-circle"></i>
           </button>
         </div>
       </div>
-      <div class="col-12 col-md-6 text-md-end">
-        <?php
-        $total_dates_count = !empty($order_by_date) ? count($order_by_date) : 0;
-        $total_events_count = 0;
-        if (!empty($order_by_date)) {
-            foreach ($order_by_date as $d => $stgs) {
-                foreach ($stgs as $stg => $evts) {
-                    $total_events_count += count($evts);
-                }
-            }
-        }
-        ?>
-        <div class="d-inline-flex align-items-center gap-2">
-          <span class="badge bg-light text-secondary border rounded-pill px-3 py-1.5 font-monospace">
-            <i class="bi bi-calendar-event me-1"></i><?php echo $total_dates_count; ?> Days
+
+      <div class="col-12 col-md-6 col-lg-7">
+        <div class="d-flex align-items-center justify-content-md-end gap-2 flex-wrap">
+          <span class="text-muted small fw-semibold"><i class="bi bi-clock-history me-1"></i>Time Filter:</span>
+          <div class="input-group input-group-sm" style="max-width: 150px;">
+            <span class="input-group-text bg-white text-muted border-end-0">From</span>
+            <input type="time" id="timeFromInput" class="form-control border-start-0">
+          </div>
+          <div class="input-group input-group-sm" style="max-width: 150px;">
+            <span class="input-group-text bg-white text-muted border-end-0">To</span>
+            <input type="time" id="timeToInput" class="form-control border-start-0">
+          </div>
+          <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill fw-semibold" onclick="clearTimeFilter()" title="Clear Time Filter">
+            <i class="bi bi-x-circle me-1"></i>Clear
+          </button>
+          <span class="badge bg-light text-secondary border rounded-pill px-3 py-1.5 font-monospace ms-1">
+            <i class="bi bi-calendar-event me-1"></i><?php echo count($order_by_date); ?> Days
           </span>
-          <span class="badge bg-light text-primary border rounded-pill px-3 py-1.5 font-monospace">
+          <span id="eventsCountBadge" class="badge bg-light text-primary border rounded-pill px-3 py-1.5 font-monospace">
             <i class="bi bi-trophy me-1"></i><?php echo $total_events_count; ?> Events
           </span>
         </div>
@@ -116,7 +130,20 @@
   </div>
 </div>
 
-<!-- Schedule Timeline Container -->
+
+<!-- No Results Message (shown when filters hide everything) -->
+<div id="noFilterResults" class="card border-0 shadow-sm rounded-4 p-5 text-center my-4 d-none" style="border: 1px solid #e2e8f0 !important;">
+  <div class="empty-state-container py-3">
+    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-inline-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 70px; height: 70px;">
+      <i class="bi bi-search fs-2"></i>
+    </div>
+    <h5 class="fw-bold text-dark mb-1">No Matching Events</h5>
+    <p class="text-muted mb-3 small" style="max-width: 420px; margin: 0 auto;">No events match the current search or time filter. Adjust or clear the filters to see the full schedule.</p>
+    <button type="button" class="btn btn-outline-primary btn-sm rounded-pill fw-semibold" onclick="clearAllFilters()">Clear All Filters</button>
+  </div>
+</div>
+
+<!-- Schedule Table Container -->
 <?php if (empty($order_by_date) || !is_array($order_by_date)): ?>
   <div class="card border-0 shadow-sm rounded-4 p-5 text-center my-4" style="border: 1px solid #e2e8f0 !important;">
     <div class="empty-state-container py-3">
@@ -136,84 +163,80 @@
 
   <?php foreach ($order_by_date as $date => $stages): ?>
     <?php if (!is_array($stages)) continue; ?>
-    
-    <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden order-date-card" style="border: 1px solid #e2e8f0 !important;">
-      <!-- Date Header -->
-      <div class="card-header py-3 px-4 d-flex align-items-center justify-content-between flex-wrap gap-2" style="background: linear-gradient(135deg, #1e293b, #0f172a) !important; color: #fff;">
-        <div class="d-flex align-items-center gap-2">
-          <div class="rounded-circle bg-white bg-opacity-20 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-            <i class="bi bi-calendar-event text-white"></i>
-          </div>
-          <h5 class="mb-0 fw-bold text-white">Date: <?php echo esc($date); ?></h5>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-          <span class="badge bg-white text-dark rounded-pill px-3 py-1 font-monospace fw-bold">
-            <?php echo count($stages); ?> Stage<?php echo count($stages) > 1 ? 's' : ''; ?>
-          </span>
-        </div>
+
+    <?php
+      // Flatten all items from every stage for this date and sort by time
+      $flat_items = array();
+      foreach ($stages as $stage => $items) {
+          if (!is_array($items)) continue;
+          foreach ($items as $item) {
+              $item['stage_name'] = $stage;
+              $flat_items[] = $item;
+          }
+      }
+      usort($flat_items, function($a, $b) {
+          $timeA = strtotime($a['time'] ?: '00:00');
+          $timeB = strtotime($b['time'] ?: '00:00');
+          if ($timeA == $timeB) {
+              return strcmp($a['stage_name'], $b['stage_name']);
+          }
+          return $timeA - $timeB;
+      });
+    ?>
+
+    <div class="order-date-section mb-4" data-date="<?php echo esc($date); ?>">
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+        <h5 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+          <i class="bi bi-calendar-event text-primary"></i>Date: <?php echo esc($date); ?>
+        </h5>
+        <span class="badge bg-light text-secondary border rounded-pill px-3 py-1 font-monospace fw-bold">
+          <?php echo count($flat_items); ?> Event<?php echo count($flat_items) != 1 ? 's' : ''; ?>
+        </span>
       </div>
 
-      <div class="card-body p-3 p-md-4">
-        <div class="row g-3 g-md-4">
-          <?php foreach ($stages as $stage => $items): ?>
-            <?php if (!is_array($items)) continue; ?>
-            <div class="col-12 col-xl-6 order-stage-col">
-              <div class="border rounded-4 h-100 overflow-hidden bg-white shadow-xs" style="border-color: #e2e8f0 !important;">
-                <!-- Stage Header -->
-                <div class="py-2.5 px-3 border-bottom d-flex align-items-center justify-content-between" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0 !important;">
-                  <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-primary rounded-circle p-1 d-inline-flex align-items-center justify-content-center" style="width: 22px; height: 22px;">
-                      <i class="bi bi-geo-alt-fill fs-8"></i>
-                    </span>
-                    <h6 class="mb-0 fw-bold text-dark fs-6"><?php echo esc($stage); ?></h6>
-                  </div>
-                  <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill px-2.5 py-1 font-monospace small fw-bold">
-                    <?php echo count($items); ?> Items
-                  </span>
-                </div>
-
-                <!-- Items Table -->
-                <div class="table-responsive">
-                  <table class="table table-hover align-middle mb-0 order-items-table">
-                    <thead>
-                      <tr class="text-uppercase text-secondary fw-semibold border-bottom" style="font-size: 11px; letter-spacing: 0.5px; background-color: #fbfcfe;">
-                        <th class="ps-3 py-2 text-center" style="width: 22%;">Time</th>
-                        <th class="py-2" style="width: 58%;">Event / Competition</th>
-                        <th class="pe-3 py-2 text-center" style="width: 20%;">Category</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <?php foreach ($items as $item): ?>
-                        <tr class="order-item-row" data-search="<?php echo strtolower(($item['item_code'] ?? '') . ' ' . $item['item_name'] . ' ' . $item['time'] . ' ' . $item['fest_category'] . ' ' . $stage); ?>">
-                          <td class="ps-3 py-2.5 text-center">
-                            <span class="badge bg-light text-dark border font-monospace px-2.5 py-1 fw-semibold d-inline-flex align-items-center gap-1">
-                              <i class="bi bi-clock text-primary"></i><?php echo esc($item['time']); ?>
-                            </span>
-                          </td>
-                          <td class="py-2.5">
-                            <div class="d-flex align-items-center gap-2">
-                              <?php if (!empty($item['item_code'])): ?>
-                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace px-2 py-0.5 rounded-pill small">
-                                  <?php echo esc($item['item_code']); ?>
-                                </span>
-                              <?php endif; ?>
-                              <span class="fw-bold text-dark fs-7"><?php echo esc($item['item_name']); ?></span>
-                            </div>
-                          </td>
-                          <td class="pe-3 py-2.5 text-center">
-                            <span class="badge bg-secondary-subtle text-secondary border font-monospace px-2.5 py-1 rounded-pill">
-                              <?php echo esc($item['fest_category']); ?>
-                            </span>
-                          </td>
-                        </tr>
-                      <?php endforeach; ?>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          <?php endforeach; ?>
-        </div>
+      <div class="table-responsive">
+        <table class="order-table align-middle mb-0">
+          <thead>
+            <tr>
+              <th style="width: 6%;">Sl.No</th>
+              <th style="width: 11%;">Time</th>
+              <th style="width: 17%;">Stage</th>
+              <th style="width: 44%;">Event / Competition</th>
+              <th style="width: 14%;">Category</th>
+              <th class="print-only">Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php
+              $serial_no = 1;
+              $ts = 0;
+            ?>
+            <?php foreach ($flat_items as $item): ?>
+              <?php
+                $ts = strtotime($item['time'] ?: '00:00');
+                $minutes = ((int) date('G', $ts)) * 60 + ((int) date('i', $ts));
+              ?>
+              <tr class="order-item-row"
+                  data-minutes="<?php echo $minutes; ?>"
+                  data-search="<?php echo strtolower(($item['item_code'] ?? '') . ' ' . $item['item_name'] . ' ' . $item['time'] . ' ' . $item['fest_category'] . ' ' . $item['stage_name']); ?>">
+                <td><?php echo $serial_no++; ?></td>
+                <td class="td-time"><?php echo esc($item['time']); ?></td>
+                <td><?php echo esc($item['stage_name']); ?></td>
+                <td>
+                  <?php if (!empty($item['item_code'])): ?>
+                    <?php echo esc($item['item_code']); ?> - 
+                  <?php endif; ?>
+                  <?php echo esc($item['item_name']); ?>
+                  <?php if (!empty($item['participant_count'])): ?>
+                    <strong>(<?php echo (int)$item['participant_count']; ?>)</strong>
+                  <?php endif; ?>
+                </td>
+                <td><?php echo esc($item['fest_category']); ?></td>
+                <td class="print-only"></td>
+              </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
       </div>
     </div>
   <?php endforeach; ?>
@@ -221,43 +244,94 @@
 <?php endif; ?>
 
 <script>
+function toMinutes(timeValue) {
+  if (!timeValue) return null;
+  var parts = timeValue.split(":");
+  if (parts.length !== 2) return null;
+  return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+}
+
+function applyOrderFilters() {
+  var filterInput = document.getElementById("orderFilterInput");
+  var fromInput = document.getElementById("timeFromInput");
+  var toInput = document.getElementById("timeToInput");
+
+  var query = filterInput ? filterInput.value.trim().toLowerCase() : "";
+  var fromMin = toMinutes(fromInput ? fromInput.value : null);
+  var toMin = toMinutes(toInput ? toInput.value : null);
+
+  var rows = document.querySelectorAll("tr.order-item-row");
+  var visibleCount = 0;
+
+  rows.forEach(function(row) {
+    var show = true;
+    var searchData = row.getAttribute("data-search") || row.textContent.toLowerCase();
+
+    if (query && searchData.indexOf(query) === -1) {
+      show = false;
+    }
+
+    if (show && fromMin !== null) {
+      var rowMin = parseInt(row.getAttribute("data-minutes") || "0", 10);
+      if (rowMin < fromMin) show = false;
+    }
+    if (show && toMin !== null) {
+      var rowMin2 = parseInt(row.getAttribute("data-minutes") || "0", 10);
+      if (rowMin2 > toMin) show = false;
+    }
+
+    row.style.display = show ? "" : "none";
+    if (show) visibleCount++;
+  });
+
+  // Hide empty date sections
+  document.querySelectorAll(".order-date-section").forEach(function(section) {
+    var visibleRows = section.querySelectorAll("tr.order-item-row:not([style*='display: none'])");
+    section.style.display = visibleRows.length > 0 ? "" : "none";
+  });
+
+  var eventsBadge = document.getElementById("eventsCountBadge");
+  if (eventsBadge) {
+    eventsBadge.innerHTML = '<i class="bi bi-trophy me-1"></i>' + visibleCount + ' / <span id="totalEventsLabel"></span>';
+    document.getElementById("totalEventsLabel").textContent = <?php echo $total_events_count; ?>;
+  }
+
+  var noResults = document.getElementById("noFilterResults");
+  var hasAnySections = document.querySelectorAll(".order-date-section:not([style*='display: none'])").length;
+  var hasFiltering = (query !== "") || (fromMin !== null) || (toMin !== null);
+
+  if (noResults) {
+    if (hasFiltering && hasAnySections === 0) {
+      noResults.classList.remove("d-none");
+    } else {
+      noResults.classList.add("d-none");
+    }
+  }
+}
+
+function clearTimeFilter() {
+  var fromInput = document.getElementById("timeFromInput");
+  var toInput = document.getElementById("timeToInput");
+  if (fromInput) fromInput.value = "";
+  if (toInput) toInput.value = "";
+  applyOrderFilters();
+}
+
+function clearAllFilters() {
+  var filterInput = document.getElementById("orderFilterInput");
+  if (filterInput) filterInput.value = "";
+  clearTimeFilter();
+}
+
 document.addEventListener("DOMContentLoaded", function() {
   var filterInput = document.getElementById("orderFilterInput");
   if (filterInput) {
-    filterInput.addEventListener("input", function() {
-      var query = this.value.trim().toLowerCase();
-      var rows = document.querySelectorAll("tr.order-item-row");
-
-      rows.forEach(function(row) {
-        var searchData = row.getAttribute("data-search") || row.textContent.toLowerCase();
-        if (!query || searchData.indexOf(query) !== -1) {
-          row.style.display = "";
-        } else {
-          row.style.display = "none";
-        }
-      });
-
-      // Also hide empty stage cards if all rows inside are hidden
-      document.querySelectorAll(".order-stage-col").forEach(function(col) {
-        var visibleRows = col.querySelectorAll("tr.order-item-row:not([style*='display: none'])");
-        if (query && visibleRows.length === 0) {
-          col.style.display = "none";
-        } else {
-          col.style.display = "";
-        }
-      });
-
-      // Hide empty date cards
-      document.querySelectorAll(".order-date-card").forEach(function(card) {
-        var visibleCols = card.querySelectorAll(".order-stage-col:not([style*='display: none'])");
-        if (query && visibleCols.length === 0) {
-          card.style.display = "none";
-        } else {
-          card.style.display = "";
-        }
-      });
-    });
+    filterInput.addEventListener("input", applyOrderFilters);
   }
+  var fromInput = document.getElementById("timeFromInput");
+  var toInput = document.getElementById("timeToInput");
+  if (fromInput) fromInput.addEventListener("change", applyOrderFilters);
+  if (toInput) toInput.addEventListener("change", applyOrderFilters);
 });
 
 function loadFestivalEvents(selectElem) {
@@ -292,12 +366,46 @@ function loadFestivalEvents(selectElem) {
   100% { transform: rotate(360deg); }
 }
 
+/* Ordinary bordered table (plain, no decoration) */
+.order-table {
+  border-collapse: collapse;
+  width: 100%;
+  background: #fff;
+}
+.order-table th,
+.order-table td {
+  border: 1px solid #000;
+  padding: 5px 8px;
+  font-size: 13px;
+  vertical-align: middle;
+}
+.order-table tbody tr {
+  height: 38px;
+}
+.order-table td.td-time {
+  white-space: nowrap;
+  overflow: hidden;
+}
+.order-table thead th {
+  font-weight: 700;
+  text-align: center;
+}
+.print-only {
+  display: none;
+}
+
+@page {
+  size: A4 portrait;
+  margin: 14mm 12mm;
+}
+
 @media print {
   body {
     background: #fff !important;
-    font-size: 11pt !important;
+    font-size: 12pt !important;
+    color: #000 !important;
   }
-  #header, #sidebar, .pagetitle, .btn, .d-print-none {
+  #header, #sidebar, .pagetitle, .btn, #noFilterResults, .d-print-none {
     display: none !important;
   }
   #main {
@@ -305,22 +413,57 @@ function loadFestivalEvents(selectElem) {
     padding: 0 !important;
   }
   .card {
-    border: 1px solid #cbd5e1 !important;
+    border: none !important;
     box-shadow: none !important;
-    page-break-inside: avoid;
-    margin-bottom: 1.5rem !important;
+    padding: 0 !important;
+    background: #fff !important;
   }
-  .card-header {
-    background: #f1f5f9 !important;
-    color: #0f172a !important;
-    border-bottom: 2px solid #334155 !important;
+  .order-date-section {
+    margin-bottom: 1.2rem !important;
   }
-  .order-stage-col {
-    width: 50% !important;
-    float: left !important;
+  .order-date-section .table-responsive {
+    overflow: visible !important;
   }
-  .table th, .table td {
+  .order-date-section h5 {
+    font-size: 12pt !important;
+    color: #000 !important;
+  }
+  .order-date-section h5 i,
+  .order-date-section h5 .bi {
+    display: none !important;
+  }
+  .order-date-section .badge {
+    display: none !important;
+  }
+  .order-table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+  .order-table th,
+  .order-table td {
+    border: 1px solid #000 !important;
     padding: 5px 8px !important;
+    font-size: 12pt !important;
+    color: #000 !important;
+    background: #fff !important;
+  }
+  .order-table thead {
+    display: table-header-group;
+  }
+  .order-table thead th {
+    font-weight: 700 !important;
+    text-align: center !important;
+  }
+  .order-table tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .order-table td.td-time {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+  }
+  .print-only {
+    display: table-cell !important;
   }
 }
 </style>

@@ -98,15 +98,17 @@
     }
 
     $date = '';
-    $hour = 'HH';
-    $minute = 'MM';
+    $hour = '';
+    $minute = '';
+    $dt_val = '';
     if (!empty($alloted_records[0]['start_time'])) {
-        $explode_date = explode(' ', $alloted_records[0]['start_time']);
-        $date = $explode_date[0];
-        if (!empty($explode_date[1])) {
-            $time_explode = explode(':', $explode_date[1]);
-            $hour = $time_explode[0];
-            $minute = $time_explode[1];
+        $st = $alloted_records[0]['start_time'];
+        if ($st && $st !== '0000-00-00 00:00:00' && strtotime($st) > 0) {
+            $ts = strtotime($st);
+            $dt_val = date('Y-m-d\TH:i', $ts);
+            $date = date('Y-m-d', $ts);
+            $hour = date('H', $ts);
+            $minute = date('i', $ts);
         }
     }
 
@@ -125,7 +127,7 @@
 
     <div class="row g-3">
       <!-- Stage -->
-      <div class="col-12 col-md-6 col-lg-4">
+      <div class="col-12 col-md-6">
         <label for="cmbStage" class="form-label fw-bold text-dark small d-flex align-items-center gap-1">
           <i class="bi bi-building text-primary"></i>
           <span>Stage Venue <span class="text-danger">*</span></span>
@@ -133,30 +135,28 @@
         <?php echo form_dropdown("cmbStage", $stage_array, @$alloted_records[0]['stage_id'], 'id="cmbStage" class="form-select py-2" required'); ?>
       </div>
 
-      <!-- Date -->
-      <div class="col-12 col-md-6 col-lg-4">
-        <label for="txtDate" class="form-label fw-bold text-dark small d-flex align-items-center gap-1">
-          <i class="bi bi-calendar-event text-primary"></i>
-          <span>Date <span class="text-danger">*</span></span>
-        </label>
-        <?php echo form_dropdown("txtDate", @$date_array, $date, 'class="form-select py-2" id="txtDate" required'); ?>
-      </div>
-
-      <!-- Time -->
-      <div class="col-12 col-md-6 col-lg-4">
-        <label class="form-label fw-bold text-dark small d-flex align-items-center gap-1">
-          <i class="bi bi-clock text-primary"></i>
+      <!-- Start Time (Unified Date & Time) -->
+      <div class="col-12 col-md-6">
+        <label for="txtDateTime" class="form-label fw-bold text-dark small d-flex align-items-center gap-1">
+          <i class="bi bi-calendar2-week text-primary"></i>
           <span>Start Time (HH:MM) <span class="text-danger">*</span></span>
         </label>
-        <div class="d-flex align-items-center gap-1">
-          <div class="flex-fill">
-            <?php echo form_dropdown("txtHour", @$hour_array, ($hour !== '') ? $hour : 'HH', 'class="form-select py-2 font-monospace" id="txtHour" maxlength="2" onfocus="javascript:clearText(\'txtHour\', \'HH\')" onBlur="javascript:clearText(\'txtHour\', \'HH\')" onkeyup="javascript:change_text_max_to_focus(\'txtHour\', \'txtMin\', \'2\')" required'); ?>
-          </div>
-          <span class="fw-bold text-muted">:</span>
-          <div class="flex-fill">
-            <?php echo form_dropdown("txtMin", @$min_array, ($minute !== '') ? $minute : 'MM', 'class="form-select py-2 font-monospace" id="txtMin" maxlength="2" onfocus="javascript:clearText(\'txtMin\', \'MM\')" onBlur="javascript:clearText(\'txtMin\', \'MM\')" required'); ?>
-          </div>
+        <div class="input-group">
+          <span class="input-group-text bg-light text-muted"><i class="bi bi-clock-history"></i></span>
+          <input type="datetime-local" 
+                 step="60" 
+                 name="txtDateTime" 
+                 id="txtDateTime" 
+                 value="<?php echo esc($dt_val); ?>" 
+                 style="color-scheme: light !important;"
+                 class="form-control py-2 font-monospace shadow-none" 
+                 onchange="syncSingleAllotmentDateTime(this.value)"
+                 oninput="syncSingleAllotmentDateTime(this.value)"
+                 required>
         </div>
+        <input type="hidden" name="txtDate" id="txtDate" value="<?php echo esc($date); ?>">
+        <input type="hidden" name="txtHour" id="txtHour" value="<?php echo esc($hour); ?>">
+        <input type="hidden" name="txtMin" id="txtMin" value="<?php echo esc($minute); ?>">
       </div>
 
       <!-- Clusters -->
@@ -341,3 +341,31 @@
 <?php } ?>
 
 </div>
+
+<script>
+function syncSingleAllotmentDateTime(val) {
+  if (!val) {
+    if (document.getElementById('txtDate')) document.getElementById('txtDate').value = '';
+    if (document.getElementById('txtHour')) document.getElementById('txtHour').value = '';
+    if (document.getElementById('txtMin')) document.getElementById('txtMin').value = '';
+    return;
+  }
+  var parts = val.split('T');
+  if (parts.length === 2) {
+    var dateEl = document.getElementById('txtDate');
+    var hourEl = document.getElementById('txtHour');
+    var minEl = document.getElementById('txtMin');
+    if (dateEl) dateEl.value = parts[0];
+    var timeParts = parts[1].split(':');
+    if (hourEl) hourEl.value = timeParts[0] || '00';
+    if (minEl) minEl.value = timeParts[1] || '00';
+  }
+}
+</script>
+
+<style>
+#txtDateTime,
+input[type="datetime-local"] {
+  color-scheme: light !important;
+}
+</style>

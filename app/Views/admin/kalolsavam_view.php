@@ -5,139 +5,119 @@
 
 <style>
 :root {
-  --primary-gradient: linear-gradient(135deg, #2563eb 0%, #4f46e5 50%, #7c3aed 100%);
-  --secondary-gradient: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
-  --accent-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-  --card-hover-shadow: 0 16px 32px rgba(79, 70, 229, 0.18);
+  --primary-accent: #2563eb;
+  --primary-hover: #1d4ed8;
+  --slate-border: #e2e8f0;
+  --slate-bg: #f8fafc;
+  --card-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04);
+  --card-hover-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.08);
 }
 
-.kalolsavam-container {
+.kalolsavam-dashboard-container {
   padding: 12px 0 35px 0;
-  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #0f172a;
 }
 
-/* Header Hero Banner */
-.header-hero {
-  background: var(--primary-gradient);
-  border-radius: 18px;
-  padding: 26px 32px;
-  color: #ffffff;
-  box-shadow: 0 10px 25px rgba(79, 70, 229, 0.28);
-  margin-bottom: 24px;
-  position: relative;
-  overflow: hidden;
-}
-
-.header-hero h1 {
-  font-size: 1.65rem;
-  font-weight: 700;
-  margin: 0 0 6px 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #ffffff;
-}
-
-.header-hero p {
-  margin: 0;
-  opacity: 0.9;
-  font-size: 0.92rem;
-}
-
-.header-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(8px);
-  padding: 5px 14px;
-  border-radius: 24px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  margin-bottom: 10px;
-}
-
-/* KPI Overview Cards */
-.kpi-card {
+/* 1. Hero Header Card */
+.hero-header-card {
   background: #ffffff;
   border-radius: 16px;
-  padding: 22px 24px;
+  border: 1px solid var(--slate-border);
   box-shadow: var(--card-shadow);
-  border: 1px solid #e2e8f0;
-  transition: all 0.25s ease;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  gap: 18px;
+  padding: 1.5rem 1.75rem;
 }
 
-.kpi-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--card-hover-shadow);
-}
-
-.kpi-icon-box {
+.header-icon-box {
   width: 52px;
   height: 52px;
   border-radius: 14px;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  color: #2563eb;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   flex-shrink: 0;
-  color: #ffffff;
 }
 
-.kpi-icon-indigo { background: linear-gradient(135deg, #4f46e5, #6366f1); }
-.kpi-icon-purple { background: linear-gradient(135deg, #7c3aed, #a855f7); }
-.kpi-icon-sky    { background: linear-gradient(135deg, #0284c7, #38bdf8); }
-.kpi-icon-amber  { background: linear-gradient(135deg, #d97706, #f59e0b); }
-
-.kpi-content h6 {
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  color: #64748b;
-  font-weight: 600;
-  margin: 0 0 4px 0;
-  letter-spacing: 0.5px;
+/* 2. KPI Summary Tiles */
+.kpi-tile {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid var(--slate-border);
+  padding: 1.15rem 1.25rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  box-shadow: 0 2px 8px -1px rgba(15, 23, 42, 0.04);
+  height: 100%;
 }
 
-.kpi-content h4 {
-  font-size: 1.15rem;
-  font-weight: 700;
+.kpi-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-hover-shadow);
+}
+
+.kpi-tile .icon-wrap {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+}
+
+.kpi-tile .val {
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
   color: #0f172a;
-  margin: 0;
 }
 
-/* Modern Form Card */
+.kpi-tile .lbl {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  margin-top: 0.35rem;
+}
+
+.kpi-tile .sub-text {
+  font-size: 0.76rem;
+  color: #94a3b8;
+  margin-top: 0.2rem;
+}
+
+/* 3. Modern Form Card */
 .modern-form-card {
   background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
-  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  border: 1px solid var(--slate-border);
   overflow: hidden;
   margin-bottom: 25px;
-  animation: fadeIn 0.3s ease-out;
+  animation: slideDown 0.25s ease-out;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .form-card-header {
-  background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
-  border-bottom: 1px solid #e2e8f0;
-  padding: 20px 28px;
+  background: #f8fafc;
+  border-bottom: 1px solid var(--slate-border);
+  padding: 1.1rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .form-card-title {
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: #0f172a;
   margin: 0;
@@ -147,33 +127,33 @@
 }
 
 .form-card-body {
-  padding: 28px;
+  padding: 1.75rem;
 }
 
 .custom-label {
-  font-size: 0.88rem;
-  font-weight: 600;
+  font-size: 0.82rem;
+  font-weight: 700;
   color: #334155;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   display: block;
 }
 
 .custom-input {
   width: 100%;
   border: 1.5px solid #cbd5e1;
-  border-radius: 12px;
-  padding: 12px 16px;
-  font-size: 0.95rem;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.92rem;
   color: #0f172a;
   background-color: #f8fafc;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   box-sizing: border-box;
 }
 
 .custom-input:focus {
   background-color: #ffffff;
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
   outline: none;
 }
 
@@ -184,16 +164,16 @@
 }
 
 .date-input-group input {
-  padding-right: 42px;
+  padding-right: 38px;
 }
 
 .date-calendar-btn {
   position: absolute;
-  right: 12px;
+  right: 10px;
   background: none;
   border: none;
-  color: #4f46e5;
-  font-size: 1.2rem;
+  color: #2563eb;
+  font-size: 1.1rem;
   cursor: pointer;
   padding: 4px;
 }
@@ -201,231 +181,168 @@
 .date-presets {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
+  gap: 6px;
+  margin-top: 8px;
 }
 
 .preset-chip {
   background: #f1f5f9;
   border: 1px solid #e2e8f0;
   border-radius: 20px;
-  padding: 4px 12px;
-  font-size: 0.75rem;
+  padding: 3px 10px;
+  font-size: 0.72rem;
   font-weight: 600;
   color: #475569;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s;
 }
 
 .preset-chip:hover {
-  background: #4f46e5;
+  background: #2563eb;
   color: #ffffff;
-  border-color: #4f46e5;
+  border-color: #2563eb;
 }
 
 .duration-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 14px;
-  background: #eef2ff;
-  color: #4338ca;
+  padding: 4px 12px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #dbeafe;
   border-radius: 14px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  margin-top: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
 }
 
 /* Logo Upload Area */
 .logo-upload-box {
   border: 2px dashed #cbd5e1;
-  border-radius: 16px;
-  padding: 24px;
+  border-radius: 14px;
+  padding: 20px;
   text-align: center;
   background: #f8fafc;
   transition: all 0.2s ease;
 }
 
 .logo-upload-box:hover {
-  border-color: #4f46e5;
-  background: #f5f3ff;
+  border-color: #2563eb;
+  background: #f0f7ff;
 }
 
 .logo-preview-img {
-  max-width: 140px;
-  max-height: 140px;
-  border-radius: 12px;
+  max-width: 120px;
+  max-height: 120px;
+  border-radius: 10px;
   object-fit: contain;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-  margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 10px;
   border: 2px solid #ffffff;
 }
 
-.btn-upload-trigger {
-  background: #4f46e5;
-  color: #ffffff;
-  border-radius: 25px;
-  padding: 8px 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.btn-upload-trigger:hover {
-  background: #4338ca;
-  color: #ffffff;
-}
-
-/* Action Buttons */
-.btn-action-primary {
-  background: var(--primary-gradient);
-  color: #ffffff;
-  border: none;
-  border-radius: 28px;
-  padding: 12px 32px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.28);
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.btn-action-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4);
-  color: #ffffff;
-}
-
-.btn-action-secondary {
-  background: #f1f5f9;
-  color: #475569;
-  border: 1px solid #cbd5e1;
-  border-radius: 28px;
-  padding: 12px 28px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.btn-action-secondary:hover {
-  background: #e2e8f0;
-  color: #0f172a;
-}
-
-/* Kalolsavam Cards Grid */
+/* 4. Kalolsavam Cards Grid */
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 20px;
 }
 
 .fest-card {
   background: #ffffff;
-  border-radius: 18px;
+  border-radius: 16px;
   box-shadow: var(--card-shadow);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--slate-border);
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
 }
 
 .fest-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-3px);
   box-shadow: var(--card-hover-shadow);
+  border-color: #cbd5e1;
 }
 
 .fest-card-header {
-  background: var(--primary-gradient);
-  padding: 22px 28px;
-  color: #ffffff;
+  background: #f8fafc;
+  border-bottom: 1px solid #f1f5f9;
+  padding: 1.25rem 1.5rem;
   position: relative;
 }
 
 .fest-card-year {
-  font-size: 1.85rem;
+  font-size: 1.45rem;
   font-weight: 800;
-  margin: 0;
-  letter-spacing: -0.5px;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.02em;
+  color: #0f172a;
 }
 
 .fest-card-name {
-  font-size: 1rem;
-  font-weight: 500;
-  margin: 4px 0 0 0;
-  opacity: 0.95;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0;
+  color: #475569;
 }
 
 .fest-status-badge {
   position: absolute;
-  top: 20px;
-  right: 24px;
-  padding: 5px 14px;
+  top: 1.25rem;
+  right: 1.5rem;
+  padding: 4px 12px;
   border-radius: 20px;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  color: #ffffff;
+  letter-spacing: 0.03em;
 }
 
 .fest-card-body {
-  padding: 24px 28px;
+  padding: 1.25rem 1.5rem;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .fest-meta-item {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
 .fest-meta-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   background: #f1f5f9;
-  color: #4f46e5;
+  color: #2563eb;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   flex-shrink: 0;
 }
 
 .fest-meta-label {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: #64748b;
   text-transform: uppercase;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  margin-bottom: 2px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 1px;
 }
 
 .fest-meta-value {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #0f172a;
 }
 
 .fest-card-footer {
-  padding: 16px 28px;
+  padding: 1rem 1.5rem;
   background: #f8fafc;
   border-top: 1px solid #f1f5f9;
   display: flex;
@@ -434,67 +351,72 @@
 }
 
 .btn-card-edit {
-  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  background: #2563eb;
   color: #ffffff;
-  border: none;
+  border: 1px solid #1d4ed8;
   border-radius: 20px;
-  padding: 8px 20px;
-  font-size: 0.85rem;
+  padding: 6px 18px;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   text-decoration: none;
-  transition: all 0.2s;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
 }
 
 .btn-card-edit:hover {
+  background: #1d4ed8;
   color: #ffffff;
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+  transform: translateY(-1px);
 }
 
-@media (max-width: 768px) {
-  .header-hero {
-    padding: 20px;
-    border-radius: 16px;
-  }
-  .form-card-body, .fest-card-body, .fest-card-header, .fest-card-footer {
-    padding: 18px 20px;
-  }
-  .cards-grid {
-    grid-template-columns: 1fr;
-  }
-  .btn-action-primary, .btn-action-secondary {
-    width: 100%;
-    justify-content: center;
-  }
+@media print {
+  .no-print { display: none !important; }
+  .fest-card { box-shadow: none !important; border: 1px solid #000 !important; }
 }
 </style>
 
-<div class="kalolsavam-container">
+<div class="container-fluid px-3 px-md-4 py-3 kalolsavam-dashboard-container">
 
-  <!-- Header Hero Banner -->
-  <div class="header-hero">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-      <div>
-        <div class="header-badge">
-          <i class="bi bi-shield-check"></i> State Administration Settings
+  <!-- 1. Top Hero Header Card -->
+  <div class="hero-header-card mb-4 no-print">
+    <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+      <div class="d-flex align-items-center gap-3">
+        <div class="header-icon-box">
+          <i class="bi bi-trophy-fill"></i>
         </div>
-        <h1><i class="bi bi-trophy-fill text-warning"></i> Kalolsavam Management</h1>
-        <p>Manage Tamil Kalolsavam Master Schedule, Venues & Information</p>
+        <div>
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <h4 class="mb-0 fw-bold text-dark tracking-tight">
+              Kalolsavam Management
+            </h4>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1 small fw-semibold">
+              <i class="bi bi-shield-check me-1"></i> State Level
+            </span>
+            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 small fw-semibold">
+              <i class="bi bi-broadcast me-1"></i> Active Edition
+            </span>
+          </div>
+          <p class="text-muted small mb-0 mt-1">
+            Master academic schedule, venue allocations, timeline milestones, and festival branding.
+          </p>
+        </div>
       </div>
-      <div>
-        <?php if (!empty($kalolsavam_details) && $kalolsavam_details[0]['status'] == 'O') { ?>
-          <button type="button" id="btnOpenEdit" class="btn btn-light rounded-pill px-4 py-2 fw-semibold text-primary shadow-sm" onclick="showFormCard();">
-            <i class="bi bi-pencil-square me-1"></i> Edit Kalolsavam
-          </button>
-        <?php } ?>
+
+      <!-- Right side: Quick Print Utility (Header Edit button removed as requested) -->
+      <div class="d-flex align-items-center gap-2">
+        <button type="button" onclick="window.print()" class="btn btn-light border btn-sm rounded-3 shadow-sm text-secondary fw-semibold px-3 py-2 text-nowrap">
+          <i class="bi bi-printer me-1"></i> Print Schedule
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- KPI Overview Cards -->
+  <!-- 2. KPI Summary Tiles (4 Cards) -->
   <?php 
     $active_fest = !empty($kalolsavam_details) ? $kalolsavam_details[0] : null;
     $start_d = ($active_fest && $active_fest['start_date'] != '0000-00-00') ? date("d M Y", strtotime($active_fest['start_date'])) : 'Not Set';
@@ -503,69 +425,85 @@
     $fest_year = $active_fest['kalolsavam_year'] ?? date('Y') . '-' . (date('Y') + 1);
     $has_selected = (count(@$selected_kalolsavam ?? []) > 0);
   ?>
-  <div class="row g-3 mb-4">
+  <div class="row g-3 mb-4 no-print">
     <div class="col-12 col-sm-6 col-lg-3">
-      <div class="kpi-card">
-        <div class="kpi-icon-box kpi-icon-indigo">
-          <i class="bi bi-mortarboard-fill"></i>
-        </div>
-        <div class="kpi-content">
-          <h6>Academic Year</h6>
-          <h4><?php echo esc($fest_year); ?></h4>
+      <div class="kpi-tile">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="val"><?php echo esc($fest_year); ?></div>
+            <div class="lbl">Academic Year</div>
+            <div class="sub-text">Current Active Cycle</div>
+          </div>
+          <div class="icon-wrap" style="background: #eff6ff; color: #2563eb;">
+            <i class="bi bi-mortarboard-fill"></i>
+          </div>
         </div>
       </div>
     </div>
+
     <div class="col-12 col-sm-6 col-lg-3">
-      <div class="kpi-card">
-        <div class="kpi-icon-box kpi-icon-purple">
-          <i class="bi bi-geo-alt-fill"></i>
-        </div>
-        <div class="kpi-content">
-          <h6>Venue</h6>
-          <h4 class="text-truncate" style="max-width: 170px;" title="<?php echo esc($venue); ?>"><?php echo esc($venue); ?></h4>
+      <div class="kpi-tile">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="val text-truncate" style="max-width: 180px;" title="<?php echo esc($venue); ?>"><?php echo esc($venue); ?></div>
+            <div class="lbl">Official Venue</div>
+            <div class="sub-text">Main Arena / Grounds</div>
+          </div>
+          <div class="icon-wrap" style="background: #f5f3ff; color: #7c3aed;">
+            <i class="bi bi-geo-alt-fill"></i>
+          </div>
         </div>
       </div>
     </div>
+
     <div class="col-12 col-sm-6 col-lg-3">
-      <div class="kpi-card">
-        <div class="kpi-icon-box kpi-icon-sky">
-          <i class="bi bi-calendar2-range-fill"></i>
-        </div>
-        <div class="kpi-content">
-          <h6>Event Dates</h6>
-          <h4 style="font-size: 0.95rem;"><?php echo ($start_d !== 'Not Set') ? $start_d : 'Not Scheduled'; ?></h4>
+      <div class="kpi-tile">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="val" style="font-size: 1.35rem;"><?php echo ($start_d !== 'Not Set') ? $start_d : 'Not Scheduled'; ?></div>
+            <div class="lbl">Schedule Dates</div>
+            <div class="sub-text"><?php echo ($end_d !== 'Not Set') ? ('Until ' . $end_d) : 'Dates Pending'; ?></div>
+          </div>
+          <div class="icon-wrap" style="background: #f0f9ff; color: #0284c7;">
+            <i class="bi bi-calendar2-range-fill"></i>
+          </div>
         </div>
       </div>
     </div>
+
     <div class="col-12 col-sm-6 col-lg-3">
-      <div class="kpi-card">
-        <div class="kpi-icon-box kpi-icon-amber">
-          <i class="bi bi-award-fill"></i>
-        </div>
-        <div class="kpi-content">
-          <h6>Status</h6>
-          <h4><span class="badge bg-primary rounded-pill px-3 py-1">Active</span></h4>
+      <div class="kpi-tile">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="val text-success"><i class="bi bi-check-circle-fill me-1"></i>Active</div>
+            <div class="lbl">Festival Status</div>
+            <div class="sub-text">System Live &amp; Configured</div>
+          </div>
+          <div class="icon-wrap" style="background: #f0fdf4; color: #16a34a;">
+            <i class="bi bi-patch-check-fill"></i>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Form Card (Add / Edit Form) -->
+  <!-- 3. Form Card (Revealed when Edit button on card is clicked) -->
   <div class="modern-form-card" id="formCard" style="<?php echo $has_selected ? 'display:block;' : 'display:none;'; ?>">
     <div class="form-card-header">
       <h3 class="form-card-title">
         <i class="bi bi-sliders text-primary"></i> 
-        <span id="formTitle"><?php echo $has_selected ? 'Edit Kalolsavam Details' : 'Add New Kalolsavam'; ?></span>
+        <span id="formTitle"><?php echo $has_selected ? 'Edit Kalolsavam Configuration' : 'Add New Kalolsavam'; ?></span>
       </h3>
-      <button type="button" class="btn-close" onclick="hideFormCard();" aria-label="Close"></button>
+      <button type="button" class="btn-close shadow-none" onclick="hideFormCard();" aria-label="Close"></button>
     </div>
 
     <div class="form-card-body">
       <form id="formKalolsavam" method="post" enctype="multipart/form-data" action="<?php echo base_url('admin/kalolsavam/update_kalolsavam'); ?>">
+        <?= csrf_field(); ?>
         <input type="hidden" name="kalolsavam_id" id="kalolsavam_id" value="<?php echo esc((string)(@$selected_kalolsavam[0]['kalolsavam_id'] ?? ($active_fest['kalolsavam_id'] ?? ($kalolsavam_id ?? '')))); ?>" />
         
         <div class="row g-4">
-          <!-- Form Inputs Column -->
+          <!-- Left Column: Text Inputs & Date Pickers -->
           <div class="col-12 col-lg-8">
             <div class="row g-3">
               
@@ -623,9 +561,9 @@
 
               <!-- Quick Presets & Duration Badge -->
               <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-1">
                   <div class="date-presets">
-                    <span class="text-muted small me-1">Presets:</span>
+                    <span class="text-muted small me-1">Quick Presets:</span>
                     <button type="button" class="preset-chip" onclick="setQuickDate(1)">1 Day</button>
                     <button type="button" class="preset-chip" onclick="setQuickDate(3)">3 Days</button>
                     <button type="button" class="preset-chip" onclick="setQuickDate(5)">5 Days</button>
@@ -633,7 +571,7 @@
                     <button type="button" class="preset-chip text-danger" onclick="clearDates()">Clear</button>
                   </div>
                   <div id="durationBadge" class="duration-pill" style="display:none;">
-                    <i class="bi bi-clock-history"></i> <span id="durationText">0 Days</span>
+                    <i class="bi bi-clock-history"></i> <span id="durationText">0 Days Event</span>
                   </div>
                 </div>
               </div>
@@ -641,10 +579,10 @@
             </div>
           </div>
 
-          <!-- Logo Upload Column -->
+          <!-- Right Column: Logo Upload Dropzone -->
           <div class="col-12 col-lg-4">
             <label class="custom-label">
-              Festival Logo
+              Official Festival Logo
             </label>
             <div class="logo-upload-box">
               <div id="logoPreviewContainer">
@@ -654,7 +592,7 @@
                 ?>
                   <img src="<?php echo base_url('uploads/state/thumb_' . $current_logo); ?>" id="previewImg" class="logo-preview-img" alt="Logo" />
                 <?php } else { ?>
-                  <div id="logoPlaceholder" style="font-size: 3rem; color: #94a3b8; margin-bottom: 8px;">
+                  <div id="logoPlaceholder" style="font-size: 2.8rem; color: #94a3b8; margin-bottom: 8px;">
                     <i class="bi bi-image"></i>
                   </div>
                   <img src="" id="previewImg" class="logo-preview-img" alt="Logo" style="display:none;" />
@@ -664,20 +602,20 @@
               <p class="text-muted small mb-3">Accepted: JPG, PNG, GIF (Max 2MB)</p>
               
               <input type="file" name="kalolsavamLogo" id="kalolsavamLogo" accept="image/*" style="display:none;" onchange="handleLogoPreview(this);" />
-              <button type="button" class="btn-upload-trigger" onclick="document.getElementById('kalolsavamLogo').click();">
-                <i class="bi bi-cloud-arrow-up-fill"></i> Upload Logo
+              <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1.5 fw-semibold" onclick="document.getElementById('kalolsavamLogo').click();">
+                <i class="bi bi-cloud-arrow-up-fill me-1"></i> Choose Logo File
               </button>
             </div>
           </div>
         </div>
 
         <!-- Submit & Action Buttons -->
-        <div class="d-flex justify-content-center align-items-center gap-3 mt-4 pt-3 border-top flex-wrap">
-          <button type="button" id="btnSubmitKalolsavam" class="btn-action-primary" onclick="submitKalolsavamAjax();">
-            <i class="bi bi-check-circle-fill"></i> <span id="btnSubmitText">Save Kalolsavam Details</span>
+        <div class="d-flex justify-content-center align-items-center gap-2 mt-4 pt-3 border-top flex-wrap">
+          <button type="button" id="btnSubmitKalolsavam" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold shadow-sm" onclick="submitKalolsavamAjax();">
+            <i class="bi bi-check-circle-fill me-1"></i> <span id="btnSubmitText">Save Configuration Changes</span>
           </button>
-          <button type="button" class="btn-action-secondary" onclick="hideFormCard();">
-            <i class="bi bi-x-circle"></i> Cancel
+          <button type="button" class="btn btn-light border rounded-pill px-4 py-2 fw-semibold text-secondary shadow-none" onclick="hideFormCard();">
+            <i class="bi bi-x-circle me-1"></i> Cancel
           </button>
         </div>
 
@@ -685,14 +623,14 @@
     </div>
   </div>
 
-  <!-- Kalolsavam Records Section (Hidden when form is open) -->
+  <!-- 4. Kalolsavam Records Grid (With exclusive Edit button on the card) -->
   <div id="kalolsavamList" style="<?php echo $has_selected ? 'display:none;' : 'display:block;'; ?>">
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-      <h4 class="fw-bold text-dark m-0 d-flex align-items-center gap-2">
-        <i class="bi bi-collection-fill text-primary"></i> Kalolsavam Records
-      </h4>
-      <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill">
-        Total: <?php echo count($kalolsavam_details ?? []); ?> Records
+      <h5 class="fw-bold text-dark m-0 d-flex align-items-center gap-2">
+        <i class="bi bi-collection-fill text-primary"></i> Active &amp; Historical Editions
+      </h5>
+      <span class="badge bg-light text-secondary border px-3 py-1.5 rounded-pill small">
+        Total: <?php echo count($kalolsavam_details ?? []); ?> Editions
       </span>
     </div>
 
@@ -718,19 +656,21 @@
           $is_open = ($fest['status'] == 'O');
         ?>
           <div class="fest-card">
+            <!-- Card Header -->
             <div class="fest-card-header">
-              <span class="fest-status-badge">
+              <span class="fest-status-badge <?php echo $is_open ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-secondary-subtle text-secondary border border-secondary-subtle'; ?>">
                 <?php echo $is_open ? '● Active' : '○ Closed'; ?>
               </span>
-              <h2 class="fest-card-year"><?php echo esc($fest['kalolsavam_year']); ?></h2>
+              <h3 class="fest-card-year"><?php echo esc($fest['kalolsavam_year']); ?></h3>
               <p class="fest-card-name"><?php echo esc($fest['kalolsavam_name']); ?></p>
             </div>
 
+            <!-- Card Body -->
             <div class="fest-card-body">
               <div class="fest-meta-item">
                 <div class="fest-meta-icon"><i class="bi bi-geo-alt"></i></div>
                 <div>
-                  <div class="fest-meta-label">Venue</div>
+                  <div class="fest-meta-label">Venue Location</div>
                   <div class="fest-meta-value"><?php echo esc(!empty($fest['venue']) ? $fest['venue'] : 'Not Configured'); ?></div>
                 </div>
               </div>
@@ -738,30 +678,31 @@
               <div class="fest-meta-item">
                 <div class="fest-meta-icon"><i class="bi bi-calendar3"></i></div>
                 <div>
-                  <div class="fest-meta-label">Schedule Duration</div>
+                  <div class="fest-meta-label">Event Timeline</div>
                   <div class="fest-meta-value"><?php echo esc($date_display); ?></div>
                 </div>
               </div>
 
               <?php if (!empty($fest['logo_name'])) { ?>
                 <div class="fest-meta-item">
-                  <div class="fest-meta-icon"><i class="bi bi-award"></i></div>
+                  <div class="fest-meta-icon" style="color: #059669; background: #ecfdf5;"><i class="bi bi-patch-check-fill"></i></div>
                   <div>
-                    <div class="fest-meta-label">Logo</div>
-                    <div class="fest-meta-value text-primary"><small><i class="bi bi-check2-circle"></i> Uploaded</small></div>
+                    <div class="fest-meta-label">Official Logo</div>
+                    <div class="fest-meta-value text-success small fw-bold">Uploaded &amp; Linked</div>
                   </div>
                 </div>
               <?php } ?>
             </div>
 
+            <!-- Card Footer: Exclusive Edit Details Button on Card -->
             <div class="fest-card-footer">
-              <span class="text-muted small">Record ID: #<?php echo esc($fest['kalolsavam_id']); ?></span>
+              <span class="text-muted small font-monospace">Edition #<?php echo esc($fest['kalolsavam_id']); ?></span>
               <?php if ($is_open) { ?>
                 <button type="button" class="btn-card-edit" onclick="fncEditKalolsavam('<?php echo $fest['kalolsavam_id']; ?>');">
-                  <i class="bi bi-pencil"></i> Edit Details
+                  <i class="bi bi-pencil-square"></i> Edit Details
                 </button>
               <?php } else { ?>
-                <span class="badge bg-secondary">Archived</span>
+                <span class="badge bg-light text-muted border rounded-pill px-3 py-1">Archived</span>
               <?php } ?>
             </div>
           </div>
@@ -769,9 +710,9 @@
       </div>
     <?php } else { ?>
       <div class="text-center py-5 bg-white rounded-4 shadow-sm border">
-        <div style="font-size: 3.5rem; color: #cbd5e1;"><i class="bi bi-calendar-x"></i></div>
-        <h5 class="mt-3 text-secondary">No Kalolsavam Records Found</h5>
-        <p class="text-muted">Create a new record using the form above.</p>
+        <div style="font-size: 3rem; color: #cbd5e1;"><i class="bi bi-calendar-x"></i></div>
+        <h5 class="mt-3 text-secondary fw-bold">No Kalolsavam Records Found</h5>
+        <p class="text-muted small">No active or archived festival records were returned.</p>
       </div>
     <?php } ?>
   </div>
@@ -780,6 +721,7 @@
 
 <!-- Hidden Form for Legacy Post Submissions -->
 <form id="list_formKalolsavam" method="post" action="<?php echo base_url('admin/kalolsavam/edit_kalolsavam'); ?>" style="display:none;">
+  <?= csrf_field(); ?>
   <input type="hidden" name="sel_kalolsavam_id" id="sel_kalolsavam_id" value="" />
 </form>
 
@@ -799,7 +741,6 @@ document.addEventListener('DOMContentLoaded', function() {
         endPicker.set('minDate', dateStr);
         endPicker.jumpToDate(startDate);
 
-        // If End Date is not set yet or earlier than Start Date, automatically synchronize to the same date / month / year
         var currentEnd = endPicker.selectedDates[0];
         if (!currentEnd || currentEnd < startDate) {
           endPicker.setDate(dateStr, true);
@@ -815,7 +756,6 @@ document.addEventListener('DOMContentLoaded', function() {
     altFormat: "F j, Y",
     allowInput: true,
     onOpen: function(selectedDates, dateStr, instance) {
-      // If End Date is not set yet, jump to the month and year of Start Date
       if (startPicker && startPicker.selectedDates.length > 0) {
         var startD = startPicker.selectedDates[0];
         instance.set('minDate', startPicker.input.value);
@@ -829,7 +769,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Initial sync on page load if Start Date exists
   if (startPicker && startPicker.selectedDates.length > 0) {
     var initialStart = startPicker.selectedDates[0];
     if (endPicker) {
@@ -936,16 +875,15 @@ function fncEditKalolsavam(id) {
     }
   });
 
-  var formData = new FormData();
-  formData.append('kalolsavam_id', id);
-
-  fetch('<?php echo base_url("admin/kalolsavam/get_kalolsavam_ajax"); ?>', {
-    method: 'POST',
-    body: formData
+  fetch('<?php echo base_url("admin/kalolsavam/get_kalolsavam_ajax"); ?>?kalolsavam_id=' + encodeURIComponent(id), {
+    method: 'GET'
   })
   .then(function(res) { return res.json(); })
   .then(function(json) {
     Swal.close();
+    if (json.csrf_hash && window.updateCsrfToken) {
+      window.updateCsrfToken(json.csrf_hash);
+    }
     if (json.success && json.data) {
       var d = json.data;
       document.getElementById('kalolsavam_id').value = d.kalolsavam_id || '';
@@ -987,8 +925,9 @@ function fncEditKalolsavam(id) {
       document.getElementById('list_formKalolsavam').submit();
     }
   })
-  .catch(function() {
+  .catch(function(err) {
     Swal.close();
+    console.error('Fetch error:', err);
     document.getElementById('sel_kalolsavam_id').value = id;
     document.getElementById('list_formKalolsavam').submit();
   });
@@ -1030,14 +969,28 @@ function submitKalolsavamAjax() {
   var formEl = document.getElementById('formKalolsavam');
   var formData = new FormData(formEl);
 
+  // Ensure CSRF token is in formData
+  if (window.getCsrfToken && !formData.get('csrf_test_name')) {
+    var tok = window.getCsrfToken();
+    if (tok) formData.append('csrf_test_name', tok);
+  }
+
   fetch('<?php echo base_url("admin/kalolsavam/save_kalolsavam_ajax"); ?>', {
     method: 'POST',
     body: formData
   })
-  .then(function(res) { return res.json(); })
+  .then(function(res) {
+    return res.json().catch(function() {
+      throw new Error('Server response error (HTTP ' + res.status + ')');
+    });
+  })
   .then(function(data) {
     submitBtn.disabled = false;
     submitBtn.innerHTML = originalHtml;
+
+    if (data.csrf_hash && window.updateCsrfToken) {
+      window.updateCsrfToken(data.csrf_hash);
+    }
 
     if (data.success) {
       hideFormCard();
@@ -1045,7 +998,7 @@ function submitKalolsavamAjax() {
         title: 'Success!',
         text: data.message || 'Kalolsavam details have been saved successfully.',
         icon: 'success',
-        confirmButtonColor: '#4f46e5'
+        confirmButtonColor: '#2563eb'
       }).then(function() {
         window.location.href = '<?php echo base_url("admin/kalolsavam"); ?>';
       });
@@ -1053,9 +1006,11 @@ function submitKalolsavamAjax() {
       Swal.fire('Error', data.message || 'Failed to save Kalolsavam details.', 'error');
     }
   })
-  .catch(function() {
+  .catch(function(err) {
     submitBtn.disabled = false;
     submitBtn.innerHTML = originalHtml;
+    console.error('Save error:', err);
+    // Submit normally via form as reliable fallback
     formEl.submit();
   });
 }

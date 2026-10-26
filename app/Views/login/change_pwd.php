@@ -225,11 +225,12 @@ $valEmail = ($postEmail !== null) ? $postEmail : ($emailid !== null ? $emailid :
                     <!-- Section: Password Security -->
                     <div class="settings-section-title">
                         <i class="bi bi-shield-lock-fill me-2"></i><span>Password Security</span>
+                        <small class="text-muted fw-normal ms-2 text-capitalize" style="font-size: 0.76rem; letter-spacing: normal;">(Optional: Leave blank to keep current password)</small>
                     </div>
                     
                     <div class="row mb-3">
                         <div class="col-12 col-md-6 mb-3 mb-md-0">
-                            <label for="txtOLDPassword" class="form-label form-label-custom">Current Password <span class="text-danger">*</span></label>
+                            <label for="txtOLDPassword" class="form-label form-label-custom">Current Password <small class="text-muted fw-normal">(Only if changing)</small></label>
                             <div class="input-group input-group-custom">
                                 <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
                                 <?php echo form_password("txtOLDPassword", '', 'id="txtOLDPassword" class="form-control" placeholder="Enter current password"'); ?>
@@ -239,18 +240,18 @@ $valEmail = ($postEmail !== null) ? $postEmail : ($emailid !== null ? $emailid :
                     
                     <div class="row mb-4">
                         <div class="col-12 col-md-6 mb-3 mb-md-0">
-                            <label for="txtNewPassword" class="form-label form-label-custom">New Password <span class="text-danger">*</span></label>
+                            <label for="txtNewPassword" class="form-label form-label-custom">New Password <small class="text-muted fw-normal">(Optional)</small></label>
                             <div class="input-group input-group-custom">
                                 <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
-                                <?php echo form_password("txtNewPassword", '', 'id="txtNewPassword" class="form-control" placeholder="Enter password"'); ?>
+                                <?php echo form_password("txtNewPassword", '', 'id="txtNewPassword" class="form-control" placeholder="Enter new password"'); ?>
                             </div>
                         </div>
                         
                         <div class="col-12 col-md-6">
-                            <label for="txtCFMPassword" class="form-label form-label-custom">Confirm New Password <span class="text-danger">*</span></label>
+                            <label for="txtCFMPassword" class="form-label form-label-custom">Confirm New Password <small class="text-muted fw-normal">(Optional)</small></label>
                             <div class="input-group input-group-custom">
                                 <span class="input-group-text"><i class="bi bi-shield-fill-check"></i></span>
-                                <?php echo form_password("txtCFMPassword", '', 'id="txtCFMPassword" class="form-control" placeholder="Confirm password"'); ?>
+                                <?php echo form_password("txtCFMPassword", '', 'id="txtCFMPassword" class="form-control" placeholder="Confirm new password"'); ?>
                             </div>
                         </div>
                     </div>
@@ -290,7 +291,7 @@ $valEmail = ($postEmail !== null) ? $postEmail : ($emailid !== null ? $emailid :
                     
                     <!-- Actions -->
                     <div class="d-flex flex-wrap gap-3 mt-4 pt-3 border-top justify-content-md-start justify-content-center">
-                        <?php echo form_submit('Change Password', 'Update Password & Profile', 'onClick="javascript: return fnschgpwdAdd()" class="btn btn-update-profile"'); ?>
+                        <?php echo form_submit('Change Password', 'Save Changes', 'onClick="javascript: return fnschgpwdAdd()" class="btn btn-update-profile"'); ?>
                         <?php if (count($checkval) > 0 && isset($checkval[0]['is_change_password']) && $checkval[0]['is_change_password'] == 'Y') { ?>
                             <?php echo form_button('Cancel', 'Cancel', 'onClick="javascript:gotohome()" class="btn btn-cancel-profile"'); ?>
                         <?php } ?>

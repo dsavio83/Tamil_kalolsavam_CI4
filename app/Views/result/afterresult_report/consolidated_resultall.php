@@ -9,22 +9,25 @@
 
 
 
-<page backtop="30mm" backbottom="20mm">
+<?php $this->load->view('report/report_pdf_style'); ?>
+<page backtop="20mm" backbottom="20mm">
     <page_header>
         <?php
         $this->load->view('report/report_header');
         ?>
-        <table width="100%" height="62" border="0" align="center">
-            <tr>
-                <td  align="center" class="style1" height="30" valign="top">Consolidated Report for Higher Level Competition From <?php echo $retvalue[0]['sub_district_name'] . '(' . $retvalue[0]['sub_district_code'] . ') '; ?></td>
-            </tr>
-        </table>
+        
     </page_header>
     <page_footer>
         <?php
         $this->load->view('report/report_footer');
         ?>
-    </page_footer>  
+    </page_footer>
+<table width="100%" height="62" border="0" align="center">
+            <tr>
+                <td  align="center" class="report-pdf-title" height="30" valign="top">Consolidated Report for Higher Level Competition From <?php echo $retvalue[0]['sub_district_name'] . '(' . $retvalue[0]['sub_district_code'] . ') '; ?></td>
+            </tr>
+        </table>
+  
 
     <table width="100%" border="1" align="center" cellpadding="0" cellspacing="0">
         <tr>
@@ -52,6 +55,9 @@
                 <td align="left" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'>   <?php
                     if ($pre != $data['school_code']) {
                         echo $data['school_code'] . ' - ' . $data['school_name'];
+                        if (!empty($data['sub_district_name'])) {
+                            echo '<br/><span style="font-size:8px; color:#555;">(' . esc($data['sub_district_name']) . ')</span>';
+                        }
                     }
                     ?></td>
                 <td align="left" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'><?php echo $data['fest_name']; ?></td>

@@ -103,7 +103,7 @@ $fest_display_name = $itempart[0]['fest_name'] ?? ($single[0]['fest_name'] ?? 'F
                   ?>
                   <tr>
                     <td class="ps-4 py-2.5">
-                      <a href="javascript:void(0)" onClick="javascript:getItemResult('<?php echo $item['item_code']; ?>')" class="text-decoration-none fw-bold text-dark d-inline-flex align-items-center gap-1.5 item-link">
+                      <a href="<?php echo base_url('result/resultentry/index/' . $item['item_code']); ?>" class="text-decoration-none fw-bold text-dark d-inline-flex align-items-center gap-1.5 item-link">
                         <span class="badge bg-light text-dark border font-monospace"><?php echo htmlspecialchars((string)$item['item_code']); ?></span>
                         <span class="text-primary"><?php echo htmlspecialchars($item['item_name']); ?></span>
                         <i class="bi bi-arrow-right-short text-muted fs-6"></i>
@@ -236,6 +236,7 @@ function resetResultConfirmation(itemcode, message, element_id) {
 
                 fetch(path + "ajax/loadajax/reset_result_confirmation_status", {
                     method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
                     body: formData
                 })
                 .then(response => response.text())
@@ -292,6 +293,7 @@ function resetResultConfirmation(itemcode, message, element_id) {
             formData.append('item_code', itemcode);
             fetch(path + "ajax/loadajax/reset_result_confirmation_status", {
                 method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 body: formData
             })
             .then(response => response.text())

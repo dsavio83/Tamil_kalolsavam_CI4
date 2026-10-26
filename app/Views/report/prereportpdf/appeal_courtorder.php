@@ -40,6 +40,8 @@
     }
     -->
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 
 
 <page backtop="20mm" backbottom="20mm ">
@@ -53,9 +55,9 @@
         $this->load->view('report/report_footer');
         ?>
     </page_footer>       
-    <table width="103%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top:15px;">
+    <table width="103%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top: 2px;">
         <tr>
-            <td height="31" align="center" class="style1" valign="top">&nbsp;&nbsp;List of  participants &nbsp;&nbsp;With Court Order</td>
+            <td height="31" align="center" class="report-pdf-title" valign="top">&nbsp;&nbsp;List of  participants &nbsp;&nbsp;With Court Order</td>
         </tr>  
     </table>
 
@@ -63,7 +65,7 @@
 
     <table width="100%" border="0" align="center">
         <tr>
-            <td width="23%" class="style9" align="right" colspan="4">&nbsp;&nbsp;&nbsp;<span class="style3">Festival: &nbsp;&nbsp;<?php echo $appeal[0]['fest_name']; ?> &nbsp;&nbsp;</span></td>
+            <td width="23%" class="style9" align="right" colspan="4">&nbsp;&nbsp;&nbsp;<span class="style3">Festival: &nbsp;&nbsp;<?php echo isset($appeal[0]['fest_name']) ? $appeal[0]['fest_name'] : ''; ?> &nbsp;&nbsp;</span></td>
 
         </tr>
         <tr><td colspan="4" height="10"></td></tr>

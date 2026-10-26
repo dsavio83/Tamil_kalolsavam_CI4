@@ -31,20 +31,13 @@ for ($j = 0; $j < count($festresult); $j++) {
             print("</table></page>");
         }
         ?>   
-        <page backtop="30mm" backbottom="10mm ">
+        <?php $this->load->view('report/report_pdf_style'); ?>
+<page backtop="20mm" backbottom="10mm ">
             <page_header>
                 <?php
                 $this->load->view('report/report_header');
                 ?>
-                <table width="100%" border="0" align="left" cellpadding="0" cellspacing="0">
-                    <tr>
-                        <td  align="left" width="400" class="style1"  style=" padding:2px;"height="25">&nbsp;&nbsp; <?php echo $festresult[$j]['item_code']; ?>-<?php echo $festresult[$j]['item_name']; ?>(<?php echo $festresult[$j]['fest_name']; ?>)  </td>
-                        <td  align="right" width="300" class="style1"  style=" padding:2px;"height="25">
-                            <?php echo $festresult[$j]['stage_name'] . ' on ' . datetophpmodel($festresult[$j]['start_time']); ?> 
-
-                        </td>
-                    </tr>
-                </table> 
+                 
             </page_header>
             <page_footer>
                 <?php
@@ -52,6 +45,16 @@ for ($j = 0; $j < count($festresult); $j++) {
                 $ctt = $festresult[$j]['no_of_judges'];
                 ?>
             </page_footer>
+<table width="100%" border="0" align="left" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td  align="left" width="400" class="report-pdf-title"  style=" padding:2px;"height="25">&nbsp;&nbsp; <?php echo $festresult[$j]['item_code']; ?>-<?php echo $festresult[$j]['item_name']; ?>(<?php echo $festresult[$j]['fest_name']; ?>)  </td>
+                        <td  align="right" width="300" class="report-pdf-title"  style=" padding:2px;"height="25">
+                            <?php echo $festresult[$j]['stage_name'] . ' on ' . datetophpmodel($festresult[$j]['start_time']); ?> 
+
+                        </td>
+                    </tr>
+                </table>
+
 
             <table width="900" border="1" align="center" cellpadding="0" cellspacing="0" bordercolor="#D4D0C8">
                 <tr>

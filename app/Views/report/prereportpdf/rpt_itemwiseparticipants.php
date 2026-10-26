@@ -27,19 +27,22 @@
 -->
 </style>
 
-<page backtop="44mm" backbottom="22mm" backleft="15mm" backright="15mm">
+<?php $this->load->view('report/report_pdf_style'); ?>
+<page backtop="20mm" backbottom="22mm" backleft="15mm" backright="15mm">
     <page_header>
         <?php $this->load->view('report/report_header'); ?>
-        <table width="100%" style="width: 100%; margin-top: 8px;" border="0" cellspacing="0" cellpadding="0" align="center">
-            <tr>
-                <td align="center" class="style1" height="24">Itemwise Participants List</td>
-            </tr>
-        </table>
+        
     </page_header>
 
     <page_footer>
         <?php $this->load->view('report/report_footer'); ?>
-    </page_footer> 
+    </page_footer>
+<table width="100%" style="width: 100%; margin-top: 8px;" border="0" cellspacing="0" cellpadding="0" align="center">
+            <tr>
+                <td align="center" class="report-pdf-title" height="24">Itemwise Participants List</td>
+            </tr>
+        </table>
+ 
 
     <!-- Meta Information: Item & Festival (Positioned cleanly below header with ample spacing) -->
     <table width="100%" style="width: 100%; margin-top: 6px; margin-bottom: 8px;" border="0" cellpadding="0" cellspacing="0">

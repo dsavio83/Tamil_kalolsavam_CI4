@@ -19,6 +19,8 @@
 
     -->
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 <style>
     @media print
     {
@@ -37,7 +39,7 @@ if (empty($itemwise)) {
         </page_footer>
         <table width="77%" border="0" cellspacing="0" cellpadding="0" align="center">
             <tr>
-                <td height="30" align="center" class="style1">Item Wise Participant Report Details</td>
+                <td height="30" align="center" class="report-pdf-title">Item Wise Participant Report Details</td>
             </tr>
         </table>
         <table width="91%" align="center" border="1" cellpadding="8" cellspacing="0" style="margin-top: 20px;">
@@ -99,7 +101,12 @@ if (empty($itemwise)) {
         <tr>
             <td width="41" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">&nbsp;&nbsp;<?php echo $count; ?></td>
             <td width="179" align="left" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">&nbsp;&nbsp;<?php echo wordwrap($value['participant_name'], 25, '<br>'); ?></td>
-            <td width="238" align="left" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">&nbsp;&nbsp;<?php echo wordwrap($value['school_code'] . ' ' . $value['school_name'], 50, '<br>'); ?></td>
+            <td width="238" align="left" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">
+                &nbsp;&nbsp;<?php echo wordwrap($value['school_code'] . ' ' . $value['school_name'], 50, '<br>'); ?>
+                <?php if (!empty($value['sub_district_name'])) { ?>
+                    <br>&nbsp;&nbsp;<small style="color:#555;">(<?php echo esc($value['sub_district_name']); ?>)</small>
+                <?php } ?>
+            </td>
             <td width="51" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $value['percentage']; ?></td>
             <td width="40" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $value['rank']; ?> </td>
             <td width="62" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $value['grade']; ?></td>

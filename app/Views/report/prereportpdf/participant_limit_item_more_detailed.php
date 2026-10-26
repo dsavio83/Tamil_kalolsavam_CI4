@@ -46,8 +46,10 @@
     }
     -->
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
 
-<page backtop="26mm" backbottom="15mm">
+
+<page backtop="20mm" backbottom="15mm">
     <page_header>
         <?php $this->load->view('report/report_header'); ?>
     </page_header>
@@ -57,7 +59,7 @@
 
     <table width="100%" border="0" cellspacing="0" cellpadding="2" align="center">
         <tr>
-            <td align="center" class="report_title">
+            <td align="center" class="report-pdf-title">
                 List of Participants in Multiple Items with Event Details
             </td>
         </tr>

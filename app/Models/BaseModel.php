@@ -34,6 +34,9 @@ class BaseModel
     /** @var \App\Libraries\Input */
     protected $input;
 
+    /** @var \CodeIgniter\HTTP\RequestInterface */
+    protected $request;
+
     /** @var \CodeIgniter\Validation\Validation */
     protected $form_validation;
 
@@ -43,15 +46,23 @@ class BaseModel
         $this->db               = new CiDatabase($connection);
         $this->db1              = $this->db;
         $this->session          = session();
-        $this->config           = config(\Config\App::class);
+        $this->config           = new \App\Libraries\CiConfig();
         $this->load             = new CiLoader($this);
         $this->input            = new Input();
+        $this->request          = service('request');
         $this->form_validation  = new FormValidation();
     }
 
     public function __get($name)
     {
         $lower = strtolower($name);
+
+        if ($lower === 'request') {
+            if (!$this->request) {
+                $this->request = service('request');
+            }
+            return $this->request;
+        }
 
         if ($this->load instanceof CiLoader) {
             $m = $this->load->get_model($lower);

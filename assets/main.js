@@ -115,16 +115,18 @@
         }
       });
 
-      // 1. Explicit Domain Mapping for Certificate Sub-routes
+      // 1. Explicit Domain Mapping for Certificate Sub-routes (Only when on a certificate page)
       const pathStr = (currentPath + ' ' + currentUrl).toLowerCase();
-      if (pathStr.includes('school_wise') || pathStr.includes('schoolwise')) {
-        bestMatch = document.getElementById('menu-cert-school') || document.querySelector('a[href*="list_school_wise"]');
-      } else if (pathStr.includes('item_wise') || pathStr.includes('itemwise') || pathStr.includes('item_certificate')) {
-        bestMatch = document.getElementById('menu-cert-item') || document.querySelector('a[href*="list_item_wise"]');
-      } else if (pathStr.includes('reg_no_wise') || pathStr.includes('participant_wise') || pathStr.includes('regnowise')) {
-        bestMatch = document.getElementById('menu-cert-reg') || document.querySelector('a[href*="list_reg_no_wise"]');
-      } else if (pathStr.includes('save_certificate_template') || pathStr.includes('test_certificate') || pathStr.endsWith('/certificate/certificate') || pathStr.endsWith('/certificate/certificate/index')) {
-        bestMatch = document.getElementById('menu-cert-template') || document.querySelector('a[href*="certificate/certificate"]');
+      if (pathStr.includes('certificate')) {
+        if (pathStr.includes('school_wise') || pathStr.includes('schoolwise')) {
+          bestMatch = document.getElementById('menu-cert-school') || document.querySelector('a[href*="list_school_wise"]');
+        } else if (pathStr.includes('item_wise') || pathStr.includes('itemwise') || pathStr.includes('item_certificate')) {
+          bestMatch = document.getElementById('menu-cert-item') || document.querySelector('a[href*="list_item_wise"]');
+        } else if (pathStr.includes('reg_no_wise') || pathStr.includes('participant_wise') || pathStr.includes('regnowise')) {
+          bestMatch = document.getElementById('menu-cert-reg') || document.querySelector('a[href*="list_reg_no_wise"]');
+        } else if (pathStr.includes('save_certificate_template') || pathStr.includes('test_certificate') || pathStr.endsWith('/certificate/certificate') || pathStr.endsWith('/certificate/certificate/index') || pathStr.endsWith('/district/certificate')) {
+          bestMatch = document.getElementById('menu-cert-template') || document.querySelector('a[href*="certificate/certificate"]') || document.querySelector('a[href*="district/certificate"]');
+        }
       }
 
       // 2. Generic URL Prefix Matching if no explicit match above

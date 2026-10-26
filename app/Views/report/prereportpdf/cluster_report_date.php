@@ -26,6 +26,8 @@
     }
     -->
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 
 <page backtop="20mm" backbottom="20mm" pageleft="50mm" >
     <page_header>
@@ -41,13 +43,14 @@
     </page_footer>       
     <table width="100%" border="0" cellspacing="0" cellpadding="0" align="center"  >
         <tr>
-            <td height="43" align="center" class="style1">Cluster Report</td>
+            <td height="43" align="center" class="report-pdf-title">Cluster Report</td>
         </tr>
 
         <tr>
             <td align="center" class="style2" height="20">&nbsp;&nbsp;<?php //echo $retdata[0]['fest_name'];    ?></td>
         </tr>
     </table>
+<?php if (!empty($retdata) && count($retdata) > 0): ?>
     <?php
     $prev_cluster = "";
     $clustarray = "";
@@ -99,12 +102,12 @@
                 }
                 ?>
                 <tr>
-                    <td  align="center" colspan="2" class="style2" height="20"><strong><h6><?php echo $retdata[$j]['stage_name'] . '-' . $retdata[$j]['stage_desc'] . '  at  ' . timephpmodel($retdata[$j]['stime']); ?></h6></strong>&nbsp;</td>
+                    <td  align="center" colspan="2" class="style2" height="20"><strong><h6><?php echo ($retdata[$j]['stage_name'] ?? '') . '-' . ($retdata[$j]['stage_desc'] ?? '') . '  at  ' . (isset($retdata[$j]['stime']) ? timephpmodel($retdata[$j]['stime']) : ''); ?></h6></strong>&nbsp;</td>
                 </tr>
                 <tr>
-                    <td  align="left" class="style2" height="20">&nbsp;&nbsp;&nbsp;<strong><?php echo $retdata[$j]['item_code'] . ' -  ' . $retdata[$j]['item_name']; ?></strong>&nbsp;&nbsp;</td>
+                    <td  align="left" class="style2" height="20">&nbsp;&nbsp;&nbsp;<strong><?php echo ($retdata[$j]['item_code'] ?? '') . ' -  ' . ($retdata[$j]['item_name'] ?? ''); ?></strong>&nbsp;&nbsp;</td>
                     <td class="style2" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Maximum 
-                        Time for item :&nbsp;&nbsp;<?php echo $retdata[$j]['max_time']; ?></td>
+                        Time for item :&nbsp;&nbsp;<?php echo $retdata[$j]['max_time'] ?? ''; ?></td>
                 </tr>
 
 
@@ -114,7 +117,16 @@
     }
     $prev_array = $clustarray;
     ?>
+    <?php if ($j > 0 && isset($retdata[$j - 1])): ?>
     <table align="left" width="100%">  <tr><td width="50"></td><td class="style3" ><span class="style5">Cluster &nbsp;&nbsp; <?php echo $retdata[$j - 1]['cluster_no']; ?>:</span>&nbsp;&nbsp;&nbsp;<?php echo wordwrap($prev_array, 120, '<br>'); ?>  </td></tr></table>
+    <?php endif; ?>
+<?php else: ?>
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" align="center">
+        <tr>
+            <td align="center" class="style4" height="40" valign="middle" style="font-size: 11px;">No data found for the selected criteria.</td>
+        </tr>
+    </table>
+<?php endif; ?>
 
 </page>
 

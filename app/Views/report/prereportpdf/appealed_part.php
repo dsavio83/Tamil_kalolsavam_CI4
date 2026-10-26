@@ -42,26 +42,29 @@
 </style>
 
 
-<page backtop="28mm" backbottom="20mm ">
+<?php $this->load->view('report/report_pdf_style'); ?>
+<page backtop="20mm" backbottom="20mm ">
     <page_header>
         <?php
         $this->load->view('report/report_header');
         ?>
-        <table width="103%" border="0" cellspacing="0" cellpadding="4" align="center">
-            <tr>
-                <td align="center" class="style1" valign="top">List of Participants by Appeal</td>
-            </tr>  
-            <tr>
-                <td class="style9" align="center" width="700">Festival: &nbsp;&nbsp;<?php echo $appeal[0]['fest_name']; ?></td>
-            </tr>
-        </table>
+        
     </page_header>
 
     <page_footer>
         <?php
         $this->load->view('report/report_footer');
         ?>
-    </page_footer>   
+    </page_footer>
+<table width="103%" border="0" cellspacing="0" cellpadding="4" align="center">
+            <tr>
+                <td align="center" class="report-pdf-title" valign="top">List of Participants by Appeal</td>
+            </tr>  
+            <tr>
+                <td class="report-pdf-subtitle" align="center" width="700">Festival: &nbsp;&nbsp;<?php echo isset($appeal[0]['fest_name']) ? $appeal[0]['fest_name'] : ''; ?></td>
+            </tr>
+        </table>
+   
 
 
 

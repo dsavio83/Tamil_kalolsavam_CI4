@@ -2,6 +2,7 @@
 # Environment & Secrets
 #-------------------------
 .env
+.env*
 .temp-env.bat
 *.env
 *.key
@@ -31,18 +32,30 @@ $RECYCLE.BIN/
 #-------------------------
 /writable/cache/*
 !/writable/cache/index.html
+!/writable/cache/.gitkeep
 
 /writable/logs/*
 !/writable/logs/index.html
+!/writable/logs/.gitkeep
 
 /writable/session/*
 !/writable/session/index.html
+!/writable/session/.gitkeep
 
 /writable/uploads/*
 !/writable/uploads/index.html
+!/writable/uploads/.gitkeep
 
 /writable/debugbar/*
 !/writable/debugbar/index.html
+!/writable/debugbar/.gitkeep
+
+/writable/*.pdf
+/writable/*.png
+/writable/*.php
+/writable/*.json
+/writable/*.txt
+/writable/*.html
 
 php_errors.log
 *.log
@@ -55,6 +68,8 @@ php_errors.log
 /photos/*
 !/photos/index.html
 /dbBackup/
+app_back/
+test_db.php
 
 #-------------------------
 # Dependencies & Package Managers
@@ -88,3 +103,4 @@ inspect_*.html
 .vscode/
 *.sublime-workspace
 *.sublime-project
+.env

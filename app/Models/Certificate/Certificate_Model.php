@@ -1,0 +1,644 @@
+<?php
+
+namespace App\Models\Certificate;
+
+
+class Certificate_Model extends \App\Models\BaseModel {
+
+    function __construct () {
+        parent::__construct ();
+    }
+    function get_font_array() {
+        $font_array = array('Arial' => 'Arial',
+            'courier' => 'Courier',
+            'helvetica' => 'Helvetica',
+            'times' => 'Times',
+            'MTCORSVA' => 'MTCORSVA'
+        );
+
+
+        /* $font_array			=	array('courier'=>'Courier', 'courierB'=>'Courier-Bold', 'courierI'=>'Courier-Oblique', 'courierBI'=>'Courier-BoldOblique',
+          'helvetica'=>'Helvetica', 'helveticaB'=>'Helvetica-Bold', 'helveticaI'=>'Helvetica-Oblique', 'helveticaBI'=>'Helvetica-BoldOblique',
+          'times'=>'Times-Roman', 'timesB'=>'Times-Bold', 'timesI'=>'Times-Italic', 'timesBI'=>'Times-BoldItalic',
+          'symbol'=>'Symbol', 'zapfdingbats'=>'ZapfDingbats'); */
+
+        return $font_array;
+    }
+
+    function get_font_size_array() {
+        $font_size_array = array('9' => '9',
+            '10' => '10',
+            '11' => '11',
+            '12' => '12',
+            '13' => '13',
+            '14' => '14',
+            '15' => '15',
+            '16' => '16',
+            '17' => '17',
+            '18' => '18',
+            '19' => '19',
+            '20' => '20',
+            '21' => '21',
+            '22' => '22',
+            '23' => '23',
+            '24' => '24',
+            '25' => '25',
+            '26' => '26',
+            '27' => '27',
+            '28' => '28'
+        );
+        return $font_size_array;
+    }
+
+    function get_line_height_array() {
+        $font_size_array = array('1' => '1',
+            '2' => '2',
+            '3' => '3',
+            '4' => '4',
+            '5' => '5',
+            '6' => '6',
+            '7' => '7',
+            '8' => '8',
+            '9' => '9',
+            '10' => '10',
+            '11' => '11',
+            '12' => '12',
+            '13' => '13',
+            '14' => '14',
+            '15' => '15',
+            '16' => '16',
+            '17' => '17',
+            '18' => '18',
+            '19' => '19',
+            '20' => '20',
+            '21' => '21',
+            '22' => '22',
+            '23' => '23',
+            '24' => '24',
+            '25' => '25',
+            '26' => '26',
+            '27' => '27',
+            '28' => '28',
+            '29' => '29',
+            '30' => '30'
+        );
+        return $font_size_array;
+    }
+
+    function get_certificate_details($dist_code, $sub_dist_code) {
+        $this->db->where('sub_district_code', $sub_dist_code);
+        $this->db->where('district_code', $dist_code);
+
+        $certificate_template = $this->db->get('sd_certificate_template');
+        $result = $certificate_template->getResultArray();
+        if (is_array($result) && count($result) > 0 && (!empty($result[0]['name_x']) || !empty($result[0]['name_y']))) {
+            return $result;
+        }
+
+        // Fallback: if no calibrated template exists for this district/sub-district,
+        // return standard legible coordinates so certificates always print properly.
+        return array(array(
+            'ct_id' => $result[0]['ct_id'] ?? null,
+            'sub_district_code' => $sub_dist_code,
+            'district_code' => $dist_code,
+            'page_style' => !empty($result[0]['page_style']) ? $result[0]['page_style'] : 'L',
+            'line_height' => !empty($result[0]['line_height']) ? $result[0]['line_height'] : 5,
+            'top_margin' => !empty($result[0]['top_margin']) ? $result[0]['top_margin'] : 10,
+            'left_margin' => !empty($result[0]['left_margin']) ? $result[0]['left_margin'] : 15,
+            'right_margin' => !empty($result[0]['right_margin']) ? $result[0]['right_margin'] : 15,
+            'type_id' => !empty($result[0]['type_id']) ? $result[0]['type_id'] : 3,
+            'label_print' => !empty($result[0]['label_print']) ? $result[0]['label_print'] : 'Y',
+            'title' => !empty($result[0]['title']) ? $result[0]['title'] : 'KERALA STATE TAMIL FESTIVAL 2026',
+            'title_x' => 70, 'title_y' => 35, 'title_font' => 'Arial', 'title_size' => 16,
+            'name_x' => 80, 'name_y' => 70, 'name_font' => 'Arial', 'name_size' => 13,
+            'class_x' => 80, 'class_y' => 80, 'class_font' => 'Arial', 'class_size' => 11,
+            'school_x' => 80, 'school_y' => 90, 'school_font' => 'Arial', 'school_size' => 11,
+            'sub_dist_x' => 80, 'sub_dist_y' => 100, 'sub_dist_font' => 'Arial', 'sub_dist_size' => 11,
+            'item_x' => 80, 'item_y' => 110, 'item_font' => 'Arial', 'item_size' => 11,
+            'category_x' => 80, 'category_y' => 120, 'category_font' => 'Arial', 'category_size' => 11,
+            'grade_x' => 80, 'grade_y' => 130, 'grade_font' => 'Arial', 'grade_size' => 13,
+            'ehs_X' => 80, 'ehs_Y' => 140, 'ehs_font' => 'Arial', 'ehs_size' => 11,
+            'date_x' => 45, 'date_y' => 170, 'date_font' => 'Arial', 'date_size' => 10,
+            'place_x' => 190, 'place_y' => 170, 'place_font' => 'Arial', 'place_size' => 10,
+            'photoX' => 0, 'photoY' => 0, 'photoWidth' => 0, 'photoHight' => 0
+        ));
+    }
+
+    function save_certificate_details($dist_code, $sub_dist_code) {
+        $data = array();
+
+        $data['title_x'] = (int) $this->input->post('txtTitleX');
+        $data['title_y'] = (int) $this->input->post('txtTitleY');
+        $data['title_font'] = $this->input->post('cboTitleFont');
+        $data['title_size'] = (int) $this->input->post('cboTitleSize');
+
+        $data['title'] = $this->input->post('txtTitle');
+
+        $data['name_x'] = (int) $this->input->post('txtNameX');
+        $data['name_y'] = (int) $this->input->post('txtNameY');
+        $data['name_font'] = $this->input->post('cboNameFont');
+        $data['name_size'] = (int) $this->input->post('cboNameSize');
+
+
+        $data['item_x'] = (int) $this->input->post('txtItemX');
+        $data['item_y'] = (int) $this->input->post('txtItemY');
+        $data['item_font'] = $this->input->post('cboItemFont');
+        $data['item_size'] = (int) $this->input->post('cboItemSize');
+
+        $data['category_x'] = (int) $this->input->post('txtCategoryX');
+        $data['category_y'] = (int) $this->input->post('txtCategoryY');
+        $data['category_font'] = $this->input->post('cboCategoryFont');
+        $data['category_size'] = (int) $this->input->post('cboCategorySize');
+
+
+        $data['grade_x'] = (int) $this->input->post('txtGradeX');
+        $data['grade_y'] = (int) $this->input->post('txtGradeY');
+        $data['grade_font'] = $this->input->post('cboGradeFont');
+        $data['grade_size'] = (int) $this->input->post('cboGradeSize');
+
+        $data['class_x'] = (int) $this->input->post('txtClassX');
+        $data['class_y'] = (int) $this->input->post('txtClassY');
+        $data['class_font'] = $this->input->post('cboClassFont');
+        $data['class_size'] = (int) $this->input->post('cboClassSize');
+
+
+        $data['school_x'] = (int) $this->input->post('txtSchoolX');
+        $data['school_y'] = (int) $this->input->post('txtSchoolY');
+        $data['school_font'] = $this->input->post('cboSchoolFont');
+        $data['school_size'] = (int) $this->input->post('cboSchoolSize');
+
+        $data['sub_dist_x'] = (int) @$this->input->post('txtSubdistrictX');
+        $data['sub_dist_y'] = (int) @$this->input->post('txtSubdistrictY');
+        $data['sub_dist_font'] = @$this->input->post('cboSubDistFont');
+        $data['sub_dist_size'] = (int) @$this->input->post('cboSubDistSize');
+
+        $data['dist_x'] = (int) @$this->input->post('txtDistrictX');
+        $data['dist_y'] = (int) @$this->input->post('txtDistrictY');
+        $data['dist_font'] = @$this->input->post('cboDistFont');
+        $data['dist_size'] = (int) @$this->input->post('cboDistSize');
+
+        $data['date_x'] = (int) @$this->input->post('txtDateX');
+        $data['date_y'] = (int) @$this->input->post('txtDateY');
+        $data['date_font'] = @$this->input->post('cboDateFont');
+        $data['date_size'] = (int) @$this->input->post('cboDateSize');
+
+        $data['place_x'] = (int) @$this->input->post('txtPlaceX');
+        $data['place_y'] = (int) @$this->input->post('txtPlaceY');
+        $data['place_font'] = @$this->input->post('cboPlaceFont');
+        $data['place_size'] = (int) @$this->input->post('cboPlaceSize');
+
+        $data['ehs_x'] = (int) @$this->input->post('txtehsX');
+        $data['ehs_y'] = (int) @$this->input->post('txtehsY');
+        $data['ehs_font'] = @$this->input->post('cboehsFont');
+        $data['ehs_size'] = (int) @$this->input->post('cboehsSize');
+
+        $data['photoX'] = (int) @$this->input->post('photoX');
+        $data['photoY'] = (int) @$this->input->post('photoY');
+        $data['photoWidth'] = @$this->input->post('photoWidth');
+        $data['photoHight'] = (int) @$this->input->post('photoHight');
+
+        $data['page_style'] = $this->input->post('cboPageStyle');
+        $data['line_height'] = $this->input->post('cboLineHeight');
+        $data['top_margin'] = $this->input->post('cboTopMargin');
+        $data['left_margin'] = $this->input->post('cboLeftMargin');
+        $data['right_margin'] = $this->input->post('cboRightMargin');
+        $data['type_id'] = $this->input->post('cboCtType');
+        $data['label_print'] = $this->input->post('cboLabelPrint');
+        $this->db->where('sub_district_code', $sub_dist_code);
+        $this->db->where('district_code', $dist_code);
+
+        $certificate_template = $this->db->get('sd_certificate_template');
+        if ($certificate_template->getNumRows() > 0) {
+            $this->db->where('sub_district_code', $sub_dist_code);
+            $this->db->where('district_code', $dist_code);
+            $this->db->update('sd_certificate_template', $data);
+        } else {
+            $data['sub_district_code'] = $sub_dist_code;
+            $data['district_code'] = $dist_code;
+            $this->db->insert('sd_certificate_template', $data);
+        }
+    }
+
+    function get_item_certificate($festtype, $school_code = '') {
+        $sub_district = $this->session->get('SUB_DISTRICT');
+        $cm_sd = !empty($sub_district) ? " AND cm.sub_district_code = " . (int)$sub_district : "";
+        $rm_sd = !empty($sub_district) ? " AND rm.sub_district_code = " . (int)$sub_district : "";
+        $rm1_sd = !empty($sub_district) ? " AND rm1.sub_district_code = " . (int)$sub_district : "";
+
+        $this->db->select('count( p.participant_id ) AS cpt, p.item_code, i.item_type, 
+			i.item_name, f.fest_name,rs.is_certificate_printed,
+			(SELECT COUNT(cm.grade) FROM sd_certificate_master cm WHERE cm.is_withheld="N" AND cm.item_code=p.item_code AND cm.admn_no=cm.parent_admn_no  AND cm.grade = "A" ' . $cm_sd . ' GROUP BY cm.grade) AS a_grade,
+			(SELECT COUNT(cm.grade) FROM sd_certificate_master cm WHERE cm.is_withheld="N" AND cm.item_code=p.item_code AND cm.admn_no=cm.parent_admn_no  AND cm.grade = "B" ' . $cm_sd . ' GROUP BY cm.grade) AS b_grade,
+			(SELECT COUNT(cm.grade) FROM sd_certificate_master cm WHERE cm.is_withheld="N" AND cm.item_code=p.item_code AND cm.admn_no=cm.parent_admn_no  AND cm.grade = "C" ' . $cm_sd . ' GROUP BY cm.grade) AS c_grade,
+			 (SELECT count(rm.participant_id) FROM sd_result_master rm WHERE rm.item_code=p.item_code ' . $rm_sd . ') AS participated_no,
+			 IF((SELECT count(rm1.item_code) FROM sd_result_master rm1 
+					WHERE rm1.item_code=p.item_code ' . $rm1_sd . ') > 0 ,
+					IF((	SELECT count(rm1.item_code) FROM sd_result_master rm1 
+							WHERE rm1.item_code=p.item_code ' . $rm1_sd . ' AND rm1.is_finish ="N"
+						) > 0, "No", "Yes"
+					),
+					"No"
+			) AS is_confirmed', FALSE);
+        $this->db->from('sd_participant_item_details AS p');
+        $rs_join = 'rs.item_code = p.item_code' . (!empty($sub_district) ? ' AND rs.sub_district_code = p.sub_district_code' : '');
+        $this->db->join('sd_result_master AS rs', $rs_join);
+        $this->db->join('item_master AS i', 'i.item_code = p.item_code');
+        $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id');
+        if (!empty($sub_district)) {
+            $this->db->where('p.sub_district_code', $sub_district);
+        }
+        if ('' == $school_code)
+            $this->db->where('i.fest_id', $festtype);
+        $this->db->where('p.is_captain', 'Y');
+        $this->db->groupBy('p.item_code');
+        $this->db->having("is_confirmed = 'Yes'");
+        $this->db->orderBy('p.item_code');
+        $getdet = $this->db->get();
+        return $getdet->getResultArray();
+    }
+
+    function get_item_certificate_single($festtype) {
+        $sub_district = $this->session->get('SUB_DISTRICT');
+        $cm_sd = !empty($sub_district) ? " AND cm.sub_district_code = " . (int)$sub_district : "";
+        $rm_sd = !empty($sub_district) ? " AND rm.sub_district_code = " . (int)$sub_district : "";
+        $rm1_sd = !empty($sub_district) ? " AND rm1.sub_district_code = " . (int)$sub_district : "";
+
+        $this->db->select('count( p.participant_id) AS cpt, p.item_code, i.item_type, i.item_name, 
+		f.fest_name,
+		(SELECT COUNT(cm.grade) FROM sd_certificate_master cm WHERE cm.item_code=p.item_code AND cm.grade = "A" ' . $cm_sd . ' GROUP BY cm.grade) AS a_grade,
+		(SELECT COUNT(cm.grade) FROM sd_certificate_master cm WHERE cm.item_code=p.item_code AND cm.grade = "B" ' . $cm_sd . ' GROUP BY cm.grade) AS b_grade,
+		(SELECT COUNT(cm.grade) FROM sd_certificate_master cm WHERE cm.item_code=p.item_code AND cm.grade = "C" ' . $cm_sd . ' GROUP BY cm.grade) AS c_grade,
+		(SELECT count(rm.participant_id) FROM sd_result_master rm WHERE rm.item_code=p.item_code ' . $rm_sd . ') AS participated_no,
+		 IF((SELECT count(rm1.item_code) FROM sd_result_master rm1 
+				WHERE rm1.item_code=p.item_code ' . $rm1_sd . ') > 0 ,
+				IF((	SELECT count(rm1.item_code) FROM sd_result_master rm1 
+						WHERE rm1.item_code=p.item_code ' . $rm1_sd . ' AND rm1.is_finish ="N"
+					) > 0, "No", "Yes"
+				),
+				"No"
+		) AS is_confirmed', FALSE);
+
+        $this->db->from('sd_certificate_master cm');
+        $p_join = 'cm.item_code=p.item_code AND p.participant_id=cm.participant_id' . (!empty($sub_district) ? ' AND p.sub_district_code=cm.sub_district_code' : '');
+        $this->db->join('sd_participant_item_details AS p', $p_join);
+        $this->db->join('item_master AS i', 'i.item_code = p.item_code');
+        $this->db->join('festival_master AS f', 'f.fest_id = i.fest_id');
+        if (!empty($sub_district)) {
+            $this->db->where('cm.sub_district_code', $sub_district);
+        }
+        $this->db->where('i.fest_id', $festtype);
+        $this->db->where('i.item_type', 'S');
+        $this->db->groupBy('p.item_code');
+        $this->db->having("is_confirmed = 'Yes'");
+        $this->db->orderBy('p.item_code');
+        $getdet = $this->db->get();
+        return $getdet->getResultArray();
+    }
+
+    function get_captains_details($item_code, $school_code = '') {
+        $certificate_type_cont = $this->get_certificate_type_condition();
+        if ($certificate_type_cont) {
+            $this->db->where($certificate_type_cont);
+        }
+        $sub_district = $this->session->get('SUB_DISTRICT');
+        if (!empty($sub_district)) {
+            $this->db->where('cm.sub_district_code', $sub_district);
+            $this->db->where('p.sub_district_code', $sub_district);
+        }
+
+        $this->db->select('cm.participant_id, pd.participant_name');
+        $this->db->from('sd_certificate_master cm');
+        $this->db->join('sd_participant_details AS pd', 'pd.participant_id=cm.participant_id');
+        $this->db->join('sd_participant_item_details AS p', 'cm.item_code=p.item_code AND  p.participant_id=cm.participant_id');
+        $this->db->where('cm.item_code', $item_code);
+        $this->db->where('cm.is_withheld', 'N');
+        $this->db->where('p.is_captain', 'Y');
+
+        if (!empty($school_code))
+            $this->db->where('cm.school_code', $school_code);
+        $this->db->orderBy('cm.participant_id', 'ASC');
+        $captains = $this->db->get();
+        $captains = $captains->getResultArray();
+        if (isset($captains) && count($captains) > 0) {
+            $captains_array[0] = 'All Participant';
+            foreach ($captains as $key => $captains) {
+                $captains_array[$captains['participant_id']] = $captains['participant_id'] . ' - ' . $captains['participant_name'];
+            }
+            return $captains_array;
+        }
+        return FALSE;
+    }
+
+    function get_participant_details($item_code, $captain_id, $item_type, $participant_id = '') {
+        $certificate_type_cont = $this->get_certificate_type_condition();
+        if ($certificate_type_cont) {
+            $this->db->where($certificate_type_cont);
+        }
+        $sub_district = $this->session->get('SUB_DISTRICT');
+        if (!empty($sub_district)) {
+            $this->db->where('cm.sub_district_code', $sub_district);
+            $this->db->where('sm.sub_district_code', $sub_district);
+        }
+
+        $this->db->select('cm.item_code, cm.participant_id, pd.participant_name, sm.school_code, sm.school_name, sd.sub_district_name, 
+							i.item_name, f.fest_name, pd.class, pd.gender,cm.rank, pd.admn_no, cm.grade, cm.is_withheld,p.spo_id');
+        $this->db->from('sd_certificate_master cm');
+        $this->db->join('sd_participant_details AS pd', 'pd.participant_id=cm.participant_id');
+        $this->db->join('sd_school_master AS sm', 'sm.school_code=pd.school_code');
+        $this->db->join('sub_district_master AS sd', 'sm.sub_district_code=sd.sub_district_code');
+        if ('S' == $item_type)
+            $this->db->join('sd_participant_item_details AS p', 'cm.item_code=p.item_code AND p.participant_id=cm.participant_id' . (!empty($sub_district) ? ' AND p.sub_district_code=cm.sub_district_code' : ''));
+        else if ('G' == $item_type)
+            $this->db->join('sd_participant_item_details AS p', 'cm.item_code=p.item_code AND p.admn_no=cm.parent_admn_no' . (!empty($sub_district) ? ' AND p.sub_district_code=cm.sub_district_code' : ''));
+
+        $this->db->join('item_master AS i', 'i.item_code = p.item_code');
+        $this->db->join('festival_master AS f', 'i.fest_id = f.fest_id');
+        $this->db->orderBy('FIELD(`cm`.`rank`, 1, 2, 3, 4, 0)');
+        $this->db->orderBy('cm.grade', 'ASC');
+        $this->db->where('cm.is_withheld', 'N');
+
+        if ('' != $participant_id && '0' != $participant_id && 0 != $participant_id) {
+            if (!empty($captain_id) && $captain_id != 'all' && '0' != $captain_id && 0 != $captain_id) {
+                $this->db->where('p.participant_id', $captain_id);
+            }
+            $this->db->where('cm.participant_id', $participant_id);
+        } else {
+            if ($captain_id != 'all' && !empty($captain_id) && $captain_id !== 0 && $captain_id !== '0') {
+                if ('S' == $item_type)
+                    $this->db->where('cm.participant_id', $captain_id);
+                else if ('G' == $item_type) {
+                    $this->db->where('p.participant_id', $captain_id);
+                }
+            }
+        }
+        $this->db->where('cm.item_code', $item_code);
+        $participant_details = $this->db->get();
+        return $participant_details->getResultArray();
+    }
+
+    function is_group_item($item_code) {
+        $this->db->select('item_type,max_pinnani');
+        $this->db->where('item_code', $item_code);
+        $item_details = $this->db->get('item_master');
+        $item_details = $item_details->getResultArray();
+        if (is_array($item_details) && count($item_details)) {
+            if ($item_details[0]['max_pinnani'] > 0) {
+                return 'G';
+            }
+            return $item_details[0]['item_type'];
+        }
+        return FALSE;
+    }
+
+    function get_group_participants($item_code, $captain_id, $school_code = '') {
+        $certificate_type_cont = $this->get_certificate_type_condition();
+        if ($certificate_type_cont) {
+            $this->db->where($certificate_type_cont);
+        }
+        $sub_district = $this->session->get('SUB_DISTRICT');
+        if (!empty($sub_district)) {
+            $this->db->where('cm.sub_district_code', $sub_district);
+        }
+
+        $this->db->select('cm.participant_id, pd.participant_name');
+        $this->db->from('sd_certificate_master cm');
+        $this->db->join('sd_participant_details AS pd', 'pd.participant_id=cm.participant_id');
+        $this->db->where('cm.item_code', $item_code);
+        if (!empty($captain_id) && 0 != $captain_id)
+            $this->db->where('cm.parent_admn_no =(SELECT parent_admn_no FROM sd_certificate_master WHERE participant_id=? AND item_code=? ' . (!empty($sub_district) ? ' AND sub_district_code=' . (int)$sub_district : '') . ' GROUP BY participant_id)', [$captain_id, $item_code]);
+
+        $this->db->where('cm.is_withheld', 'N');
+        if (!empty($school_code))
+            $this->db->where('cm.school_code', $school_code);
+        $this->db->orderBy('cm.participant_id', 'ASC');
+        $captains = $this->db->get();
+        $captains = $captains->getResultArray();
+        if (isset($captains) && count($captains) > 0) {
+            $participant_select_box = '<select class="form-select form-select-lg rounded-3 shadow-none border-secondary-subtle" name="participant_id" id="participant_id"><option value="0">All Participants</option>';
+            foreach ($captains as $key => $captains) {
+                $participant_select_box .= '<option value="' . $captains['participant_id'] . '">' . $captains['participant_id'] . ' - ' . $captains['participant_name'] . '</option>';
+            }
+            $participant_select_box .= '</select>';
+            return $participant_select_box;
+        }
+        return FALSE;
+    }
+
+    function school_details_certificate_wise() {
+        $sub_district = $this->session->get('SUB_DISTRICT');
+        $spd_sd = !empty($sub_district) ? " AND spd.sub_district_code = " . (int)$sub_district : "";
+        $rm_sd = !empty($sub_district) ? " AND rm.sub_district_code = " . (int)$sub_district : "";
+        $cm1_sd = !empty($sub_district) ? " AND cm1.sub_district_code = " . (int)$sub_district : "";
+        if ($sub_district) {
+            $this->db->where('sm.sub_district_code', $sub_district);
+            $this->db->where('cm.sub_district_code', $sub_district);
+            $this->db->where('rm.sub_district_code', $sub_district);
+        }
+        $this->db->select('sm.school_name, sm.school_code, 
+				(SELECT SUM(spd.point) FROM sd_school_point_details spd WHERE spd.school_code=cm.school_code ' . $spd_sd . ')  AS total_point, 
+				(SELECT COUNT(rm.participant_id) FROM sd_result_master rm WHERE rm.school_code=sm.school_code ' . $rm_sd . ') as no_participation, 
+				
+				(SELECT COUNT(cm1.grade) FROM sd_certificate_master cm1 WHERE cm1.school_code=cm.school_code AND 
+				is_withheld = "N" AND cm1.parent_admn_no=cm1.admn_no AND cm1.grade = "A" ' . $cm1_sd . ') AS a_grade,
+				
+				(SELECT COUNT(cm1.grade) FROM sd_certificate_master cm1 WHERE cm1.school_code=cm.school_code AND is_withheld = "N"  AND cm1.parent_admn_no=cm1.admn_no AND cm1.grade = "B" ' . $cm1_sd . ') AS b_grade,
+				(SELECT COUNT(cm1.grade) FROM sd_certificate_master cm1 WHERE cm1.school_code=cm.school_code AND is_withheld = "N"  AND cm1.parent_admn_no=cm1.admn_no AND cm1.grade = "C" ' . $cm1_sd . ') AS c_grade', FALSE);
+        $this->db->from('sd_school_master AS sm');
+        $this->db->join('sd_certificate_master AS cm', 'cm.school_code=sm.school_code');
+        //	$this->db->join ('sd_school_point_details AS spd', 'spd.school_code=cm.school_code');
+        $this->db->join('sd_result_master AS rm', 'rm.school_code=cm.school_code');
+        $this->db->orderBy('sm.school_code', 'ASC');
+        $this->db->groupBy('sm.school_code, sm.school_name, cm.school_code');
+        $result = $this->db->get();
+        return $result->getResultArray();
+    }
+
+    function get_school_festival_details($school_code) {
+        $certificate_type_cont = $this->get_certificate_type_condition();
+        if ($certificate_type_cont) {
+            $this->db->where($certificate_type_cont);
+        }
+        $sub_district = $this->session->get('SUB_DISTRICT');
+        if (!empty($sub_district)) {
+            $this->db->where('cm.sub_district_code', $sub_district);
+        }
+        $this->db->select('fm.fest_id, fm.fest_name');
+        $this->db->from('sd_certificate_master cm');
+        $this->db->join('item_master i', 'i.item_code=cm.item_code');
+        $this->db->join('festival_master fm', 'fm.fest_id=i.fest_id');
+        $this->db->groupBy('fm.fest_id, fm.fest_name');
+        $this->db->where('cm.is_withheld', 'N');
+        $this->db->where('cm.school_code', $school_code);
+        $fest_array = $this->db->get();
+        $fest_array = $fest_array->getResultArray();
+        if (is_array($fest_array) && count($fest_array) > 0) {
+            $result_array[0] = 'All Festival';
+            foreach ($fest_array as $fest_array) {
+                $result_array[$fest_array['fest_id']] = $fest_array['fest_name'];
+            }
+
+            return $result_array;
+        }
+        return FALSE;
+    }
+
+    function get_school_item_details($school_code, $fest_id) {
+        $certificate_type_cont = $this->get_certificate_type_condition();
+        if ($certificate_type_cont) {
+            $this->db->where($certificate_type_cont);
+        }
+        $sub_district = $this->session->get('SUB_DISTRICT');
+        if (!empty($sub_district)) {
+            $this->db->where('cm.sub_district_code', $sub_district);
+        }
+        $this->db->select('i.item_code, i.item_name');
+        $this->db->from('sd_certificate_master cm');
+        $this->db->join('item_master i', 'i.item_code=cm.item_code');
+        if (0 != $fest_id)
+            $this->db->where('i.fest_id', $fest_id);
+        $this->db->groupBy('i.item_code');
+        $this->db->where('cm.is_withheld', 'N');
+        $this->db->where('cm.school_code', $school_code);
+        $item_array = $this->db->get();
+        $item_array = $item_array->getResultArray();
+        $item_select_box = '';
+        if (is_array($item_array) && count($item_array) > 0) {
+            $item_select_box = '<select class="form-select form-select-lg rounded-3 shadow-none border-secondary-subtle" name="item_code" id="item_code" onChange="javascript:get_school_captains(this.value);"><option value="0">All Items</option>';
+            foreach ($item_array as $item_array) {
+                $item_select_box .= '<option value="' . $item_array['item_code'] . '">' . $item_array['item_code'] . ' - ' . $item_array['item_name'] . '</option>';
+            }
+            $item_select_box .= '</select>';
+            return $item_select_box;
+        }
+        return FALSE;
+    }
+
+    function get_school_participant_details($school_code = '', $festival = '', $item_code = '', $captain_id = '', $participant_id = '') {
+        $certificate_type_cont = $this->get_certificate_type_condition();
+        if ($certificate_type_cont) {
+            $this->db->where($certificate_type_cont);
+        }
+        $sub_district = $this->session->get('SUB_DISTRICT');
+        if (!empty($sub_district)) {
+            $this->db->where('cm.sub_district_code', $sub_district);
+            $this->db->where('sm.sub_district_code', $sub_district);
+        }
+
+        $this->db->select('cm.item_code, cm.participant_id, pd.participant_name, sm.school_code, sm.school_name, sd.sub_district_name,
+							i.item_name, f.fest_name, pd.class, pd.gender, cm.grade,cm.rank, cm.is_withheld, pd.admn_no');
+        $this->db->from('sd_certificate_master cm');
+        $this->db->join('item_master i', 'i.item_code=cm.item_code');
+        $this->db->join('sd_school_master sm', 'sm.school_code=cm.school_code');
+        $this->db->join('sub_district_master AS sd', 'sm.sub_district_code=sd.sub_district_code');
+        $this->db->join('sd_participant_details AS pd', 'pd.participant_id=cm.participant_id');
+        $this->db->join('festival_master f', 'f.fest_id=i.fest_id');
+        if (!empty($school_code) && 0 != $school_code) {
+            $this->db->where('sm.school_code', $school_code);
+        }
+        if (!empty($festival) && 0 != $festival) {
+            $this->db->where('f.fest_id', $festival);
+        }
+        if (!empty($item_code) && 0 != $item_code) {
+            $this->db->where('cm.item_code', $item_code);
+        }
+        if (!empty($captain_id) && 0 != $captain_id) {
+            $captain_sub_filter = !empty($sub_district) ? " AND sub_district_code=" . (int)$sub_district : "";
+            if (!empty($item_code) && 0 != $item_code) {
+                $this->db->where('cm.parent_admn_no = (SELECT parent_admn_no FROM sd_certificate_master WHERE item_code=' . (int)$item_code . ' AND participant_id=' . (int)$captain_id . $captain_sub_filter . ' LIMIT 1)', NULL, FALSE);
+            } else {
+                $this->db->where('cm.parent_admn_no = (SELECT parent_admn_no FROM sd_certificate_master WHERE participant_id=' . (int)$captain_id . $captain_sub_filter . ' LIMIT 1)', NULL, FALSE);
+            }
+        }
+        if (!empty($participant_id) && 0 != $participant_id) {
+            $this->db->where('cm.participant_id', $participant_id);
+        }
+
+        $participant_details = $this->db->get();
+        return $participant_details->getResultArray();
+    }
+
+    function get_participant_details_with_id($participant_id) {
+        $certificate_type_cont = $this->get_certificate_type_condition();
+        if ($certificate_type_cont) {
+            $this->db->where($certificate_type_cont);
+        }
+        $sub_district = $this->session->get('SUB_DISTRICT');
+        if (!empty($sub_district)) {
+            $this->db->where('cm.sub_district_code', $sub_district);
+            $this->db->where('sm.sub_district_code', $sub_district);
+        }
+        $this->db->select('cm.participant_id, pd.participant_name, sm.school_code, sm.school_name, pd.admn_no');
+        $this->db->from('sd_certificate_master cm');
+        $this->db->join('sd_participant_details pd', 'pd.participant_id=cm.participant_id');
+        $this->db->join('sd_school_master sm', 'sm.school_code=cm.school_code');
+        $this->db->where('cm.participant_id', $participant_id);
+        $this->db->groupBy('cm.participant_id');
+        $participant_details = $this->db->get();
+        return $participant_details->getResultArray();
+    }
+
+    function get_participant_item_details($participant_id) {
+        $certificate_type_cont = $this->get_certificate_type_condition();
+        if ($certificate_type_cont) {
+            $this->db->where($certificate_type_cont);
+        }
+        $sub_district = $this->session->get('SUB_DISTRICT');
+        if (!empty($sub_district)) {
+            $this->db->where('cm.sub_district_code', $sub_district);
+        }
+        $this->db->select('i.item_code, i.item_name');
+        $this->db->from('sd_certificate_master cm');
+        $this->db->join('item_master i', 'i.item_code=cm.item_code');
+        $this->db->where('cm.participant_id', $participant_id);
+        $item_details = $this->db->get();
+        $item_details = $item_details->getResultArray();
+        $result_array = array();
+        if (is_array($item_details) && count($item_details) > 0) {
+            $result_array[0] = 'All Items';
+            foreach ($item_details as $item_details) {
+                $result_array[$item_details['item_code']] = $item_details['item_name'];
+            }
+
+            return $result_array;
+        }
+        return FALSE;
+    }
+
+    function get_certificate_type_condition() {
+        $sub_dist_code = $this->session->get('SUB_DISTRICT');
+        $dist_code = $this->session->get('DISTRICT');
+        $this->db->where('sub_district_code', $sub_dist_code);
+        $this->db->where('district_code', $dist_code);
+        $this->db->select('type_id');
+        $certificate_type = $this->db->get('sd_certificate_template');
+        $where = '';
+        if ($certificate_type->getNumRows() > 0) {
+            $certificate = $certificate_type->getResultArray();
+            $type_id = $certificate[0]['type_id'];
+
+            if ($type_id == 1) {
+                $where = "(cm.grade = 'A')";
+            } else if ($type_id == 2) {
+                $where = "(cm.grade IN ('A','B'))";
+            } else if ($type_id == 3) {
+                $where = "(cm.grade IN ('A','B','C'))";
+            } else if ($type_id == 4) {
+                $where = "cm.rank != 0 and cm.rank < 4";
+            } else if ($type_id == 5) {
+                $where = "(cm.rank < 3 and cm.rank != 0)";
+            } else if ($type_id == 6) {
+                $where = "(cm.rank = 1)";
+            } else if ($type_id == 7) {
+                $where = "(cm.rank = 1  and cm.grade = 'A')";
+            } else if ($type_id == 8) {
+                $where = "((cm.rank < 4 and cm.rank != 0)  or cm.grade IN ('A'))";
+            }else if ($type_id == 9){
+                $where = "(cm.grade IN ('A','B','C',''))";
+            }
+        }
+        return $where;
+    }
+
+}
+
+?>

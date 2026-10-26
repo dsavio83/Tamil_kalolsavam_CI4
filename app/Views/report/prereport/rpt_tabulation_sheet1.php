@@ -26,6 +26,8 @@
     }	
     -->
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 <?php
 foreach ($retvalue as $data) {
     ?>
@@ -45,7 +47,7 @@ foreach ($retvalue as $data) {
                 }
                 ?>
                 <tr>
-                    <td colspan="4" class="style10" align="center">Tabulation Sheet</td></tr>
+                    <td colspan="4" class="report-pdf-title" align="center">Tabulation Sheet</td></tr>
                 <tr>
                     <td width=50 height="32" class="style9">Item  :</td>
                     <td width=300 height="32" class="style9"><?php echo $data['item_code']; ?>   -   <?php echo $data['item_name']; ?> (<?php echo $data['fest_name']; ?>)</td>
@@ -83,7 +85,6 @@ foreach ($retvalue as $data) {
             ?>
 
         </page_footer> 
-
 
         <table width="62%" border="1" align="center" cellpadding="0" cellspacing="0" bordercolor="#D4D0C8">
             <tr>
@@ -128,9 +129,8 @@ foreach ($retvalue as $data) {
             <?php }
             ?>
         </table>
-        <p>&nbsp;</p>
-        <p>&nbsp;</p>
 
+        <p>&nbsp;</p>
 
     </page> 
     <?php

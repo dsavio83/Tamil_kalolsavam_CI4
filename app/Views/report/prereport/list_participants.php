@@ -32,10 +32,34 @@
         </span>
       </div>
 
+<?php
+$isDistrictAdmin = ((int)$this->session->get('USER_TYPE') === 2 || (int)$this->session->get('USER_TYPE') === 0 || $this->session->get('USER_GROUP') === 'W');
+?>
       <!-- Card Body -->
       <div class="card-body p-4 d-flex flex-column flex-grow-1">
         <?php echo form_open('report/prereportpdf/list_participants', array('id' => 'formListPartSchool', 'target' => '_blank', 'class' => 'no-global-loader d-flex flex-column flex-grow-1')); ?>
         
+        <!-- Sub-District Filter (District / Webmaster) -->
+        <?php if ($isDistrictAdmin && !empty($subdistricts)) { ?>
+        <div class="mb-3">
+          <label for="cmbSubDistrictFilterSchool" class="form-label fw-semibold text-dark small mb-1.5 d-flex align-items-center gap-1.5">
+            <i class="bi bi-geo-alt-fill text-primary"></i>
+            <span>Filter by Sub-District</span>
+          </label>
+          <select id="cmbSubDistrictFilterSchool" class="form-select py-2 fs-6">
+            <option value="ALL">-- All Sub-Districts --</option>
+            <?php foreach ($subdistricts as $sd) { ?>
+              <option value="<?php echo htmlspecialchars((string)$sd['sub_district_code']); ?>">
+                <?php echo htmlspecialchars($sd['sub_district_code'] . ' - ' . $sd['sub_district_name']); ?>
+              </option>
+            <?php } ?>
+          </select>
+          <small class="text-muted mt-1 d-block" style="font-size: 0.78rem;">
+            <i class="bi bi-funnel text-primary me-1"></i> Selecting a sub-district filters the participating schools below.
+          </small>
+        </div>
+        <?php } ?>
+
         <!-- School Dropdown -->
         <div class="mb-3">
           <label for="txtSchoolCode" class="form-label fw-semibold text-dark small mb-1.5 d-flex align-items-center gap-1.5">
@@ -48,7 +72,9 @@
             <?php
             if (!empty($retdat)) {
                 foreach ($retdat as $s) {
-                    echo '<option value="' . htmlspecialchars((string)$s['school_code']) . '">' . htmlspecialchars($s['school_code'] . ' - ' . $s['school_name']) . '</option>';
+                    $sdCode = $s['sub_district_code'] ?? '';
+                    $sdName = !empty($s['sub_district_name']) ? ' (' . $s['sub_district_name'] . ')' : '';
+                    echo '<option value="' . htmlspecialchars((string)$s['school_code']) . '" data-subdistrict="' . htmlspecialchars((string)$sdCode) . '">' . htmlspecialchars($s['school_code'] . ' - ' . $s['school_name'] . $sdName) . '</option>';
                 }
             }
             ?>
@@ -92,3 +118,37 @@
 
     </div>
   </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var subDistFilter = document.getElementById('cmbSubDistrictFilterSchool');
+    var schoolSelect = document.getElementById('txtSchoolCode');
+    if (!subDistFilter || !schoolSelect) return;
+
+    var allOptions = Array.from(schoolSelect.querySelectorAll('option:not([value=""])'));
+
+    subDistFilter.addEventListener('change', function() {
+        var selectedSub = this.value;
+        var currentVal = schoolSelect.value;
+        var hasValidSelection = false;
+
+        schoolSelect.innerHTML = '<option value="" disabled selected>-- Select Participating School --</option>';
+
+        allOptions.forEach(function(opt) {
+            var optSub = opt.getAttribute('data-subdistrict');
+            if (selectedSub === 'ALL' || selectedSub === '' || optSub === selectedSub) {
+                var clone = opt.cloneNode(true);
+                if (clone.value === currentVal) {
+                    clone.selected = true;
+                    hasValidSelection = true;
+                }
+                schoolSelect.appendChild(clone);
+            }
+        });
+
+        if (!hasValidSelection) {
+            schoolSelect.value = '';
+        }
+    });
+});
+</script>

@@ -35,7 +35,7 @@ class Database extends Config
         'pConnect'     => false,
         'DBDebug'      => true,
         'charset'      => 'utf8mb4',
-        'DBCollat'     => 'utf8mb4_general_ci',
+        'DBCollat'     => 'utf8mb4_unicode_ci',
         'swapPre'      => '',
         'encrypt'      => false,
         'compress'     => false,
@@ -156,6 +156,75 @@ class Database extends Config
     //            'time'     => 'H:i:s',
     //        ],
     //    ];
+
+    /**
+     * Maintenance connection used by backup/restore/import-initialize flows,
+     * which legitimately require DDL (CREATE/ALTER/DROP/TRUNCATE) on tk2025.*
+     * - NOT the routine application account. Credentials via env
+     * (database.maint.username / database.maint.password).
+     *
+     * @var array<string, mixed>
+     */
+    public array $maint = [
+        'DSN'        => '',
+        'hostname'   => '127.0.0.1',
+        'username'   => '',
+        'password'   => '',
+        'database'   => 'tk2025',
+        'DBDriver'   => 'MySQLi',
+        'DBPrefix'   => '',
+        'pConnect'   => false,
+        'DBDebug'    => false,
+        'charset'    => 'utf8mb4',
+        'DBCollat'   => 'utf8mb4_general_ci',
+        'swapPre'    => '',
+        'encrypt'    => false,
+        'compress'   => false,
+        'strictOn'   => false,
+        'failover'   => [],
+        'port'       => 3306,
+        'numberNative' => false,
+        'foundRows'  => false,
+        'dateFormat' => [
+            'date'     => 'Y-m-d',
+            'datetime' => 'Y-m-d H:i:s',
+            'time'     => 'H:i:s',
+        ],
+    ];
+
+    /**
+     * Read-only connection used by the daily password-hash tripwire checker.
+     * Credentials are provided via env (CI4: database.audit.username /
+     * database.audit.password) so that no DB secret lives in source control.
+     *
+     * @var array<string, mixed>
+     */
+    public array $audit = [
+        'DSN'        => '',
+        'hostname'   => '127.0.0.1',
+        'username'   => '',
+        'password'   => '',
+        'database'   => 'tk2025',
+        'DBDriver'   => 'MySQLi',
+        'DBPrefix'   => '',
+        'pConnect'   => false,
+        'DBDebug'    => false,
+        'charset'    => 'utf8mb4',
+        'DBCollat'   => 'utf8mb4_general_ci',
+        'swapPre'    => '',
+        'encrypt'    => false,
+        'compress'   => false,
+        'strictOn'   => false,
+        'failover'   => [],
+        'port'       => 3306,
+        'numberNative' => false,
+        'foundRows'  => false,
+        'dateFormat' => [
+            'date'     => 'Y-m-d',
+            'datetime' => 'Y-m-d H:i:s',
+            'time'     => 'H:i:s',
+        ],
+    ];
 
     /**
      * This database connection is used when running PHPUnit database tests.

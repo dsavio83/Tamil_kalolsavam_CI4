@@ -84,7 +84,10 @@ class Input
 
     public function is_ajax_request()
     {
-        return $this->request->isAJAX();
+        if (method_exists($this->request, 'isAJAX')) {
+            return $this->request->isAJAX();
+        }
+        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     }
 
     public function valid_ip($ip, $which = '')

@@ -23,7 +23,7 @@ try {
         } else {
             $sub_m = $db->table('sub_district_master')->select('sub_district_name')->where('sub_district_code', $sub_dist_code)->get()->getRowArray();
             if (!empty($sub_m['sub_district_name'])) {
-                $dynamic_fest_title = $sub_m['sub_district_name'] . ' Sub-District Tamil Kalolsavam';
+                $dynamic_fest_title = $sub_m['sub_district_name'] . ' Sub District Tamil Kalolsavam';
             }
         }
     }
@@ -33,15 +33,19 @@ try {
         if (!empty($dist_fest['dist_kalolsavam_name'])) {
             $dynamic_fest_title = $dist_fest['dist_kalolsavam_name'];
         } else {
-            $dist_m = $db->table('rev_district_master')->select('rev_district_name')->where('rev_district_code', $dist_code)->get()->getRowArray();
+            $dist_m = $db->table('rev_district_master')->select('rev_district_name')->where('rev_district_code', $dist_code)->where('status', 'Y')->get()->getRowArray();
             if (!empty($dist_m['rev_district_name'])) {
                 $dynamic_fest_title = $dist_m['rev_district_name'] . ' District Tamil Kalolsavam';
             }
         }
     }
 
+    $gen_fest = $db->table('kalolsavam_master')->select('kalolsavam_name, kalolsavam_year')->where('status', 'O')->get()->getRowArray();
+    if (!empty($gen_fest['kalolsavam_year'])) {
+        $dynamic_fest_year = trim($gen_fest['kalolsavam_year']);
+    }
+
     if (empty($dynamic_fest_title)) {
-        $gen_fest = $db->table('kalolsavam_master')->select('kalolsavam_name')->where('status', 'O')->get()->getRowArray();
         if (!empty($gen_fest['kalolsavam_name'])) {
             $dynamic_fest_title = $gen_fest['kalolsavam_name'];
         }
@@ -53,6 +57,20 @@ try {
 if (empty($dynamic_fest_title)) {
     $dynamic_fest_title = 'Tamil Kalolsavam';
 }
+if (empty($dynamic_fest_year)) {
+    $curY = (int)date('Y');
+    $dynamic_fest_year = $curY . '-' . ($curY + 1);
+}
+
+// Clean plain-text page title (valid for browser tab, history, and tooltips)
+if (isset($title) && trim($title) !== '') {
+    $browser_title = strip_tags($title);
+} else {
+    $browser_title = $dynamic_fest_title;
+    if (!empty($dynamic_fest_year) && !str_contains($browser_title, $dynamic_fest_year) && !preg_match('/\b20\d\d\b/', $browser_title)) {
+        $browser_title .= ' ' . $dynamic_fest_year;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -61,10 +79,11 @@ if (empty($dynamic_fest_title)) {
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title><?php echo (isset($title) && trim($title) != '') ? $title : esc($dynamic_fest_title) . ' <span id="year-range"></span>'; ?></title>
+  <title><?php echo esc($browser_title); ?></title>
   <meta content="" name="description">
   <meta content="" name="keywords">
   <meta name="csrf-token" content="<?php echo csrf_hash(); ?>">
+  <meta name="color-scheme" content="light">
 
   <!-- Favicons -->
   <link href="<?php echo base_url(); ?>assets/img/favicon.png" rel="icon">
@@ -72,7 +91,25 @@ if (empty($dynamic_fest_title)) {
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   
   <style>
+    /* Force Light Theme across all native form controls and date/time pickers */
+    :root, html, body {
+      color-scheme: light !important;
+    }
+    input, select, textarea, button,
+    input[type="date"],
+    input[type="time"],
+    input[type="datetime-local"] {
+      color-scheme: light !important;
+    }
+
     /* Add your custom styles here */
+    .menu-pdf-icon {
+      font-size: 1rem;
+      color: #fff;
+      margin-left: 5px;
+      vertical-align: middle;
+      opacity: 0.9;
+    }
     #custom-alert,
     #custom-error-alert {
       position: fixed;
@@ -233,7 +270,12 @@ if (empty($dynamic_fest_title)) {
   <!--<link href="<?php echo base_url(); ?>assets/vendor/simple-datatables/style.css" rel="stylesheet">-->
   <!-- jQuery and SweetAlert -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="<?php echo base_url(); ?>assets/vendor/sweetalert2/sweetalert2.all.min.js"></script>
+  <script>
+    if (typeof Swal === 'undefined') {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"><\/script>');
+    }
+  </script>
   <!-- DataTables -->
   <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
   <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
@@ -274,6 +316,21 @@ if (empty($dynamic_fest_title)) {
             } catch (e) {}
           }
         });
+      }
+    })();
+
+    // Ensure Element.prototype.remove is safe against null parentNode for modern frameworks like Bootstrap 5
+    (function() {
+      if (window.Element && Element.prototype) {
+        Element.prototype.remove = function() {
+          if (this && this.parentNode) {
+            this.parentNode.removeChild(this);
+          }
+          return this;
+        };
+        if (window.Element.Methods && Element.Methods.remove) {
+          Element.Methods.remove = Element.prototype.remove;
+        }
       }
     })();
   </script>
@@ -360,7 +417,7 @@ if (empty($dynamic_fest_title)) {
 
 
   <!-- Template Main JS File -->
-  <script src="<?php echo base_url(); ?>assets/js/main.js"></script>
+  <script src="<?php echo base_url(); ?>assets/js/main.js?v=20260913"></script>
    <script src="<?php echo base_url(); ?>assets/js/tost.js"></script>
    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
@@ -450,10 +507,23 @@ if (empty($dynamic_fest_title)) {
       }
   };
 
+  function cleanAlertMessage(html) {
+    if (!html) return "";
+    var tmp = document.createElement("div");
+    tmp.innerHTML = html;
+    var clean = tmp.textContent || tmp.innerText || "";
+    if (clean.indexOf('<') !== -1 && clean.indexOf('>') !== -1) {
+      tmp.innerHTML = clean;
+      clean = tmp.textContent || tmp.innerText || "";
+    }
+    return clean.replace(/\s+/g, ' ').trim();
+  }
+
   function showAlert(message) {
-    if (message && message.trim() !== '') {
+    var clean = cleanAlertMessage(message);
+    if (clean !== '') {
       Toastify({
-        text: message,
+        text: clean,
         duration: 4000,
         gravity: "top",
         position: "right",
@@ -468,12 +538,10 @@ if (empty($dynamic_fest_title)) {
   }
 
   function showErrorAlert(message) {
-    if (message && message.trim() !== '') {
-      // Decode entities like &lt;br&gt; or HTML tags if any, clean them for Toastify
-      var cleanMessage = message.replace(/<[^>]*>/g, ' ');
-      
+    var clean = cleanAlertMessage(message);
+    if (clean !== '') {
       Toastify({
-        text: cleanMessage,
+        text: clean,
         duration: 4000,
         gravity: "top",
         position: "right",
@@ -485,7 +553,6 @@ if (empty($dynamic_fest_title)) {
         }
       }).showToast();
 
-      // If login modal is present on the page, keep it open/show it!
       var loginModalEl = document.getElementById('loginModal');
       if (loginModalEl) {
         var myModal = new bootstrap.Modal(loginModalEl);
@@ -495,9 +562,10 @@ if (empty($dynamic_fest_title)) {
   }
 
   function showSuccessAlert(message) {
-    if (message && message.trim() !== '') {
+    var clean = cleanAlertMessage(message);
+    if (clean !== '') {
       Toastify({
-        text: message,
+        text: clean,
         duration: 4000,
         gravity: "top",
         position: "right",
@@ -513,16 +581,41 @@ if (empty($dynamic_fest_title)) {
 
   <?php
   $session = session();
-  if ($session->getFlashdata('success')) {
-      $success = $session->getFlashdata('success');
-  }
-  if ($session->getFlashdata('error')) {
-      $error = $session->getFlashdata('error');
-  }
-  if ($session->getFlashdata('message')) {
-      $message = $session->getFlashdata('message');
+  $swal_success = $session->getFlashdata('swal_success');
+  $swal_error   = $session->getFlashdata('swal_error');
+  $success      = $session->getFlashdata('success');
+  $error        = $session->getFlashdata('error');
+  $message      = $session->getFlashdata('message');
+
+  // Prevent duplicate toast if message and success are identical
+  if (!empty($message) && !empty($success) && $message === $success) {
+      $message = '';
   }
   ?>
+  <?php if (!empty($swal_success)) { ?>
+  if (typeof Swal !== 'undefined') {
+    Swal.fire({
+      icon: 'success',
+      title: 'வெற்றிகரமாகச் சேமிக்கப்பட்டது!',
+      text: "<?php echo addslashes($swal_success); ?>",
+      confirmButtonColor: '#4f46e5',
+      confirmButtonText: '<i class="bi bi-check-lg me-1"></i> சரி (OK)',
+      timer: 4000,
+      timerProgressBar: true
+    });
+  }
+  <?php } ?>
+  <?php if (!empty($swal_error)) { ?>
+  if (typeof Swal !== 'undefined') {
+    Swal.fire({
+      icon: 'error',
+      title: 'பிழை (Error)',
+      text: "<?php echo addslashes($swal_error); ?>",
+      confirmButtonColor: '#ef4444',
+      confirmButtonText: 'சரி (OK)'
+    });
+  }
+  <?php } ?>
   // Assuming $message and $error are PHP variables containing the messages
   showAlert("<?php echo isset($message) ? htmlspecialchars($message) : ''; ?>");
   showErrorAlert("<?php echo isset($error) ? htmlspecialchars($error) : ''; ?>");
@@ -745,14 +838,77 @@ if (empty($dynamic_fest_title)) {
     });
   }
 
-  // Dynamically set the year in the title
-  document.addEventListener("DOMContentLoaded", function() {
-      const currentYear = new Date().getFullYear();
-      const nextYear = currentYear + 1;
-      const yearRange = `${currentYear} - ${nextYear}`;
-      document.title = document.title.replace('<span id="year-range"></span>', yearRange);
+  // Global (X, Y) Scroll Position Persistence on Page Reload
+  (function() {
+    try {
+      var currentPath = window.location.pathname + window.location.search;
+      var pageScrollKey = 'tk_page_pos_' + encodeURIComponent(currentPath);
+
+      // Function to save current (x, y) coordinates
+      var savePageCoordinates = function() {
+        try {
+          var px = window.pageXOffset || document.documentElement.scrollLeft || window.scrollX || 0;
+          var py = window.pageYOffset || document.documentElement.scrollTop || window.scrollY || 0;
+          sessionStorage.setItem(pageScrollKey + '_x', String(Math.round(px)));
+          sessionStorage.setItem(pageScrollKey + '_y', String(Math.round(py)));
+          sessionStorage.setItem(pageScrollKey + '_t', String(Date.now()));
+        } catch(e) {}
+      };
+
+      var scrollDebounce = null;
+      window.addEventListener('scroll', function() {
+        if (!scrollDebounce) {
+          scrollDebounce = setTimeout(function() {
+            savePageCoordinates();
+            scrollDebounce = null;
+          }, 100);
+        }
+      }, { passive: true });
+
+      window.addEventListener('beforeunload', savePageCoordinates);
+      window.addEventListener('pagehide', savePageCoordinates);
+
+      // Restore on reload if within 5 minutes for this exact URL
+      var posX = sessionStorage.getItem(pageScrollKey + '_x');
+      var posY = sessionStorage.getItem(pageScrollKey + '_y');
+      var posT = sessionStorage.getItem(pageScrollKey + '_t');
+
+      if (posY !== null && posT && (Date.now() - parseInt(posT, 10) < 300000)) {
+        var targetPxX = parseInt(posX || '0', 10);
+        var targetPxY = parseInt(posY, 10);
+
+        if ('scrollRestoration' in history) {
+          history.scrollRestoration = 'manual';
+        }
+
+        var executeRestore = function() {
+          window.scrollTo(targetPxX, targetPxY);
+        };
+
+        window.scrollTo(targetPxX, targetPxY);
+        requestAnimationFrame(executeRestore);
+        setTimeout(executeRestore, 50);
+        setTimeout(executeRestore, 150);
+        setTimeout(executeRestore, 350);
+        window.addEventListener('load', executeRestore);
+      }
+    } catch(e) {}
+  })();
+
+  // Focus username input with cursor ready when login modal opens
+  document.addEventListener('shown.bs.modal', function (e) {
+    var modal = e.target;
+    if (modal) {
+      var uInput = modal.querySelector('#txtUserName, #portalUserName, input[name="txtUserName"]');
+      if (uInput) {
+        uInput.focus();
+        if (uInput.value) {
+          var len = uInput.value.length;
+          uInput.setSelectionRange(len, len);
+        }
+      }
+    }
   });
-        
 </script>
 
 

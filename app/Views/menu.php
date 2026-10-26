@@ -12,11 +12,23 @@ $display_school_name = '';
 
 try {
     $db = \Config\Database::connect();
-    if ($school_code && empty($sub_dist_code)) {
+
+    // Resolve school user code if not set in session
+    if (empty($school_code) && (int)$session->get('USER_TYPE') === 5) {
+        $cluster = $db->table('sd_user_cluster')->select('school_code')->where('user_id', (int)$session->get('USERID'))->get()->getRowArray();
+        if (!empty($cluster['school_code'])) {
+            $school_code = $cluster['school_code'];
+        }
+    }
+
+    if (!empty($school_code)) {
         $sch = $db->table('sd_school_master')->select('school_name, sub_district_code, rev_district_code')->where('school_code', $school_code)->get()->getRowArray();
+        if (!$sch) {
+            $sch = $db->table('d_school_master')->select('school_name, sub_district_code, rev_district_code')->where('school_code', $school_code)->get()->getRowArray();
+        }
         if ($sch) {
-            $sub_dist_code = $sch['sub_district_code'];
-            $dist_code = $sch['rev_district_code'];
+            if (empty($sub_dist_code)) $sub_dist_code = $sch['sub_district_code'];
+            if (empty($dist_code)) $dist_code = $sch['rev_district_code'];
             $display_school_name = $sch['school_name'];
         }
     }
@@ -29,22 +41,24 @@ try {
     }
 
     if ($dist_code) {
-        $dist_m = $db->table('rev_district_master')->select('rev_district_name')->where('rev_district_code', $dist_code)->get()->getRowArray();
+        $dist_m = $db->table('rev_district_master')->select('rev_district_name')->where('rev_district_code', $dist_code)->where('status', 'Y')->get()->getRowArray();
         if ($dist_m) {
             $display_district = $dist_m['rev_district_name'];
         }
     }
 
-    if ($user_name !== '' && $user_name !== null) {
-        $display_user_name = $user_name;
-    } else {
-        $user_id = (int)$session->get('USERID');
-        if ($user_id > 0) {
-            $um = $db->table('user_master')->select('name, user_name')->where('user_id', $user_id)->get()->getRowArray();
-            if ($um) {
-                $display_user_name = (!empty($um['name'])) ? $um['name'] : $um['user_name'];
-            }
+    // Prefer the name saved by the user in their profile (user_master.name) from the
+    // database, so header reflects profile edits without requiring a fresh login.
+    $user_id = (int)$session->get('USERID');
+    if ($user_id > 0) {
+        $um = $db->table('user_master')->select('name, user_name')->where('user_id', $user_id)->get()->getRowArray();
+        if ($um && !empty($um['name'])) {
+            $display_user_name = $um['name'];
+        } else {
+            $display_user_name = (!empty($um['user_name'])) ? $um['user_name'] : $user_name;
         }
+    } else {
+        $display_user_name = $user_name;
     }
     if (empty($display_user_name)) {
         $display_user_name = 'User';
@@ -59,7 +73,45 @@ if (empty($display_sub_district)) {
     $display_sub_district = 'Sub-District';
 }
 $header_title = 'Tamil Kalaivizha';
-$profile_display_name = $display_school_name ? ($display_school_name . ' (' . $school_code . ')') : $display_user_name;
+
+$user_group = $session->get('USER_GROUP');
+$utype = (int)$session->get('USER_TYPE');
+$role_badge_title = '';
+$header_display_title = '';
+
+if ($user_group === 'W' || $utype === 0) {
+    $header_display_title = 'Webmaster';
+    $role_badge_title = 'Webmaster';
+} elseif ($utype === 1) {
+    $header_display_title = 'State Admin';
+    $role_badge_title = 'State Admin';
+} elseif ($utype === 2) {
+    $clean_dist = trim(preg_replace('/district/i', '', (string)$display_district));
+    $header_display_title = !empty($clean_dist) && $clean_dist !== 'District' ? ($clean_dist . ' District') : 'District Admin';
+    $role_badge_title = 'District Admin';
+} elseif ($utype === 3) {
+    $clean_sub = trim(preg_replace('/sub[- ]?district/i', '', (string)$display_sub_district));
+    $header_display_title = !empty($clean_sub) && $clean_sub !== 'Sub-District' ? ($clean_sub . ' Sub District') : 'Sub District Admin';
+    $role_badge_title = 'Sub District Admin';
+} elseif ($utype === 6) {
+    $header_display_title = 'Stage Manager';
+    $role_badge_title = 'Stage Manager';
+} elseif ($utype === 5) {
+    if (!empty($display_school_name)) {
+        $header_display_title = $display_school_name . (!empty($school_code) ? ' (' . $school_code . ')' : '');
+    } else {
+        $header_display_title = !empty($school_code) ? ('School (' . $school_code . ')') : 'School User';
+    }
+    $role_badge_title = 'School User';
+} elseif ($utype === 4) {
+    $header_display_title = 'Cluster Admin';
+    $role_badge_title = 'Cluster Admin';
+} else {
+    $header_display_title = $display_user_name ?: 'User';
+    $role_badge_title = 'User';
+}
+
+$profile_display_name = $header_display_title;
 ?>
 <!-- ======= Header ======= -->
 <header id="header" class="header fixed-top d-flex align-items-center">
@@ -75,10 +127,16 @@ $profile_display_name = $display_school_name ? ($display_school_name . ' (' . $s
   <nav class="header-nav ms-auto">
     <ul class="d-flex align-items-center m-0 p-0 list-unstyled">
       
-      <?php if ($display_sub_district && $display_sub_district !== 'Sub-District') { ?>
+      <?php if ($utype === 2 && $display_district && $display_district !== 'District') { ?>
       <li class="nav-item d-none d-sm-block me-3">
         <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill font-monospace">
-          <i class="bi bi-geo-alt-fill me-1"></i><?php echo esc($display_sub_district); ?>
+          <i class="bi bi-geo-alt-fill me-1"></i><?php echo esc(trim(preg_replace('/district/i', '', $display_district)) . ' District'); ?>
+        </span>
+      </li>
+      <?php } elseif ($utype === 3 && $display_sub_district && $display_sub_district !== 'Sub-District') { ?>
+      <li class="nav-item d-none d-sm-block me-3">
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill font-monospace">
+          <i class="bi bi-geo-alt-fill me-1"></i><?php echo esc(trim(preg_replace('/sub[- ]?district/i', '', $display_sub_district)) . ' Sub District'); ?>
         </span>
       </li>
       <?php } ?>
@@ -92,8 +150,8 @@ $profile_display_name = $display_school_name ? ($display_school_name . ' (' . $s
 
         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile" style="position: absolute; inset: 0px 0px auto auto; margin: 0px; transform: translate(-16px, 38px);">
           <li class="dropdown-header text-start">
-            <h6 class="fw-bold mb-0 text-dark"><?php echo esc($display_user_name); ?></h6>
-            <small class="text-muted"><?php echo esc($display_district); ?><?php echo ($display_sub_district && $display_sub_district !== 'Sub-District') ? ' - ' . esc($display_sub_district) : ''; ?></small>
+            <h6 class="fw-bold mb-0 text-dark"><?php echo esc($profile_display_name); ?></h6>
+            <small class="text-muted"><?php echo esc($role_badge_title); ?></small>
           </li>
           <li>
             <hr class="dropdown-divider">

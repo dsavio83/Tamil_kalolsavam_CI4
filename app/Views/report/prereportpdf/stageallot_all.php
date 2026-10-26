@@ -40,6 +40,8 @@
     }
     -->
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 
 <?php
 $prev_festid = "";
@@ -91,9 +93,9 @@ for ($j = 0; $j < count($allot); $j++) {
                 $this->load->view('report/report_footer');
                 ?>
             </page_footer>       
-            <table width="123%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top:15px;">
+            <table width="123%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top: 2px;">
                 <tr>
-                    <td height="31" align="center" class="style1" valign="top">Number of Participants and duration for stage allotment<br /><?php echo $allot[$j]['fest_name']; ?></td>
+                    <td height="31" align="center" class="report-pdf-title" valign="top">Number of Participants and duration for stage allotment<br /><?php echo $allot[$j]['fest_name']; ?></td>
                 </tr>  
             </table>
             <table width="100%" border="1" align="center" cellpadding="0" cellspacing="0" >

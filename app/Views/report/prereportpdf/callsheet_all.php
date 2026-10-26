@@ -26,16 +26,18 @@
     }
     -->
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 <?php
-// Group details by item_code
+// Group details by item_code (fest_id prefix keeps festivals separate)
 $items_grouped = array();
 if (!empty($fees_details) && is_array($fees_details)) {
     foreach ($fees_details as $row) {
-        $items_grouped[$row['item_code']][] = $row;
+        $items_grouped[(isset($row['fest_id']) ? $row['fest_id'] : '') . '|' . $row['item_code']][] = $row;
     }
 }
 
-foreach ($items_grouped as $item_code => $participants):
+foreach ($items_grouped as $group_key => $participants):
     $first = $participants[0];
     $timetype = '';
     if (isset($first['time_type'])) {
@@ -56,9 +58,9 @@ foreach ($items_grouped as $item_code => $participants):
         <span class="style8">Special Order Entry (Result to be Withheld)</span>
     </page_footer>
 
-    <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top:15px;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top: 2px;">
         <tr>
-            <td align="center" class="style1" height="27" width="800">
+            <td align="center" class="report-pdf-title" height="27">
                 Call sheet <?php echo isset($first['fest_name']) ? $first['fest_name'] : ''; ?><br />
                 <?php echo $first['item_code'] . ' - ' . $first['item_name']; ?>
             </td>

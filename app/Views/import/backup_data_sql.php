@@ -218,20 +218,29 @@
     document.addEventListener('DOMContentLoaded', function() {
         var btn = document.getElementById('btnBackupNow');
         if (btn) {
-            btn.addEventListener('click', function(e) {
-                var overlay = document.createElement('div');
-                overlay.id = 'backup-loading-overlay';
-                overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
-                overlay.innerHTML = '<div style="background:#fff;padding:30px 40px;border-radius:12px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.3);">' +
-                    '<div style="margin-bottom:15px;"><i class="bi bi-arrow-repeat" style="font-size:36px;color:#667eea;animation:spin 1s linear infinite;display:inline-block;"></i></div>' +
-                    '<div style="font-size:16px;font-weight:600;color:#012970;">Generating backup...</div>' +
-                    '<div style="font-size:13px;color:#888;margin-top:5px;">Please wait, this may take a moment.</div>' +
-                    '</div>';
-                document.body.appendChild(overlay);
+            btn.addEventListener('click', function() {
+                var originalHtml = btn.innerHTML;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Generating SQL Backup...';
+                btn.style.pointerEvents = 'none';
+                btn.style.opacity = '0.85';
 
-                var style = document.createElement('style');
-                style.textContent = '@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}';
-                document.head.appendChild(style);
+                var notice = document.getElementById('backupStatusNotice');
+                if (!notice) {
+                    notice = document.createElement('div');
+                    notice.id = 'backupStatusNotice';
+                    notice.className = 'alert alert-info alert-dismissible fade show mt-3 shadow-xs';
+                    notice.innerHTML = '<i class="bi bi-info-circle-fill me-2"></i><strong>Backup Exporting:</strong> Generating SQL dump file... Download will start automatically. <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+                    var actions = document.querySelector('.backup-actions');
+                    if (actions && actions.parentNode) {
+                        actions.parentNode.insertBefore(notice, actions.nextSibling);
+                    }
+                }
+
+                setTimeout(function() {
+                    btn.innerHTML = originalHtml;
+                    btn.style.pointerEvents = 'auto';
+                    btn.style.opacity = '1';
+                }, 5000);
             });
         }
     });

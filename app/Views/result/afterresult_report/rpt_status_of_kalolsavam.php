@@ -12,6 +12,8 @@
         color: #000000;
     }
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 <page backtop="20mm" backbottom="20mm ">
     <page_header>
         <?php
@@ -25,7 +27,7 @@
     </page_footer>  
     <table width="100%" height="62" border="0" align="center">
         <tr>
-            <td align="center" class="style1"><strong>Status Of Kalolsavam</strong></td>
+            <td align="center" class="report-pdf-title"><strong>Status Of Kalolsavam</strong></td>
         </tr>
     </table>
 

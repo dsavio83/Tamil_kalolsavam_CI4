@@ -16,6 +16,8 @@
         font-weight: 100;
     }
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 
 <page backtop="20mm" backbottom="20mm ">
     <page_header>
@@ -30,7 +32,7 @@
     </page_footer>  
     <table width="750" height="62" border="0">
         <tr>
-            <td width="750" align="center" class="style1">School Wise Point Report</td>
+            <td width="750" align="center" class="report-pdf-title">School Wise Point Report</td>
         </tr>
     </table>
     <table width="93%" border="1" align="center" cellpadding="0" cellspacing="0">

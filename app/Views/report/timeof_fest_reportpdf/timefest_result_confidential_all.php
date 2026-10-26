@@ -1,23 +1,41 @@
 
 <style type="text/css">
-    .style1 {
-        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
-        font-size: 14px;
+    table {
+        font-family: Arial, Helvetica, sans-serif;
+        color: #000000;
+    }
+    .header-text {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 10pt;
         font-weight: bold;
         color: #000000;
     }
-    .style2 {
-        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
-        font-size: 11px;
+    .data-table {
+        border-collapse: collapse;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 8pt;
+        margin-top: 5px;
+    }
+    .th-cell {
+        border: 0.5px solid #000000;
+        background-color: #f0f2f5;
+        text-align: center;
+        vertical-align: middle;
         font-weight: bold;
+        font-size: 8pt;
+        padding: 4px 2px;
         color: #000000;
     }
-    .style3 {
-        font-family: 'TAU-Pallai', 'Segoe UI', Tahoma, sans-serif;
-        font-size: 10px;
-        font-weight: normal;
-        height: 12px;
-        border: 0 0 0.5px 0.5px 0 #000000; 
+    .td-cell {
+        border: 0.5px solid #000000;
+        vertical-align: middle;
+        font-size: 8pt;
+        padding: 4px 3px;
+        color: #000000;
+    }
+    .footer-table {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 9pt;
         color: #000000;
     }
 </style>
@@ -39,31 +57,27 @@ for ($j = 0; $j < count($festresult); $j++) {
         $previtem = $festresult[$j]['item_code'];
         $this->load->model('report/Timefest_model');
         $itemcount = $this->Timefest_model->timeoffest_count($temp);
-        //$itemcount2= $this->Timefest_model->timeoffest_count2($previtem);     
         $absentee_list = $this->Timefest_model->timeoffest_result_absentee($temp);
-        $absentee = explode(',', $absentee_list);
+        $absentee = explode(',', (string)$absentee_list);
         $this->Reg_no = array();
 
         if ($j != 0) {
             $rt = 0;
             for ($ty = 0; $ty < count($absentee); $ty++) {
-                //if($temp==$absenteeall[$ty]['item_code']){
                 $this->Reg_no[$ty] = $absentee[$ty];
                 $rt++;
-                // }
             }
-            $Absent_reg_no = (count($absentee) and ( trim($absentee[0]))) ? count($absentee) : '0';
+            $Absent_reg_no = (count($absentee) and (trim($absentee[0]))) ? count($absentee) : '0';
             $no_reg_tot = $itemcount[0]['picount'];
 
             $withheldcount = $withheldno - $appeal;
 
-            //	if($Absent_reg_no>0){
-            print(" </table><br /><table  align='center'  width='100%' border='0' cellspacing='0' cellpadding='0'><tr>
-        <td width='150' align='left'>**No of Withheld :&nbsp;&nbsp;$appeal</td>
-        <td width='150'>No.of Registered :&nbsp;&nbsp;$no_reg_tot</td>
-        <td width='150'>No of Absentee :&nbsp;&nbsp;$Absent_reg_no</td>
-		 <td width='150'>*No of Appeal Entry :&nbsp;&nbsp;$withheldcount</td>
-        </tr><tr><td colspan='4'><table width='100%'><tr><td valign='top'>Absentee Reg No :</td><td>");
+            print("</tbody></table><br /><table align='center' width='96%' border='0' cellspacing='0' cellpadding='0' class='footer-table'><tr>
+        <td width='140' align='left'>**No of Withheld :&nbsp;&nbsp;$appeal</td>
+        <td width='140'>No.of Registered :&nbsp;&nbsp;$no_reg_tot</td>
+        <td width='140'>No of Absentee :&nbsp;&nbsp;$Absent_reg_no</td>
+        <td width='130'>*No of Appeal Entry :&nbsp;&nbsp;$withheldcount</td>
+        </tr><tr><td colspan='4' style='padding-top: 5px;'><table width='100%' border='0' cellspacing='0' cellpadding='0' class='footer-table'><tr><td valign='top' width='120'>Absentee Reg No :</td><td valign='top'>");
             for ($i = 1; $i <= $Absent_reg_no; $i++) {
                 echo $this->Reg_no[$i - 1] . '&nbsp;';
 
@@ -77,169 +91,146 @@ for ($j = 0; $j < count($festresult); $j++) {
             print("</table></page>");
             $withheldno = 0;
         }
+        $ctt = (int)$festresult[$j]['no_of_judges'];
         ?>   
-        <page backtop="28mm" backbottom="20mm">
+        <?php $this->load->view('report/report_pdf_style'); ?>
+<page backtop="20mm" backbottom="20mm">
             <page_header>
                 <?php
                 $this->load->view('report/report_header');
                 ?>
-                <table width="100%" border="0" align="left" cellpadding="0" cellspacing="0" style="color: #000000;">
-                    <tr>
-                        <td  align="left" width="400" class="style1"  style="padding: 2px; color: #000000;" height="25">&nbsp;&nbsp;&nbsp;&nbsp;
-                            <?php
-                                $festName = $festresult[$j]['fest_name'];
-                                $festName = str_replace('TAMIL KALAIVIZHA', '', $festName);
-                                ?>
-
-                                <?php echo $festresult[$j]['item_code']; ?> - <?php echo $festresult[$j]['item_name']; ?> (<?php echo empty($festName)?"no data" :$festName;?>) 
-                        </td>
-                        <td  align="right" width="300" class="style1"  style="padding: 2px; color: #000000;" height="25">
-                            <?php echo $festresult[$j]['stage_name'] . ' on ' . datetophpmodel($festresult[$j]['start_time']); ?> 
-                        </td>
-                    </tr>
-                </table> 
+                 
             </page_header>
             <page_footer>
-                <?php ?> <table width="50%" border="0" align="center" cellpadding="0" cellspacing="0" bordercolor="#D4D0C8">
+                <table width="50%" border="0" align="center" cellpadding="0" cellspacing="0" class="footer-table">
                     <tr>
-                        <td  align="right" width="80" height="20" valign="top">Entered by :</td>
-                        <td  align="right" width="500" height="20" valign="top">Signature :</td>
+                        <td align="right" width="80" height="20" valign="top">Entered by :</td>
+                        <td align="right" width="500" height="20" valign="top">Signature :</td>
                         <td align="left" width="100">&nbsp;</td>
                     </tr>
                     <tr>
-                        <td  align="right" width="80" height="20" valign="top">Checked by :</td>
-                        <td   align="right" height="20" valign="top" >Program Convenor</td>
+                        <td align="right" width="80" height="20" valign="top">Checked by :</td>
+                        <td align="right" height="20" valign="top">Program Convenor</td>
                         <td align="left">&nbsp;</td>
                     </tr>
-
-                </table><?php
+                </table>
+                <?php
                 $this->load->view('report/report_footer');
-                $ctt = $festresult[$j]['no_of_judges'];
                 ?>
             </page_footer>
-            <table width="97%" border="1" align="center" cellpadding="0" cellspacing="0" bordercolor="#000000" style="margin-top: 5px;">
-                <tr>
-                    <td width=20 height="10" rowspan="2" align="center" class="style2" style='border:0 0 0.5px 0.5px 0 #000000;'>Sl No</td>
-                    <td width=40  height="10" rowspan="2" align="center" class="style2" style='border:0 0 0.5px 0.5px 0 #000000;'>Reg No</td>
-                    <td width=27  height="10" rowspan="2" align="center" class="style2" style='border:0 0 0.5px 0.5px 0 #000000;'>Code No</td>
-                    <td width=170  height="10" rowspan="2" align="left" class="style2" style='border:0 0 0.5px 0.5px 0 #000000;'>&nbsp;Name</td>
-                    <td width=170  height="10" rowspan="2" align="left" class="style2" style='border:0 0 0.5px 0.5px 0 #000000;'>&nbsp;School</td>
-                    <td align="center" colspan="<?php echo $ctt + 1; ?>" width=20 height="10" class="style2" style='border:0 0 0.5px 0.5px 0 #000000;'>Marks</td>
-                    <td align="center" rowspan="2" width=20 height="10" class="style2" style='border:0 0 0.5px 0.5px 0 #000000;'>%</td>
-                    <td align="center" rowspan="2" width=20 height="10" class="style2" style='border:0 0 0.5px 0.5px 0 #000000;'>R</td>
-                    <td align="center" rowspan="2" width=20 height="10" class="style2" style='border:0 0 0.5px 0.5px 0 #000000;'>G</td>
-                    <td align="center" rowspan="2" width=20 height="10" class="style2" style='border:0 0 0.5px 0.5px 0 #000000;'>P</td>
-                </tr>
-                <tr>
-                    <?php
-                    $ct = $festresult[$j]['no_of_judges'];
-                    for ($k = 0; $k < $ct; $k++) {
+<table width="100%" border="0" align="left" cellpadding="0" cellspacing="0" style="color: #000000; font-family: Arial, Helvetica, sans-serif;">
+                    <tr>
+                        <td align="left" width="380" class="report-pdf-meta" style="padding: 2px;">
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <?php
+                            $festName = $festresult[$j]['fest_name'];
+                            $festName = str_replace('TAMIL KALAIVIZHA', '', $festName);
+                            echo $festresult[$j]['item_code'] . ' - ' . $festresult[$j]['item_name'] . ' (' . (empty($festName) ? "no data" : trim($festName)) . ')';
+                            ?> 
+                        </td>
+                        <td align="right" width="320" class="report-pdf-meta" style="padding: 2px;">
+                            <?php echo $festresult[$j]['stage_name'] . ' on ' . datetophpmodel($festresult[$j]['start_time']); ?> 
+                        </td>
+                    </tr>
+                </table>
 
-                        $appeal = 0;
-                        ?>
-
-                        <td  align="center" height="10"width=20 style='border:0 0 0.5px 0.5px 0 #000000 ;'><?php echo $k + 1; ?></td>
-                    <?php } ?>
-
-                    <td  align="center" height="10" width=30 style='border:0 0 0.5px 0.5px 0 #000000 ; '>Total</td>
-                </tr>
+            <table width="96%" cellpadding="0" cellspacing="0" align="center" class="data-table">
+                <thead>
+                    <tr>
+                        <th width="18" rowspan="2" align="center" class="th-cell">Sl<br>No</th>
+                        <th width="24" rowspan="2" align="center" class="th-cell">Reg<br>No</th>
+                        <th width="24" rowspan="2" align="center" class="th-cell">Code<br>No</th>
+                        <th width="115" rowspan="2" align="center" class="th-cell">Name</th>
+                        <th width="145" rowspan="2" align="center" class="th-cell">School</th>
+                        <th colspan="<?php echo $ctt + 1; ?>" align="center" class="th-cell">Marks</th>
+                        <th width="24" rowspan="2" align="center" class="th-cell">%</th>
+                        <th width="16" rowspan="2" align="center" class="th-cell">R</th>
+                        <th width="16" rowspan="2" align="center" class="th-cell">G</th>
+                        <th width="16" rowspan="2" align="center" class="th-cell">P</th>
+                    </tr>
+                    <tr>
+                        <?php
+                        $ct = (int)$festresult[$j]['no_of_judges'];
+                        for ($k = 0; $k < $ct; $k++) {
+                            ?>
+                            <th width="20" align="center" class="th-cell"><?php echo $k + 1; ?></th>
+                        <?php } ?>
+                        <th width="24" align="center" class="th-cell">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
                 <?php
-                $sl++;
             }
+            $sl++;
+            $symbol = '';
+            if ($festresult[$j]['is_publish'] == 'N') {
+                $symbol .= '*';
+            }
+
+            if ($festresult[$j]['spo_id'] > 0) {
+                $symbol .= '*';
+                if ($symbol == '**') {
+                    $appeal++;
+                }
+                $withheldno++;
+            }
+
+            $name = $festresult[$j]['participant_name'];
+            $name = wordwrap($name, 24, "<br />", 1);
+
+            $text = $festresult[$j]['school_code'] . ': ' . $festresult[$j]['school_name'];
+            $text = wordwrap($text, 32, "<br />", 1);
+
+            $marks = explode('#$#', $festresult[$j]['marks']);
+            $percentage = $festresult[$j]['percentage'];
+            $prnt = round($percentage, 2);
             ?>
             <tr>
-                <td  align="center" width=20 class="style3"><?php echo $sl; ?>&nbsp;</td>
-                <td   align="center" width=39  class="style3"><?php
-                    $symbol = '';
-                    if ($festresult[$j]['is_publish'] == 'N') {
-
-                        $symbol .= '*';
-                    }
-
-                    if ($festresult[$j]['spo_id'] > 0) {
-
-                        $symbol .= '*';
-                        if ($symbol == '**') {
-                            $appeal++;
-                        }
-                        $withheldno++;
-                    }
-
-                    echo $festresult[$j]['participant_id'] . $symbol;
-                    ?>
-                    &nbsp;</td>
-                <td width=27  align="center"class="style3"><p><?php echo $festresult[$j]['code_no']; ?></p></td>
-                <td width=170 align="left" class="style3"><?php
-                    $name = $festresult[$j]['participant_name'];
-                    $name = wordwrap($name, 30, "<br />", 1);
-                    echo $name;
-                    ?></td>
-                <td width=170 align="left" class="style3"><?php
-                    $text = $festresult[$j]['school_code'].':'.$festresult[$j]['school_name'];
-                    $text = wordwrap($text, 45, "<br />", 1);
-                    echo $text;
-                    ?></td>
+                <td width="18" align="center" class="td-cell"><?php echo $sl; ?></td>
+                <td width="24" align="center" class="td-cell" style="font-weight: bold;"><?php echo $festresult[$j]['participant_id'] . $symbol; ?></td>
+                <td width="24" align="center" class="td-cell"><?php echo $festresult[$j]['code_no']; ?></td>
+                <td width="115" align="left" class="td-cell"><?php echo $name; ?></td>
+                <td width="145" align="left" class="td-cell"><?php echo $text; ?></td>
                 <?php
-                $marks = explode('#$#', $festresult[$j]['marks']);
-                $cnt =0;
-                if(!empty($festresult)){
-                    $cnt =  count((array)$festresult[$j]['no_of_judges']);
-                }
-                if($cnt>0){
-                    for ($k = 0; $k < $ct; $k++) {
-                        ?>
-                        <td  width="20" align="center" class="style3" >
-                            <?php
-                            echo @$marks[$k];
-                            ?>
-                        </td>         
-                        <?php
-                    }
+                for ($k = 0; $k < $ct; $k++) {
+                    ?>
+                    <td width="20" align="center" class="td-cell"><?php echo @$marks[$k]; ?></td>
+                    <?php
                 }
                 ?>
-
-
-                <td  align="center"  width=20 class="style3"><?php echo $festresult[$j]['total_mark']; ?></td>
-                <td  align="center"  width=20 class="style3"><?php
-                    $percentage = $festresult[$j]['percentage'];
-                    $prnt = round($percentage, 2);
-                    echo $prnt;
-                    ?></td>
-                <td align="center" width=20 class="style3"><?php echo $festresult[$j]['rank']; ?></td>
-                <td align="center" width=20 class="style3"><?php echo $festresult[$j]['grade']; ?></td>
-                <td align="center" width=20 class="style3"><?php echo $festresult[$j]['point']; ?></td>
+                <td width="24" align="center" class="td-cell" style="font-weight: bold;"><?php echo $festresult[$j]['total_mark']; ?></td>
+                <td width="24" align="center" class="td-cell"><?php echo $prnt; ?></td>
+                <td width="16" align="center" class="td-cell" style="font-weight: bold;"><?php echo $festresult[$j]['rank']; ?></td>
+                <td width="16" align="center" class="td-cell" style="font-weight: bold;"><?php echo $festresult[$j]['grade']; ?></td>
+                <td width="16" align="center" class="td-cell"><?php echo $festresult[$j]['point']; ?></td>
             </tr>
-
             <?php
-            $sl++;
         }
         ?>
+        </tbody>
     </table>
     <?php
     $temp = $festresult[$j - 1]['item_code'];
     $itemcount = $this->Timefest_model->timeoffest_count($festresult[$j - 1]['item_code']);
     $absentee_list = $this->Timefest_model->timeoffest_result_absentee($temp);
-    $absentee = explode(',', $absentee_list);
-
+    $absentee = explode(',', (string)$absentee_list);
 
     $this->Reg_no = array();
     $rt = 0;
     for ($ty = 0; $ty < count($absentee); $ty++) {
-        //if($temp==$absenteeall[$ty]['item_code']){
         $this->Reg_no[$ty] = $absentee[$ty];
         $rt++;
-        // }
     }
-    $Absent_reg_no = (count($absentee) and ( trim($absentee[0]))) ? count($absentee) : '0';
+    $Absent_reg_no = (count($absentee) and (trim($absentee[0]))) ? count($absentee) : '0';
     $no_reg_tot = $itemcount[0]['picount'];
     $withheldcount = $withheldno - $appeal;
 
-    print("<br /><table  align='center'  width='100%' border='0' cellspacing='0' cellpadding='0'><tr>
-					<td width='150' align='left'>**No of Withheld :&nbsp;&nbsp;$appeal</td>
-					<td width='150' >No.of Registered :&nbsp;&nbsp;$no_reg_tot</td>
-					<td width='150' >No of Absentee :&nbsp;&nbsp;$Absent_reg_no</td>
-					 <td width='150' >*No of Appeal Entry :&nbsp;&nbsp;$withheldcount</td>
-					</tr><tr><td colspan='4'><table width='100%'><tr> <td valign='top'>Absentee Reg No :</td><td>");
+    print("<br /><table align='center' width='96%' border='0' cellspacing='0' cellpadding='0' class='footer-table'><tr>
+        <td width='140' align='left'>**No of Withheld :&nbsp;&nbsp;$appeal</td>
+        <td width='140'>No.of Registered :&nbsp;&nbsp;$no_reg_tot</td>
+        <td width='140'>No of Absentee :&nbsp;&nbsp;$Absent_reg_no</td>
+        <td width='130'>*No of Appeal Entry :&nbsp;&nbsp;$withheldcount</td>
+        </tr><tr><td colspan='4' style='padding-top: 5px;'><table width='100%' border='0' cellspacing='0' cellpadding='0' class='footer-table'><tr><td valign='top' width='120'>Absentee Reg No :</td><td valign='top'>");
     for ($i = 1; $i <= $Absent_reg_no; $i++) {
         echo $this->Reg_no[$i - 1] . '&nbsp;';
 

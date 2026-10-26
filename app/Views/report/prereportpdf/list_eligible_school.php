@@ -16,6 +16,8 @@
     }
     -->
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 <page  backtop="20mm" backbottom="20mm" >
     <page_header>
         <?php
@@ -32,17 +34,17 @@
     <table width="100%" border="0" cellspacing="0" cellpadding="0" align="center" >
         <tr><td height="20"></td></tr>
         <tr>
-            <td height="30" align="center" class="style1">List of Eligible Schools</td>
+            <td height="30" align="center" class="report-pdf-title">List of Eligible Schools</td>
         </tr>
 
     </table>
     <table width="100%" align="center" >
 
         <tr>
-            <td width="100">&nbsp;</td>
+            <td width="80">&nbsp;</td>
             <td width="70" height="21" align="center" class="style3">Sl.No</td>
             <td width="150" align="center" class="style3">School code</td>
-            <td width="500" align="left" class="style3">School Name</td>
+            <td width="450" align="left" class="style3">School Name</td>
 
         </tr>
         <?php

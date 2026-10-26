@@ -37,16 +37,24 @@
     }
 </style>
 
-<page backtop="30mm" backbottom="20mm ">
+<?php $this->load->view('report/report_pdf_style'); ?>
+<page backtop="20mm" backbottom="20mm ">
 
     <page_header>
         <?php
         $this->load->view('report/report_header');
         ?>
-        <table width="100%" border="0" align="left" cellpadding="0" cellspacing="0">
+         
+    </page_header>
+    <page_footer>
+        <?php
+        $this->load->view('report/report_footer');
+        ?>
+    </page_footer>
+<table width="100%" border="0" align="left" cellpadding="0" cellspacing="0">
             <tr>
-                <td align="left" width="400" class="style1"  style=" padding:2px;"height="25">&nbsp;&nbsp;<?php echo $itemcode; ?>-<?php echo $retdat[0]['item_name']; ?>(<?php echo $retdat[0]['fest_name']; ?>)   </td>
-                <td  align="right" width="300" class="style1"  style=" padding:2px;"height="25">
+                <td align="left" width="400" class="report-pdf-subtitle"  style="padding:2px; text-align:left;" height="25">&nbsp;&nbsp;<?php echo $itemcode; ?>-<?php echo $retdat[0]['item_name']; ?>(<?php echo $retdat[0]['fest_name']; ?>)   </td>
+                <td  align="right" width="300" class="report-pdf-subtitle"  style="padding:2px; text-align:right;" height="25">
                     <?php echo $retdat[0]['stage_name']; ?>&nbsp; on&nbsp;
                     <?php
                     $date = explode(' ', $retdat[0]['start_time']);
@@ -54,13 +62,8 @@
                     ?>
                 </td>
             </tr>
-        </table> 
-    </page_header>
-    <page_footer>
-        <?php
-        $this->load->view('report/report_footer');
-        ?>
-    </page_footer>
+        </table>
+
 
 
     <table width="900" border="1" align="center" cellpadding="0" cellspacing="0" bordercolor="#000000">

@@ -17,6 +17,8 @@
         color: #000000;
     }
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 
 
 <?php
@@ -48,7 +50,7 @@ foreach ($retvalue AS $data) {
             </page_footer>   
             <table width="100%" height="62" border="0" cellpadding="0" cellspacing="0" align="center">
                 <tr>
-                    <td  align="center"  class="style1">All Results</td>
+                    <td  align="center"  class="report-pdf-title">All Results</td>
                 </tr>
                 <tr>
                     <td  align="center" ><b>  Festival : <?php echo $data['fest_name']; ?>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;<?php echo $data['item_code']; ?> ( <?php echo $data['item_name']; ?>)</b></td>

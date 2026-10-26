@@ -3,7 +3,9 @@
 function forceRemoveModalBackdrop() {
     var backdrops = document.querySelectorAll('.modal-backdrop');
     for (var i = 0; i < backdrops.length; i++) {
-        backdrops[i].remove();
+        if (backdrops[i].parentNode) {
+            backdrops[i].parentNode.removeChild(backdrops[i]);
+        }
     }
     document.body.classList.remove('modal-open');
     document.body.style.overflow = '';
@@ -58,6 +60,13 @@ function loadSchoolMasterModal(userId) {
     xhr.open('POST', path + 'schools/school_master/edit_school_detials', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    if (typeof getCsrfToken === 'function') {
+        var csrfToken = getCsrfToken();
+        if (csrfToken) {
+            xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+            params = params + '&csrf_test_name=' + encodeURIComponent(csrfToken);
+        }
+    }
     xhr.onreadystatechange = function () {
         if (xhr.readyState !== 4) {
             return;
@@ -68,8 +77,9 @@ function loadSchoolMasterModal(userId) {
             var inst = bootstrap.Modal.getInstance(modalEl);
             if (inst) {
                 inst.hide();
+            } else {
+                forceRemoveModalBackdrop();
             }
-            forceRemoveModalBackdrop();
         };
 
         if (xhr.status !== 200) {
@@ -100,9 +110,8 @@ function loadSchoolMasterModal(userId) {
         }
 
         targetBody.innerHTML = respBody.innerHTML;
-        forceRemoveModalBackdrop();
 
-        if (modalEl.classList.contains('show')) {
+        if (!modalEl.classList.contains('show')) {
             if (!bootstrap.Modal.getInstance(modalEl)) {
                 existing = new bootstrap.Modal(modalEl);
             }
@@ -161,17 +170,30 @@ function fncAddSchool(usertype)
         }
     }
 
-    var btn = document.getElementById('btnAddSchool') || document.getElementById('btnUpdateSchool') || document.querySelector('#formUser button[type="submit"]') || document.querySelector('#formUser button[type="button"]');
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Updating School...';
-    }
-
     var formUser = document.getElementById('formUser');
-    if (formUser) {
-        formUser.submit();
-    }
-    return true;
+    if (!formUser) return false;
+
+    Swal.fire({
+        target: document.body,
+        title: 'Add this school?',
+        text: 'Add "' + schoolName.value.trim() + '" to the school list?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, add school',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#4338ca',
+        reverseButtons: true
+    }).then(function (result) {
+        if (!result.isConfirmed) return;
+
+        var btn = document.getElementById('btnAddSchool');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Adding School...';
+        }
+        HTMLFormElement.prototype.submit.call(formUser);
+    });
+    return false;
 }
 
 function fncUpdateSchool(userId, usertype) {
@@ -329,16 +351,16 @@ function loadSchool()
 
 function loadSubDistrictFilter()
 {
-    if ($('cmbDistrictFilter').value > 0)
-    {
-        $('divSubDistrictFilter').style.display = 'block';
-        ajax_loder2('divSubDistrictFilter');
-        if ($('cmbSubDistrictFilter'))
-            $('cmbSubDistrictFilter').selectedIndex = 0;
-        if ($('cmbSchoolFilter'))
-            $('cmbSchoolFilter').selectedIndex = 0;
+    var districtFilter = $('cmbDistrictFilter');
+    var subDistrictContainer = $('divSubDistrictFilter');
+    if (!districtFilter || !subDistrictContainer) return;
 
-        var district_code = $('cmbDistrictFilter').value;
+    subDistrictContainer.style.display = 'block';
+    if (parseInt(districtFilter.value, 10) > 0)
+    {
+        ajax_loder2('divSubDistrictFilter');
+
+        var district_code = districtFilter.value;
         var oOptions = {
             method: "post",
             parameters: {'district': district_code, 'name': 'cmbSubDistrictFilter', 'function': 'loadSchoolFilter'},
@@ -354,6 +376,8 @@ function loadSubDistrictFilter()
         var oRequest = new Ajax.Updater({
             //success: "divCustomerInfo"
         }, path + "ajax/loadajax/get_subdistrict_details_small", oOptions);
+    } else {
+        subDistrictContainer.innerHTML = '<select name="cmbSubDistrictFilter" id="cmbSubDistrictFilter" class="form-select form-select-sm"><option value="0">Select Sub-district</option></select>';
     }
 }
 

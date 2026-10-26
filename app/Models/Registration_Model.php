@@ -366,28 +366,23 @@ class Registration_Model extends \App\Models\BaseModel {
                         $this->db->select('admn_no');
                         $result = $this->db->get('sd_participant_item_details');
                         $caption = $result->getResultArray();
-                        if (count($caption) > 0) {
-                            $is_captain = 'N';
-                            $parent_admn_no = $caption[0]['admn_no'];
+                        $is_captain = 'N';
+                        $parent_admn_no = count($caption) > 0 ? $caption[0]['admn_no'] : $admnNo;
 
+                        /**
+                          Check here for already registered for this item
+                         */
+                        $items = array();
+                        $items['participant_id'] = $participant_id;
+                        $items['school_code'] = (int) $schoolCode;
+                        $items['admn_no'] = $admnNo;
+                        $items['item_code'] = $item_code;
+                        $items['item_type'] = 'P';
 
-                            /**
-                              Check here for already registered for this item
-                             */
-                            $items = array();
-                            $items['participant_id'] = $participant_id;
-                            $items['school_code'] = (int) $schoolCode;
-                            $items['admn_no'] = $admnNo;
-                            $items['item_code'] = $item_code;
-                            $items['item_type'] = 'P';
+                        $items['parent_admn_no'] = $parent_admn_no;
+                        $items['is_captain'] = $is_captain;
 
-                            $items['parent_admn_no'] = $parent_admn_no;
-                            $items['is_captain'] = $is_captain;
-
-                            $this->db->insert('sd_participant_item_details', $items);
-                        } else {
-                            $error_array[] = $_POST['txtPinnanyCode_' . $i] . ' pinnany has no main participants';
-                        }
+                        $this->db->insert('sd_participant_item_details', $items);
                     } else {
                         $error_array[] = 'Invalid Item Code : ' . $_POST['txtItemCode_' . $i] . '.';
                     }
@@ -760,27 +755,22 @@ class Registration_Model extends \App\Models\BaseModel {
                         $this->db->select('admn_no');
                         $result = $this->db->get('sd_participant_item_details');
                         $caption = $result->getResultArray();
-                        if (count($caption) > 0) {
-                            $is_captain = 'N';
-                            $parent_admn_no = $caption[0]['admn_no'];
-                            /**
-                              Check here for already registered for this item
-                             */
-                            $items = array();
-                            $items['participant_id'] = $participant_id;
-                            $items['school_code'] = (int) $schoolCode;
-                            $items['admn_no'] = $admnNo;
-                            $items['item_code'] = $item_code;
-                            $items['item_type'] = 'P';
+                        $is_captain = 'N';
+                        $parent_admn_no = count($caption) > 0 ? $caption[0]['admn_no'] : $admnNo;
+                        /**
+                          Check here for already registered for this item
+                         */
+                        $items = array();
+                        $items['participant_id'] = $participant_id;
+                        $items['school_code'] = (int) $schoolCode;
+                        $items['admn_no'] = $admnNo;
+                        $items['item_code'] = $item_code;
+                        $items['item_type'] = 'P';
 
+                        $items['parent_admn_no'] = $parent_admn_no;
+                        $items['is_captain'] = $is_captain;
 
-                            $items['parent_admn_no'] = $parent_admn_no;
-                            $items['is_captain'] = $is_captain;
-
-                            $this->db->insert('sd_participant_item_details', $items);
-                        } else {
-                            $error_array[] = $_POST['txtPinnanyCode_' . $i] . ' pinnany has no main participants';
-                        }
+                        $this->db->insert('sd_participant_item_details', $items);
                     } else {
                         $error_array[] = 'Invalid Item Code : ' . $_POST['txtItemCode_' . $i] . '.';
                     }
@@ -1017,14 +1007,24 @@ class Registration_Model extends \App\Models\BaseModel {
 
         $item_master = $this->db->get('item_master');
         $item = $item_master->getRow();
-        if ($item->gender != 'C') {
-            $this->db->where('admn_no', $admn_no);
-            $this->db->where('school_code', $school_code);
-            $this->db->where('gender', $item->gender);
-            $participant_details = $this->db->get('sd_participant_details');
-            if ($participant_details->getNumRows() <= 0) {
+        if (!$item || $item->gender == 'C') {
+            return false;
+        }
+
+        $post_gender = $this->input->post('txtGender');
+        if (!empty($post_gender)) {
+            if ($post_gender != $item->gender) {
                 return "Wrong Gender";
             }
+            return false;
+        }
+
+        $this->db->where('admn_no', $admn_no);
+        $this->db->where('school_code', $school_code);
+        $this->db->where('gender', $item->gender);
+        $participant_details = $this->db->get('sd_participant_details');
+        if ($participant_details->getNumRows() <= 0) {
+            return "Wrong Gender";
         }
         return false;
     }
@@ -1167,16 +1167,30 @@ class Registration_Model extends \App\Models\BaseModel {
         $this->db->where('item_code', $item_code);
         $item_master = $this->db->get('item_master');
         $item = $item_master->getResultArray();
-        if ($item_type == 'P') {
-            $max_no = $item[0]['max_pinnani'];
+        $itemRow = !empty($item[0]) ? $item[0] : [];
+        $itemName = !empty($itemRow['item_name']) ? $itemRow['item_name'] : '';
+
+        $is_drama = in_array((int)$item_code, [159, 361, 560, 760], true)
+            || (!empty($itemName) && stripos($itemName, 'DRAMA') !== false)
+            || (!empty($itemName) && mb_strpos($itemName, 'நாடகம்') !== false);
+
+        if ($is_drama) {
+            $max_no = ($item_type == 'P') ? 3 : 7;
         } else {
-            $max_no = $item[0]['max_participants'];
+            if ($item_type == 'P') {
+                $max_no = isset($itemRow['max_pinnani']) ? (int)$itemRow['max_pinnani'] : 0;
+            } else {
+                $max_no = !empty($itemRow['max_participants']) ? (int)$itemRow['max_participants'] : 1;
+            }
         }
 
         $this->db->where('school_code', $school_code);
         $this->db->where('item_code', $item_code);
+        if (!empty($admn_no)) {
+            $this->db->where('admn_no !=', $admn_no);
+        }
         if ($item_type == 'P') {
-            $this->db->where('item_type', $item_type);
+            $this->db->where('item_type', 'P');
         } else {
             $this->db->where("item_type != 'P'");
         }
@@ -1193,6 +1207,7 @@ class Registration_Model extends \App\Models\BaseModel {
                 return "Maximum number of students was exceed";
             }
         }
+        return false;
     }
 
     function is_over_max_vibhagam_school($item_code, $school_code) {

@@ -9,16 +9,13 @@
     .style2 {font-size: 24px}
     -->
 </style>
-<page backtop="25mm" backbottom="40mm ">
+<?php $this->load->view('report/report_pdf_style'); ?>
+<page backtop="20mm" backbottom="40mm ">
     <page_header>
         <?php
         $this->load->view('report/report_header');
         ?>
-        <table width="100%" border="0" cellspacing="0" cellpadding="0" align="center" class="heading_tab">
-            <tr>
-                <td align="center" class="style1">Score Sheet</td>
-            </tr>
-        </table>
+        
     </page_header>
     <page_footer>
         <table width="100%" border="0" align="center" cellpadding="0" cellspacing="0" bordercolor="#D4D0C8">
@@ -39,17 +36,23 @@
         <?php
         $this->load->view('report/report_footer');
         ?>
-    </page_footer>  
+    </page_footer>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" align="center" class="heading_tab">
+            <tr>
+                <td align="center" class="report-pdf-title">Score Sheet</td>
+            </tr>
+        </table>
+  
 
     <table width="82%" border="0" align="center" cellpadding="0" cellspacing="0" bordercolor="#D4D0C8">
         <tr>
-            <td height="32" align="center" colspan="11" style='border:0 0 0.5px 0.5px 0 #000000 ; height:20 px; font:Georgia;'>Festival:<?php echo $start_time[0]['fest_name']; ?></td>
+            <td height="32" align="center" colspan="11" style='border:0 0 0.5px 0.5px 0 #000000 ; height:20 px; font:Georgia;'>Festival:<?php echo $start_time[0]['fest_name'] ?? ''; ?></td>
         </tr>
 
         <tr>        
             <td width="37" height="32" style='border:0 0 0.5px 0.5px 0 #000000 ; height:20 px;'><strong>Item </strong></td>
-            <td colspan="8" style='border:0 0 0.5px 0.5px 0 #000000 ; height:20 px;'><span class="style2"><?php echo wordwrap($itemcode . " - " . $start_time[0]['item_name'], 25, '<br>'); ?></span></td>
-            <td style='border:0 0 0.5px 0.5px 0 #000000 ; height:20 px;' colspan="2"><strong>Date</strong><strong>:<?php echo datetophpmodel($start_time[0]['start_time']); ?>&nbsp;&nbsp;&nbsp;<?php echo $start_time[0]['stage_name']; ?></strong></td>
+            <td colspan="8" style='border:0 0 0.5px 0.5px 0 #000000 ; height:20 px;'><span class="style2"><?php echo wordwrap($itemcode . " - " . ($start_time[0]['item_name'] ?? ''), 25, '<br>'); ?></span></td>
+            <td style='border:0 0 0.5px 0.5px 0 #000000 ; height:20 px;' colspan="2"><strong>Date</strong><strong>:<?php echo datetophpmodel($start_time[0]['start_time'] ?? $start_time[0]['timer'] ?? ''); ?>&nbsp;&nbsp;&nbsp;<?php echo $start_time[0]['stage_name'] ?? ''; ?></strong></td>
         </tr>
 
 <!--<tr>
@@ -57,18 +60,24 @@
   <td colspan="9" style='border:0 0 0.5px 0.5px 0 #000000 ; height:20 px;font:Georgia; '><strong><span class="style2"><?php echo wordwrap($itemcode . " - " . $start_time[0]['item_name'], 25, '<br>'); ?></span></strong></td>
   <td align="left" style='border:0 0 0.5px 0.5px 0 #000000 ; height:20 px;'><strong>Date :<?php echo datetophpmodel($start_time[0]['start_time']); ?> </strong></td>
 </tr>-->
-        <?php if (file_exists(base_path() . 'value_points/' . $itemcode . '.JPG')) { ?>
-
+        <?php
+        $root_path = defined('FCPATH') ? FCPATH : (defined('ROOTPATH') ? ROOTPATH : 'c:/xampp/htdocs/tk25/');
+        $vp_img = '';
+        foreach (['.png', '.PNG', '.jpg', '.JPG', '.jpeg', '.JPEG'] as $ext) {
+            $candidate = $root_path . 'value_points/' . $itemcode . $ext;
+            if (is_file($candidate) && filesize($candidate) > 500) {
+                $vp_img = str_replace('\\', '/', $candidate);
+                break;
+            }
+        }
+        ?>
+        <?php if ($vp_img !== ''): ?>
             <tr>
-                <td align="center" colspan="11" style='border:0 0 0.5px 0.5px 0 #000000 ; font:Georgia;'>
-                    <img src="<?php echo base_url('value_points/') . $itemcode . '.JPG' ?>" height="200" width="700" />            	</td>
+                <td align="center" colspan="11" style="border: 0 0 0.5px 0.5px 0 #000000; text-align: center; padding: 4px 0;">
+                    <img src="<?php echo $vp_img; ?>" style="width: 550px;" />
+                </td>
             </tr>
-            <!--<tr>
-              <td align="center" colspan="11" style='border:0 0 0.5px 0.5px 0 #000000 ; font:Georgia;'>
-                  <img src="<?php echo base_url() . 'value_points/' . $itemcode . '.JPG' ?>" height="100" width="700" />
-              </td>
-            </tr>-->
-        <?php } ?>
+        <?php endif; ?>
         <tr>
             <td colspan="2" style='border:0 0 0.5px 0.5px 0 #000000 ; height:20 px;'><div align="left"><strong>.</strong></div>              	</td>
             <td colspan="6" align="center"><strong>Score for each value points</strong></td>
@@ -93,7 +102,7 @@
             <td align="center"  height="24"  style='border:0 0 0.5px 0.5px 0 #000000 ; height:50 px;'>&nbsp;</td>
         </tr>
         <?php
-        $count = $start_time[0]['no_of_participant'];
+        $count = (int)($start_time[0]['no_of_participant'] ?? 1);
         $sl = 0;
         for ($i = 0; $i < $count + 5; $i++) {
             $sl++;

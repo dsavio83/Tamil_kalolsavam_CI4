@@ -19,6 +19,8 @@
 
     -->
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 <style>
     @media print
     {
@@ -41,7 +43,7 @@
     <table width="77%" border="0" cellspacing="0" cellpadding="0" align="center" >
         <tr><td height="20"></td></tr>
         <tr>
-            <td height="43" align="center" class="style1">List of Students Participating More than One Items</td>
+            <td height="43" align="center" class="report-pdf-title">List of Students Participating More than One Items</td>
         </tr>
     </table>
 

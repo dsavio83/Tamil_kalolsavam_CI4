@@ -1,212 +1,236 @@
-<page backtop="20mm" backbottom="50mm">
+<?php
+if (empty($fest_details)) {
+    $sub_district_code = !empty($school_details[0]['sub_district_code']) ? $school_details[0]['sub_district_code'] : session()->get('SUB_DISTRICT');
+    if (!empty($sub_district_code)) {
+        $db = \Config\Database::connect();
+        $fest_details = $db->table('sd_kalolsavam_master')
+            ->where('sub_district_code', (int)$sub_district_code)
+            ->where('status', 'O')
+            ->get()->getResultArray();
+        if (empty($fest_details)) {
+            $fest_details = $db->table('sd_kalolsavam_master')
+                ->where('sub_district_code', (int)$sub_district_code)
+                ->get()->getResultArray();
+        }
+    }
+}
+
+$fest_title = !empty($fest_details[0]['sub_dist_kalolsavam_name']) ? preg_replace('/\s+/', ' ', trim($fest_details[0]['sub_dist_kalolsavam_name'])) : get_festival_title();
+$venue = !empty($fest_details[0]['venue']) ? trim($fest_details[0]['venue']) : '';
+$start_date = (!empty($fest_details[0]['start_date']) && $fest_details[0]['start_date'] != '0000-00-00') ? date('d M Y', strtotime($fest_details[0]['start_date'])) : '';
+$end_date = (!empty($fest_details[0]['end_date']) && $fest_details[0]['end_date'] != '0000-00-00') ? date('d M Y', strtotime($fest_details[0]['end_date'])) : '';
+$date_range = ($start_date && $end_date) ? ($start_date . ' - ' . $end_date) : ($start_date ?: $end_date);
+$logo = !empty($fest_details[0]['logo_name']) ? trim($fest_details[0]['logo_name']) : '';
+$logo_path = $logo ? pdf_safe_logo_image('sub_district', $logo, false) : '';
+
+$school_type = '';
+if (@$school_details[0]['school_type'] == 'G') $school_type = 'Government';
+else if (@$school_details[0]['school_type'] == 'A') $school_type = 'Aided';
+else if (@$school_details[0]['school_type'] == 'U') $school_type = 'Unaided';
+?>
+<page backtop="22mm" backbottom="35mm" backleft="7.5mm" backright="7.5mm">
     <page_header>
-        <table style="width: 100%;">
+        <table style="width: 100%;" cellpadding="0" cellspacing="0">
             <tr>
-                    <!--<td style="text-align: left; width: 50%">
-                            <img src="<?php //echo image_url().'logo.jpg'   ?>">
-                    </td>-->
-                <td style="width: 100%" align="center"><strong><?php echo get_festival_title(); ?></strong></td>
-            </tr>
-            <tr>
-                <td style="width: 100%" align="center">
-                    <?php echo @$school_details[0]['sub_district_name'] . ' Subdistrict'; ?>
+                <td style="width: 20%; text-align: left; vertical-align: top;">
+                    <?php if (!empty($logo_path) && (file_exists($logo_path) || filter_var($logo_path, FILTER_VALIDATE_URL))) { ?>
+                        <img src="<?php echo $logo_path; ?>" height="58">
+                    <?php } ?>
+                </td>
+                <td style="width: 80%; text-align: right; vertical-align: top;" align="right">
+                    <strong style="font-size: 13.5pt; font-weight: bold; line-height: 1.3;"><?php echo $fest_title; ?></strong><br />
+                    <?php if (!empty($venue)) { ?><span style="font-size: 11pt; line-height: 1.4;"><?php echo $venue; ?></span><br /><?php } ?>
+                    <?php if (!empty($date_range)) { ?><span style="font-size: 10.5pt; line-height: 1.4;"><?php echo $date_range; ?></span><?php } ?>
                 </td>
             </tr>
             <tr>
-                <td style="width: 100%"><hr/></td>
+                <td style="width: 100%; padding-top: 4px;" colspan="2"><hr style="border: none; border-top: 1.5px solid #000000; margin: 0;"/></td>
             </tr>
         </table>
     </page_header>
+    
     <page_footer>
-        <table width="80%" cellpadding="5" cellspacing="0" border="0" align="left">
-
+        <table style="width: 100%;" cellpadding="0" cellspacing="0" border="0">
             <tr>
-                <td align="center" width="700" colspan="3">
+                <td align="center" colspan="3" style="width: 100%; font-size: 10pt; padding-bottom: 15px;">
                     Certified that above details has been verified and found correct
-                    <br /><br /><br />
                 </td>
             </tr>
             <tr>
-                <td align="left" width="200">
+                <td align="left" style="width: 35%; font-size: 10pt; vertical-align: bottom;">
                     Place&nbsp;:&nbsp;..............................<br /><br />
                     Date&nbsp;&nbsp;:&nbsp;.............................
                 </td>
-                <td align="center" width="300">
-                    <br /><br />
+                <td align="center" style="width: 30%; font-size: 10pt; vertical-align: bottom;">
                     (School Seal)
                 </td>
-                <td align="right">
-                    <br /><br />
-                    Principal/Headmaster
+                <td align="right" style="width: 35%; font-size: 10pt; vertical-align: bottom;">
+                    Principal / Headmaster
                 </td>
             </tr>
-        </table>
-
-        <table style="width: 100%;">
             <tr>
-                <td style="width: 100%"><hr/></td>
+                <td colspan="3" style="width: 100%; padding-top: 8px;">
+                    <hr style="border: none; border-top: 1px solid #888888; margin: 0 0 4px 0;"/>
+                </td>
             </tr>
             <tr>
-                <td style="text-align: center;width: 100%">page [[page_cu]]/{nb} </td>
+                <td colspan="3" style="text-align: center; width: 100%; font-size: 8.5pt; color: #555;">
+                    page [[page_cu]]/{nb}
+                </td>
             </tr>
         </table>
     </page_footer>
-    <table width="100%" border="0" cellspacing="5" cellpadding="10" align="center" class="heading_tab" style="margin-top:15px;">
-        <tr>
-            <td align="left" width="100" class="table_row_first">School Code : </td>
-            <td align="left" width="100" class="table_row_first"><?php echo @$school_details[0]['school_code']; ?></td>
-            <td align="left" width="100" class="table_row_first">School Name : </td>
-            <td align="left" width="300" class="table_row_first"><?php @print($school_details[0]['school_name']) ?></td>
-        </tr>
-        <tr>
-            <td align="left" class="table_row_second">Standard : </td>
-            <td align="left" class="table_row_second">From : <?php echo @$school_details[0]['class_start']; ?></td>
-            <td align="left" colspan="2" class="table_row_second">To : <?php echo @$school_details[0]['class_end']; ?></td>
-        </tr>
-        <tr>
-            <td align="left"  class="table_row_first">School Type : </td>
-            <td align="left" colspan="3" class="table_row_first">
-                <?php
-                if (@$school_details[0]['school_type'] == 'G')
-                    $type = 'Government';
-                else if (@$school_details[0]['school_type'] == 'A')
-                    $type = 'Aided';
-                else if (@$school_details[0]['school_type'] == 'U')
-                    $type = 'Unaided';
-                else
-                    $type = '';
-                echo $type;
-                ?>
-            </td>
-        </tr>
-        <tr>
-            <td align="left"  class="table_row_first">Phone : </td>
-            <td align="left" colspan="3" class="table_row_first"><?php echo (@$school_details[0]['school_phone']) ? @$school_details[0]['school_phone'] : ''; ?></td>
-        </tr>
-        <tr>
-            <td align="left"  class="table_row_first">Headmaster : </td>
-            <td align="left"  class="table_row_first"><?php echo (@$school_details[0]['hm_name']) ? @$school_details[0]['hm_name'] : ''; ?></td>
-            <td align="left" class="table_row_first">Phone : </td>
-            <td align="left"  class="table_row_first"><?php echo (@$school_details[0]['hm_phone']) ? @$school_details[0]['hm_phone'] : ''; ?></td>
-        </tr>
-        <tr>
-            <td align="left" class="table_row_first">Principal : </td>
-            <td align="left" class="table_row_first"><?php echo (@$school_details[0]['principal_name']) ? @$school_details[0]['principal_name'] : ''; ?></td>
-            <td align="left"  class="table_row_first">Phone : </td>
-            <td align="left"  class="table_row_first"><?php echo (@$school_details[0]['principal_phone']) ? @$school_details[0]['principal_phone'] : ''; ?></td>
-        </tr>
-        <tr>
-            <td align="left" class="table_row_first" valign="top">Team Managers : </td>
-            <td align="left" colspan="3" class="table_row_first"><div id="teachersRow">
-                    <?php
-                    if (@$school_details[0]['teachers'] != '') {
-                        $teachers = explode("#@#", $school_details[0]['teachers']);
-                        echo '<table cellpadding="2" cellspacing="2" border="0">';
-                        for ($i = 0; $i < count($teachers); $i++) {
-                            $teachers_details = explode('#$#', $teachers[$i]);
-                            if (count($teachers_details) > 1) {
-                                echo '<tr><td>' . @$teachers_details[0] . '</td><td>&nbsp;&nbsp;&nbsp;Phone : </td><td>' . @$teachers_details[1] . '</td></tr>';
-                            }
-                        }
-                        echo '</table>';
-                    }
-                    ?>
-                </div>
-                <div class="clear"></div>
-            </td>
-        </tr>
-        <tr>
-            <td align="left" class="table_row_first">Total number of students : </td>
-            <td align="left" class="table_row_first" colspan="3">
-                LP <?php echo @$school_details[0]['strength_lp']; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                UP <?php echo @$school_details[0]['strength_up']; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                HS <?php echo @$school_details[0]['strength_hs']; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                HSS <?php echo @$school_details[0]['strength_hss']; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                VHSE <?php echo @$school_details[0]['strength_vhss']; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                Total <?php echo @$school_details[0]['total_strength']; ?>
 
-            </td>
-        </tr>
+    <h2 align="center" style="font-size: 12.5pt; margin-top: 0px; margin-bottom: 5px; font-weight: bold; text-transform: uppercase;">Registration Details</h2>
 
-    </table>
-
-
-
-    <table width="100%" border="1" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top:15px;">
+    <!-- School Information Table -->
+    <table border="1" cellpadding="3" cellspacing="0" style="font-size: 9.5pt; border-collapse: collapse;">
         <tr>
-            <th align="center" width="30" style="border-right:1px #000000; padding:2px;">Sl.No</th>
-            <th align="left" width="80" style="border-right:1px #000000; padding:2px;">Admn No.</th>
-            <th align="left" width="150" style="border-right:1px #000000; padding:2px;">Name of participant</th>
-            <th align="center" width="50" style="border-right:1px #000000; padding:2px;">Class</th>
-            <th align="left" width="50" style="border-right:1px #000000; padding:2px;">Boy / Girl </th>
-            <th align="left" width="300" style="padding:2px;">Item code</th>
+            <td width="128" style="font-weight: bold; background-color: #f2f2f2; border: 1px solid #000000;">School Code :</td>
+            <td width="185" style="border: 1px solid #000000;"><?php echo htmlspecialchars($school_details[0]['school_code']); ?></td>
+            <td width="107" style="font-weight: bold; background-color: #f2f2f2; border: 1px solid #000000;">School Name :</td>
+            <td width="245" style="border: 1px solid #000000; font-weight: bold;"><?php echo htmlspecialchars($school_details[0]['school_name']); ?></td>
+        </tr>
+        <tr>
+            <td width="128" style="font-weight: bold; background-color: #f2f2f2; border: 1px solid #000000;">Sub District :</td>
+            <td width="185" style="border: 1px solid #000000;"><?php echo htmlspecialchars($school_details[0]['sub_district_name'] ?? ''); ?></td>
+            <td width="107" style="font-weight: bold; background-color: #f2f2f2; border: 1px solid #000000;">School Type :</td>
+            <td width="245" style="border: 1px solid #000000;"><?php echo $school_type; ?></td>
+        </tr>
+        <tr>
+            <td width="128" style="font-weight: bold; background-color: #f2f2f2; border: 1px solid #000000;">Standard :</td>
+            <td width="185" style="border: 1px solid #000000;">From : <?php echo htmlspecialchars($school_details[0]['class_start']); ?> &nbsp;&nbsp; To : <?php echo htmlspecialchars($school_details[0]['class_end']); ?></td>
+            <td width="107" style="font-weight: bold; background-color: #f2f2f2; border: 1px solid #000000;">School Email :</td>
+            <td width="245" style="border: 1px solid #000000;"><?php echo htmlspecialchars($school_details[0]['school_email'] ?? '-'); ?></td>
+        </tr>
+        <tr>
+            <td width="128" style="font-weight: bold; background-color: #f2f2f2; border: 1px solid #000000;">Headmaster :</td>
+            <td width="185" style="border: 1px solid #000000;"><?php echo htmlspecialchars($school_details[0]['hm_name'] ?? '-'); ?></td>
+            <td width="107" style="font-weight: bold; background-color: #f2f2f2; border: 1px solid #000000;">Mobile :</td>
+            <td width="245" style="border: 1px solid #000000;"><?php echo htmlspecialchars($school_details[0]['hm_phone'] ?? '-'); ?></td>
+        </tr>
+        <tr>
+            <td width="128" style="font-weight: bold; background-color: #f2f2f2; border: 1px solid #000000;">Principal :</td>
+            <td width="185" style="border: 1px solid #000000;"><?php echo htmlspecialchars($school_details[0]['principal_name'] ?? '-'); ?></td>
+            <td width="107" style="font-weight: bold; background-color: #f2f2f2; border: 1px solid #000000;">Mobile :</td>
+            <td width="245" style="border: 1px solid #000000;"><?php echo htmlspecialchars($school_details[0]['principal_phone'] ?? '-'); ?></td>
         </tr>
         <?php
-        $count = 0;
-        for ($j = 0; $j < count($participant_details); $j++) {
-            $count++;
-            ?>
-            <tr>
-                <td align="center" style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $count; ?></td>
-                <td align="left" style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $participant_details[$j]['admn_no'] ?></td>
-                <td align="left" style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo wordwrap($participant_details[$j]['participant_name'], 25, '<br>') ?></td>
-                <td align="center" style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $participant_details[$j]['class'] ?></td>
-                <td align="left" style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo ($participant_details[$j]['gender'] == 'B') ? 'Boy' : 'Girl'; ?></td>
-                <td align="left" style="border-top:1px #000000; padding:2px;">
-                    <?php
-                    $cnt_item = 1;
-                    foreach ($participant_details[$j]['item_code'] as $items) {
-                        if ($cnt_item == 6) {
-                            echo '<br>';
-                        }
-                        echo @$items . '&nbsp;&nbsp;';
-
-                        $cnt_item++;
-                    }
-                    ?>
-                </td>
-            </tr>
-            <?php
+        $tm_names = [];
+        $tm_phones = [];
+        if (!empty($school_details[0]['teachers'])) {
+            $teachers = explode("#@#", $school_details[0]['teachers']);
+            foreach ($teachers as $t) {
+                if (trim($t) === '') continue;
+                $parts = explode('#$#', $t);
+                $tName = trim($parts[0] ?? '');
+                $tPhone = trim($parts[1] ?? '');
+                if ($tName !== '') {
+                    $tm_names[] = htmlspecialchars($tName);
+                    $tm_phones[] = htmlspecialchars($tPhone !== '' ? $tPhone : '-');
+                }
+            }
         }
+        $tm_name_str = !empty($tm_names) ? implode('<br>', $tm_names) : '-';
+        $tm_phone_str = !empty($tm_phones) ? implode('<br>', $tm_phones) : '-';
         ?>
-    </table>
-    <br><br><br>
-    <table width="80%" align="left">
         <tr>
-            <td align="left" width="500">
-                Name & Signature of Team Manager
+            <td width="128" style="font-weight: bold; background-color: #f2f2f2; border: 1px solid #000000; vertical-align: top;">Team Manager(s) :</td>
+            <td width="185" style="border: 1px solid #000000; vertical-align: top;"><?php echo $tm_name_str; ?></td>
+            <td width="107" style="font-weight: bold; background-color: #f2f2f2; border: 1px solid #000000; vertical-align: top;">Mobile :</td>
+            <td width="245" style="border: 1px solid #000000; vertical-align: top;"><?php echo $tm_phone_str; ?></td>
+        </tr>
+        <tr>
+            <td width="128" style="font-weight: bold; background-color: #f2f2f2; border: 1px solid #000000; vertical-align: middle;">Total number of students :</td>
+            <td width="537" colspan="3" style="border: 1px solid #000000; padding: 0px;">
+                <table border="1" cellpadding="3" cellspacing="0" style="border-collapse: collapse; text-align: center; font-size: 9pt;">
+                    <tr style="background-color: #fafafa;">
+                        <td width="75" style="font-weight: bold; border: 1px solid #777;">LP</td>
+                        <td width="75" style="font-weight: bold; border: 1px solid #777;">UP</td>
+                        <td width="75" style="font-weight: bold; border: 1px solid #777;">HS</td>
+                        <td width="75" style="font-weight: bold; border: 1px solid #777;">HSS</td>
+                        <td width="87" style="font-weight: bold; border: 1px solid #777;">VHSE</td>
+                        <td width="125" style="font-weight: bold; border: 1px solid #777; background-color: #e9ecef;">Total</td>
+                    </tr>
+                    <tr>
+                        <td width="75" style="border: 1px solid #777;"><?php echo (int)@$school_details[0]['strength_lp']; ?></td>
+                        <td width="75" style="border: 1px solid #777;"><?php echo (int)@$school_details[0]['strength_up']; ?></td>
+                        <td width="75" style="border: 1px solid #777;"><?php echo (int)@$school_details[0]['strength_hs']; ?></td>
+                        <td width="75" style="border: 1px solid #777;"><?php echo (int)@$school_details[0]['strength_hss']; ?></td>
+                        <td width="87" style="border: 1px solid #777;"><?php echo (int)@$school_details[0]['strength_vhss']; ?></td>
+                        <td width="125" style="border: 1px solid #777; font-weight: bold; background-color: #f4f4f4;"><?php echo (int)@$school_details[0]['total_strength']; ?></td>
+                    </tr>
+                </table>
             </td>
         </tr>
     </table>
-    <br><br><br>
-    <!--<table cellpadding="5" cellspacing="0" border="1" align="center">-->
-    <!--    <tr>-->
-    <!--        <th colspan="4" style="border-bottom:1px #000000;" align="center">Details of fees to be remitted</th>-->
-    <!--    </tr>-->
-    <!--    <tr>-->
-    <!--        <td width="300" align="left"  style="border-bottom:1px #000000; border-right: 0 1px 1px 0 #000000; padding:2px;">&nbsp;</td>-->
-    <!--        <td width="100" align="left"  style="border-bottom:1px #000000; border-right: 0 1px 1px 0 #000000; padding:2px;">UP/HS</td>-->
-    <!--        <td width="100" align="left"  style="border-bottom:1px #000000; border-right: 0 1px 1px 0 #000000; padding:2px;">HSS</td>-->
-    <!--        <td width="100" align="left"  style="border-bottom:1px #000000; padding:2px;">VHSE</td>-->
-    <!--    </tr>-->
-    <!--    <tr>-->
-    <!--        <td align="left"  style="border-bottom:1px #000000; border-right: 0 1px 1px 0 #000000; padding:2px;">School affiliation fee</td>-->
-    <!--        <td align="left"  style="border-bottom:1px #000000; border-right: 0 1px 1px 0 #000000; padding:2px;"><?php //echo $fees_details['up_fee']['afliation'] + $fees_details['hs_fee']['afliation'] ?></td>-->
-    <!--        <td align="left"  style="border-bottom:1px #000000; padding:2px; border-right: 0 1px 1px 0 #000000;"><?php echo $fees_details['hss_fee']['afliation'] ?></td>-->
-    <!--        <td align="left"  style="border-bottom:1px #000000; padding:2px;"><?php //echo $fees_details['vhss_fee']['afliation'] ?></td>-->
-    <!--    </tr>-->
-    <!--    <tr>-->
-    <!--        <td align="left"  style="border-bottom:1px #000000; border-right: 0 1px 1px 0 #000000; padding:2px;">Participation fee</td>-->
-    <!--        <td align="left"  style="border-bottom:1px #000000; border-right: 0 1px 1px 0 #000000; padding:2px;"><?php //echo $fees_details['up_fee']['participant'] + $fees_details['hs_fee']['participant'] ?></td>-->
-    <!--        <td align="left"  style="border-bottom:1px #000000; padding:2px; border-right: 0 1px 1px 0 #000000;"><?php //echo $fees_details['hss_fee']['participant'] ?></td>-->
-    <!--        <td align="left"  style="border-bottom:1px #000000; padding:2px;"><?php //echo $fees_details['vhss_fee']['participant'] ?></td>-->
-    <!--    </tr>-->
-    <!--    <tr>-->
-    <!--        <td align="left"  style="border-right: 0 1px 1px 0 #000000; padding:2px;">Total</td>-->
-    <!--        <td align="left"  style="border-right: 0 1px 1px 0 #000000; padding:2px;"><?php //echo $fees_details['up_fee']['afliation'] + $fees_details['hs_fee']['afliation'] + $fees_details['up_fee']['participant'] + $fees_details['hs_fee']['participant'] ?></td>-->
-    <!--        <td align="left"  style="border-right: 0 1px 1px 0 #000000; padding:2px;"><?php //echo $fees_details['hss_fee']['afliation'] + $fees_details['hss_fee']['participant'] ?></td>-->
-    <!--        <td align="left"  style="padding:2px;"><?php //echo $fees_details['vhss_fee']['afliation'] + $fees_details['vhss_fee']['participant'] ?></td>-->
-    <!--    </tr>-->
-    <!--</table>-->
 
+    <!-- Participants Table -->
+    <table border="1" cellpadding="3" cellspacing="0" style="margin-top: 10px; font-size: 9.5pt; border-collapse: collapse;">
+        <thead>
+            <tr style="background-color: #e9ecef;">
+                <td width="34" style="border: 1px solid #000000; text-align: center; font-weight: bold;">Sl.No</td>
+                <td width="66" style="border: 1px solid #000000; text-align: center; font-weight: bold;">Admn No.</td>
+                <td width="151" style="border: 1px solid #000000; text-align: left; font-weight: bold;">Name of participant</td>
+                <td width="42" style="border: 1px solid #000000; text-align: center; font-weight: bold;">Class</td>
+                <td width="60" style="border: 1px solid #000000; text-align: center; font-weight: bold;">Boy / Girl</td>
+                <td width="52" style="border: 1px solid #000000; text-align: center; font-weight: bold;">Item 1</td>
+                <td width="52" style="border: 1px solid #000000; text-align: center; font-weight: bold;">Item 2</td>
+                <td width="52" style="border: 1px solid #000000; text-align: center; font-weight: bold;">Item 3</td>
+                <td width="52" style="border: 1px solid #000000; text-align: center; font-weight: bold;">Item 4</td>
+                <td width="52" style="border: 1px solid #000000; text-align: center; font-weight: bold;">Item 5</td>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            $count = 0;
+            for ($j = 0; $j < count($participant_details); $j++) {
+                $count++;
+                $items = !empty($participant_details[$j]['item_code']) && is_array($participant_details[$j]['item_code']) 
+                         ? array_values($participant_details[$j]['item_code']) 
+                         : [];
+                $it1 = !empty($items[0]) ? htmlspecialchars($items[0]) : '';
+                $it2 = !empty($items[1]) ? htmlspecialchars($items[1]) : '';
+                $it3 = !empty($items[2]) ? htmlspecialchars($items[2]) : '';
+                $it4 = !empty($items[3]) ? htmlspecialchars($items[3]) : '';
+                $it5 = '';
+                if (count($items) > 5) {
+                    $remaining = array_slice($items, 4);
+                    $it5 = htmlspecialchars(implode(', ', $remaining));
+                } elseif (!empty($items[4])) {
+                    $it5 = htmlspecialchars($items[4]);
+                }
+                ?>
+                <tr>
+                    <td width="34" style="border: 1px solid #000000; text-align: center;"><?php echo $count; ?></td>
+                    <td width="66" style="border: 1px solid #000000; text-align: center;"><?php echo htmlspecialchars($participant_details[$j]['admn_no']); ?></td>
+                    <td width="151" style="border: 1px solid #000000; text-align: left;"><?php echo htmlspecialchars($participant_details[$j]['participant_name']); ?></td>
+                    <td width="42" style="border: 1px solid #000000; text-align: center;"><?php echo htmlspecialchars($participant_details[$j]['class']); ?></td>
+                    <td width="60" style="border: 1px solid #000000; text-align: center;"><?php echo ($participant_details[$j]['gender'] == 'B') ? 'Boy' : 'Girl'; ?></td>
+                    <td width="52" style="border: 1px solid #000000; text-align: center;"><?php echo $it1; ?></td>
+                    <td width="52" style="border: 1px solid #000000; text-align: center;"><?php echo $it2; ?></td>
+                    <td width="52" style="border: 1px solid #000000; text-align: center;"><?php echo $it3; ?></td>
+                    <td width="52" style="border: 1px solid #000000; text-align: center;"><?php echo $it4; ?></td>
+                    <td width="52" style="border: 1px solid #000000; text-align: center;"><?php echo $it5; ?></td>
+                </tr>
+                <?php
+            }
+            if ($count === 0) {
+                ?>
+                <tr>
+                    <td colspan="10" style="border: 1px solid #000000; text-align: center; padding: 10px;">No registered participants found for this school.</td>
+                </tr>
+                <?php
+            }
+            ?>
+        </tbody>
+    </table>
+
+    <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; margin-top: 30px;">
+        <tr>
+            <td style="width: 100%; text-align: left; font-size: 10pt;">
+                <strong>Name & Signature of Team Manager :</strong> ........................................................................
+            </td>
+        </tr>
+    </table>
 </page>

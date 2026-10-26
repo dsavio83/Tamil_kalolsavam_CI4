@@ -190,6 +190,9 @@
                     </td>
                     <td class="py-3" style="font-size: 13.5px;">
                       <div class="fw-medium text-dark"><?php echo htmlspecialchars($p['school_name'] ?? ''); ?></div>
+                      <?php if (!empty($p['sub_district_name'])): ?>
+                        <small class="text-primary d-block fw-semibold" style="font-size: 11.5px;"><i class="bi bi-geo-alt-fill me-1"></i><?php echo htmlspecialchars($p['sub_district_name']); ?></small>
+                      <?php endif; ?>
                       <small class="text-muted" style="font-size: 12px;"><?php echo htmlspecialchars($p['school_code'] ?? ''); ?></small>
                     </td>
                     <td class="text-center py-3">

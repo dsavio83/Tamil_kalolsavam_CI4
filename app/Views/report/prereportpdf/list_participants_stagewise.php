@@ -30,22 +30,25 @@ for ($j = 0; $j < count($partdata); $j++) {
         ?>
 
 
-        <page backtop="30mm" backbottom="20mm ">
+        <?php $this->load->view('report/report_pdf_style'); ?>
+<page backtop="20mm" backbottom="20mm ">
             <page_header>
                 <?php
                 $this->load->view('report/report_header');
                 ?>
-                <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top:15px;">
-                    <tr>
-                        <td class="style1" align="center">Itemwise participants list : <?php echo $partdata[$j]['fest_name']; ?></td>
-                    </tr>
-                </table>
+                
             </page_header>
             <page_footer>
                 <?php
                 $this->load->view('report/report_footer');
                 ?>
-            </page_footer> 
+            </page_footer>
+<table width="100%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top: 2px;">
+                    <tr>
+                        <td class="report-pdf-title" align="center">Itemwise participants list : <?php echo $partdata[$j]['fest_name']; ?></td>
+                    </tr>
+                </table>
+ 
 
 
             <table width="100%" border="1" align="center" cellpadding="0" cellspacing="0">

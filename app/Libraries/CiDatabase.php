@@ -25,12 +25,137 @@ class CiDatabase
     /** @var array Buffered builder method calls when table is not yet known */
     protected array $pendingCalls = [];
 
+    /** @var bool|null Manual override for District mode */
+    public static ?bool $forceDistrictMode = null;
+
+    /** @var int|null Manual override for District code */
+    public static ?int $forceDistrictCode = null;
+
+    /**
+     * Map of sub-district (sd_*) tables to district (d_*) tables
+     */
+    protected static array $districtTableMap = [
+        'sd_stage_master'                => 'd_stage_master',
+        'sd_stage_item_master'           => 'd_stage_item_master',
+        'sd_item_absentee_master'        => 'd_item_absentee_master',
+        'sd_stage_manager_assignment'    => 'd_stage_manager_assignment',
+        'sd_stage_delay_log'             => 'd_stage_delay_log',
+        'sd_cluster_master'              => 'd_cluster_master',
+        'sd_cluster_participant_details' => 'd_cluster_participant_details',
+        'sd_user_cluster'                => 'd_user_cluster',
+        'sd_result_master'               => 'd_result_master',
+        'sd_result_publish'              => 'd_result_publish',
+        'sd_result_time'                 => 'd_result_time',
+        'sd_school_point_details'        => 'd_school_point_details',
+        'sd_certificate_master'          => 'd_certificate_master',
+        'sd_certificate_template'        => 'd_certificate_template',
+        'sd_participant_details'         => 'd_participant_details',
+        'sd_participant_item_details'    => 'd_participant_item_details',
+        'sd_qualification_ledger'        => 'd_qualification_ledger',
+        'sd_import_audit_log'            => 'd_import_audit_log',
+        'sd_school_master'               => 'd_school_master',
+        'sd_school_details'              => 'd_school_details',
+        'sd_cluster_master'              => 'd_cluster_master',
+        'sd_cluster_participant_details' => 'd_cluster_participant_details',
+        'sd_stage_delay_log'             => 'd_stage_delay_log',
+        'sd_stage_manager_assignment'    => 'd_stage_manager_assignment',
+        'sd_item_absentee_master'        => 'd_item_absentee_master',
+        'sd_certificate_type'            => 'd_certificate_type',
+        'sd_item_allotment'              => 'd_item_allotment',
+        'sd_kalolsavam_master'           => 'd_kalolsavam_master',
+    ];
+
     public function __construct(BaseConnection $conn)
     {
         $this->conn = $conn;
         try {
             $this->conn->query("SET SESSION sql_mode=(SELECT REPLACE(REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''),',,',','))");
         } catch (\Throwable $e) {}
+    }
+
+    public function isDistrictMode(): bool
+    {
+        if (static::$forceDistrictMode !== null) {
+            return static::$forceDistrictMode;
+        }
+        try {
+            $session = session();
+            if (!$session || (int)$session->get('USER_TYPE') !== 2) {
+                return false;
+            }
+            return true;
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    public function getDistrictCode(): int
+    {
+        if (static::$forceDistrictCode !== null) {
+            return static::$forceDistrictCode;
+        }
+        try {
+            $session = session();
+            return $session ? (int)$session->get('DISTRICT') : 0;
+        } catch (\Throwable $e) {
+            return 0;
+        }
+    }
+
+    public function resolveTableName(string $table): string
+    {
+        if (!$this->isDistrictMode()) {
+            return $table;
+        }
+
+        $trimmed = trim($table);
+        $unquoted = str_replace('`', '', $trimmed);
+
+        if (preg_match('/^([a-zA-Z0-9_]+)(\s+(?:AS\s+)?([a-zA-Z0-9_]+))?$/i', $unquoted, $matches)) {
+            $baseTable = $matches[1];
+            if (isset(static::$districtTableMap[$baseTable])) {
+                $target = static::$districtTableMap[$baseTable];
+                if (!empty($matches[2])) {
+                    return $target . $matches[2];
+                }
+                return $target;
+            }
+        }
+        return $table;
+    }
+
+    public function resolveFromClause($from)
+    {
+        if (!$this->isDistrictMode()) {
+            return $from;
+        }
+        if (is_array($from)) {
+            return array_map([$this, 'resolveTableName'], $from);
+        }
+        if (is_string($from)) {
+            $parts = explode(',', $from);
+            $resolved = array_map(function($p) {
+                return $this->resolveTableName(trim($p));
+            }, $parts);
+            return implode(', ', $resolved);
+        }
+        return $from;
+    }
+
+    public function rewriteSqlForDistrict(string $sql): string
+    {
+        if (!$this->isDistrictMode()) {
+            return $sql;
+        }
+
+        foreach (static::$districtTableMap as $sdTable => $dTable) {
+            $sql = preg_replace('/(?<![a-zA-Z0-9_`])`?' . preg_quote($sdTable, '/') . '`?(?![a-zA-Z0-9_`])/i', $dTable, $sql);
+        }
+
+        // In district mode, ignore `sub_district_code = 0` or `sub_district_code = ''` or `sub_district_code = '0'`
+        $sql = preg_replace('/(?:\b[a-zA-Z0-9_]+\.)?sub_district_code\s*=\s*(?:0|\'0\'|\'\'|""|\s*NULL\b)/i', '1=1', $sql);
+
+        return $sql;
     }
 
     /**
@@ -47,7 +172,7 @@ class CiDatabase
     protected function getBuilder(?string $table = null): BaseBuilder
     {
         if ($table !== null && $table !== '') {
-            $this->table = $table;
+            $this->table = $this->resolveTableName($table);
         }
 
         if ($this->builder === null) {
@@ -95,20 +220,30 @@ class CiDatabase
     // Query Builder Clauses
     // --------------------------------------------------------------------
 
+    public function table(string $table): BaseBuilder
+    {
+        $table = $this->resolveTableName($table);
+        return $this->conn->table($table);
+    }
+
     public function from($from, bool $overwrite = false): self
     {
-        if (is_string($from) && $this->builder === null) {
-            $this->table = $from;
-            $this->getBuilder($from);
+        $resolved = $this->resolveFromClause($from);
+        if (is_string($resolved) && $this->builder === null) {
+            $this->table = $resolved;
+            $this->getBuilder($resolved);
         } else {
-            $this->recordCall('from', func_get_args());
+            $this->recordCall('from', [$resolved, $overwrite]);
         }
         return $this;
     }
 
     public function select($select = '*', ?bool $escape = null): self
     {
-        return $this->recordCall('select', func_get_args());
+        if ($this->isDistrictMode() && is_string($select)) {
+            $select = $this->rewriteSqlForDistrict($select);
+        }
+        return $this->recordCall('select', [$select, $escape]);
     }
 
     public function selectMax(string $select = '', string $alias = ''): self
@@ -143,32 +278,100 @@ class CiDatabase
 
     public function where($key, $value = null, ?bool $escape = null): self
     {
-        return $this->recordCall('where', func_get_args());
+        if ($this->isDistrictMode()) {
+            if (is_array($key)) {
+                $sessionSubDist = 0;
+                try {
+                    $sessionSubDist = session() ? (int)(session()->get('SUB_DISTRICT') ?? 0) : 0;
+                } catch (\Throwable $e) {}
+                foreach ($key as $k => $v) {
+                    $kBase = trim(str_replace('`', '', (string)$k));
+                    if (str_ends_with($kBase, 'sub_district_code')) {
+                        if (empty($v) || $v == 0 || $v == $sessionSubDist) {
+                            unset($key[$k]);
+                        }
+                    }
+                }
+                if (empty($key)) {
+                    return $this;
+                }
+            } elseif (is_string($key)) {
+                $key = $this->rewriteSqlForDistrict($key);
+                $kBase = trim(str_replace('`', '', $key));
+                if (str_ends_with($kBase, 'sub_district_code')) {
+                    $sessionSubDist = 0;
+                    try {
+                        $sessionSubDist = session() ? (int)(session()->get('SUB_DISTRICT') ?? 0) : 0;
+                    } catch (\Throwable $e) {}
+                    if (empty($value) || $value == 0 || $value == $sessionSubDist) {
+                        return $this;
+                    }
+                } elseif ($value === null) {
+                    $key = preg_replace('/(?:\b[a-zA-Z0-9_]+\.)?sub_district_code\s*=\s*(?:0|\'0\'|\'\'|""|\s*NULL\b)/i', '1=1', $key);
+                }
+            }
+        }
+        return $this->recordCall('where', [$key, $value, $escape]);
     }
 
     public function orWhere($key, $value = null, ?bool $escape = null): self
     {
-        return $this->recordCall('orWhere', func_get_args());
+        if ($this->isDistrictMode() && is_string($key)) {
+            $key = $this->rewriteSqlForDistrict($key);
+        }
+        return $this->recordCall('orWhere', [$key, $value, $escape]);
     }
 
     public function whereIn(?string $key = null, $values = null, ?bool $escape = null): self
     {
-        return $this->recordCall('whereIn', func_get_args());
+        if ($this->isDistrictMode() && is_string($key)) {
+            $key = $this->rewriteSqlForDistrict($key);
+        }
+        return $this->recordCall('whereIn', [$key, $values, $escape]);
+    }
+
+    public function where_in(?string $key = null, $values = null, ?bool $escape = null): self
+    {
+        return $this->whereIn($key, $values, $escape);
     }
 
     public function orWhereIn(?string $key = null, $values = null, ?bool $escape = null): self
     {
-        return $this->recordCall('orWhereIn', func_get_args());
+        if ($this->isDistrictMode() && is_string($key)) {
+            $key = $this->rewriteSqlForDistrict($key);
+        }
+        return $this->recordCall('orWhereIn', [$key, $values, $escape]);
+    }
+
+    public function or_where_in(?string $key = null, $values = null, ?bool $escape = null): self
+    {
+        return $this->orWhereIn($key, $values, $escape);
     }
 
     public function whereNotIn(?string $key = null, $values = null, ?bool $escape = null): self
     {
-        return $this->recordCall('whereNotIn', func_get_args());
+        if ($this->isDistrictMode() && is_string($key)) {
+            $key = $this->rewriteSqlForDistrict($key);
+        }
+        return $this->recordCall('whereNotIn', [$key, $values, $escape]);
+    }
+
+    public function where_not_in(?string $key = null, $values = null, ?bool $escape = null): self
+    {
+        return $this->whereNotIn($key, $values, $escape);
     }
 
     public function orWhereNotIn(?string $key = null, $values = null, ?bool $escape = null): self
     {
-        return $this->recordCall('orWhereNotIn', func_get_args());
+        if ($this->isDistrictMode() && is_string($key)) {
+            $key = $this->rewriteSqlForDistrict($key);
+        }
+        return $this->recordCall('orWhereNotIn', [$key, $values, $escape]);
+    }
+
+    public function or_where_not_in(?string $key = null, $values = null, ?bool $escape = null): self
+    {
+        return $this->orWhereNotIn($key, $values, $escape);
     }
 
     public function like($field, string $match = '', string $side = 'both', ?bool $escape = null, bool $insensitiveSearch = false): self
@@ -193,7 +396,11 @@ class CiDatabase
 
     public function join(string $table, $cond, string $type = '', ?bool $escape = null): self
     {
-        return $this->recordCall('join', func_get_args());
+        $table = $this->resolveTableName($table);
+        if ($this->isDistrictMode() && is_string($cond)) {
+            $cond = $this->rewriteSqlForDistrict($cond);
+        }
+        return $this->recordCall('join', [$table, $cond, $type, $escape]);
     }
 
     public function orderBy(string $orderBy, string $direction = '', ?bool $escape = null): self
@@ -274,6 +481,7 @@ class CiDatabase
     {
         try {
             if ($table !== null && !is_numeric($table)) {
+                $table = $this->resolveTableName($table);
                 $builder = $this->getBuilder($table);
                 return $builder->get($limit, $offset);
             } else {
@@ -301,6 +509,7 @@ class CiDatabase
     public function countAllResults($table = null, bool $reset = true): int
     {
         if (is_string($table) && $table !== '') {
+            $table = $this->resolveTableName($table);
             $builder = $this->getBuilder($table);
         } else {
             $builder = $this->getBuilder();
@@ -320,6 +529,7 @@ class CiDatabase
     public function countAll(?string $table = null, bool $reset = true): int
     {
         if (is_string($table) && $table !== '') {
+            $table = $this->resolveTableName($table);
             $builder = $this->getBuilder($table);
         } else {
             $builder = $this->getBuilder();
@@ -331,8 +541,72 @@ class CiDatabase
         return $count;
     }
 
+    /** @var array<string, array<string>> Cache of column names per table */
+    private static array $tableFieldsCache = [];
+
+    public function tableHasField(string $table, string $field): bool
+    {
+        $resolved = $this->resolveTableName($table);
+        $baseTable = trim(explode(' ', $resolved)[0]);
+        $baseTable = str_replace('`', '', $baseTable);
+
+        if (!isset(self::$tableFieldsCache[$baseTable])) {
+            try {
+                self::$tableFieldsCache[$baseTable] = $this->conn->getFieldNames($baseTable);
+            } catch (\Throwable $e) {
+                self::$tableFieldsCache[$baseTable] = [];
+            }
+        }
+        return in_array($field, self::$tableFieldsCache[$baseTable], true);
+    }
+
     public function insert($table = null, $set = null, ?bool $escape = null): bool
     {
+        $targetTable = is_string($table) ? $this->resolveTableName($table) : ($this->table ?? '');
+        $targetBase = trim(explode(' ', str_replace('`', '', $targetTable))[0]);
+
+        if ($this->isDistrictMode()) {
+            $distCode = $this->getDistrictCode();
+            if (is_string($table)) {
+                $table = $this->resolveTableName($table);
+                if (is_array($set) && $distCode > 0 && (!isset($set['district_code']) || empty($set['district_code']))) {
+                    if ($this->tableHasField($table, 'district_code')) {
+                        $set['district_code'] = $distCode;
+                    }
+                }
+            } elseif (is_array($table)) {
+                if ($distCode > 0 && (!isset($table['district_code']) || empty($table['district_code']))) {
+                    $activeTable = $this->table ?? '';
+                    if ($activeTable !== '' && $this->tableHasField($activeTable, 'district_code')) {
+                        $table['district_code'] = $distCode;
+                    }
+                }
+            }
+        }
+
+        // Handle specific constraints for d_participant_details and d_participant_item_details
+        $setData = is_string($table) ? $set : $table;
+        if (is_array($setData)) {
+            if ($targetBase === 'd_participant_item_details') {
+                if (isset($setData['participant_id'])) {
+                    if (!isset($setData['d_participant_id']) || empty($setData['d_participant_id'])) {
+                        $setData['d_participant_id'] = $setData['participant_id'];
+                    }
+                    unset($setData['participant_id']);
+                }
+                unset($setData['pi_id']);
+            } elseif ($targetBase === 'd_participant_details') {
+                if (isset($setData['source_participant_id']) && ($setData['source_participant_id'] === 0 || $setData['source_participant_id'] === '0')) {
+                    $setData['source_participant_id'] = null;
+                }
+            }
+            if (is_string($table)) {
+                $set = $setData;
+            } else {
+                $table = $setData;
+            }
+        }
+
         if (is_string($table)) {
             $builder = $this->getBuilder($table);
             $res     = $builder->insert($set, $escape);
@@ -340,12 +614,77 @@ class CiDatabase
             $builder = $this->getBuilder();
             $res     = $builder->insert($table, $set);
         }
+
+        if ($targetBase === 'd_participant_details') {
+            try {
+                $insId = $this->conn->insertID();
+                if ($insId > 0) {
+                    $this->conn->query("UPDATE `d_participant_details` SET `participant_id` = {$insId}, `source_participant_id` = IF(IFNULL(`source_participant_id`, 0) = 0, {$insId}, `source_participant_id`) WHERE `d_participant_id` = {$insId} AND (`participant_id` = 0 OR `participant_id` IS NULL OR `source_participant_id` IS NULL OR `source_participant_id` = 0)");
+                }
+            } catch (\Throwable $e) {}
+        }
+
         $this->reset();
         return (bool)$res;
     }
 
     public function insertBatch($table = null, $set = null, ?bool $escape = null, int $batchSize = 100)
     {
+        $targetTable = is_string($table) ? $this->resolveTableName($table) : ($this->table ?? '');
+        $targetBase = trim(explode(' ', str_replace('`', '', $targetTable))[0]);
+
+        if ($this->isDistrictMode()) {
+            $distCode = $this->getDistrictCode();
+            if (is_string($table)) {
+                $table = $this->resolveTableName($table);
+                if (is_array($set) && $distCode > 0 && $this->tableHasField($table, 'district_code')) {
+                    foreach ($set as &$row) {
+                        if (is_array($row) && (!isset($row['district_code']) || empty($row['district_code']))) {
+                            $row['district_code'] = $distCode;
+                        }
+                    }
+                    unset($row);
+                }
+            } elseif (is_array($table) && $distCode > 0) {
+                $activeTable = $this->table ?? '';
+                if ($activeTable !== '' && $this->tableHasField($activeTable, 'district_code')) {
+                    foreach ($table as &$row) {
+                        if (is_array($row) && (!isset($row['district_code']) || empty($row['district_code']))) {
+                            $row['district_code'] = $distCode;
+                        }
+                    }
+                    unset($row);
+                }
+            }
+        }
+
+        // Handle specific constraints in batch for d_participant_item_details and d_participant_details
+        $batchRows = is_string($table) ? $set : $table;
+        if (is_array($batchRows)) {
+            foreach ($batchRows as &$bRow) {
+                if (!is_array($bRow)) continue;
+                if ($targetBase === 'd_participant_item_details') {
+                    if (isset($bRow['participant_id'])) {
+                        if (!isset($bRow['d_participant_id']) || empty($bRow['d_participant_id'])) {
+                            $bRow['d_participant_id'] = $bRow['participant_id'];
+                        }
+                        unset($bRow['participant_id']);
+                    }
+                    unset($bRow['pi_id']);
+                } elseif ($targetBase === 'd_participant_details') {
+                    if (isset($bRow['source_participant_id']) && ($bRow['source_participant_id'] === 0 || $bRow['source_participant_id'] === '0')) {
+                        $bRow['source_participant_id'] = null;
+                    }
+                }
+            }
+            unset($bRow);
+            if (is_string($table)) {
+                $set = $batchRows;
+            } else {
+                $table = $batchRows;
+            }
+        }
+
         if (is_string($table)) {
             $builder = $this->getBuilder($table);
             $res     = $builder->insertBatch($set, $escape, $batchSize);
@@ -360,6 +699,7 @@ class CiDatabase
     public function update($table = null, $set = null, $where = null, ?int $limit = null): bool
     {
         if (is_string($table)) {
+            $table = $this->resolveTableName($table);
             $builder = $this->getBuilder($table);
             $res     = $builder->update($set, $where, $limit);
         } else {
@@ -373,6 +713,7 @@ class CiDatabase
     public function updateBatch($table = null, $set = null, $constraints = null, int $batchSize = 100)
     {
         if (is_string($table)) {
+            $table = $this->resolveTableName($table);
             $builder = $this->getBuilder($table);
             $res     = $builder->updateBatch($set, $constraints, $batchSize);
         } else {
@@ -386,6 +727,7 @@ class CiDatabase
     public function delete($table = '', $where = '', ?int $limit = null, bool $resetData = true)
     {
         if (is_string($table) && $table !== '') {
+            $table = $this->resolveTableName($table);
             $builder = $this->getBuilder($table);
             $res     = $builder->delete($where, $limit, $resetData);
         } else {
@@ -398,6 +740,9 @@ class CiDatabase
 
     public function emptyTable(?string $table = null): bool
     {
+        if (is_string($table) && $table !== '') {
+            $table = $this->resolveTableName($table);
+        }
         $builder = $this->getBuilder($table);
         $res     = $builder->emptyTable();
         $this->reset();
@@ -411,6 +756,9 @@ class CiDatabase
 
     public function truncate(?string $table = null): bool
     {
+        if (is_string($table) && $table !== '') {
+            $table = $this->resolveTableName($table);
+        }
         $builder = $this->getBuilder($table);
         $res     = $builder->truncate();
         $this->reset();
@@ -420,6 +768,7 @@ class CiDatabase
     public function getCompiledSelect($table = null, bool $reset = true): string
     {
         if (is_string($table) && $table !== '') {
+            $table = $this->resolveTableName($table);
             $builder = $this->getBuilder($table);
         } else {
             $builder = $this->getBuilder();
@@ -437,11 +786,17 @@ class CiDatabase
 
     public function query(string $sql, $binds = null, bool $setEscapeFlags = true, string $queryClass = '')
     {
+        if ($this->isDistrictMode()) {
+            $sql = $this->rewriteSqlForDistrict($sql);
+        }
         return $this->conn->query($sql, $binds, $setEscapeFlags, $queryClass);
     }
 
     public function simpleQuery(string $sql)
     {
+        if ($this->isDistrictMode()) {
+            $sql = $this->rewriteSqlForDistrict($sql);
+        }
         return $this->conn->simpleQuery($sql);
     }
 
@@ -562,16 +917,19 @@ class CiDatabase
 
     public function tableExists(string $tableName, bool $cached = true): bool
     {
+        $tableName = $this->resolveTableName($tableName);
         return $this->conn->tableExists($tableName, $cached);
     }
 
     public function fieldExists(string $fieldName, string $tableName): bool
     {
+        $tableName = $this->resolveTableName($tableName);
         return $this->conn->fieldExists($fieldName, $tableName);
     }
 
     public function getFieldNames(string $tableName): array
     {
+        $tableName = $this->resolveTableName($tableName);
         return $this->conn->getFieldNames($tableName);
     }
 

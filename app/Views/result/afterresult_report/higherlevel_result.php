@@ -15,12 +15,12 @@
         </ol>
       </nav>
     </div>
-    <div>
+    <!-- <div>
       <button type="button" onclick="window.history.back();" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5 d-inline-flex align-items-center gap-1.5 shadow-sm">
         <i class="bi bi-arrow-left"></i>
         <span>Back</span>
       </button>
-    </div>
+    </div> -->
   </div>
 </div>
 
@@ -34,9 +34,9 @@
             <i class="bi bi-award fs-2 text-white"></i>
           </div>
           <div>
-            <h5 class="fw-bold mb-1 text-white">District & State Kalolsavam Qualification</h5>
+            <h5 class="fw-bold mb-1 text-white">District Kalolsavam Qualification</h5>
             <p class="mb-0 text-white-50 small">
-              Generate certified participant lists who achieved <span class="badge bg-warning text-dark fw-bold px-2 py-0.5 rounded-pill">Grade A</span> in UP, HS, and HSS competitions eligible for higher level festivals.
+              Generate certified participant lists who achieved <span class="badge bg-warning text-dark fw-bold px-2 py-0.5 rounded-pill">Grade A</span> in UP, HS, and HSS competitions eligible for district level festivals.
             </p>
           </div>
         </div>

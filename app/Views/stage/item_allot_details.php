@@ -1,12 +1,13 @@
 <?php
-echo form_open(base_url() . 'stage/item_participant/stage_allot_fest_all', array('id' => 'formIWPq'));
+echo form_open('stage/item_participant/stage_allot_fest_all', array('id' => 'formIWPq'));
 $total_single = count($single);
 $total_group = count($itempart);
 $total_items = $total_single + $total_group;
-$fest_title = @$itempart[0]['fest_name'] ? @$itempart[0]['fest_name'] : (@$single[0]['fest_name'] ? @$single[0]['fest_name'] : 'Festival');
+$fest_title = !empty($fest_title) ? $fest_title : (@$itempart[0]['fest_name'] ? @$itempart[0]['fest_name'] : (@$single[0]['fest_name'] ? @$single[0]['fest_name'] : 'Festival'));
 ?>
 <input type="hidden" name="txtItemCode" id="txtItemCode" value="" />
 <input type="hidden" name="txtFestId" id="txtFestId" value="<?php echo $fest_id; ?>" />
+<input type="hidden" name="sub_district" value="<?php echo (int)($sub_district ?? 0); ?>" />
 
 <!-- Festival Info & Summary Card -->
 <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
@@ -52,8 +53,14 @@ $fest_title = @$itempart[0]['fest_name'] ? @$itempart[0]['fest_name'] : (@$singl
           <input type="text" id="itemTableSearch" class="form-control border-start-0" placeholder="Quick search item name or code..." autocomplete="off">
         </div>
       </div>
-      <div class="col-12 col-md-7 col-lg-8 text-md-end">
-        <span class="text-muted small me-2"><i class="bi bi-info-circle me-1"></i>Click an item name to open individual stage configuration.</span>
+      <div class="col-12 col-md-7 col-lg-8 d-flex align-items-center justify-content-md-end gap-2 flex-wrap">
+        <div class="d-inline-flex align-items-center gap-1 bg-light border px-2 py-1 rounded-3">
+          <span class="small text-muted fw-semibold me-1"><i class="bi bi-lightning-charge-fill text-warning me-1"></i>Quick Fill:</span>
+          <input type="datetime-local" step="60" id="quickFillDateTime" style="color-scheme: light !important; width: 215px;" class="form-control form-control-sm font-monospace border bg-white" title="Select date and time to copy to visible items">
+          <button type="button" class="btn btn-sm btn-primary py-1 px-2.5 text-nowrap rounded-2 fw-semibold" onclick="applyQuickFillDateTime()" title="Apply this date & time to all visible items in table">
+            Apply to Visible
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -100,9 +107,12 @@ $fest_title = @$itempart[0]['fest_name'] ? @$itempart[0]['fest_name'] : (@$singl
         /* 1. SINGLE ITEMS */
         for ($j = 0; $j < count($single); $j++) {
             $item_code = $single[$j]['item_code'];
-            $date = date('Y-m-d', strtotime($single[$j]['start_time']));
-            $hour = date('H', strtotime($single[$j]['start_time']));
-            $min = date('i', strtotime($single[$j]['start_time']));
+            $st = !empty($single[$j]['start_time']) ? $single[$j]['start_time'] : '';
+            $st_time = ($st && $st !== '0000-00-00 00:00:00' && strtotime($st) > 0) ? strtotime($st) : null;
+            $dt_val = $st_time ? date('Y-m-d\TH:i', $st_time) : '';
+            $date = $st_time ? date('Y-m-d', $st_time) : '';
+            $hour = $st_time ? date('H', $st_time) : '';
+            $min = $st_time ? date('i', $st_time) : '';
 
             $value_array = array();
             $limit = (@$single[$j]['is_off_stage'] == 'Y') ? 1 : (($no_of_clusters > @$single[$j]['cpt']) ? @$single[$j]['cpt'] : $no_of_clusters);
@@ -136,19 +146,21 @@ $fest_title = @$itempart[0]['fest_name'] ? @$itempart[0]['fest_name'] : (@$singl
             </td>
 
             <td class="py-3">
-              <div class="d-flex align-items-center gap-1">
-                <div class="flex-grow-1">
-                  <?php echo form_dropdown('txtDate' . $item_code, $date_array, $date, 'id="txtDate' . $item_code . '" class="form-select form-select-sm shadow-none"'); ?>
-                </div>
-                <div style="width: 72px;">
-                  <?php echo form_dropdown('txtHour' . $item_code, @$hour_array, $hour, 'class="form-select form-select-sm shadow-none font-monospace" id="txtHour' . $item_code . '" title="Hour"'); ?>
-                </div>
-                <span class="text-muted fw-bold">:</span>
-                <div style="width: 72px;">
-                  <?php echo form_dropdown('txtMin' . $item_code, @$min_array, $min, 'class="form-select form-select-sm shadow-none font-monospace" id="txtMin' . $item_code . '" title="Minute"'); ?>
-                </div>
-              </div>
+              <input type="datetime-local" 
+                     step="60"
+                     name="txtDateTime<?php echo $item_code; ?>" 
+                     id="txtDateTime<?php echo $item_code; ?>" 
+                     value="<?php echo esc($dt_val); ?>" 
+                     style="color-scheme: light !important;"
+                     class="form-control form-control-sm dt-picker-input font-monospace shadow-none" 
+                     onchange="syncSplitDateTime('<?php echo $item_code; ?>', this.value)"
+                     oninput="syncSplitDateTime('<?php echo $item_code; ?>', this.value)"
+                     required>
+              <input type="hidden" name="txtDate<?php echo $item_code; ?>" id="txtDate<?php echo $item_code; ?>" value="<?php echo esc($date); ?>">
+              <input type="hidden" name="txtHour<?php echo $item_code; ?>" id="txtHour<?php echo $item_code; ?>" value="<?php echo esc($hour); ?>">
+              <input type="hidden" name="txtMin<?php echo $item_code; ?>" id="txtMin<?php echo $item_code; ?>" value="<?php echo esc($min); ?>">
             </td>
+
 
             <td class="py-3">
               <?php
@@ -170,9 +182,12 @@ $fest_title = @$itempart[0]['fest_name'] ? @$itempart[0]['fest_name'] : (@$singl
         <?php
         for ($j = 0; $j < count($itempart); $j++) {
             $item_code = $itempart[$j]['item_code'];
-            $date = date('Y-m-d', strtotime($itempart[$j]['start_time']));
-            $hour = date('H', strtotime($itempart[$j]['start_time']));
-            $min = date('i', strtotime($itempart[$j]['start_time']));
+            $st = !empty($itempart[$j]['start_time']) ? $itempart[$j]['start_time'] : '';
+            $st_time = ($st && $st !== '0000-00-00 00:00:00' && strtotime($st) > 0) ? strtotime($st) : null;
+            $dt_val = $st_time ? date('Y-m-d\TH:i', $st_time) : '';
+            $date = $st_time ? date('Y-m-d', $st_time) : '';
+            $hour = $st_time ? date('H', $st_time) : '';
+            $min = $st_time ? date('i', $st_time) : '';
 
             $value_array = array();
             $limit = (@$itempart[$j]['is_off_stage'] == 'Y') ? 1 : (($no_of_clusters > @$itempart[$j]['cpt']) ? @$itempart[$j]['cpt'] : $no_of_clusters);
@@ -206,19 +221,21 @@ $fest_title = @$itempart[0]['fest_name'] ? @$itempart[0]['fest_name'] : (@$singl
             </td>
 
             <td class="py-3">
-              <div class="d-flex align-items-center gap-1">
-                <div class="flex-grow-1">
-                  <?php echo form_dropdown('txtDate' . $item_code, $date_array, $date, 'id="txtDate' . $item_code . '" class="form-select form-select-sm shadow-none"'); ?>
-                </div>
-                <div style="width: 72px;">
-                  <?php echo form_dropdown('txtHour' . $item_code, @$hour_array, $hour, 'class="form-select form-select-sm shadow-none font-monospace" id="txtHour' . $item_code . '" title="Hour"'); ?>
-                </div>
-                <span class="text-muted fw-bold">:</span>
-                <div style="width: 72px;">
-                  <?php echo form_dropdown('txtMin' . $item_code, @$min_array, $min, 'class="form-select form-select-sm shadow-none font-monospace" id="txtMin' . $item_code . '" title="Minute"'); ?>
-                </div>
-              </div>
+              <input type="datetime-local" 
+                     step="60"
+                     name="txtDateTime<?php echo $item_code; ?>" 
+                     id="txtDateTime<?php echo $item_code; ?>" 
+                     value="<?php echo esc($dt_val); ?>" 
+                     style="color-scheme: light !important;"
+                     class="form-control form-control-sm dt-picker-input font-monospace shadow-none" 
+                     onchange="syncSplitDateTime('<?php echo $item_code; ?>', this.value)"
+                     oninput="syncSplitDateTime('<?php echo $item_code; ?>', this.value)"
+                     required>
+              <input type="hidden" name="txtDate<?php echo $item_code; ?>" id="txtDate<?php echo $item_code; ?>" value="<?php echo esc($date); ?>">
+              <input type="hidden" name="txtHour<?php echo $item_code; ?>" id="txtHour<?php echo $item_code; ?>" value="<?php echo esc($hour); ?>">
+              <input type="hidden" name="txtMin<?php echo $item_code; ?>" id="txtMin<?php echo $item_code; ?>" value="<?php echo esc($min); ?>">
             </td>
+
 
             <td class="py-3">
               <?php
@@ -237,6 +254,16 @@ $fest_title = @$itempart[0]['fest_name'] ? @$itempart[0]['fest_name'] : (@$singl
           </tr>
         <?php } ?>
 
+        <?php if (($total_single + $total_group) === 0): ?>
+          <tr>
+            <td colspan="6" class="text-center py-5">
+              <i class="bi bi-inbox text-muted d-block mb-2" style="font-size: 2.2rem;"></i>
+              <h6 class="fw-bold text-dark mb-1">No Items Found — the list is empty</h6>
+              <p class="text-muted small mb-0">தேர்வு செய்யப்பட்ட பிரிவில் போட்டிகள் எதுவும் இல்லை. வேறு ஒரு பிரிவை தேர்வு செய்யவும்.</p>
+            </td>
+          </tr>
+        <?php endif; ?>
+
         </tbody>
       </table>
     </div>
@@ -248,7 +275,7 @@ $fest_title = @$itempart[0]['fest_name'] ? @$itempart[0]['fest_name'] : (@$singl
       <i class="bi bi-shield-check text-success me-1"></i>Ensure dates, stages, and judges are correctly assigned before saving.
     </div>
     <div>
-      <button type="submit" name="Allotment" value="Allotment" class="btn btn-primary px-4 py-2 rounded-pill shadow-sm d-inline-flex align-items-center gap-2 fw-semibold" onclick="showFormSpinner(this, 'Saving Allotments...')">
+      <button type="submit" name="Allotment" value="Allotment" id="btnSaveAllotmentTable" class="btn btn-primary px-4 py-2 rounded-pill shadow-sm d-inline-flex align-items-center gap-2 fw-semibold">
         <i class="bi bi-check2-circle fs-5"></i>
         <span>Save Allotment</span>
       </button>
@@ -267,7 +294,7 @@ $fest_title = @$itempart[0]['fest_name'] ? @$itempart[0]['fest_name'] : (@$singl
     <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
       <i class="bi bi-arrow-up-circle me-1"></i> Top
     </button>
-    <button type="submit" name="Allotment" value="Allotment" class="btn btn-success px-4 py-2 rounded-pill shadow-sm d-inline-flex align-items-center gap-2 fw-bold" onclick="showFormSpinner(this, 'Saving Allotments...')">
+    <button type="submit" name="Allotment" value="Allotment" id="btnSaveAllotmentSticky" class="btn btn-success px-4 py-2 rounded-pill shadow-sm d-inline-flex align-items-center gap-2 fw-bold">
       <i class="bi bi-floppy2-fill"></i>
       <span>Save Stage Allotments</span>
     </button>
@@ -277,6 +304,60 @@ $fest_title = @$itempart[0]['fest_name'] ? @$itempart[0]['fest_name'] : (@$singl
 <?php echo form_close(); ?>
 
 <script>
+function syncSplitDateTime(itemCode, val) {
+  if (!itemCode) return;
+  var dateEl = document.getElementById('txtDate' + itemCode);
+  var hourEl = document.getElementById('txtHour' + itemCode);
+  var minEl = document.getElementById('txtMin' + itemCode);
+  if (!val) {
+    if (dateEl) dateEl.value = '';
+    if (hourEl) hourEl.value = '';
+    if (minEl) minEl.value = '';
+    return;
+  }
+  var parts = val.split('T');
+  if (parts.length === 2) {
+    if (dateEl) dateEl.value = parts[0];
+    var timeParts = parts[1].split(':');
+    if (hourEl) hourEl.value = timeParts[0] || '00';
+    if (minEl) minEl.value = timeParts[1] || '00';
+  }
+}
+
+function applyQuickFillDateTime() {
+  var qf = document.getElementById('quickFillDateTime');
+  if (!qf || !qf.value) {
+    alert('Please choose a date and time in the Quick Fill box first.');
+    return;
+  }
+  var val = qf.value;
+  var rows = document.querySelectorAll("#allotmentTable tbody tr.allot-row");
+  var count = 0;
+  rows.forEach(function(row) {
+    if (row.style.display !== "none") {
+      var dtInput = row.querySelector("input.dt-picker-input");
+      if (dtInput) {
+        dtInput.value = val;
+        var code = dtInput.id.replace('txtDateTime', '');
+        syncSplitDateTime(code, val);
+        count++;
+      }
+    }
+  });
+  if (count > 0 && typeof event !== 'undefined' && event.target) {
+    var btn = event.target.closest('button');
+    if (btn) {
+      var origText = btn.innerHTML;
+      btn.innerHTML = '<i class="bi bi-check2 me-1"></i>Applied (' + count + ')';
+      btn.classList.replace('btn-primary', 'btn-success');
+      setTimeout(function() {
+        btn.innerHTML = origText;
+        btn.classList.replace('btn-success', 'btn-primary');
+      }, 1500);
+    }
+  }
+}
+
 document.addEventListener("DOMContentLoaded", function() {
   var searchInput = document.getElementById("itemTableSearch");
   var visibleCountEl = document.getElementById("visibleCount");
@@ -302,10 +383,39 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     });
   }
+
+  // Handle Save Allotments Form Submission cleanly
+  var formAllot = document.getElementById("formIWPq");
+  if (formAllot) {
+    formAllot.addEventListener("submit", function(e) {
+      // Ensure all hidden date/hour/min fields are populated before submit
+      document.querySelectorAll('input.dt-picker-input').forEach(function(inp) {
+        var id = inp.id.replace('txtDateTime', '');
+        syncSplitDateTime(id, inp.value);
+      });
+
+      var submitBtns = formAllot.querySelectorAll('button[type="submit"]');
+      submitBtns.forEach(function(btn) {
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving Allotments...';
+        btn.style.pointerEvents = 'none';
+        setTimeout(function() {
+          btn.disabled = true;
+        }, 50);
+      });
+      if (typeof window.showGlobalLoader === 'function') {
+        window.showGlobalLoader('Saving Stage Allotments...', true);
+      }
+    });
+  }
 });
 </script>
 
 <style>
+.dt-picker-input,
+#quickFillDateTime,
+input[type="datetime-local"] {
+  color-scheme: light !important;
+}
 .item-title-link:hover {
   text-decoration: underline !important;
   color: #0d6efd !important;

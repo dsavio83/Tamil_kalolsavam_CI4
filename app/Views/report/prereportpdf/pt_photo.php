@@ -50,67 +50,79 @@
     -->
 </style>
 <?php
-$sub_dist_name = '';
-$label = '';
+$title = '';
+$dir = 'sub_district';
 if ($this->session->get('SUB_DISTRICT')) {
     $sub_dist_name = get_sub_dist_name($this->session->get('SUB_DISTRICT'));
-    $label = $sub_dist_name;
+    $title = wordwrap($sub_dist_name . ' Sub District', 40, '<br/>');
+    $dir = 'sub_district';
+} elseif ($this->session->get('DISTRICT')) {
+    $title = wordwrap(get_dist_name($this->session->get('DISTRICT')) . ' District', 40, '<br/>');
+    $dir = 'district';
 }
+
 $fest_master_details = $this->General_Model->get_fest_master_details();
-$title = '';
 $venue = '';
-$logo = '';
 $file_path = '';
 if (count($fest_master_details) > 0) {
-    $title = (@$fest_master_details[0]['sub_dist_kalolsavam_name']) ? @$fest_master_details[0]['sub_dist_kalolsavam_name'] : '';
-    if (!empty($sub_dist_name)) {
-        $title = wordwrap($sub_dist_name . ' Sub District', 40, '<br/>');
+    if (empty($title)) {
+        $title = (@$fest_master_details[0]['sub_dist_kalolsavam_name']) ? @$fest_master_details[0]['sub_dist_kalolsavam_name'] : '';
     }
     $venue = wordwrap(@$fest_master_details[0]['venue'], 40, '<br/>');
     $logo = @$fest_master_details[0]['logo_name'];
-    $file_path = pdf_safe_logo_image('sub_district', $logo, true);
+    $file_path = pdf_safe_logo_image($dir, $logo, true);
 }
 
 $chunks = array_chunk($participant_details, 6);
 foreach ($chunks as $page_items) {
     $total_in_page = count($page_items);
     ?>
-    <page backtop="3mm" backbottom="3mm" backleft="3mm" backright="3mm">
-        <table align="left" border="0" cellspacing="0" cellpadding="0">
+    <page backtop="7mm" backbottom="7mm" backleft="10mm" backright="20mm">
+        <table align="center" border="0" cellspacing="0" cellpadding="0">
             <?php
             for ($i = 0; $i < $total_in_page;) {
                 ?>
                 <tr>
-                    <td valign="top">
-                        <?php
-                        if (!empty($page_items[$i]['participant_id'])) {
-                            echo render_single_photo_card($page_items[$i], $Photo, $file_path, $title, $venue, $this);
-                        }
-                        ?>
-                    </td>
-                    <td width="10">&nbsp;</td>
+                    <!-- Card 1 -->
+                    <?php if (!empty($page_items[$i]['participant_id'])) { ?>
+                        <td valign="top">
+                            <?php echo render_single_photo_card($page_items[$i], $Photo, $file_path, $title, $venue, $this); ?>
+                        </td>
+                    <?php } else { ?>
+                        <td width="290" valign="top">&nbsp;</td>
+                    <?php } ?>
+
+                    <!-- Equal middle cutting gap -->
+                    <td width="25" align="center" valign="middle">&nbsp;</td>
                     <?php $i++; ?>
-                    <td valign="top">
-                        <?php
-                        if ($i < $total_in_page && !empty($page_items[$i]['participant_id'])) {
-                            echo render_single_photo_card($page_items[$i], $Photo, $file_path, $title, $venue, $this);
-                        }
-                        ?>
-                    </td>
-                    <td width="10">&nbsp;</td>
+
+                    <!-- Card 2 -->
+                    <?php if ($i < $total_in_page && !empty($page_items[$i]['participant_id'])) { ?>
+                        <td valign="top">
+                            <?php echo render_single_photo_card($page_items[$i], $Photo, $file_path, $title, $venue, $this); ?>
+                        </td>
+                    <?php } else { ?>
+                        <td width="290" valign="top">&nbsp;</td>
+                    <?php } ?>
                     <?php $i++; ?>
-                    <td valign="top">
-                        <?php
-                        if ($i < $total_in_page && !empty($page_items[$i]['participant_id'])) {
-                            echo render_single_photo_card($page_items[$i], $Photo, $file_path, $title, $venue, $this);
-                        }
-                        ?>
-                    </td>
+
+                    <!-- Equal middle cutting gap -->
+                    <td width="25" align="center" valign="middle">&nbsp;</td>
+
+                    <!-- Card 3 -->
+                    <?php if ($i < $total_in_page && !empty($page_items[$i]['participant_id'])) { ?>
+                        <td valign="top">
+                            <?php echo render_single_photo_card($page_items[$i], $Photo, $file_path, $title, $venue, $this); ?>
+                        </td>
+                    <?php } else { ?>
+                        <td width="290" valign="top">&nbsp;</td>
+                    <?php } ?>
                     <?php $i++; ?>
                 </tr>
                 <?php if ($i < $total_in_page) { ?>
+                    <!-- Vertical cutting gap -->
                     <tr>
-                        <td colspan="5" height="15">&nbsp;</td>
+                        <td colspan="5" height="30">&nbsp;</td>
                     </tr>
                 <?php } ?>
                 <?php
@@ -121,5 +133,3 @@ foreach ($chunks as $page_items) {
     <?php
 }
 ?>
-
-

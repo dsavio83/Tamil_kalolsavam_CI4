@@ -5,8 +5,7 @@ namespace App\Controllers;
 class Downloads extends \App\Controllers\BaseController
 {
     private array $allowlist = [
-        'chittur_itemcodes.html' => 'text/html',
-        'kalolsavam.pdf'         => 'application/pdf',
+        'kalolsavam.pdf' => 'application/pdf',
     ];
 
     public function serve(string $file = ''): \CodeIgniter\HTTP\Response
@@ -15,6 +14,10 @@ class Downloads extends \App\Controllers\BaseController
 
         if ($file === '' || $file !== basename($file)) {
             return $response->setStatusCode(403)->setBody('Forbidden');
+        }
+
+        if ($file === 'chittur_itemcodes.html' || strpos($file, 'itemcodes') !== false) {
+            return redirect()->to(base_url('downloads/item_codes'));
         }
 
         if (!isset($this->allowlist[$file])) {

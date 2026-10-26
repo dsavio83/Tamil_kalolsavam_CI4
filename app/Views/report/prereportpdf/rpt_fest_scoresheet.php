@@ -18,6 +18,8 @@
 
     -->
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 <?php
 $flag = 0;
 $count = 0;
@@ -57,9 +59,9 @@ foreach ($fest_details as $data) {
             $this->load->view('report/report_footer');
             ?>
         </page_footer>   
-        <table width="100%" border="0" cellspacing="0" cellpadding="0" align="center" class=						"heading_tab" style="margin-top:15px;">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" align="center" class=						"heading_tab" style="margin-top: 2px;">
             <tr>
-                <td height="37" align="center" class="style1">Score Sheet</td>
+                <td height="37" align="center" class="report-pdf-title">Score Sheet</td>
             </tr>
         </table>
         <table width="67%" border="0" align="center" cellpadding="0" cellspacing="0" bordercolor="#D4D0C8">
@@ -71,12 +73,24 @@ foreach ($fest_details as $data) {
                 <td colspan="8" style='border:0 0 0.5px 0.5px 0 #000000 ; height:20 px;'><span class="style3"><?php echo wordwrap($data['item_code'] . " - " . $data['item_name'], 25, '<br>'); ?></span></td>
                 <td style='border:0 0 0.5px 0.5px 0 #000000 ; height:20 px;' colspan="2"><strong>Date</strong><strong>:<?php echo datetophpmodel($data['start_time']); ?>&nbsp;&nbsp;<?php echo $data['stage_name']; ?></strong></td>
             </tr>
-            <?php if (file_exists(base_path() . 'value_points/' . $data['item_code'] . '.JPG')) { ?>
+            <?php
+            $root_path = defined('FCPATH') ? FCPATH : (defined('ROOTPATH') ? ROOTPATH : 'c:/xampp/htdocs/tk25/');
+            $vp_img = '';
+            foreach (['.png', '.PNG', '.jpg', '.JPG', '.jpeg', '.JPEG'] as $ext) {
+                $candidate = $root_path . 'value_points/' . $data['item_code'] . $ext;
+                if (is_file($candidate) && filesize($candidate) > 500) {
+                    $vp_img = str_replace('\\', '/', $candidate);
+                    break;
+                }
+            }
+            ?>
+            <?php if ($vp_img !== ''): ?>
                 <tr>
-                    <td align="center" colspan="11" style='border:0 0 0.5px 0.5px 0 #000000 ; font:Georgia;'>
-                        <img src="<?php echo base_url('value_points/') . $data['item_code'] . '.JPG' ?>" height="200" width="700" />            	</td>
+                    <td align="center" colspan="11" style="border: 0 0 0.5px 0.5px 0 #000000; text-align: center; padding: 4px 0;">
+                        <img src="<?php echo $vp_img; ?>" style="width: 550px;" />
+                    </td>
                 </tr>
-            <?php } ?>
+            <?php endif; ?>
             <tr>
                 <td colspan="2" style='border:0 0 0.5px 0.5px 0 #000000 ; height:20 px;'><div align="left"><strong>.</strong></div>              	</td>
                 <td colspan="6" align="center"><strong>Score for each value points</strong></td>

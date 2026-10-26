@@ -1,45 +1,41 @@
 <style type="text/css">
-    <!--
-    .style1 {
-        font-size: 14px;
-        font-weight: bold;
-        color: #660033;
-    }
-    .style2{
-        font-size: 11px;
-        font-weight: bold;
-        color:#000000;
-    }
-    .style9{
-        font-size: 12px;
-        font-weight: bold;
-        color:#000000;
-    }
-    .style3{
-        font-size: 12px;
-        font-weight: bold;
-        color:#000000;
-    }
-    .style4{
-        font-size: 8px;
-        font-weight: bold;
-        color:#000000;
-    }
-    .style5{
-        font-size: 10px;
-        color:#000000;
-    }
-    .tb{
-        font-size: 12px;
-        font-weight: bold;
-        color:#000000;}
-    .ety{
-        font-size: 12px;
-        color:#000000;
-    }
-    -->
+<!--
+.report-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: #660033;
+    text-align: center;
+}
+.fest-title {
+    font-size: 11px;
+    font-weight: bold;
+    color: #000000;
+    text-align: center;
+    padding-top: 1px;
+}
+.meta-item {
+    font-size: 10px;
+    color: #000000;
+    line-height: 1.35;
+}
+.th-cell {
+    font-size: 9.5px;
+    font-weight: bold;
+    color: #000000;
+    border: 0.25mm solid #000000;
+    padding: 3px 2px;
+}
+.td-cell {
+    font-size: 9px;
+    color: #000000;
+    border: 0.25mm solid #000000;
+    padding: 2.5px 2px;
+}
+-->
 </style>
+
 <?php
+$isDistrictAdmin = ((int)$this->session->get('USER_TYPE') === 2 || (int)$this->session->get('USER_TYPE') === 0);
 $prev_festid = "";
 
 for ($j = 0; $j < count($part_details); $j++) {
@@ -48,96 +44,92 @@ for ($j = 0; $j < count($part_details); $j++) {
         $count = 0;
         $prev_festid = $part_details[$j]['fest_id'];
         if ($j != 0) {
-            print("</table></page>");
+            echo "</tbody></table></page>";
         }
+
+        $district_name = !empty($part_details[$j]['rev_district_name']) 
+            ? $part_details[$j]['rev_district_name'] 
+            : (!empty($this->session->get('DISTRICT')) ? get_dist_name($this->session->get('DISTRICT')) : '');
+        $sub_district_name = !empty($part_details[$j]['sub_district_name']) 
+            ? $part_details[$j]['sub_district_name'] 
+            : (!empty($this->session->get('SUB_DISTRICT')) ? get_sub_dist_name($this->session->get('SUB_DISTRICT')) : '');
         ?>
 
-        <page backtop="30mm" backbottom="20mm ">
+        <?php $this->load->view('report/report_pdf_style'); ?>
+<page backtop="20mm" backbottom="18mm" backleft="5mm" backright="5mm">
             <page_header>
-                <?php
-                $this->load->view('report/report_header');
-                ?>
-                <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center">
-                    <tr>
-                        <td align="center" class="style1" valign="top">List of  participants For Team Manager</td>
-                    </tr>  
-                </table>
+                <?php $this->load->view('report/report_header'); ?>
+                
+            </page_header>
 
-                <table width="100%" border="0" align="center">
+            <page_footer>
+                <?php $this->load->view('report/report_footer'); ?>
+            </page_footer>
+<table style="width: 100%; margin-top: 1px;" border="0" cellspacing="0" cellpadding="0" align="center">
                     <tr>
-                        <td width="23%" class="style9">&nbsp;&nbsp;&nbsp;<span class="style3">Festival: &nbsp;&nbsp;<?php echo $part_details[$j]['fest_name']; ?> &nbsp;&nbsp;</span></td>
-                        <td width="31%" class="style9">&nbsp;&nbsp;&nbsp;<span class="style3">School  Code:&nbsp;&nbsp;&nbsp;<?php echo $part_details[$j]['school_code']; ?>&nbsp;&nbsp;&nbsp;</span></td>
-                        <td width="44%" class="style9"><span class="style3">School Name:&nbsp;&nbsp;<?php echo wordwrap($part_details[$j]['school_name'], 30, '<br/>'); ?> </span></td>
-                        <td width="2%">&nbsp;</td>
+                        <td align="center" class="report-pdf-title" style="width: 100%; text-align: center;">List of participants For Team Manager</td>
+                    </tr>
+                    <tr>
+                        <td align="center" class="report-pdf-subtitle" style="width: 100%; text-align: center;">
+                            Festival: <?php echo esc($part_details[$j]['fest_name']); ?>
+                        </td>
                     </tr>
                 </table>
-            </page_header>
-            <page_footer>
-                <?php
-                $this->load->view('report/report_footer');
-                ?>
-            </page_footer>       
 
 
-
-
-            <table width="130%" border="1" align="center" cellpadding="0" cellspacing="0" >
+            <table style="width: 100%; margin-top: 1px; margin-bottom: 5px;" border="0" cellspacing="0" cellpadding="0" align="center">
                 <tr>
-                    <td width="20" align="center" class="style2" style="border-right:1px #000000; padding:2px;">Sl.No</td>
-                    <td width="178"align="left" class="style2" style="border-right:1px #000000; padding:2px;">Item</td>
-                    <td width="190" align="left" class="style2" style="border-right:1px #000000; padding:2px;">Name </td>
-                    <td width="40" align="center" class="style2" style="border-right:1px #000000; padding:2px;">Reg No.</td>
-                    <td width="40" align="center" class="style2" style="border-right:1px #000000; padding:2px;">Adm.No.</td>
-                    <td width="20" align="center" class="style2" style="border-right:1px #000000; padding:2px;">B/G</td>
-                    <td width="28" align="center" class="style2" style="border-right:1px #000000; padding:2px;">Class</td>
-                    <td width="28" align="center" class="style2" style="border-right:1px #000000; padding:2px;">Cluster</td>
-                    <td width="56" align="center" class="style2" style="border-right:1px #000000; padding:2px;">Stage No</td>
-                    <td width="62" align="center" class="style2" style="border-right:1px #000000; padding:2px;">Date</td>
-                     <!-- <td width="12%" align="center" class="style2" style="border-right:0px #000000; padding:2px;">&nbsp;&nbsp;Tentative Time&nbsp;&nbsp;</td> -->
+                    <td style="width: <?php echo $isDistrictAdmin ? '60%' : '100%'; ?>; text-align: left;" class="meta-item" valign="top">
+                        <strong>School Name:</strong> <?php echo esc($part_details[$j]['school_name']); ?><br/>
+                        <strong>School Code:</strong> <?php echo esc($part_details[$j]['school_code']); ?>
+                    </td>
+                    <?php if ($isDistrictAdmin) { ?>
+                    <td style="width: 40%; text-align: right;" align="right" class="meta-item" valign="top">
+                        <strong>District:</strong> <?php echo esc($district_name); ?><br/>
+                        <strong>Sub-District:</strong> <?php echo esc($sub_district_name); ?>
+                    </td>
+                    <?php } ?>
                 </tr>
-                <?php
-            }
-            //participant_id
+            </table>
 
+            <table style="width: 100%;" border="0" cellpadding="0" cellspacing="0">
+                <thead>
+                    <tr>
+                        <td class="th-cell" style="width: 4%; text-align: center;">Sl.No</td>
+                        <td class="th-cell" style="width: 24%; text-align: left;">&nbsp;Item</td>
+                        <td class="th-cell" style="width: 22%; text-align: left;">&nbsp;Name</td>
+                        <td class="th-cell" style="width: 7%; text-align: center;">Reg No.</td>
+                        <td class="th-cell" style="width: 7%; text-align: center;">Adm.No.</td>
+                        <td class="th-cell" style="width: 4%; text-align: center;">B/G</td>
+                        <td class="th-cell" style="width: 5%; text-align: center;">Class</td>
+                        <td class="th-cell" style="width: 6%; text-align: center;">Cluster</td>
+                        <td class="th-cell" style="width: 8%; text-align: center;">Stage No</td>
+                        <td class="th-cell" style="width: 13%; text-align: center; white-space: nowrap;">Date</td>
+                    </tr>
+                </thead>
+                <tbody>
+        <?php
+    }
 
-            $count++;
+    $count++;
+    $datt = !empty($part_details[$j]['ddt']) ? datetophpmodel($part_details[$j]['ddt']) : '';
+    ?>
+    <tr>
+        <td class="td-cell" style="width: 4%; text-align: center;"><?php echo $count; ?></td>
+        <td class="td-cell" style="width: 24%; text-align: left;">&nbsp;<?php echo wordwrap(esc($part_details[$j]['item_code'] . ' - ' . $part_details[$j]['item_name']), 33, '<br/>'); ?></td>
+        <td class="td-cell" style="width: 22%; text-align: left;">&nbsp;<?php echo wordwrap(esc($part_details[$j]['participant_name']), 28, '<br/>'); ?></td>
+        <td class="td-cell" style="width: 7%; text-align: center;"><?php echo esc($part_details[$j]['participant_id']); ?></td>
+        <td class="td-cell" style="width: 7%; text-align: center;"><?php echo esc($part_details[$j]['admn_no']); ?></td>
+        <td class="td-cell" style="width: 4%; text-align: center;"><?php echo esc($part_details[$j]['gender']); ?></td>
+        <td class="td-cell" style="width: 5%; text-align: center;"><?php echo esc($part_details[$j]['class']); ?></td>
+        <td class="td-cell" style="width: 6%; text-align: center;"><?php echo esc($part_details[$j]['cluster_no']); ?></td>
+        <td class="td-cell" style="width: 8%; text-align: center;"><?php echo esc($part_details[$j]['stage_name']); ?></td>
+        <td class="td-cell" style="width: 13%; text-align: center; white-space: nowrap;"><?php echo esc($datt); ?></td>
+    </tr>
+    <?php
+}
 
-            $total_time_for_item = ($part_details[$j]['time_type'] == 'S') ? ceil((int) $part_details[$j]['max_time'] / 60) : (int) $part_details[$j]['max_time'];
-            if (($part_details[$j]['max_time'] != "") && ($part_details[$j]['no_of_participant'] != "")) {
-                if ($part_details[$j]['is_off_stage'] == 'N') {
-                    $time = $total_time_for_item * $part_details[$j]['no_of_participant'];
-                    $time = get_time_format($time);
-                } else {
-                    $time = get_time_format($total_time_for_item);
-                }
-                $datt = datetophpmodel($part_details[$j]['ddt']);
-            } else {
-                $datt = "";
-                $timetye = "";
-                $time = "";
-            }
-            $txt = $part_details[$j]['participant_name'];
-            $name = wordwrap($txt, 20, "\n", true);
-            ?>
-            <tr>
-                <td class="ety" align="center"  style="border-top:1px #000000; border-right:1px #000000; padding:2px;" ><?php echo $count; ?></td>
-                <td  class="ety"align="left"  style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo wordwrap($part_details[$j]['item_code'] . ' - ' . $part_details[$j]['item_name'], 30, '<br>'); ?></td>
-                <td class="ety" align="left"  style="border-top:1px #000000; border-right:1px #000000; padding:2px;" ><?php echo wordwrap($part_details[$j]['participant_name'], 30, '<br>') ?></td>
-
-                <td  class="ety" align="center"  style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $part_details[$j]['participant_id']; ?></td>
-                <td  class="ety" align="center"  style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $part_details[$j]['admn_no']; ?></td>
-                <td class="ety" align="center"  style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $part_details[$j]['gender']; ?></td>
-                <td class="ety" align="center"  style="border-top:1px #000000; border-right:1px #000000; padding:2px;" ><?php echo $part_details[$j]['class']; ?></td>
-                <td class="ety"  align="center"  style="border-top:1px #000000; border-right:1px #000000; padding:2px;" ><?php echo $part_details[$j]['cluster_no']; ?></td>
-                <td class="ety" align="center"  style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $part_details[$j]['stage_name']; //stage_desc   ?></td>
-                <td class="ety" align="left"  style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $datt; ?></td>
-              <!--  <td align="center" class="ety" style="border-top:1px #000000; border-right:1px #000000; padding:2px;" >&nbsp;&nbsp;<?php //echo $time;    ?></td>-->
-            </tr>
-            <?php
-        }
-        ?>
-
-    </table>
-
-</page>
-
+if (count($part_details) > 0) {
+    echo "</tbody></table></page>";
+}
+?>

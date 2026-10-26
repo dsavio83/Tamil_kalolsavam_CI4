@@ -9,22 +9,25 @@
 
 
 
-<page backtop="30mm" backbottom="20mm">
+<?php $this->load->view('report/report_pdf_style'); ?>
+<page backtop="20mm" backbottom="20mm">
     <page_header>
         <?php
         $this->load->view('report/report_header');
         ?>
-        <table width="100%" height="62" border="0" align="center">
-            <tr>
-                <td  align="center" class="style1" height="30" valign="top">Participants Eligible For Higher Level Competition From <?php echo $retvalue[0]['sub_district_name'] . '(' . $retvalue[0]['sub_district_code'] . ') '; ?></td>
-            </tr>
-        </table>
+        
     </page_header>
     <page_footer>
         <?php
         $this->load->view('report/report_footer');
         ?>
-    </page_footer>  
+    </page_footer>
+<table width="100%" height="62" border="0" align="center">
+            <tr>
+                <td  align="center" class="report-pdf-title" height="30" valign="top">Participants Eligible For Higher Level Competition From <?php echo $retvalue[0]['sub_district_name'] . '(' . $retvalue[0]['sub_district_code'] . ') '; ?></td>
+            </tr>
+        </table>
+  
     <?php
     $prevfestid = "";
     $schoolid = "";

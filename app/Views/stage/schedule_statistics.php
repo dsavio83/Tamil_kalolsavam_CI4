@@ -340,11 +340,11 @@
               $v_load_pct = round(($v_count / $max_venue_items) * 100);
             ?>
             <div class="col-12 col-md-6 col-xl-4">
-              <div class="border rounded-4 p-3.5 bg-white shadow-2xs h-100" style="border: 1px solid #e2e8f0 !important;">
+              <div class="border rounded-4 p-3 bg-white shadow-2xs h-100" style="border: 1px solid #e2e8f0 !important; padding: 1.2rem !important;">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                   <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-primary rounded-circle p-1.5 d-inline-flex align-items-center justify-content-center" style="width: 26px; height: 26px;">
-                      <i class="bi bi-geo-alt-fill text-white fs-7"></i>
+                    <span class="badge bg-primary rounded-circle p-0 d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 28px; height: 28px;">
+                      <i class="bi bi-geo-alt-fill text-white" style="font-size: 0.85rem;"></i>
                     </span>
                     <h6 class="fw-bold text-dark mb-0"><?php echo esc($venue_name); ?></h6>
                   </div>
@@ -365,9 +365,9 @@
                 <div class="d-flex align-items-center justify-content-between pt-2 border-top mt-2">
                   <small class="text-muted font-monospace">Stage Status:</small>
                   <?php if($v_count > 10): ?>
-                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill small">Heavy Traffic</span>
+                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2.5 py-1 small">Heavy Traffic</span>
                   <?php else: ?>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill small">Optimal Balance</span>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 small">Optimal Balance</span>
                   <?php endif; ?>
                 </div>
               </div>

@@ -1,56 +1,9 @@
-<link rel="prefetch" href="<?php echo base_url(); ?>report/prereport/callsheet_first">
-<link rel="prefetch" href="<?php echo base_url(); ?>report/prereport/timesheetinterface">
-<link rel="prefetch" href="<?php echo base_url(); ?>report/prereport/score_sheet_interfaces">
-<link rel="prefetch" href="<?php echo base_url(); ?>report/prereport/tabulation_report_interface">
-
-<style>
-.stage-report-tabs-wrapper {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 3px;
-}
-.stage-report-tabs {
-  gap: 0.5rem;
-  flex-wrap: nowrap;
-}
-@media (min-width: 992px) {
-  .stage-report-tabs {
-    flex-wrap: wrap;
-  }
-}
-.stage-report-tabs .nav-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.65rem 1.25rem;
-  border-radius: 50rem;
-  font-weight: 600;
-  white-space: nowrap;
-  letter-spacing: 0.2px;
-  transition: all 0.2s ease-in-out;
-}
-.stage-report-tabs .nav-link i {
-  margin-right: 0.55rem !important;
-  font-size: 1.1rem;
-  line-height: 1;
-}
-.stage-report-tabs .nav-link:not(.active) {
-  background-color: #f8f9fa;
-  color: #495057;
-  border: 1px solid #e9ecef;
-}
-.stage-report-tabs .nav-link:not(.active):hover {
-  background-color: #e9ecef;
-  color: #0d6efd;
-}
-</style>
-
 <div class="pagetitle mb-3">
   <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
     <div>
       <h1 class="d-flex align-items-center gap-2 text-dark fw-bold mb-1">
         <i class="bi bi-easel2-fill text-primary"></i>
-        <span>Stage Reports</span>
+        <span>All In One</span>
       </h1>
       <p class="text-muted small mb-0">Stage-wise reports — call sheet, time sheet, score sheet and tabulation as PDF.</p>
     </div>
@@ -58,59 +11,11 @@
       <ol class="breadcrumb mb-0 bg-light px-3 py-1.5 rounded-pill border">
         <li class="breadcrumb-item"><a href="<?php echo base_url(); ?>welcome" class="text-decoration-none"><i class="bi bi-house-door-fill me-1"></i>Home</a></li>
         <li class="breadcrumb-item text-muted">Reports</li>
-        <li class="breadcrumb-item active text-primary fw-semibold" aria-current="page">Stage Reports</li>
+        <li class="breadcrumb-item active text-primary fw-semibold" aria-current="page">All In One</li>
       </ol>
     </nav>
   </div>
 </div>
-
-<!-- Navigation Pill Tabs -->
-<div class="card border-0 shadow-sm rounded-4 mb-4">
-  <div class="card-body p-2">
-    <div class="stage-report-tabs-wrapper">
-      <div class="nav nav-pills nav-fill stage-report-tabs" id="reportTabs" role="tablist">
-        <a class="nav-link rounded-pill text-secondary fw-semibold py-2 px-3" href="<?php echo base_url(); ?>report/prereport/callsheet_first" data-prefetch>
-          <i class="bi bi-person-lines-fill me-2"></i>
-          <span>Call Sheet</span>
-        </a>
-        <a class="nav-link rounded-pill text-secondary fw-semibold py-2 px-3" href="<?php echo base_url(); ?>report/prereport/timesheetinterface" data-prefetch>
-          <i class="bi bi-clock-history me-2"></i>
-          <span>Time Sheet</span>
-        </a>
-        <a class="nav-link rounded-pill text-secondary fw-semibold py-2 px-3" href="<?php echo base_url(); ?>report/prereport/score_sheet_interfaces" data-prefetch>
-          <i class="bi bi-clipboard-check-fill me-2"></i>
-          <span>Score Sheet</span>
-        </a>
-        <a class="nav-link rounded-pill text-secondary fw-semibold py-2 px-3" href="<?php echo base_url(); ?>report/prereport/tabulation_report_interface" data-prefetch>
-          <i class="bi bi-table me-2"></i>
-          <span>Tabulation</span>
-        </a>
-        <a class="nav-link active rounded-pill fw-semibold py-2 px-3" href="<?php echo base_url(); ?>report/prereport/four_reports" data-prefetch>
-          <i class="bi bi-collection-fill me-2"></i>
-          <span>All in One</span>
-        </a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-(function(){
-  var urls = [
-    '<?php echo base_url(); ?>report/prereport/callsheet_first',
-    '<?php echo base_url(); ?>report/prereport/timesheetinterface',
-    '<?php echo base_url(); ?>report/prereport/score_sheet_interfaces',
-    '<?php echo base_url(); ?>report/prereport/tabulation_report_interface'
-  ];
-  function pf(u){ try{ var l=document.createElement('link'); l.rel='prefetch'; l.href=u; document.head.appendChild(l);}catch(e){} }
-  if('requestIdleCallback' in window) requestIdleCallback(function(){ urls.forEach(pf); }, {timeout:2000});
-  else setTimeout(function(){ urls.forEach(pf); }, 800);
-  document.querySelectorAll('#reportTabs a[data-prefetch]').forEach(function(a){
-    a.addEventListener('mouseenter', function(){ pf(a.href); }, {once:true});
-    a.addEventListener('focus', function(){ pf(a.href); }, {once:true});
-  });
-})();
-</script>
 
 <?php echo form_open('report/prereportpdf/four_reports', array('id' => 'formIWP', 'target' => '_blank', 'class' => 'no-global-loader')); ?>
 <input type="hidden" name="report_type" id="report_type" value="">
@@ -132,7 +37,7 @@
             <label class="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-1" for="modeItemCode">
               <i class="bi bi-hash"></i> Enter Item Code
             </label>
-
+						&nbsp; &nbsp;
             <input type="radio" class="btn-check" name="input_mode" id="modeFestival" value="fest" autocomplete="off">
             <label class="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-1" for="modeFestival">
               <i class="bi bi-flag-fill"></i> Or Select Festival
@@ -164,7 +69,7 @@
                 <label for="cmbFestTypeFour" class="form-label small text-secondary fw-semibold mb-1">
                   <i class="bi bi-flag-fill text-primary me-1"></i> Select Festival: <span class="text-danger">*</span>
                 </label>
-                <?php echo form_dropdown("cmbFestType", $fest, '', 'class="form-select py-2" id="cmbFestTypeFour" onchange="fetch_items_for_four_reports(this.value)"'); ?>
+                <?php $fest['ALL'] = 'Select All Festival'; echo form_dropdown("cmbFestType", $fest, '', 'class="form-select py-2" id="cmbFestTypeFour" onchange="fetch_items_for_four_reports(this.value)"'); ?>
               </div>
               <div class="col-md-6">
                 <label for="cbo_item" class="form-label small text-secondary fw-semibold mb-1">
@@ -283,6 +188,7 @@ function fetch_items_for_four_reports(festid) {
   
   var formData = new FormData();
   formData.append('fest_id', festid);
+  formData.append('with_all', '1');
 
   fetch('<?php echo base_url(); ?>ajax/loadajax/fetch_item_from_festival', {
     method: 'POST',
@@ -297,7 +203,7 @@ function fetch_items_for_four_reports(festid) {
       sel.name = 'cbo_item';
       sel.className = 'form-select py-2';
       sel.addEventListener('change', function() {
-        if (this.value && this.value !== '0' && this.value !== 'ALL') {
+        if (this.value && this.value !== '0') {
           var itemInput = document.getElementById('item');
           if (itemInput) {
             itemInput.value = this.value;
@@ -361,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
           return false;
         }
 
-        if (!selectedItemVal || selectedItemVal === '' || selectedItemVal === '0' || selectedItemVal === 'ALL') {
+        if (!selectedItemVal || selectedItemVal === '' || selectedItemVal === '0') {
           e.preventDefault();
           if (typeof Swal !== 'undefined') {
             Swal.fire({

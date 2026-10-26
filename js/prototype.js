@@ -1567,7 +1567,9 @@ Element.Methods = {
     },
     remove: function (element) {
         element = $(element);
-        element.parentNode.removeChild(element);
+        if (element && element.parentNode) {
+            element.parentNode.removeChild(element);
+        }
         return element;
     },
     update: function (element, content) {
@@ -4061,12 +4063,10 @@ Object.extend(Event, (function () {
         window.attachEvent("onunload", destroyCache);
     }
 
-    // Safari has a dummy event handler on page unload so that it won't
-    // use its bfcache. Safari <= 3.1 has an issue with restoring the "document"
-    // object when page is returned to via the back button using its bfcache.
-    if (Prototype.Browser.WebKit) {
-        window.addEventListener('unload', Prototype.emptyFunction, false);
-    }
+    // Listeners for the `unload` event are not registered: browsers restrict
+    // it through the Permissions Policy and log a
+    // "[Violation] Permissions policy violation: unload is not allowed"
+    // console warning. The old Safari bfcache workaround is unnecessary today.
 
     return {
         observe: function (element, eventName, handler) {

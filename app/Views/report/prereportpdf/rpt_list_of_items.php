@@ -8,6 +8,8 @@
 
     -->
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 <page backtop="20mm" backbottom="20mm ">
     <page_header>
         <?php
@@ -20,11 +22,11 @@
         ?>
     </page_footer>       
 
-    <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top:15px;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top: 2px;">
 
         <tr>
             <td> 
-                <div align="center" class="style1">List of items</div>
+                <div align="center" class="report-pdf-title">List of items</div>
             </td>
         </tr>
     </table>

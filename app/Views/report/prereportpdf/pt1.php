@@ -73,8 +73,8 @@ $chunks = array_chunk($participant_details, 6);
 foreach ($chunks as $page_items) {
     $total_in_page = count($page_items);
     ?>
-    <page backtop="3mm" backbottom="3mm" backleft="3mm" backright="3mm">
-        <table align="left" border="0" cellspacing="0" cellpadding="0">
+    <page backtop="3mm" backbottom="3mm" backleft="10mm" backright="20mm">
+        <table align="center" border="0" cellspacing="0" cellpadding="0">
             <?php
             for ($i = 0; $i < $total_in_page;) {
                 ?>
@@ -86,7 +86,7 @@ foreach ($chunks as $page_items) {
                         }
                         ?>
                     </td>
-                    <td width="10">&nbsp;</td>
+                    <td width="25">&nbsp;</td>
                     <?php $i++; ?>
                     <td valign="top">
                         <?php
@@ -95,7 +95,7 @@ foreach ($chunks as $page_items) {
                         }
                         ?>
                     </td>
-                    <td width="10">&nbsp;</td>
+                    <td width="25">&nbsp;</td>
                     <?php $i++; ?>
                     <td valign="top">
                         <?php

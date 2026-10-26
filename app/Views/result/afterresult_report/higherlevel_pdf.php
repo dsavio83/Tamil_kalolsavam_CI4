@@ -11,13 +11,14 @@
         color:#000000;
     }
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 <?php
 $count = 0;
 $prevfestid = "";
 for ($j = 0; $j < count($retvalue); $j++) {
-    $count++;
     if ($prevfestid != $retvalue[$j]['fest_id']) {
-
+        $count = 0;
         $prevfestid = $retvalue[$j]['fest_id'];
         if ($j != 0) {
             print("</table></page>");
@@ -37,32 +38,38 @@ for ($j = 0; $j < count($retvalue); $j++) {
             </page_footer>  
             <table width="100%"  border="0" align="center">
                 <tr>
-                    <td  align="center" height="30" valign="top" class="style1">Participants Eligible For Higher Level Competition in <?php echo $retvalue[$j]['fest_name']; ?></td>
+                    <td  align="center" height="30" valign="top" class="report-pdf-title">Participants Eligible For Higher Level Competition in <?php echo esc($retvalue[$j]['fest_name']); ?></td>
                 </tr></table>
 
             <table width="96%" border="1" align="center" cellpadding="0" cellspacing="0">
 
 
                 <tr>
-                    <td width="35" align="center" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'>Sl No </td>
-                    <td width="175" align="left" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'>Item</td>
-                    <td width="210" align="left" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'>Name of Participant</td>
-                    <td width="40" align="center" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'>Class</td>
-                    <td width="200" align="left" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;'>School </td>
+                    <td width="35" align="center" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px; font-weight:bold;'>Sl No </td>
+                    <td width="175" align="left" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px; font-weight:bold;'>Item</td>
+                    <td width="210" align="left" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px; font-weight:bold;'>Name of Participant</td>
+                    <td width="40" align="center" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px; font-weight:bold;'>Class</td>
+                    <td width="200" align="left" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px; font-weight:bold;'>School </td>
                 </tr>
                 <?php
             }
             if ($retvalue[$j]['grade'] == 'A') {
+                $count++;
                 ?>
 
 
 
                 <tr>
                     <td align="center" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;' class="style2"><?php echo $count; ?></td>
-                    <td align="left" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;' class="style2"><?php echo wordwrap($retvalue[$j]['item_code'] . ' - ' . $retvalue[$j]['item_name'], 30, '<br>'); ?></td>
-                    <td align="left" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;' class="style2"><?php echo wordwrap($retvalue[$j]['participant_name'], 40, '<br>'); ?></td>
-                    <td align="center" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;' class="style2"><?php echo $retvalue[$j]['class']; ?></td>
-                    <td align="left" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;' class="style2"><?php echo wordwrap($retvalue[$j]['school_code'] . ' - ' . $retvalue[$j]['school_name'], 40, '<br>'); ?></td>
+                    <td align="left" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;' class="style2"><?php echo wordwrap(esc($retvalue[$j]['item_code'] . ' - ' . $retvalue[$j]['item_name']), 30, '<br>'); ?></td>
+                    <td align="left" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;' class="style2"><?php echo wordwrap(esc($retvalue[$j]['participant_name']), 40, '<br>'); ?></td>
+                    <td align="center" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;' class="style2"><?php echo esc($retvalue[$j]['class']); ?></td>
+                    <td align="left" style='border: 0 0 0.5px 0.5px 0 #000000;  height:20px;' class="style2">
+                        <?php echo wordwrap(esc($retvalue[$j]['school_code'] . ' - ' . $retvalue[$j]['school_name']), 40, '<br>'); ?>
+                        <?php if (!empty($retvalue[$j]['sub_district_name'])) { ?>
+                            <br/><span style="font-size:9px; color:#555;">(<?php echo esc($retvalue[$j]['sub_district_name']); ?>)</span>
+                        <?php } ?>
+                    </td>
 
                 </tr>
                 <?php

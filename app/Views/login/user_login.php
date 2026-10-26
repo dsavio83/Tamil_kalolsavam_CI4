@@ -1,4 +1,11 @@
 <style>
+@font-face {
+  font-family: 'TAU-Marutham Bold';
+  src: url('<?php echo base_url('assets/fonts/TAU-Marutham Bold.ttf'); ?>') format('truetype');
+  font-weight: bold;
+  font-display: swap;
+}
+
 @media (min-width: 1400px) {
   #login-container {
     margin-left: -250px;
@@ -143,7 +150,7 @@ body {
    <div class="container-fluid d-flex align-items-center justify-content-between px-3 px-md-4">
       <a href="<?php echo base_url(); ?>" class="logo d-flex align-items-center text-decoration-none">
          <img src="<?php echo base_url(); ?>assets/img/logo.png" alt="Logo" style="max-height: 40px;" class="me-2">
-         <span class="d-none d-sm-block fw-bold text-dark fs-5">தமிழ் கலைவிழா 2025</span>
+         <span class="d-none d-sm-block fw-bold text-dark fs-5"><span style="font-family: 'TAU-Marutham Bold', sans-serif; font-size: 1.8rem;">தமிழ் கலைவிழா</span> <?php echo date('Y'); ?></span>
       </a>
       
       <div class="d-flex align-items-center gap-2">
@@ -176,7 +183,7 @@ body {
                    <label for="txtUserName" class="form-label small fw-semibold text-dark mb-1">Username / School Code</label>
                    <div class="input-group has-validation">
                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-person-fill text-primary"></i></span>
-                       <input type="text" name="txtUserName" id="txtUserName" value="<?php echo (isset($_POST['txtUserName']) and trim($_POST['txtUserName']) != '' and trim($_POST['txtUserName']) != 'text') ? htmlspecialchars($_POST['txtUserName']) : htmlspecialchars(get_cookie('username') ?? ''); ?>" class="form-control border-start-0" placeholder="Enter your username or school code" required autocomplete="username">
+                       <input type="text" name="txtUserName" id="txtUserName" value="<?php echo (isset($_POST['txtUserName']) and trim($_POST['txtUserName']) != '' and trim($_POST['txtUserName']) != 'text') ? htmlspecialchars($_POST['txtUserName']) : htmlspecialchars(get_cookie('username') ?? ''); ?>" class="form-control border-start-0" placeholder="Enter your username or school code" required autocomplete="username" autofocus>
                    </div>
                    <div id="txtUserNameFeedback" class="invalid-feedback d-none small mt-1">Please enter your username.</div>
                </div>
@@ -198,7 +205,6 @@ body {
                      <input class="form-check-input" type="checkbox" name="remember" value="true" id="rememberMe">
                      <label class="form-check-label small text-muted" for="rememberMe">Remember me</label>
                   </div>
-                   <a href="<?php echo base_url('downloads/serve/chittur_itemcodes.html'); ?>" class="small text-decoration-none text-primary" target="_blank">Item Codes</a>
                </div>
                
                <button type="submit" name="login" value="Login" id="btnLoginSubmit" class="btn btn-primary w-100 py-2 fw-semibold d-inline-flex align-items-center justify-content-center gap-2 rounded-3 shadow-sm">
@@ -283,7 +289,7 @@ body {
             <div class="row justify-content-center">
                 <div class="col-lg-8 text-center">
                     <p class="lead text-muted tamil-font">
-                        தமிழ் கலைவிழா 2025 என்பது தமிழ் மொழியின் சிறப்பையும், கலாச்சாரத்தின் ஆழத்தையும் கொண்டாடும் ஒரு முக்கியமான மாநில மற்றும் மாவட்ட அளவிலான விழாவாகும். 
+                        தமிழ் கலைவிழா <?php echo date('Y'); ?> என்பது தமிழ் மொழியின் சிறப்பையும், கலாச்சாரத்தின் ஆழத்தையும் கொண்டாடும் ஒரு முக்கியமான மாவட்ட மற்றும் உபமாவட்ட அளவிலான விழாவாகும். 
                         இவ்விழாவில் மாணவ மாணவிகள் தங்கள் திறமைகளை வெளிப்படுத்தி, தமிழின் பெருமையை நிலைநாட்டுகின்றனர்.
                     </p>
                 </div>
@@ -348,9 +354,9 @@ body {
         <div class="row">
             <div class="col-12 text-center">
                 <div class="d-flex align-items-center justify-content-center mb-2">
-                    <h5 class="text-white mb-0 tamil-font">தமிழ் கலைவிழா 2025 - 2026</h5>
+                    <h5 class="text-white mb-0 tamil-font">தமிழ் கலைவிழா <?php echo date('Y'); ?> - <?php echo date('Y') + 1; ?></h5>
                 </div>
-                <p class="small text-muted mb-0">© 2025 தமிழ்நாடு & கேரளா பள்ளிக் கல்வித்துறை. அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை.</p>
+                <p class="small text-muted mb-0">© <?php echo date('Y'); ?> கேரளப் பொதுக்கல்வித் துறை. அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை.</p>
             </div>
         </div>
     </div>
@@ -517,6 +523,21 @@ body {
                 } else {
                     passwordField.type = "password";
                     togglePassword.innerHTML = '<i class="bi bi-eye"></i>';
+                }
+            });
+        }
+
+        // Focus username input with cursor ready when login modal opens
+        var loginModalEl = document.getElementById("loginModal");
+        if (loginModalEl) {
+            loginModalEl.addEventListener("shown.bs.modal", function () {
+                var uInput = document.getElementById("txtUserName");
+                if (uInput) {
+                    uInput.focus();
+                    if (uInput.value) {
+                        var len = uInput.value.length;
+                        uInput.setSelectionRange(len, len);
+                    }
                 }
             });
         }

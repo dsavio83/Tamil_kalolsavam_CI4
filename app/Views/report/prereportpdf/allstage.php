@@ -16,23 +16,26 @@
     }
     -->
 </style>
-<page backtop="30mm" backbottom="20mm ">
+<?php $this->load->view('report/report_pdf_style'); ?>
+<page backtop="20mm" backbottom="20mm ">
     <page_header>
         <?php
         $this->load->view('report/report_header');
         ?>
-        <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center">
-
-            <tr>
-                <td height="23" align="center" class="style1">Reports of &nbsp; <?php echo $stagename[0]['stage_name']; ?> </td>
-            </tr>
-        </table>
+        
     </page_header>
     <page_footer>
         <?php
         $this->load->view('report/report_footer');
         ?>
     </page_footer>
+<table width="100%" border="0" cellspacing="0" cellpadding="4" align="center">
+
+            <tr>
+                <td height="23" align="center" class="report-pdf-title">Reports of &nbsp; <?php echo $stagename[0]['stage_name']; ?> </td>
+            </tr>
+        </table>
+
 
 
 
@@ -59,14 +62,15 @@
                 $dater = datetophpmodel($data['ddt']);
                 $count = 0;
                 ?>
-                <tr><td class="style2" colspan="6" style="border-bottom:1px #000000; border-right:1px #000000;" align="center">Item on &nbsp;<?php echo $dater; ?></td></tr>
+                <tr><td class="style2" colspan="7" width="685" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;" align="center">Item on &nbsp;<?php echo $dater; ?></td></tr>
                 <tr>
-                    <td class="style2" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">Sl.No. </td>
-                    <td class="style2" align="left"  style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">&nbsp;Item</td>
-                    <td class="style2" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"> No.of<br />Participants/Teams</td>
-                    <td class="style2" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"> Tentative Time </td>
-                    <td class="style2" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"> Start Time </td>
-                    <td class="style2" align="center" width="150" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;">Remarks </td>
+                    <td class="style2" width="30" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">Sl.No. </td>
+                    <td class="style2" width="197" align="left"  style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">&nbsp;Item</td>
+                    <td class="style2" width="163" align="left"  style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">&nbsp;Fest Name</td>
+                    <td class="style2" width="90" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"> No.of<br />Participants/Teams</td>
+                    <td class="style2" width="75" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"> Tentative Time </td>
+                    <td class="style2" width="65" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"> Start Time </td>
+                    <td class="style2" width="65" align="center" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;">Remarks </td>
                 </tr>
                 <?php
             }
@@ -74,12 +78,13 @@
             $count++;
             ?>
             <tr>
-                <td class="style3" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $count; ?></td>
-                <td class="style3" align="left" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo wordwrap($data['item_code'] . ' - ' . $data['item_name'] . ' (' . $data['fest_name'] . ')',35,'<br>'); ?></td>
-                <td class="style3" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $data['no_of_participant']; ?></td>
-                <td class="style3" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;" align="center"><?php echo $time; ?></td>
-                <td class="style3" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $data['dtm']; ?></td>
-                <td  class="style3"style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;">&nbsp;</td>
+                <td class="style3" width="30" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $count; ?></td>
+                <td class="style3" width="197" align="left" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">&nbsp;<?php echo $data['item_code'] . ' - ' . $data['item_name']; ?></td>
+                <td class="style3" width="163" align="left" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">&nbsp;<?php echo $data['fest_name']; ?></td>
+                <td class="style3" width="90" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $data['no_of_participant']; ?></td>
+                <td class="style3" width="75" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;" align="center"><?php echo $time; ?></td>
+                <td class="style3" width="65" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $data['dtm']; ?></td>
+                <td class="style3" width="65" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;">&nbsp;</td>
             </tr>
         <?php } ?>
 

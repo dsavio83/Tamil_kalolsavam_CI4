@@ -6,6 +6,11 @@
 $has_selected = (!empty($selected_user) && count($selected_user) > 0);
 $selected_user_id = $has_selected ? ($selected_user[0]['user_id'] ?? '') : '';
 $selected_username = $has_selected ? ($selected_user[0]['user_name'] ?? '') : '';
+$selected_user_type = $has_selected ? (int)($selected_user[0]['user_type'] ?? 3) : 3;
+$selected_stage_id = $has_selected ? (int)($selected_user[0]['assigned_stage_id'] ?? 0) : 0;
+$is_district = !empty($is_district) || ((int)session()->get('USER_TYPE') === 2);
+$admin_role_label = $is_district ? 'District User' : 'Sub-District Admin';
+$admin_roles_label = $is_district ? 'District Users' : 'Sub-District Admins';
 
 // Flatten assigned user rights IDs for clean lookup
 $assigned_rights_ids = [];
@@ -44,12 +49,19 @@ $category_icons = [
 $total_users = count($retvalue ?? []);
 $active_users = 0;
 $pending_pwd_users = 0;
+$stage_managers_count = 0;
+$subdist_admins_count = 0;
 if (!empty($retvalue)) {
     foreach ($retvalue as $u) {
         if (($u['is_change_password'] ?? '') === 'N') {
             $pending_pwd_users++;
         } else {
             $active_users++;
+        }
+        if ((int)($u['user_type'] ?? 0) === 6) {
+            $stage_managers_count++;
+        } else {
+            $subdist_admins_count++;
         }
     }
 }
@@ -195,6 +207,7 @@ if (!empty($retvalue)) {
 .stat-icon-indigo { background: #e0e7ff; color: #4338ca; }
 .stat-icon-emerald { background: #d1fae5; color: #047857; }
 .stat-icon-amber   { background: #fef3c7; color: #b45309; }
+.stat-icon-purple  { background: #f3e8ff; color: #7e22ce; }
 
 .stat-content-val {
   font-size: 1.45rem;
@@ -419,6 +432,11 @@ if (!empty($retvalue)) {
   flex-shrink: 0;
 }
 
+.user-avatar-circle.avatar-stage-manager {
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.25);
+}
+
 .user-name-text {
   font-weight: 600;
   color: #0f172a;
@@ -433,6 +451,46 @@ if (!empty($retvalue)) {
   font-size: 0.75rem;
   color: #64748b;
   margin-top: 2px;
+}
+
+.role-badge-subdist {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.role-badge-stagemgr {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #faf5ff;
+  color: #7e22ce;
+  border: 1px solid #e9d5ff;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.stage-tag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-top: 4px;
 }
 
 /* Rights Badge */
@@ -774,12 +832,12 @@ if (!empty($retvalue)) {
         <h1 class="module-title">
           <i class="bi bi-people-fill"></i> User Registration
         </h1>
-        <p class="module-subtitle">Manage Sub-District Admin accounts, login credentials, and authorized module permissions</p>
+        <p class="module-subtitle">Manage <?php echo $admin_role_label; ?> and Stage Manager accounts, assigned stages, login credentials, and module permissions</p>
       </div>
 
       <div class="nav-actions-group">
         <a href="javascript:void(0)" onclick="showUserForm('ADD');" class="btn-nav-action btn-primary-action">
-          <i class="bi bi-person-plus-fill"></i> Add Sub-District User
+          <i class="bi bi-person-plus-fill"></i> Add User
         </a>
         <a href="<?php echo base_url('user/user_cluster'); ?>" class="btn-nav-action btn-outline-action" title="Switch to Cluster Registration">
           <i class="bi bi-diagram-3-fill text-primary"></i> Cluster Registration
@@ -788,11 +846,11 @@ if (!empty($retvalue)) {
     </div>
   </div>
 
-  <!-- Summary Stats -->
+  <!-- Summary Stats Grid (4 Cards) -->
   <div class="stats-grid">
-    <div class="stat-item-card" onclick="filterByStatus('all');">
+    <div class="stat-item-card" onclick="filterByTab('all');">
       <div class="stat-icon-box stat-icon-indigo">
-        <i class="bi bi-person-lines-fill"></i>
+        <i class="bi bi-people-fill"></i>
       </div>
       <div>
         <div class="stat-content-val" id="totalUsersCount"><?php echo $total_users; ?></div>
@@ -800,17 +858,27 @@ if (!empty($retvalue)) {
       </div>
     </div>
 
-    <div class="stat-item-card" onclick="filterByStatus('active');">
-      <div class="stat-icon-box stat-icon-emerald">
-        <i class="bi bi-shield-check"></i>
+    <div class="stat-item-card" onclick="filterByTab('admin');">
+      <div class="stat-icon-box stat-icon-indigo">
+        <i class="bi bi-shield-lock-fill"></i>
       </div>
       <div>
-        <div class="stat-content-val"><?php echo $active_users; ?></div>
-        <div class="stat-content-lbl">Active Accounts</div>
+        <div class="stat-content-val"><?php echo $subdist_admins_count; ?></div>
+        <div class="stat-content-lbl"><?php echo $admin_roles_label; ?></div>
       </div>
     </div>
 
-    <div class="stat-item-card" onclick="filterByStatus('pending');">
+    <div class="stat-item-card" onclick="filterByTab('stagemgr');">
+      <div class="stat-icon-box stat-icon-purple">
+        <i class="bi bi-headset"></i>
+      </div>
+      <div>
+        <div class="stat-content-val text-purple"><?php echo $stage_managers_count; ?></div>
+        <div class="stat-content-lbl">Stage Managers</div>
+      </div>
+    </div>
+
+    <div class="stat-item-card" onclick="filterByTab('pending');">
       <div class="stat-icon-box stat-icon-amber">
         <i class="bi bi-key-fill"></i>
       </div>
@@ -830,9 +898,9 @@ if (!empty($retvalue)) {
         <div>
           <h2 class="form-title" id="formHeaderTitle">
             <i class="bi <?php echo $has_selected ? 'bi-pencil-square text-warning' : 'bi-person-plus text-primary'; ?>"></i>
-            <?php echo $has_selected ? ('Edit User: ' . esc($selected_username)) : 'Create Sub-District Admin User'; ?>
+            <?php echo $has_selected ? ('Edit User: ' . esc($selected_username)) : 'Create User'; ?>
           </h2>
-          <p class="text-muted small mb-0 mt-1">Configure account credentials and authorized functional permissions.</p>
+          <p class="text-muted small mb-0 mt-1">Configure account credentials, role assignment, and authorized module permissions.</p>
         </div>
 
         <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="showUsersList();">
@@ -840,7 +908,7 @@ if (!empty($retvalue)) {
         </button>
       </div>
 
-      <!-- User Basic Credentials -->
+      <!-- User Basic Credentials & Role Assignment -->
       <div class="row g-3 mb-4">
         <div class="col-12 col-md-6">
           <label class="custom-form-label" for="txtNewUserName">
@@ -849,7 +917,7 @@ if (!empty($retvalue)) {
           <div class="input-with-icon">
             <i class="bi bi-person input-icon"></i>
             <input type="text" name="txtNewUserName" id="txtNewUserName" class="custom-text-input" 
-                   placeholder="Enter username (e.g. subdist_user)" 
+                   placeholder="Enter username (e.g. subdist_user or stagemanager1)" 
                    value="<?php echo esc($selected_username); ?>" required />
           </div>
         </div>
@@ -867,67 +935,190 @@ if (!empty($retvalue)) {
             </button>
           </div>
         </div>
-      </div>
 
-      <!-- Permissions / User Rights Header -->
-      <div class="perm-controls-bar">
-        <div class="fw-bold text-primary d-flex align-items-center gap-2">
-          <i class="bi bi-shield-lock-fill"></i> User Rights & Module Permissions
+        <!-- Role Selector -->
+        <div class="col-12 col-md-6">
+          <label class="custom-form-label" for="selUserType">
+            User Role <span class="text-danger">*</span>
+          </label>
+          <div class="input-with-icon">
+            <i class="bi bi-shield-lock input-icon"></i>
+            <select name="selUserType" id="selUserType" class="custom-text-input form-select" onchange="handleRoleChange(this.value);" required>
+              <option value="3" <?php echo ($selected_user_type === 3) ? 'selected' : ''; ?>><?php echo $admin_role_label; ?></option>
+              <option value="6" <?php echo ($selected_user_type === 6) ? 'selected' : ''; ?>>Stage Manager</option>
+            </select>
+          </div>
+          <div class="form-text small text-muted">
+            <?php echo $admin_role_label; ?> manages portal data; Stage Manager operates live stage schedule and lot stepping.
+          </div>
         </div>
-        <div class="d-flex gap-2">
-          <button type="button" class="btn btn-sm btn-light border fw-semibold" onclick="toggleAllPermissions(true)">
-            <i class="bi bi-check-all text-success me-1"></i> Select All
-          </button>
-          <button type="button" class="btn btn-sm btn-light border fw-semibold" onclick="toggleAllPermissions(false)">
-            <i class="bi bi-x text-danger me-1"></i> Deselect All
-          </button>
-        </div>
-      </div>
 
-      <!-- Categorized Permissions Grid -->
-      <?php if (!empty($grouped_rights)) { ?>
-        <?php foreach ($grouped_rights as $cat_name => $items) { 
-          $cat_icon = $category_icons[$cat_name] ?? 'bi-folder2-open';
-          $cat_slug = preg_replace('/[^a-zA-Z0-9]/', '_', strtolower($cat_name));
-        ?>
-          <div class="permission-category-card">
-            <div class="permission-category-header">
-              <div class="category-title-wrap">
-                <i class="bi <?php echo $cat_icon; ?>"></i>
-                <span><?php echo esc($cat_name); ?></span>
-                <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2 py-1 small">
-                  <?php echo count($items); ?>
-                </span>
-              </div>
-              <div class="form-check m-0">
-                <input class="form-check-input category-master-check" type="checkbox" id="checkCat_<?php echo $cat_slug; ?>" 
-                       onchange="toggleCategoryGroup('<?php echo $cat_slug; ?>', this.checked)">
-                <label class="form-check-label small text-muted user-select-none" for="checkCat_<?php echo $cat_slug; ?>">
-                  Select All
-                </label>
-              </div>
-            </div>
-
-            <div class="permission-items-grid">
-              <?php foreach ($items as $ur) { 
-                $rf_id = (int)$ur['rf_id'];
-                $is_checked = in_array($rf_id, $assigned_rights_ids);
-              ?>
-                <label class="permission-check-item" for="chkRight_<?php echo $rf_id; ?>">
-                  <input type="checkbox" name="chkRight_<?php echo $rf_id; ?>" id="chkRight_<?php echo $rf_id; ?>" 
-                         class="perm-checkbox group-<?php echo $cat_slug; ?>" 
-                         value="<?php echo $rf_id; ?>" 
-                         <?php echo $is_checked ? 'checked' : ''; ?> 
-                         onchange="syncCategoryHeader('<?php echo $cat_slug; ?>');" />
-                  <span class="permission-check-label"><?php echo esc($ur['rf_functionality']); ?></span>
-                </label>
+        <!-- Stage Assignment (Dynamic for Stage Manager) -->
+        <div class="col-12 col-md-6" id="stageAssignmentWrapper" style="<?php echo ($selected_user_type === 6) ? 'display:block;' : 'display:none;'; ?>">
+          <label class="custom-form-label" for="selAssignedStage">
+            Assigned Festival Stage <span class="text-danger" id="stageReqAsterisk">*</span>
+          </label>
+          <div class="input-with-icon">
+            <i class="bi bi-soundwave input-icon"></i>
+            <select name="selAssignedStage" id="selAssignedStage" class="custom-text-input form-select">
+              <option value="">-- Select Festival Stage --</option>
+              <?php if (!empty($stages)) { ?>
+                <?php foreach ($stages as $stg) { 
+                  $is_stg_sel = ($selected_stage_id === (int)$stg['stage_id']);
+                ?>
+                  <option value="<?php echo $stg['stage_id']; ?>" <?php echo $is_stg_sel ? 'selected' : ''; ?>>
+                    <?php echo esc($stg['stage_name']) . (!empty($stg['stage_desc']) ? ' (' . esc($stg['stage_desc']) . ')' : ''); ?>
+                  </option>
+                <?php } ?>
               <?php } ?>
+            </select>
+          </div>
+          <div class="form-text small text-muted">
+            The assigned manager will conduct live programs and control participant lot sequencing on this stage.
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage Manager Workflow Notice -->
+      <div id="stageManagerInfoBox" class="alert alert-light border border-purple-subtle bg-purple bg-opacity-10 rounded-3 mb-4 p-3" style="<?php echo ($selected_user_type === 6) ? 'display:flex;' : 'display:none;'; ?> align-items:center; gap:12px;">
+        <i class="bi bi-info-circle-fill text-purple fs-4"></i>
+        <div class="small text-dark">
+          <strong>Stage Manager Onboarding Note:</strong> When created, Stage Managers start with initial password pending (<code>CHANGEPWD = 'N'</code>). Upon first login, they will change their password and will be directly routed to their dedicated <strong>Stage Manager Console</strong> (<code>stage/manager</code>).
+        </div>
+      </div>
+
+      <!-- Stage Manager Role Permissions (Exclusive & Strictly Scoped) -->
+      <div id="stageManagerPermissionsWrapper" style="<?php echo ($selected_user_type === 6) ? 'display:block;' : 'display:none;'; ?>">
+        <div class="perm-controls-bar border-purple-subtle bg-purple bg-opacity-10 mb-3 p-3 rounded-3">
+          <div>
+            <div class="fw-bold text-purple d-flex align-items-center gap-2">
+              <i class="bi bi-shield-lock-fill"></i> Stage Manager Permissions (Role Restricted)
+            </div>
+            <div class="small text-muted mt-1">
+              Stage Managers have strictly restricted scope. Standard created accounts have NO other module rights. Only Stage Management, Participant Viewing, and Mark Entry may be granted.
             </div>
           </div>
+        </div>
+
+        <div class="permission-category-card border-purple-subtle mb-3">
+          <div class="permission-category-header bg-purple bg-opacity-10">
+            <div class="category-title-wrap">
+              <i class="bi bi-person-check-fill text-purple"></i>
+              <span>Authorized Stage Manager Permissions</span>
+              <span class="badge bg-purple text-white rounded-pill px-2 py-1 small">3 Permitted</span>
+            </div>
+          </div>
+
+          <div class="permission-items-grid p-3">
+            <!-- 1. Stage Management -->
+            <label class="permission-check-item border rounded-3 p-3 d-flex align-items-start gap-2" for="chkSmRight_3">
+              <input type="checkbox" name="chkRight_3" id="chkSmRight_3" 
+                     class="perm-checkbox-sm form-check-input mt-1" 
+                     value="3" 
+                     <?php echo ($selected_user_type === 6 ? in_array(3, $assigned_rights_ids) : true) ? 'checked' : ''; ?> 
+                     <?php echo ($selected_user_type !== 6) ? 'disabled' : ''; ?> />
+              <div>
+                <span class="permission-check-label fw-bold d-block text-dark">Stage Management &amp; Console</span>
+                <span class="text-muted small">Access to Stage Manager Console (stage/manager), live program dispatch, lot stepping &amp; schedule delay tracking.</span>
+              </div>
+            </label>
+
+            <!-- 2. Participant View -->
+            <label class="permission-check-item border rounded-3 p-3 d-flex align-items-start gap-2" for="chkSmRight_29">
+              <input type="checkbox" name="chkRight_29" id="chkSmRight_29" 
+                     class="perm-checkbox-sm form-check-input mt-1" 
+                     value="29" 
+                     <?php echo in_array(29, $assigned_rights_ids) ? 'checked' : ''; ?> 
+                     <?php echo ($selected_user_type !== 6) ? 'disabled' : ''; ?> />
+              <div>
+                <span class="permission-check-label fw-bold d-block text-dark">View Participant Details (Confidential)</span>
+                <span class="text-muted small">Allows viewing student names, schools, and rosters. Leave unchecked unless explicitly authorized by Admin.</span>
+              </div>
+            </label>
+
+            <!-- 3. Result / Mark Entry -->
+            <label class="permission-check-item border rounded-3 p-3 d-flex align-items-start gap-2" for="chkSmRight_12">
+              <input type="checkbox" name="chkRight_12" id="chkSmRight_12" 
+                     class="perm-checkbox-sm form-check-input mt-1" 
+                     value="12" 
+                     <?php echo in_array(12, $assigned_rights_ids) ? 'checked' : ''; ?> 
+                     <?php echo ($selected_user_type !== 6) ? 'disabled' : ''; ?> />
+              <div>
+                <span class="permission-check-label fw-bold d-block text-dark">Result &amp; Mark Entry</span>
+                <span class="text-muted small">Allows entering judges' scores and competition marks directly from the stage console.</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="alert alert-warning py-2 px-3 rounded-12 small mb-4">
+          <i class="bi bi-shield-exclamation me-1"></i> <strong>Confidentiality Policy:</strong> In accordance with festival integrity rules, student identities are kept anonymous by default. Stage Managers have no access to School Registration, Reports, Certificates, or System Configuration.
+        </div>
+      </div>
+
+      <!-- Sub-District Admin Permissions (Hidden for Stage Manager) -->
+      <div id="adminPermissionsWrapper" style="<?php echo ($selected_user_type === 6) ? 'display:none;' : 'display:block;'; ?>">
+        <!-- Permissions / User Rights Header -->
+        <div class="perm-controls-bar">
+          <div class="fw-bold text-primary d-flex align-items-center gap-2">
+            <i class="bi bi-shield-lock-fill"></i> User Rights & Module Permissions
+          </div>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-light border fw-semibold" onclick="toggleAllPermissions(true)">
+              <i class="bi bi-check-all text-success me-1"></i> Select All
+            </button>
+            <button type="button" class="btn btn-sm btn-light border fw-semibold" onclick="toggleAllPermissions(false)">
+              <i class="bi bi-x text-danger me-1"></i> Deselect All
+            </button>
+          </div>
+        </div>
+
+        <!-- Categorized Permissions Grid -->
+        <?php if (!empty($grouped_rights)) { ?>
+          <?php foreach ($grouped_rights as $cat_name => $items) { 
+            $cat_icon = $category_icons[$cat_name] ?? 'bi-folder2-open';
+            $cat_slug = preg_replace('/[^a-zA-Z0-9]/', '_', strtolower($cat_name));
+          ?>
+            <div class="permission-category-card">
+              <div class="permission-category-header">
+                <div class="category-title-wrap">
+                  <i class="bi <?php echo $cat_icon; ?>"></i>
+                  <span><?php echo esc($cat_name); ?></span>
+                  <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2 py-1 small">
+                    <?php echo count($items); ?>
+                  </span>
+                </div>
+                <div class="form-check m-0">
+                  <input class="form-check-input category-master-check" type="checkbox" id="checkCat_<?php echo $cat_slug; ?>" 
+                         onchange="toggleCategoryGroup('<?php echo $cat_slug; ?>', this.checked)">
+                  <label class="form-check-label small text-muted user-select-none" for="checkCat_<?php echo $cat_slug; ?>">
+                    Select All
+                  </label>
+                </div>
+              </div>
+
+              <div class="permission-items-grid">
+                <?php foreach ($items as $ur) { 
+                  $rf_id = (int)$ur['rf_id'];
+                  $is_checked = in_array($rf_id, $assigned_rights_ids);
+                ?>
+                  <label class="permission-check-item" for="chkRight_<?php echo $rf_id; ?>">
+                    <input type="checkbox" name="chkRight_<?php echo $rf_id; ?>" id="chkRight_<?php echo $rf_id; ?>" 
+                           class="perm-checkbox group-<?php echo $cat_slug; ?>" 
+                           value="<?php echo $rf_id; ?>" 
+                           <?php echo $is_checked ? 'checked' : ''; ?> 
+                           <?php echo ($selected_user_type === 6) ? 'disabled' : ''; ?>
+                           onchange="syncCategoryHeader('<?php echo $cat_slug; ?>');" />
+                    <span class="permission-check-label"><?php echo esc($ur['rf_functionality']); ?></span>
+                  </label>
+                <?php } ?>
+              </div>
+            </div>
+          <?php } ?>
+        <?php } else { ?>
+          <div class="alert alert-info py-2 small">No customizable module permissions available.</div>
         <?php } ?>
-      <?php } else { ?>
-        <div class="alert alert-info py-2 small">No customizable module permissions available.</div>
-      <?php } ?>
+      </div>
 
       <!-- Form Action Buttons -->
       <div class="d-flex justify-content-center align-items-center gap-3 mt-4 pt-3 border-top flex-wrap">
@@ -944,7 +1135,7 @@ if (!empty($retvalue)) {
     </div>
   </div>
 
-  <!-- Users List Section (Existing Sub-District Admin Users Table) -->
+  <!-- Users List Section (Existing Sub-District Admin & Stage Manager Users Table) -->
   <div id="usersListSection" style="<?php echo $has_selected ? 'display:none;' : 'display:block;'; ?>">
     <div class="content-box-card">
       
@@ -952,30 +1143,33 @@ if (!empty($retvalue)) {
       <div class="content-box-header">
         <div class="header-title-box">
           <h3 class="header-title-text">
-            <i class="bi bi-table text-primary"></i> Existing Sub-District Admin Users
+            <i class="bi bi-table text-primary"></i> Registered Users & Stage Managers
           </h3>
           <span class="header-badge-count" id="displayedCountBadge">
             <?php echo $total_users; ?> Users
           </span>
         </div>
 
-        <!-- Quick Status Filter Tabs -->
+        <!-- Quick Status / Role Filter Tabs -->
         <div class="filter-tabs-bar">
-          <button type="button" class="filter-tab-btn active" id="tabAll" onclick="filterByStatus('all');">
+          <button type="button" class="filter-tab-btn active" id="tabAll" onclick="filterByTab('all');">
             All Users <span class="tab-count"><?php echo $total_users; ?></span>
           </button>
-          <button type="button" class="filter-tab-btn" id="tabActive" onclick="filterByStatus('active');">
-            Active <span class="tab-count"><?php echo $active_users; ?></span>
+          <button type="button" class="filter-tab-btn" id="tabAdmin" onclick="filterByTab('admin');">
+            <i class="bi bi-shield-lock-fill text-primary"></i> <?php echo $is_district ? 'District Users' : 'Admins'; ?> <span class="tab-count"><?php echo $subdist_admins_count; ?></span>
           </button>
-          <button type="button" class="filter-tab-btn" id="tabPending" onclick="filterByStatus('pending');">
-            Pending Password <span class="tab-count"><?php echo $pending_pwd_users; ?></span>
+          <button type="button" class="filter-tab-btn" id="tabStageMgr" onclick="filterByTab('stagemgr');">
+            <i class="bi bi-headset text-purple"></i> Stage Managers <span class="tab-count"><?php echo $stage_managers_count; ?></span>
+          </button>
+          <button type="button" class="filter-tab-btn" id="tabPending" onclick="filterByTab('pending');">
+            <i class="bi bi-key-fill text-amber"></i> Pending Password <span class="tab-count"><?php echo $pending_pwd_users; ?></span>
           </button>
         </div>
 
         <!-- Live Search Input -->
         <div class="search-input-wrap">
           <i class="bi bi-search search-icon"></i>
-          <input type="text" id="userSearchInput" placeholder="Search user name..." oninput="handleSearchInput();" />
+          <input type="text" id="userSearchInput" placeholder="Search user or stage name..." oninput="handleSearchInput();" />
           <button type="button" class="search-clear-btn" id="searchClearBtn" onclick="clearSearch();" title="Clear Search">
             <i class="bi bi-x-circle-fill"></i>
           </button>
@@ -987,12 +1181,13 @@ if (!empty($retvalue)) {
           <table class="modern-data-table" id="userTable">
             <thead>
               <tr>
-                <th width="7%" class="text-center">Sl.No</th>
-                <th width="38%">User Name / Account</th>
-                <th width="20%">Permissions</th>
-                <th width="20%">Account Status</th>
-                <th width="7.5%" class="text-center">Edit</th>
-                <th width="7.5%" class="text-center">Delete</th>
+                <th width="6%" class="text-center">Sl.No</th>
+                <th width="32%">User Name / Account</th>
+                <th width="26%">Role & Assignment</th>
+                <th width="14%">Permissions</th>
+                <th width="14%">Account Status</th>
+                <th width="4%" class="text-center">Edit</th>
+                <th width="4%" class="text-center">Delete</th>
               </tr>
             </thead>
             <tbody id="userTableBody">
@@ -1001,12 +1196,16 @@ if (!empty($retvalue)) {
               foreach ($retvalue as $val) { 
                 $uid = $val['user_id'];
                 $uname = $val['user_name'];
+                $utype = (int)($val['user_type'] ?? 3);
+                $is_stage_mgr = ($utype === 6);
+                $assigned_stg = $val['assigned_stage_name'] ?? '';
                 $is_pending_pwd = (($val['is_change_password'] ?? '') === 'N');
                 $status_key = $is_pending_pwd ? 'pending' : 'active';
+                $role_key = (string)$utype;
                 $initial = !empty($uname) ? strtoupper(substr($uname, 0, 2)) : 'US';
                 $rights_cnt = isset($val['rights_count']) ? (int)$val['rights_count'] : 0;
               ?>
-                <tr class="user-row-item" data-username="<?php echo strtolower(esc($uname)); ?>" data-status="<?php echo $status_key; ?>">
+                <tr class="user-row-item" data-username="<?php echo strtolower(esc($uname . ' ' . $assigned_stg)); ?>" data-status="<?php echo $status_key; ?>" data-role="<?php echo $role_key; ?>">
                   <td class="text-center">
                     <span class="badge bg-light text-secondary border px-2 py-1 rounded fw-bold">
                       <?php echo str_pad((string)$i, 2, '0', STR_PAD_LEFT); ?>
@@ -1014,19 +1213,42 @@ if (!empty($retvalue)) {
                   </td>
                   <td>
                     <div class="user-cell-wrap">
-                      <div class="user-avatar-circle"><?php echo esc($initial); ?></div>
+                      <div class="user-avatar-circle <?php echo $is_stage_mgr ? 'avatar-stage-manager' : ''; ?>"><?php echo esc($initial); ?></div>
                       <div>
                         <div class="user-name-text"><?php echo esc($uname); ?></div>
                         <div class="user-role-badge">
-                          <i class="bi bi-shield-check text-primary"></i> Sub-District Admin
+                          <?php if ($is_stage_mgr) { ?>
+                            <i class="bi bi-headset text-purple"></i> Stage Console User
+                          <?php } else { ?>
+                            <i class="bi bi-shield-check text-primary"></i> <?php echo $admin_role_label; ?>
+                          <?php } ?>
                         </div>
                       </div>
                     </div>
                   </td>
                   <td>
+                    <?php if ($is_stage_mgr) { ?>
+                      <div>
+                        <span class="role-badge-stagemgr">
+                          <i class="bi bi-headset"></i> Stage Manager
+                        </span>
+                      </div>
+                      <div class="stage-tag-badge">
+                        <i class="bi bi-soundwave text-primary"></i>
+                        <span>Stage: <strong><?php echo !empty($assigned_stg) ? esc($assigned_stg) : '<em class="text-warning">Unassigned</em>'; ?></strong></span>
+                      </div>
+                    <?php } else { ?>
+                      <div>
+                        <span class="role-badge-subdist">
+                          <i class="bi bi-shield-check"></i> <?php echo $admin_role_label; ?>
+                        </span>
+                      </div>
+                    <?php } ?>
+                  </td>
+                  <td>
                     <span class="rights-count-badge">
                       <i class="bi bi-key-fill"></i>
-                      <span><?php echo ($rights_cnt > 0) ? ($rights_cnt . ' Rights') : 'Custom Rights'; ?></span>
+                      <span><?php echo ($rights_cnt > 0) ? ($rights_cnt . ' Rights') : 'Default Rights'; ?></span>
                     </span>
                   </td>
                   <td>
@@ -1059,8 +1281,8 @@ if (!empty($retvalue)) {
         <!-- Dynamic No Search Results Box (Initially hidden) -->
         <div class="empty-records-box" id="noSearchResultsBox" style="display:none;">
           <div class="empty-records-icon"><i class="bi bi-search"></i></div>
-          <div class="empty-records-title">No Matching Sub-District Users Found</div>
-          <div class="empty-records-desc">Try adjusting your search keyword or selected filter status.</div>
+          <div class="empty-records-title">No Matching Users Found</div>
+          <div class="empty-records-desc">Try adjusting your search keyword or selected filter tab.</div>
           <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 mt-3" onclick="clearSearch();">
             <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Search Filter
           </button>
@@ -1079,8 +1301,8 @@ if (!empty($retvalue)) {
       <?php } else { ?>
         <div class="empty-records-box">
           <div class="empty-records-icon"><i class="bi bi-people"></i></div>
-          <div class="empty-records-title">No Sub-District Admin Users Found</div>
-          <div class="empty-records-desc">Click the "Add Sub-District User" button above to create a new user account.</div>
+          <div class="empty-records-title">No <?php echo $admin_role_label; ?> Users Found</div>
+          <div class="empty-records-desc">Click the "Add User" button above to create a new user account.</div>
         </div>
       <?php } ?>
     </div>
@@ -1098,7 +1320,45 @@ if (!empty($retvalue)) {
 </form>
 
 <script>
-var currentStatusFilter = 'all';
+var currentTabFilter = 'all';
+
+// Handle dynamic role change (Toggle Stage Assignment dropdown, Info Box, and Role-specific permissions)
+function handleRoleChange(roleVal) {
+  var role = parseInt(roleVal, 10);
+  var stageWrap = document.getElementById('stageAssignmentWrapper');
+  var infoBox = document.getElementById('stageManagerInfoBox');
+  var asterisk = document.getElementById('stageReqAsterisk');
+  var stageSelect = document.getElementById('selAssignedStage');
+  var adminPerms = document.getElementById('adminPermissionsWrapper');
+  var smPerms = document.getElementById('stageManagerPermissionsWrapper');
+
+  if (role === 6) {
+    if (stageWrap) stageWrap.style.display = 'block';
+    if (infoBox) infoBox.style.display = 'flex';
+    if (asterisk) asterisk.style.display = 'inline';
+    if (adminPerms) {
+      adminPerms.style.display = 'none';
+      adminPerms.querySelectorAll('input').forEach(function(el) { el.disabled = true; });
+    }
+    if (smPerms) {
+      smPerms.style.display = 'block';
+      smPerms.querySelectorAll('input').forEach(function(el) { el.disabled = false; });
+    }
+  } else {
+    if (stageWrap) stageWrap.style.display = 'none';
+    if (infoBox) infoBox.style.display = 'none';
+    if (asterisk) asterisk.style.display = 'none';
+    if (stageSelect) stageSelect.value = '';
+    if (smPerms) {
+      smPerms.style.display = 'none';
+      smPerms.querySelectorAll('input').forEach(function(el) { el.disabled = true; });
+    }
+    if (adminPerms) {
+      adminPerms.style.display = 'block';
+      adminPerms.querySelectorAll('input').forEach(function(el) { el.disabled = false; });
+    }
+  }
+}
 
 // Toggle Add/Edit Form vs List Section
 function showUserForm(mode) {
@@ -1107,7 +1367,18 @@ function showUserForm(mode) {
     document.getElementById('hidUserId').value = '';
     document.getElementById('txtNewUserName').value = '';
     document.getElementById('txtNewPassword').value = '';
-    document.getElementById('formHeaderTitle').innerHTML = '<i class="bi bi-person-plus text-primary"></i> Create Sub-District Admin User';
+    
+    var roleSelect = document.getElementById('selUserType');
+    if (roleSelect) {
+      roleSelect.value = '3';
+      handleRoleChange('3');
+    }
+    var stageSelect = document.getElementById('selAssignedStage');
+    if (stageSelect) {
+      stageSelect.value = '';
+    }
+
+    document.getElementById('formHeaderTitle').innerHTML = '<i class="bi bi-person-plus text-primary"></i> Create User';
     document.getElementById('btnSubmitUser').innerHTML = '<i class="bi bi-check-circle-fill"></i> Save User';
     toggleAllPermissions(false);
   }
@@ -1171,26 +1442,34 @@ function syncCategoryHeader(catSlug) {
   }
 }
 
-// Filter by Status (Tabs)
-function filterByStatus(statusKey) {
-  currentStatusFilter = statusKey;
+// Filter by Role / Status (Tabs)
+function filterByTab(tabKey) {
+  currentTabFilter = tabKey;
 
   // Update tab UI active states
   var tabs = document.querySelectorAll('.filter-tab-btn');
   tabs.forEach(function(tab) { tab.classList.remove('active'); });
 
-  if (statusKey === 'all') {
+  if (tabKey === 'all') {
     var el = document.getElementById('tabAll');
     if (el) el.classList.add('active');
-  } else if (statusKey === 'active') {
-    var el = document.getElementById('tabActive');
+  } else if (tabKey === 'admin') {
+    var el = document.getElementById('tabAdmin');
     if (el) el.classList.add('active');
-  } else if (statusKey === 'pending') {
+  } else if (tabKey === 'stagemgr') {
+    var el = document.getElementById('tabStageMgr');
+    if (el) el.classList.add('active');
+  } else if (tabKey === 'pending') {
     var el = document.getElementById('tabPending');
     if (el) el.classList.add('active');
   }
 
   applyCombinedFilter();
+}
+
+// Backward compatibility alias
+function filterByStatus(statusKey) {
+  filterByTab(statusKey);
 }
 
 // Live Search & Combined Filter Logic
@@ -1212,7 +1491,7 @@ function clearSearch() {
   if (clearBtn) {
     clearBtn.style.display = 'none';
   }
-  currentStatusFilter = 'all';
+  currentTabFilter = 'all';
   var tabs = document.querySelectorAll('.filter-tab-btn');
   tabs.forEach(function(tab) { tab.classList.remove('active'); });
   var tabAll = document.getElementById('tabAll');
@@ -1229,11 +1508,24 @@ function applyCombinedFilter() {
   rows.forEach(function(row) {
     var username = row.getAttribute('data-username') || '';
     var status = row.getAttribute('data-status') || '';
+    var role = row.getAttribute('data-role') || '';
 
     var matchesSearch = (username.indexOf(query) !== -1);
-    var matchesStatus = (currentStatusFilter === 'all' || status === currentStatusFilter);
+    var matchesTab = false;
 
-    if (matchesSearch && matchesStatus) {
+    if (currentTabFilter === 'all') {
+      matchesTab = true;
+    } else if (currentTabFilter === 'admin') {
+      matchesTab = (role === '3');
+    } else if (currentTabFilter === 'stagemgr') {
+      matchesTab = (role === '6');
+    } else if (currentTabFilter === 'pending') {
+      matchesTab = (status === 'pending');
+    } else if (currentTabFilter === 'active') {
+      matchesTab = (status === 'active');
+    }
+
+    if (matchesSearch && matchesTab) {
       row.style.display = '';
       visibleCount++;
     } else {
@@ -1274,7 +1566,7 @@ function triggerEditUser(userId) {
 function triggerDeleteUser(userId, userName) {
   Swal.fire({
     title: 'Delete User Confirmation',
-    html: 'Are you sure you want to delete user <b>' + userName + '</b>?<br><span class="text-danger small">This action cannot be undone.</span>',
+    html: 'Are you sure you want to delete user <b>' + userName + '</b>?<br><span class="text-danger small">This action cannot be undone and will remove stage assignments.</span>',
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#dc2626',
@@ -1291,12 +1583,19 @@ function triggerDeleteUser(userId, userName) {
 
 // Form Validation on Submit
 document.addEventListener('DOMContentLoaded', function() {
+  // Sync edit mode state if selected
+  var roleSelect = document.getElementById('selUserType');
+  if (roleSelect) {
+    handleRoleChange(roleSelect.value);
+  }
+
   var form = document.getElementById('formUser');
   if (form) {
     form.addEventListener('submit', function(e) {
       var username = document.getElementById('txtNewUserName').value.trim();
       var password = document.getElementById('txtNewPassword').value.trim();
       var isEdit = document.getElementById('hidUserId').value !== '';
+      var roleVal = parseInt(document.getElementById('selUserType').value, 10);
 
       if (!username) {
         e.preventDefault();

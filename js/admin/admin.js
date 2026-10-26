@@ -116,15 +116,19 @@ function fncSaveKalolsavam()
 }
 function fncListSubDistrictDetails(id)
 {
-    $('sel_district_id').value = id;
-    $('list_district').action = path + 'welcome/sub_district_details';
-    $('list_district').submit();
+    var sel = document.getElementById('sel_district_id');
+    if (sel) sel.value = id;
+    var form = document.getElementById('list_district');
+    if (form) {
+        form.action = path + 'welcome/sub_district_details';
+        form.submit();
+    }
 }
 function fncListClustertDetails(id)
 {
-    $('sel_sub_district_id').value = id;
-    $('list_district').action = path + 'welcome/cluster_details';
-    $('list_district').submit();
+    var basePath = (typeof path !== 'undefined') ? path : '';
+    if (basePath && !basePath.endsWith('/')) basePath += '/';
+    window.location.href = basePath + 'welcome/cluster_details?sel_sub_district_id=' + encodeURIComponent(id);
 }
 function fncSaveKalolsavamCSV()
 {
@@ -133,10 +137,13 @@ function fncSaveKalolsavamCSV()
 
 function nonclusterschool(subdist)
 {
-    $('hidClusterId').value = subdist;
-    $('clustschool').action = path + 'welcome/nonclustdetails';
-    $('clustschool').submit();
-
+    var hidClusterId = document.getElementById('hidClusterId');
+    var clustschool = document.getElementById('clustschool');
+    if (hidClusterId) hidClusterId.value = subdist;
+    if (clustschool) {
+        clustschool.action = path + 'welcome/nonclustdetails';
+        clustschool.submit();
+    }
 }
 function fncExportSubDistrictData()
 {
@@ -168,17 +175,22 @@ function printContentt(element_id)
     WindowObject.close();
 }
 function fncrestoreKalolsavamdatabase() {
-    var confirmed = $('i_confirm') && $('i_confirm').checked;
-    if (!confirmed) {
+    var fileInput = document.getElementById('kalolsavamdatabase');
+    if (!fileInput || !fileInput.value) {
+        alert('Please select a .sql database backup file to restore.');
+        return false;
+    }
+    var confirmBox = document.getElementById('i_confirm');
+    if (!confirmBox || !confirmBox.checked) {
         alert('Please tick the confirmation box before restoring the database.');
         return false;
     }
     // Append the server-side confirmation value required for restore.
-    var form = $('formKalolsavam');
+    var form = document.getElementById('formKalolsavam');
     if (!form) {
         return false;
     }
-    var inp = $('confirm_restore');
+    var inp = document.getElementById('confirm_restore');
     if (!inp) {
         inp = document.createElement('input');
         inp.type = 'hidden';
@@ -191,75 +203,102 @@ function fncrestoreKalolsavamdatabase() {
     }
     form.submit();
     return true;
-
 }
 
 function fnc_change_confirmation_status(schoolName, schoolCode, elementId) {
-    Swal.fire({
-        title: 'Reset Confirmation Status?',
-        text: "Do you really want to reset the confirmation status of " + schoolName + "?",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Yes, Reset',
-        cancelButtonText: 'Cancel'
-    }).then(function(result) {
-        if (result.isConfirmed) {
-            // Show loading state
-            Swal.fire({
-                title: 'Resetting...',
-                text: 'Please wait...',
-                allowOutsideClick: false,
-                didOpen: function() {
-                    Swal.showLoading();
-                }
-            });
-
-            new Ajax.Request(path + 'ajax/loadajax/change_confirmation_status', {
-                method: 'post',
-                parameters: {
-                    school_code: schoolCode
-                },
-                onSuccess: function(response) {
-                    var responseText = response.responseText.trim();
-                    if (responseText === 'No') {
-                        // Update the UI to show "No" (unconfirmed)
-                        var element = $(elementId);
-                        if (element) {
-                            element.innerHTML = 'No';
-                        }
-
-                        // Hide the reset button since it's now reset to "No"
-                        var resetBtn = $('reset_' + schoolCode);
-                        if (resetBtn) {
-                            resetBtn.style.display = 'none';
-                        }
-
-                        Swal.fire({
-                            title: 'Success!',
-                            text: 'Confirmation status has been reset successfully.',
-                            icon: 'success',
-                            confirmButtonColor: '#28a745'
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'Failed!',
-                            text: 'Failed to reset: ' + responseText,
-                            icon: 'error',
-                            confirmButtonColor: '#dc3545'
-                        });
+    var swalFn = (typeof Swal !== 'undefined') ? Swal : (typeof swal !== 'undefined' ? swal : null);
+    if (swalFn && swalFn.fire) {
+        swalFn.fire({
+            title: 'Reset Confirmation Status?',
+            text: "Do you really want to reset the confirmation status of " + schoolName + "?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Reset',
+            cancelButtonText: 'Cancel'
+        }).then(function(result) {
+            if (result.isConfirmed) {
+                swalFn.fire({
+                    title: 'Resetting...',
+                    text: 'Please wait...',
+                    allowOutsideClick: false,
+                    didOpen: function() {
+                        swalFn.showLoading();
                     }
-                },
-                onFailure: function(xhr) {
-                    Swal.fire({
-                        title: 'Error!',
-                        text: 'An error occurred during reset. Please try again.',
-                        icon: 'error',
-                        confirmButtonColor: '#dc3545'
-                    });
-                }
+                });
+                executeChangeConfirmation(schoolName, schoolCode, elementId, swalFn);
+            }
+        });
+    } else {
+        if (confirm("Do you really want to reset the confirmation status of " + schoolName + "?")) {
+            executeChangeConfirmation(schoolName, schoolCode, elementId, null);
+        }
+    }
+}
+
+function executeChangeConfirmation(schoolName, schoolCode, elementId, swalFn) {
+    var formData = new URLSearchParams();
+    formData.append('school_code', schoolCode);
+
+    fetch(path + 'ajax/loadajax/change_confirmation_status', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+    })
+    .then(function(res) { return res.text(); })
+    .then(function(responseText) {
+        var resp = responseText.trim();
+        if (resp === 'No') {
+            var element = document.getElementById(elementId);
+            if (element) {
+                element.innerHTML = 'No';
+            }
+            var resetBtn = document.getElementById('reset_' + schoolCode);
+            if (resetBtn) {
+                resetBtn.style.display = 'none';
+            }
+            var resetNonBtn = document.getElementById('reset_nonschool_' + schoolCode);
+            if (resetNonBtn) {
+                resetNonBtn.style.display = 'none';
+            }
+            if (swalFn && swalFn.fire) {
+                swalFn.fire({
+                    title: 'Success!',
+                    text: 'Confirmation status has been reset successfully.',
+                    icon: 'success',
+                    confirmButtonColor: '#28a745'
+                });
+            } else {
+                alert('Confirmation status has been reset successfully.');
+            }
+        } else {
+            if (swalFn && swalFn.fire) {
+                swalFn.fire({
+                    title: 'Failed!',
+                    text: 'Failed to reset: ' + resp,
+                    icon: 'error',
+                    confirmButtonColor: '#dc3545'
+                });
+            } else {
+                alert('Failed to reset: ' + resp);
+            }
+        }
+    })
+    .catch(function(err) {
+        console.error('Reset status error:', err);
+        if (swalFn && swalFn.fire) {
+            swalFn.fire({
+                title: 'Error!',
+                text: 'Network or server communication error.',
+                icon: 'error',
+                confirmButtonColor: '#dc3545'
             });
+        } else {
+            alert('Error communicating with server.');
         }
     });
 }

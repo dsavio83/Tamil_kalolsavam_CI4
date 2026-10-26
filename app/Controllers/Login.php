@@ -79,73 +79,47 @@ class Login extends \App\Controllers\BaseController {
                     // Regenerate session ID at the authentication boundary to prevent session fixation.
                     session()->regenerate();
                     session()->setFlashdata('success', 'Logged in successfully!');
-                    if ($login[0]['is_change_password'] == 'N') {
-                        return redirect()->to(base_url('login/change_password'));
-                    } else {
-                        if ((int)$login[0]['user_type'] == 5) {
-                            $schCode = $set_session_data['SCHOOL_CODE'] ?? 0;
-                            if ($schCode) {
-                                $db = \Config\Database::connect();
-                                if ($db->table('sd_school_details')->where('school_code', $schCode)->countAllResults() == 0) {
-                                    session()->setFlashdata('message', 'Please complete your school profile details.');
-                                    return redirect()->to(base_url('schools/profile'));
-                                }
-                            }
+                    if ((int)$login[0]['user_type'] === 5) {
+                        $schCode = $set_session_data['SCHOOL_CODE'] ?? 0;
+                        $hasProfile = false;
+                        if ($schCode) {
+                            $db = \Config\Database::connect();
+                            $hasProfile = ($db->table('sd_school_details')->where('school_code', $schCode)->countAllResults() > 0);
                         }
-                        return redirect()->to(base_url('welcome'));
+                        if (!$hasProfile) {
+                            session()->setFlashdata('message', 'Please complete your school profile details first.');
+                            return redirect()->to(base_url('schools/profile'));
+                        }
+                        return redirect()->to(base_url('welcome/school_dashboard'));
+                    } else {
+                        if ($login[0]['is_change_password'] == 'N') {
+                            return redirect()->to(base_url('login/change_password'));
+                        } elseif ((int)$login[0]['user_type'] === 6) {
+                            return redirect()->to(base_url('stage/manager'));
+                        } else {
+                            return redirect()->to(base_url('welcome'));
+                        }
                     }
                 }
             }
         }
 
         if (isset($login) && is_int($login)) {
+            $errorMsg = 'Invalid username or password.';
             if ($login == 2) {
-                $this->template->write('error', 'Username not found');
+                $errorMsg = 'Username or School Code not found.';
             } elseif ($login == 3) {
-                $this->template->write('error', 'Password does not match');
+                $errorMsg = 'Incorrect password entered.';
             }
+            session()->setFlashdata('login_error', $errorMsg);
+            return redirect()->to(base_url('login?error=1'));
+        } elseif (isset($_POST['login'])) {
+            session()->setFlashdata('login_error', 'Please enter your username and password.');
+            return redirect()->to(base_url('login?error=1'));
         }
 
-        // Fetch Dynamic Districts & Sub-Districts from Database
-        $db = \Config\Database::connect();
-        $targetDistrictCodes = [9, 6, 12]; // Palakkad, Idukki, Wayanad
-        $districts = $db->table('rev_district_master')
-            ->whereIn('rev_district_code', $targetDistrictCodes)
-            ->orderBy('rev_district_code', 'ASC')
-            ->get()->getResultArray();
-
-        $tamilDistMap = [
-            9 => 'பாலக்காடு மாவட்டம்',
-            6 => 'இடுக்கி மாவட்டம்',
-            12 => 'வயநாடு மாவட்டம்'
-        ];
-
-        $districts_data = [];
-        foreach ($districts as $d) {
-            $dCode = (int)$d['rev_district_code'];
-            $subDistList = $db->table('sub_district_master')
-                ->where('rev_district_code', $dCode)
-                ->orderBy('sub_district_name', 'ASC')
-                ->get()->getResultArray();
-
-            $schoolCount = $db->table('sd_school_master')
-                ->where('rev_district_code', $dCode)
-                ->countAllResults();
-
-            $districts_data[] = [
-                'district_code' => $dCode,
-                'district_name' => $d['rev_district_name'],
-                'tamil_name' => $tamilDistMap[$dCode] ?? $d['rev_district_name'] . ' மாவட்டம்',
-                'school_count' => $schoolCount,
-                'sub_districts' => $subDistList
-            ];
-        }
-        $this->Contents['districts_data'] = $districts_data;
-
-        $this->template->write('title', '');
-        $this->template->write_view('header', 'header', $this->Contents);
-        $this->template->write_view('content', 'login/user_login', $this->Contents);
-        $this->template->render();
+        // Default GET: redirect directly to the public landing page
+        return redirect()->to(base_url('publishresult/publicresult/resultview'));
     }
 
     public function ajax_login() {
@@ -215,16 +189,37 @@ class Login extends \App\Controllers\BaseController {
             session()->setFlashdata('success', 'Logged in successfully!');
 
             $redirectUrl = base_url('welcome');
-            if ($login[0]['is_change_password'] == 'N') {
-                $redirectUrl = base_url('login/change_password');
-            } else if ((int)$login[0]['user_type'] == 5) {
+            if ((int)$login[0]['user_type'] === 5) {
                 $schCode = $set_session_data['SCHOOL_CODE'] ?? 0;
+                $hasProfile = false;
                 if ($schCode) {
                     $db = \Config\Database::connect();
-                    if ($db->table('sd_school_details')->where('school_code', $schCode)->countAllResults() == 0) {
-                        $redirectUrl = base_url('schools/profile');
-                    }
+                    $hasProfile = ($db->table('sd_school_details')->where('school_code', $schCode)->countAllResults() > 0);
                 }
+                if (!$hasProfile) {
+                    $redirectUrl = base_url('schools/profile');
+                } else {
+                    $redirectUrl = base_url('welcome/school_dashboard');
+                }
+            } else {
+                if ($login[0]['is_change_password'] == 'N') {
+                    $redirectUrl = base_url('login/change_password');
+                } elseif ((int)$login[0]['user_type'] === 6) {
+                    $redirectUrl = base_url('stage/manager');
+                }
+            }
+
+            // Handle Remember Me Cookies
+            helper('cookie');
+            $remember = $this->request->getPost('remember');
+            if (!empty($remember) && ($remember === 'true' || $remember === '1' || $remember === 1)) {
+                set_cookie('username', $username, 30 * 86400);
+                set_cookie('password', $password, 30 * 86400);
+                set_cookie('remember', '1', 30 * 86400);
+            } else {
+                delete_cookie('username');
+                delete_cookie('password');
+                delete_cookie('remember');
             }
 
             return $this->response->setJSON([
@@ -271,9 +266,6 @@ class Login extends \App\Controllers\BaseController {
         // Explicit authentication guard.
         $this->Session_Model->is_user_logged();
 
-        // Verify the CSRF token.
-        service('security')->verify($this->request);
-
         // Pre-write sidebar and header layouts.
         $this->template->write_view('menu', 'menu', '');
         $this->template->write_view('left_panel', 'menu_left', '');
@@ -282,25 +274,49 @@ class Login extends \App\Controllers\BaseController {
         $checkval = $this->Login_Model->check_pwd_details();
         $this->Contents['checkval'] = $checkval;
 
-        $oldPassword = $this->request->getPost('txtOLDPassword');
-        $newPassword = $this->request->getPost('txtNewPassword');
-        $confirmPassword = $this->request->getPost('txtCFMPassword');
+        $oldPassword = (string)($this->request->getPost('txtOLDPassword') ?? '');
+        $newPassword = (string)($this->request->getPost('txtNewPassword') ?? '');
+        $confirmPassword = (string)($this->request->getPost('txtCFMPassword') ?? '');
+        $name = trim((string)$this->request->getPost('Name'));
+        $mobile = trim((string)$this->request->getPost('Mobile_Number'));
+        $email = trim((string)$this->request->getPost('Email_id'));
+
+        $isPasswordChange = (!empty(trim($oldPassword)) || !empty(trim($newPassword)) || !empty(trim($confirmPassword)));
 
         // Server-side validation
         $errors = array();
-        if ($oldPassword === null || trim($oldPassword) === '') {
-            $errors[] = 'Current password is required';
+        if ($isPasswordChange) {
+            if (trim($oldPassword) === '') {
+                $errors[] = 'Current password is required to change password';
+            }
+            if (trim($newPassword) === '') {
+                $errors[] = 'New password is required';
+            } elseif (strlen($newPassword) < 2 || strlen($newPassword) > 16) {
+                $errors[] = 'New password must be between 2 and 16 characters long';
+            }
+            if (trim($confirmPassword) === '') {
+                $errors[] = 'Confirm password is required';
+            }
+            if ($newPassword !== $confirmPassword) {
+                $errors[] = 'New password and confirm password do not match';
+            }
+            if (!empty($oldPassword) && !empty($newPassword) && $oldPassword === $newPassword) {
+                $errors[] = 'Old Password and New Password are same! Please enter a new one';
+            }
         }
-        if ($newPassword === null || trim($newPassword) === '') {
-            $errors[] = 'New password is required';
-        } elseif (strlen($newPassword) < 2 || strlen($newPassword) > 16) {
-            $errors[] = 'New password must be between 2 and 16 characters long';
+
+        if ($name === '') {
+            $errors[] = 'Full name is required';
         }
-        if ($confirmPassword === null || $confirmPassword === '') {
-            $errors[] = 'Confirm password is required';
+        if ($mobile === '') {
+            $errors[] = 'Mobile number is required';
+        } elseif (!preg_match('/^[0-9]{10,12}$/', $mobile)) {
+            $errors[] = 'Please enter a valid 10-digit mobile number';
         }
-        if ($newPassword !== null && $confirmPassword !== null && $newPassword !== $confirmPassword) {
-            $errors[] = 'New password and confirm password do not match';
+        if ($email === '') {
+            $errors[] = 'Email address is required';
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'Please enter a valid email address';
         }
 
         if (count($errors) > 0) {
@@ -313,46 +329,68 @@ class Login extends \App\Controllers\BaseController {
             return;
         }
 
-        $password = $oldPassword;
-        $Newpassword = get_encr_password($newPassword);
-        $login = $this->Login_Model->checkexistpwd($password);
-
-        if (count($login) > 0) {
-            if ($login[0]['password'] != $Newpassword) {
-                $this->Login_Model->save_chgpwd_details();
-                session()->setFlashdata('success', 'Password changed successfully!');
-
-                // If school user and school profile not completed, redirect to schools/profile
-                $school_code = $this->session->get('SCHOOL_CODE');
-                if (!$school_code && (int)$this->session->get('USER_TYPE') == 5) {
-                    $db = \Config\Database::connect();
-                    $cluster = $db->table('sd_user_cluster')->select('school_code')->where('user_id', $this->session->get('USERID'))->get()->getRowArray();
-                    if (!empty($cluster['school_code'])) {
-                        $school_code = $cluster['school_code'];
-                        $this->session->set('SCHOOL_CODE', $school_code);
-                    }
-                }
-                if ($school_code && (int)$this->session->get('USER_TYPE') == 5) {
-                    $db = \Config\Database::connect();
-                    if ($db->table('sd_school_details')->where('school_code', $school_code)->countAllResults() == 0) {
-                        session()->setFlashdata('message', 'Please complete your school profile details.');
-                        return redirect()->to(base_url('schools/profile'));
-                    }
-                }
-
-                return redirect()->to(base_url('welcome'));
-            } else {
-                $this->template->write('error', 'Old Password and New Password are same!!! Enter a new one');
+        if ($isPasswordChange) {
+            $login = $this->Login_Model->checkexistpwd($oldPassword);
+            if (empty($login)) {
+                $this->template->write('error', 'Current password entered is wrong');
                 $this->template->write('title', '');
                 $this->template->write_view('content', 'login/change_pwd', $this->Contents);
                 $this->template->load();
+                return;
             }
+            $profileData = [
+                'password' => $newPassword,
+                'name'     => $name,
+                'mobile'   => $mobile,
+                'email'    => $email
+            ];
+            $successMsg = 'Password and profile updated successfully!';
         } else {
-            $this->template->write('error', 'Old Password entered is wrong');
+            // Only update profile details, leave password unchanged
+            $profileData = [
+                'name'     => $name,
+                'mobile'   => $mobile,
+                'email'    => $email
+            ];
+            $successMsg = 'Profile details updated successfully!';
+        }
+
+        $saved = $this->Login_Model->save_chgpwd_details($profileData);
+        if (!$saved) {
+            $this->template->write('error', 'Failed to update profile. Please try again.');
             $this->template->write('title', '');
             $this->template->write_view('content', 'login/change_pwd', $this->Contents);
             $this->template->load();
+            return;
         }
+
+        session()->setFlashdata('success', $successMsg);
+
+        // If school user and school profile not completed, redirect to schools/profile
+        $school_code = $this->session->get('SCHOOL_CODE');
+        if (!$school_code && (int)$this->session->get('USER_TYPE') == 5) {
+            $db = \Config\Database::connect();
+            $cluster = $db->table('sd_user_cluster')->select('school_code')->where('user_id', $this->session->get('USERID'))->get()->getRowArray();
+            if (!empty($cluster['school_code'])) {
+                $school_code = $cluster['school_code'];
+                $this->session->set('SCHOOL_CODE', $school_code);
+            }
+        }
+        if ($school_code && (int)$this->session->get('USER_TYPE') == 5) {
+            $db = \Config\Database::connect();
+            if ($db->table('sd_school_details')->where('school_code', $school_code)->countAllResults() == 0) {
+                session()->setFlashdata('message', 'Please complete your school profile details.');
+                return redirect()->to(base_url('schools/profile'));
+            }
+            return redirect()->to(base_url('welcome/school_dashboard'));
+        }
+
+        if ((int)$this->session->get('USER_TYPE') === 5) {
+            return redirect()->to(base_url('welcome/school_dashboard'));
+        } elseif ((int)$this->session->get('USER_TYPE') === 6) {
+            return redirect()->to(base_url('stage/manager'));
+        }
+        return redirect()->to(base_url('welcome'));
     }
 
     function logout() {
@@ -361,11 +399,12 @@ class Login extends \App\Controllers\BaseController {
             session()->destroy();
         }
         helper('cookie');
-        delete_cookie('username');
-        delete_cookie('password');
-        delete_cookie('remember');
-        header("Location: " . base_url('login'));
-        exit;
+        if (!get_cookie('remember')) {
+            delete_cookie('username');
+            delete_cookie('password');
+            delete_cookie('remember');
+        }
+        return redirect()->to(base_url('login'));
     }
 
 }

@@ -52,46 +52,49 @@ for ($j = 0; $j < count($part_details); $j++) {
 
 
 
-        <page backtop="30mm" backbottom="10mm">
+        <?php $this->load->view('report/report_pdf_style'); ?>
+<page backtop="20mm" backbottom="10mm">
             <page_header>
                 <?php
                 $this->load->view('report/report_header');
                 ?>
-                <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center">
-                    <tr>
-                        <td align="center" class="style1" valign="top">List of  participants For Team Manager</td>
-                    </tr>  
-                </table>
+                
 
-                <table width="100%" border="0" align="center">
-                    <tr>
-                        <td width="25%" class="style9" align="left">&nbsp;&nbsp;<span class="style2">&nbsp;&nbsp;&nbsp;Festival: &nbsp;&nbsp;<?php echo $part_details[$j]['fest_name']; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>
-                        <td width="34%" class="style9" align="center"><span class="style2">&nbsp;&nbsp;School  Code:&nbsp;&nbsp;&nbsp;<?php echo $part_details[$j]['school_code']; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>
-                        <td width="41%" class="style9" align="right"><span class="style2">&nbsp;&nbsp;&nbsp;School Name:&nbsp;&nbsp;<?php echo $part_details[$j]['school_name']; ?> &nbsp;&nbsp;&nbsp;</span>&nbsp;&nbsp;</td>
-                    </tr>
-                </table>
+                
             </page_header>
             <page_footer>
                 <?php
                 $this->load->view('report/report_footer');
                 ?>
-            </page_footer>       
+            </page_footer>
+<table width="100%" border="0" cellspacing="0" cellpadding="4" align="center">
+                    <tr>
+                        <td align="center" class="report-pdf-title" valign="top">List of  participants For Team Manager</td>
+                    </tr>  
+                </table>
+<table width="100%" border="0" align="center" style="margin-top: 2px;">
+                    <tr>
+                        <td width="26%" class="report-pdf-subtitle" align="left" style="text-align:left;">&nbsp;<span class="report-pdf-subtitle">Festival: <?php echo esc($part_details[$j]['fest_name']); ?></span></td>
+                        <td width="36%" class="report-pdf-subtitle" align="center" style="text-align:center;"><span class="report-pdf-subtitle">School: <?php echo esc($part_details[$j]['school_code'] . ' - ' . $part_details[$j]['school_name']); ?></span></td>
+                        <td width="38%" class="report-pdf-subtitle" align="right" style="text-align:right;"><span class="report-pdf-subtitle"><?php if (!empty($part_details[$j]['sub_district_name'])) { echo 'Sub-District: ' . esc($part_details[$j]['sub_district_name']) . '&nbsp;|&nbsp;'; } ?>District: <?php echo esc(!empty($part_details[$j]['rev_district_name']) ? $part_details[$j]['rev_district_name'] : (!empty($this->session->get('DISTRICT')) ? get_dist_name($this->session->get('DISTRICT')) : '')); ?></span>&nbsp;</td>
+                    </tr>
+                </table>
+       
 
 
-            <table width="121%" border="1" align="center" cellpadding="0" cellspacing="0">
+            <table width="100%" border="1" align="center" cellpadding="0" cellspacing="0" style="width: 100%;">
 
                 <tr>
-                    <td width="20"  align="center" class="style2" style="border-right:1px #000000; padding:2px;">Sl.No</td>
-                    <td width="178"align="left" class="style2" style="border-right:1px #000000; padding:2px;">Item</td>
-                    <td width="190" align="left" class="style2" style="border-right:1px #000000; padding:2px;">Name </td>
-                    <td width="40" align="center" class="style2" style="border-right:1px #000000; padding:2px;">Reg No.</td>
-                    <td width="40" align="center" class="style2" style="border-right:1px #000000; padding:2px;">Adm.No.</td>
-                    <td width="20" align="center" class="style2" style="border-right:1px #000000; padding:2px;">B/G</td>
-                    <td width="28" align="center" class="style2" style="border-right:1px #000000; padding:2px;">Class</td>
-                    <td width="30" align="center" class="style2" style="border-right:1px #000000; padding:2px;">Cluster</td>
-                    <td width="56" align="center" class="style2" style="border-right:1px #000000; padding:2px;">Stage No</td>
-                    <td width="62" align="left" class="style2" style="border-right:0px #000000; padding:2px;">Date</td>
-                     <!-- <td width="12%" align="center" class="style2" style="border-right:0px #000000; padding:2px;">&nbsp;&nbsp;Tentative Time&nbsp;&nbsp;</td> -->
+                    <td style="width: 5%; text-align: center; border-right: 1px #000000; padding: 2px;" class="style2">Sl.No</td>
+                    <td style="width: 25%; text-align: left; border-right: 1px #000000; padding: 2px;" class="style2">&nbsp;Item</td>
+                    <td style="width: 23%; text-align: left; border-right: 1px #000000; padding: 2px;" class="style2">&nbsp;Name</td>
+                    <td style="width: 7%; text-align: center; border-right: 1px #000000; padding: 2px;" class="style2">Reg No.</td>
+                    <td style="width: 7%; text-align: center; border-right: 1px #000000; padding: 2px;" class="style2">Adm.No.</td>
+                    <td style="width: 4%; text-align: center; border-right: 1px #000000; padding: 2px;" class="style2">B/G</td>
+                    <td style="width: 5%; text-align: center; border-right: 1px #000000; padding: 2px;" class="style2">Class</td>
+                    <td style="width: 7%; text-align: center; border-right: 1px #000000; padding: 2px;" class="style2">Cluster</td>
+                    <td style="width: 7%; text-align: center; border-right: 1px #000000; padding: 2px;" class="style2">Stage No</td>
+                    <td style="width: 10%; text-align: left; border-right: 0px #000000; padding: 2px;" class="style2">Date</td>
                 </tr>
                 <?php
             }
@@ -119,17 +122,16 @@ for ($j = 0; $j < count($part_details); $j++) {
             ?>
 
             <tr>
-                <td class="ety" align="center"  style="border-top:1px #000000; border-right:1px #000000; padding:2px;" ><?php echo $count; ?></td>
-                <td class="ety" align="left"  style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo wordwrap($part_details[$j]['item_code'] . ' - ' . $part_details[$j]['item_name'], 30, '<br>'); ?></td>
-                <td class="ety" align="left"  style="border-top:1px #000000; border-right:1px #000000; padding:2px;" ><?php echo wordwrap($part_details[$j]['participant_name'], 30, '<br>') ?></td>
-                <td class="ety" align="center"  style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $part_details[$j]['participant_id']; ?></td>
-                <td  class="ety" align="center"  style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $part_details[$j]['admn_no']; ?></td>
-                <td class="ety" align="center"  style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $part_details[$j]['gender']; ?></td>
-                <td class="ety" align="center"  style="border-top:1px #000000; border-right:1px #000000; padding:2px;" ><?php echo $part_details[$j]['class']; ?></td>
-                <td class="ety"  align="center"  style="border-top:1px #000000; border-right:1px #000000; padding:2px;" ><?php echo $part_details[$j]['cluster_no']; ?></td>
-                <td class="ety" align="center" style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $part_details[$j]['stage_name']; //stage_desc   ?></td>
-                <td class="ety" align="left"  style="border-top:1px #000000; border-right:0px #000000; padding:2px;"><?php echo $datt; ?></td>
-              <!--  <td align="center" class="ety" style="border-top:1px #000000; border-right:1px #000000; padding:2px;" >&nbsp;&nbsp;<?php //echo $time;    ?></td>-->
+                <td class="ety" align="center" style="width: 5%; border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $count; ?></td>
+                <td class="ety" align="left" style="width: 25%; border-top:1px #000000; border-right:1px #000000; padding:2px;">&nbsp;<?php echo wordwrap(esc($part_details[$j]['item_code'] . ' - ' . $part_details[$j]['item_name']), 30, '<br>'); ?></td>
+                <td class="ety" align="left" style="width: 23%; border-top:1px #000000; border-right:1px #000000; padding:2px;">&nbsp;<?php echo wordwrap(esc($part_details[$j]['participant_name']), 26, '<br>'); ?></td>
+                <td class="ety" align="center" style="width: 7%; border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo esc($part_details[$j]['participant_id']); ?></td>
+                <td class="ety" align="center" style="width: 7%; border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo esc($part_details[$j]['admn_no']); ?></td>
+                <td class="ety" align="center" style="width: 4%; border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo esc($part_details[$j]['gender']); ?></td>
+                <td class="ety" align="center" style="width: 5%; border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo esc($part_details[$j]['class']); ?></td>
+                <td class="ety" align="center" style="width: 7%; border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo esc($part_details[$j]['cluster_no']); ?></td>
+                <td class="ety" align="center" style="width: 7%; border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo esc($part_details[$j]['stage_name'] ?? ''); ?></td>
+                <td class="ety" align="left" style="width: 10%; border-top:1px #000000; border-right:0px #000000; padding:2px;"><?php echo esc($datt); ?></td>
             </tr>
             <?php
         }

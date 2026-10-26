@@ -373,11 +373,9 @@
         <p>Manage District Tamil Kalolsavam Venue, Dates & Information</p>
       </div>
       <div>
-        <?php if (!empty($kalolsavam_details) && $kalolsavam_details[0]['status'] == 'O') { ?>
-          <button type="button" id="btnOpenEdit" class="btn btn-light rounded-pill px-4 py-2 fw-semibold text-primary shadow-sm" onclick="showFormCard();">
-            <i class="bi bi-pencil-square me-1"></i> Edit Details
-          </button>
-        <?php } ?>
+        <button type="button" onclick="window.print()" class="btn btn-light rounded-pill px-3 py-2 fw-semibold text-secondary shadow-sm">
+          <i class="bi bi-printer me-1"></i> Print
+        </button>
       </div>
     </div>
   </div>
@@ -396,6 +394,7 @@
 
     <div class="form-card-body">
       <form id="formKalolsavam" method="post" enctype="multipart/form-data" action="<?php echo base_url('admin/kalolsavam/update_kalolsavam'); ?>">
+        <?= csrf_field(); ?>
         <input type="hidden" name="kalolsavam_id" id="kalolsavam_id" value="<?php echo esc((string)(@$selected_kalolsavam[0]['dist_kalolsavam_id'] ?? ($kalolsavam_details[0]['dist_kalolsavam_id'] ?? ($kalolsavam_id ?? '')))); ?>" />
         
         <div class="row g-4">
@@ -558,6 +557,7 @@
 
 <!-- Hidden Form for Legacy Post Submissions -->
 <form id="list_formKalolsavam" method="post" action="<?php echo base_url('admin/kalolsavam/edit_kalolsavam'); ?>" style="display:none;">
+  <?= csrf_field(); ?>
   <input type="hidden" name="sel_kalolsavam_id" id="sel_kalolsavam_id" value="" />
 </form>
 
@@ -684,16 +684,15 @@ function fncEditKalolsavam(id) {
     didOpen: function() { Swal.showLoading(); }
   });
 
-  var formData = new FormData();
-  formData.append('kalolsavam_id', id);
-
-  fetch('<?php echo base_url("admin/kalolsavam/get_kalolsavam_ajax"); ?>', {
-    method: 'POST',
-    body: formData
+  fetch('<?php echo base_url("admin/kalolsavam/get_kalolsavam_ajax"); ?>?kalolsavam_id=' + encodeURIComponent(id), {
+    method: 'GET'
   })
   .then(function(res) { return res.json(); })
   .then(function(json) {
     Swal.close();
+    if (json.csrf_hash && window.updateCsrfToken) {
+      window.updateCsrfToken(json.csrf_hash);
+    }
     if (json.success && json.data) {
       var d = json.data;
       document.getElementById('kalolsavam_id').value = d.dist_kalolsavam_id || '';
@@ -733,8 +732,9 @@ function fncEditKalolsavam(id) {
       document.getElementById('list_formKalolsavam').submit();
     }
   })
-  .catch(function() {
+  .catch(function(err) {
     Swal.close();
+    console.error('Fetch error:', err);
     document.getElementById('sel_kalolsavam_id').value = id;
     document.getElementById('list_formKalolsavam').submit();
   });
@@ -759,20 +759,35 @@ function submitDistKalolsavamAjax() {
   }
 
   var submitBtn = document.getElementById('btnSubmitKalolsavam');
+  var originalHtml = submitBtn.innerHTML;
   submitBtn.disabled = true;
   submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Saving...';
 
   var formEl = document.getElementById('formKalolsavam');
   var formData = new FormData(formEl);
 
+  // Ensure CSRF token is in formData
+  if (window.getCsrfToken && !formData.get('csrf_test_name')) {
+    var tok = window.getCsrfToken();
+    if (tok) formData.append('csrf_test_name', tok);
+  }
+
   fetch('<?php echo base_url("admin/kalolsavam/save_kalolsavam_ajax"); ?>', {
     method: 'POST',
     body: formData
   })
-  .then(function(res) { return res.json(); })
+  .then(function(res) {
+    return res.json().catch(function() {
+      throw new Error('Server response error (HTTP ' + res.status + ')');
+    });
+  })
   .then(function(data) {
     submitBtn.disabled = false;
-    submitBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Save Changes';
+    submitBtn.innerHTML = originalHtml;
+
+    if (data.csrf_hash && window.updateCsrfToken) {
+      window.updateCsrfToken(data.csrf_hash);
+    }
 
     if (data.success) {
       hideFormCard();
@@ -788,8 +803,10 @@ function submitDistKalolsavamAjax() {
       Swal.fire('Error', data.message || 'Failed to save details.', 'error');
     }
   })
-  .catch(function() {
+  .catch(function(err) {
     submitBtn.disabled = false;
+    submitBtn.innerHTML = originalHtml;
+    console.error('Save error:', err);
     formEl.submit();
   });
 }

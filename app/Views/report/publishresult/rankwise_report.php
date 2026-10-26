@@ -17,6 +17,8 @@
         color: #000000;
     }
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 <style>
     @media print
     {
@@ -58,7 +60,7 @@ foreach ($rankwise as $value) {
 
                 <table width="77%" border="0" cellspacing="0" cellpadding="0" align="center" >
                     <tr>
-                        <td height="30" align="center" class="style1">Rank  Wise Participants Details&nbsp;
+                        <td height="30" align="center" class="report-pdf-title">Rank  Wise Participants Details&nbsp;
                             <?php echo $value['fest_name']; ?> </td>
                     </tr>
                 </table>
@@ -142,7 +144,12 @@ foreach ($rankwise as $value) {
                         <td width="42" class="style3" align="center"  style=" border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $value['rank']; ?></td>
                     <?php } ?>
                     <td width="150" class="style3" align="left" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">&nbsp;<?php echo wordwrap($value['participant_name'], 25, '<br>'); ?></td>
-                    <td width="208" class="style3" align="left" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">&nbsp;&nbsp;<?php echo wordwrap($value['school_code'] . ' - ' . $value['school_name'], 50, '<br>'); ?></td>
+                    <td width="208" class="style3" align="left" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">
+                        &nbsp;&nbsp;<?php echo wordwrap($value['school_code'] . ' - ' . $value['school_name'], 50, '<br>'); ?>
+                        <?php if (!empty($value['sub_district_name'])) { ?>
+                            <br>&nbsp;&nbsp;<small style="color:#555;">(<?php echo esc($value['sub_district_name']); ?>)</small>
+                        <?php } ?>
+                    </td>
 
 
                     <td width="36" class="style3" align="center" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $value['grade']; ?></td>

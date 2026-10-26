@@ -14,6 +14,8 @@
 	$session_code = trim((string)(session()->get('SCHOOL_CODE') ?? ''));
 	$active_code = (!empty($school_details[0]['school_code'])) ? $school_details[0]['school_code'] : ($session_code !== '0' ? $session_code : (service('request')->getPost('hidSchoolId') ?: ''));
 	$total_participants_count = !empty($participant_details) ? count($participant_details) : 0;
+	$is_finalized = (!empty($school_details[0]['is_finalize']) && $school_details[0]['is_finalize'] === 'Y');
+	$can_edit = (!$is_finalized && (!isset($is_edit) || $is_edit !== 'no'));
 	?>
 
 	<!-- Modern Top Bar & Right-aligned Action Buttons -->
@@ -26,11 +28,13 @@
 							<i class="bi bi-people-fill fs-4"></i>
 						</div>
 						<div>
-							<h4 class="fw-bold mb-1 text-dark d-flex align-items-center gap-2">
+							<h4 class="fw-bold mb-1 text-dark">
 								School Entry & Registrations
-								<span class="badge bg-primary rounded-pill fs-7 px-2 py-1"><?php echo $total_participants_count; ?> Students</span>
 							</h4>
-							<div class="d-flex align-items-center gap-2 text-muted small">
+							<div class="mb-1">
+								<span class="badge bg-primary rounded-pill fs-7 px-2 py-1"><?php echo $total_participants_count; ?> Students</span>
+							</div>
+							<div class="d-flex align-items-center gap-2 text-muted small flex-wrap">
 								<a href="<?php echo base_url(); ?>welcome" class="text-decoration-none text-muted"><i class="bi bi-house-door me-1"></i>Home</a>
 								<span>/</span>
 								<span class="text-primary fw-medium">School Entry</span>
@@ -42,10 +46,14 @@
 					</div>
 				</div>
 				<div class="col-md-6 col-12 text-md-end">
-					<div class="d-flex flex-wrap gap-2 justify-content-md-end align-items-center">
+					<div class="d-flex flex-nowrap top-action-buttons-container gap-2 justify-content-md-end align-items-center w-100">
+						<?php
+						$is_saved = !empty($is_school_details_saved);
+						$show_school_details_initial = empty($active_code) || !$is_saved || !empty($initial_show_school_details);
+						?>
 						<?php if (!empty($is_admin)): ?>
-							<button type="button" class="btn btn-outline-primary shadow-sm rounded-3 px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2" id="schoolDetailsToggleBtn" onclick="toggleSchoolDetailsSection()">
-								<i class="bi bi-building"></i> <span id="schoolDetailsToggleBtnText"><?php echo (empty($active_code) && !empty($initial_show_school_details)) ? 'Hide School Details' : 'School Details'; ?></span>
+							<button type="button" class="btn btn-outline-primary shadow-sm rounded-3 px-2 px-sm-3 py-2 fw-semibold d-inline-flex align-items-center justify-content-center gap-1 gap-sm-2 flex-fill flex-md-grow-0 text-nowrap" id="schoolDetailsToggleBtn" onclick="toggleSchoolDetailsSection()">
+								<i class="bi bi-building"></i> <span id="schoolDetailsToggleBtnText"><?php echo $show_school_details_initial ? 'Hide School Details' : 'School Details'; ?></span>
 							</button>
 						<?php endif; ?>
 
@@ -63,13 +71,17 @@
 						?>
 
 						<?php if ($can_show_add_participant): ?>
-							<?php if ((!isset($is_edit) || $is_edit != 'no') && (!isset($school_details[0]['is_finalize']) || $school_details[0]['is_finalize'] != 'Y')): ?>
-								<button type="button" class="btn btn-success shadow-sm rounded-3 px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2" data-bs-toggle="modal"
-									data-bs-target="#participantModal" onclick="clearForm()" id="addParticipantBtn">
+							<?php if ($can_edit): ?>
+								<?php
+								// Requirement: If school details are not saved OR if school details section is open, hide Add Participant button
+								$add_btn_display = ($is_saved && !$show_school_details_initial) ? 'inline-flex' : 'none';
+								?>
+								<button type="button" class="btn btn-success shadow-sm rounded-3 px-2 px-sm-3 py-2 fw-semibold align-items-center justify-content-center gap-1 gap-sm-2 flex-fill flex-md-grow-0 text-nowrap" data-bs-toggle="modal"
+									data-bs-target="#participantModal" onclick="clearForm()" id="addParticipantBtn" style="display: <?php echo $add_btn_display; ?> !important;">
 									<i class="bi bi-person-plus-fill fs-6"></i> Add Participant
 								</button>
 							<?php else: ?>
-								<span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill fs-7 fw-semibold d-inline-flex align-items-center gap-1 shadow-2xs">
+								<span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill fs-7 fw-semibold d-inline-flex align-items-center justify-content-center gap-1 shadow-2xs flex-fill flex-md-grow-0 text-nowrap">
 									<i class="bi bi-lock-fill"></i> Registration Finalized & Locked
 								</span>
 							<?php endif; ?>
@@ -82,24 +94,34 @@
 
 	<!-- School Details Section (Only for Admins: IT Master, State Admin, District Admin, Sub District Admin) -->
 	<?php if (!empty($is_admin)): ?>
-	<?php
-	$show_school_details_initial = empty($active_code) && !empty($initial_show_school_details);
-	?>
 	<div class="row justify-content-center mb-4" id="schoolDetailsSection" style="display: <?php echo $show_school_details_initial ? 'block' : 'none'; ?>;">
 		<div class="col-12">
 			<div class="card shadow-sm border-0 rounded-4 overflow-hidden" style="border: 1px solid #e2e8f0 !important;">
 				
 				<div class="card-header bg-white py-3 px-4 d-flex flex-wrap align-items-center justify-content-between gap-2" style="background: linear-gradient(135deg, #f8fafc, #ffffff) !important; border-bottom: 1px solid #edf2f7 !important;">
-					<div class="d-flex align-items-center gap-2">
-						<i class="bi bi-mortarboard-fill text-primary fs-5"></i>
-						<h5 class="fw-bold mb-0 text-dark">School Details & Institutional Profile</h5>
+					<div>
+						<div class="d-flex align-items-center gap-2 mb-1">
+							<i class="bi bi-mortarboard-fill text-primary fs-5"></i>
+							<h5 class="fw-bold mb-0 text-dark">School Details & Institutional Profile</h5>
+						</div>
+						<?php if (!empty($active_code)): ?>
+							<div class="d-flex align-items-center gap-2 flex-wrap">
+								<span class="badge bg-primary px-3 py-1 fs-7 rounded-pill">
+									<i class="bi bi-hash me-1"></i>School Code: <?php echo esc($active_code); ?>
+								</span>
+								<?php if ($is_saved): ?>
+									<span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fs-8 rounded-pill">
+										<i class="bi bi-check2-circle me-1"></i>Details Saved
+									</span>
+								<?php else: ?>
+									<span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1 fs-8 rounded-pill">
+										<i class="bi bi-exclamation-triangle-fill me-1"></i>Details Incomplete / Not Saved
+									</span>
+								<?php endif; ?>
+							</div>
+						<?php endif; ?>
 					</div>
 					<div class="d-flex align-items-center gap-2">
-						<?php if (!empty($active_code)): ?>
-							<span class="badge bg-primary px-3 py-2 fs-7 rounded-pill">
-								<i class="bi bi-hash me-1"></i>School Code: <?php echo esc($active_code); ?>
-							</span>
-						<?php endif; ?>
 						<button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="hideSchoolDetailsSection()">
 							<i class="bi bi-chevron-up me-1"></i> Collapse
 						</button>
@@ -107,6 +129,15 @@
 				</div>
 
 				<div class="card-body p-4">
+					<?php if (!empty($active_code) && !$is_saved): ?>
+						<div class="alert alert-warning border-0 shadow-sm rounded-3 d-flex align-items-center gap-3 mb-4 p-3" style="background: #fffbeb; border-left: 4px solid #f59e0b !important;">
+							<i class="bi bi-exclamation-triangle-fill fs-3 text-warning flex-shrink-0"></i>
+							<div>
+								<div class="fw-bold text-dark mb-1">School Details Incomplete</div>
+								
+							</div>
+						</div>
+					<?php endif; ?>
 					<?php echo form_open('schools/registration/update', array('id' => 'formSchool')); ?>
 					<input type="hidden" name="hidTeachers" id="hidTeachers" value="<?php echo (!empty($school_details[0]['teachers'])) ? count(array_filter(explode('#@#', $school_details[0]['teachers']))) : 1; ?>">
 					<input type="hidden" name="hidSchoolId" id="formSchoolHidSchoolId" value="<?php echo esc($active_code); ?>">
@@ -346,8 +377,10 @@ echo form_open('schools/registration/save_participant', array('id' => 'formParti
 ?>
 <input type="hidden" name="hidSchoolId" id="hidSchoolId" value="<?php echo esc($active_code); ?>">
 <input type="hidden" name="hidADNO" id="hidADNO" value="">
+<input type="hidden" name="hidHSSNo" id="hidHSSNo" value="<?php echo esc(@$school_details[0]['strength_hss'] ?? 0); ?>">
+<input type="hidden" name="hidVHSSNo" id="hidVHSSNo" value="<?php echo esc(@$school_details[0]['strength_vhss'] ?? 0); ?>">
 <?php
-if (isset($is_edit) and $is_edit != 'no') {
+if ($can_edit) {
 	?>
 
 	<!-- Participant Modal -->
@@ -362,7 +395,7 @@ if (isset($is_edit) and $is_edit != 'no') {
 				</div>
 				<div class="modal-body" style="overflow-y: auto !important; max-height: 80vh;">
 					<!-- Two Column Layout: Left (col-8) for inputs, Right (col-4) for class-based items -->
-					<div class="row">
+					<div class="row align-items-stretch">
 						<!-- Left Column: Participant Details (col-md-8) -->
 						<div class="col-md-8">
 							<div class="card border-0">
@@ -376,8 +409,11 @@ if (isset($is_edit) and $is_edit != 'no') {
 											<?php echo form_input(
 												"txtADNO",
 												'',
-												'class="form-control" id="txtADNO" maxlength="6" placeholder="Enter admission number" onkeyup="javascript:this.value=this.value.toUpperCase();"'
+												'class="form-control" id="txtADNO" maxlength="10" placeholder="Enter admission number" onkeyup="javascript:this.value=this.value.toUpperCase();"'
 											); ?>
+											<div id="adnoHelpText" class="form-text mt-1" style="display: none; font-size: 0.75rem; color: #4f46e5;">
+												<i class="bi bi-info-circle me-1"></i>HSS: Prefix <b>H</b> (e.g. <b>H1234</b>) | Vocational: Prefix <b>V</b> (e.g. <b>V1234</b>)
+											</div>
 										</div>
 										<div class="col-md-6 mb-2">
 											<label for="txtParticipantName" class="form-label fw-bold text-muted small text-uppercase">Name <span class="text-danger">*</span></label>
@@ -426,9 +462,9 @@ if (isset($is_edit) and $is_edit != 'no') {
 												<?php
 												for ($i = 1; $i <= 5; $i++) {
 													echo '<div class="col-4 mb-2">';
-													echo '<div class="position-relative">';
-													echo form_input("txtItemCode_" . $i, '', 'class="form-control item-code-input text-center fw-bold pe-4" id="txtItemCode_' . $i . '" onkeypress="javascript:return numbersonly(this, event, false);" onKeyUp="javascript:change_text_max_to_focus(\'txtItemCode_' . $i . '\',\'txtItemCode_' . ($i + 1) . '\',this); checkItemTypeIcon(' . $i . ');" oninput="checkItemTypeIcon(' . $i . ');" onchange="validateItemCodeFinal(' . $i . ', false);" onblur="validateItemCodeFinal(' . $i . ', false);" maxlength="4" placeholder="Item ' . $i . '"');
-													echo '<span id="itemTypeIcon_' . $i . '" class="position-absolute top-50 end-0 translate-middle-y me-2 d-flex align-items-center" style="display: none; pointer-events: none; z-index: 5;"></span>';
+													echo '<div class="item-code-wrapper position-relative" style="position: relative !important;">';
+													echo form_input("txtItemCode_" . $i, '', 'class="form-control item-code-input text-center fw-bold" style="padding-right: 28px !important; padding-left: 10px !important;" id="txtItemCode_' . $i . '" onkeypress="javascript:return numbersonly(this, event, false);" onfocus="this.dataset.previousVal = this.value.trim();" onKeyUp="javascript:change_text_max_to_focus(\'txtItemCode_' . $i . '\',\'txtItemCode_' . ($i + 1) . '\',this); checkItemTypeIcon(' . $i . ');" oninput="checkItemTypeIcon(' . $i . ');" onchange="validateItemCodeFinal(' . $i . ', false);" onblur="validateItemCodeFinal(' . $i . ', false);" maxlength="4" placeholder="Item ' . $i . '"');
+													echo '<span id="itemTypeIcon_' . $i . '" class="item-type-icon" style="display: none; position: absolute; top: 50%; right: 8px; transform: translateY(-50%); -webkit-transform: translateY(-50%); pointer-events: none; z-index: 5;"></span>';
 													echo '</div>';
 													echo '<div class="item-details" id="itemDetails_' . $i . '" style="display: none; margin-top: 3px; padding: 2px 4px; background-color: #f8f9fa; border-radius: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">';
 													echo '<small class="text-muted" id="itemName_' . $i . '" style="font-size: 0.65rem;" title=""></small>';
@@ -448,13 +484,13 @@ if (isset($is_edit) and $is_edit != 'no') {
 												<?php
 												for ($i = 1; $i <= 3; $i++) {
 													echo '<div class="col-4 mb-2">';
-													echo '<div class="position-relative">';
+													echo '<div class="item-code-wrapper position-relative" style="position: relative !important;">';
 													echo form_input(
 														"txtPinnanyCode_" . $i,
 														'',
-														'class="form-control pinnany-code-input text-center fw-bold pe-4" id="txtPinnanyCode_' . $i . '" onkeypress="javascript:return numbersonly(this, event, false);" onKeyUp="javascript:change_text_max_to_focus(\'txtPinnanyCode_' . $i . '\',\'txtPinnanyCode_' . ($i + 1) . '\',this); checkPinnanyTypeIcon(' . $i . ');" oninput="checkPinnanyTypeIcon(' . $i . ');" onchange="validateItemCodeFinal(' . $i . ', true);" onblur="validateItemCodeFinal(' . $i . ', true);" maxlength="4" placeholder="Pinnany ' . $i . '"'
+														'class="form-control pinnany-code-input text-center fw-bold" style="padding-right: 28px !important; padding-left: 10px !important;" id="txtPinnanyCode_' . $i . '" onkeypress="javascript:return numbersonly(this, event, false);" onfocus="this.dataset.previousVal = this.value.trim();" onKeyUp="javascript:change_text_max_to_focus(\'txtPinnanyCode_' . $i . '\',\'txtPinnanyCode_' . ($i + 1) . '\',this); checkPinnanyTypeIcon(' . $i . ');" oninput="checkPinnanyTypeIcon(' . $i . ');" onchange="validateItemCodeFinal(' . $i . ', true);" onblur="validateItemCodeFinal(' . $i . ', true);" maxlength="4" placeholder="Pinnany ' . $i . '"'
 													);
-													echo '<span id="pinnanyTypeIcon_' . $i . '" class="position-absolute top-50 end-0 translate-middle-y me-2 d-flex align-items-center" style="display: none; pointer-events: none; z-index: 5;"></span>';
+													echo '<span id="pinnanyTypeIcon_' . $i . '" class="pinnany-type-icon" style="display: none; position: absolute; top: 50%; right: 8px; transform: translateY(-50%); -webkit-transform: translateY(-50%); pointer-events: none; z-index: 5;"></span>';
 													echo '</div>';
 													echo '<div class="pinnany-details" id="pinnanyDetails_' . $i . '" style="display: none; margin-top: 3px; padding: 2px 4px; background-color: #f8f9fa; border-radius: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">';
 													echo '<small class="text-muted" id="pinnanyName_' . $i . '" style="font-size: 0.65rem;" title=""></small>';
@@ -466,19 +502,49 @@ if (isset($is_edit) and $is_edit != 'no') {
 										</div>
 									</div>
 
-									<!-- Row 5: Photo Upload (Preview 90x90) -->
+									<!-- Row 5: Photo Upload & 3:4 Crop (150x200 Preview) -->
 									<div class="row align-items-center g-3 mb-2">
-										<div class="col-md-8">
-											<label for="userfile" class="form-label fw-bold text-muted small text-uppercase">Photo Upload</label>
-											<?php echo form_upload("userfile", '', 'class="form-control" id="userfile" accept="image/*" onchange="previewPhoto(this)"'); ?>
-											<small class="text-muted d-block mt-1">Allowed formats: JPG, PNG, GIF (Max size: 1MB)</small>
+										<div class="col-md-7">
+											<label class="form-label fw-bold text-muted small text-uppercase d-block mb-2">
+												<i class="bi bi-camera me-1"></i> Participant Photo (150 &times; 200 px &bull; 3:4) <span class="text-danger">*</span>
+											</label>
+											<div class="d-flex flex-wrap gap-2 mb-2">
+												<button type="button" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1" onclick="triggerCameraCapture()">
+													<i class="bi bi-camera-fill"></i> Take Photo
+												</button>
+												<button type="button" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1" onclick="triggerGallerySelection()">
+													<i class="bi bi-images"></i> Choose from Gallery
+												</button>
+											</div>
+
+											<!-- Hidden inputs for camera, gallery, userfile and base64 cropped data -->
+											<input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;" onchange="handlePhotoSelected(this)">
+											<input type="file" id="galleryInput" accept="image/jpeg,image/png,image/webp" style="display: none;" onchange="handlePhotoSelected(this)">
+											<input type="file" name="userfile" id="userfile" accept="image/*" style="display: none;">
+											<input type="hidden" name="cropped_image_data" id="cropped_image_data" value="">
+
+											<small class="text-muted d-block" style="font-size: 0.78rem;">
+												<i class="bi bi-info-circle me-1"></i>Min: 300 &times; 400 px &bull; Crop: Fixed 3:4 &bull; Max: 100 KB
+											</small>
 										</div>
-										<div class="col-md-4 text-center">
-											<label class="form-label fw-bold text-muted small text-uppercase d-block">Photo Preview</label>
-											<div id="photoPreview" class="d-flex align-items-center justify-content-center border rounded shadow-sm mx-auto" style="width: 90px; height: 90px; background-color: #f8f9fa; overflow: hidden;">
-												<img id="currentPhoto" src="" alt="Photo" class="img-thumbnail p-0"
-													style="width: 90px; height: 90px; object-fit: cover; display: none;" />
-												<div id="noPhotoMessage" class="text-muted" style="font-size: 0.75rem;">No photo</div>
+										<div class="col-md-5 text-center">
+											<label class="form-label fw-bold text-muted small text-uppercase d-block mb-1">
+												Photo Preview (150 &times; 200)
+											</label>
+											<div id="photoPreview" class="photo-preview-box mx-auto">
+												<img id="currentPhoto" src="" alt="Photo" class="photo-preview-img" />
+												<div id="noPhotoMessage" class="photo-preview-placeholder">
+													<i class="bi bi-person-bounding-box fs-3 d-block mb-1 text-secondary"></i>
+													<span>No photo<br><small class="text-muted">150 &times; 200 px</small></span>
+												</div>
+											</div>
+											<div class="mt-2 d-flex justify-content-center gap-1">
+												<button type="button" id="btnRecropPhoto" class="btn btn-xs btn-outline-info" style="display: none; font-size: 0.75rem; padding: 2px 8px;" onclick="reCropCurrentPhoto()">
+													<i class="bi bi-crop me-1"></i>Re-crop
+												</button>
+												<button type="button" id="btnRemovePhoto" class="btn btn-xs btn-outline-danger" style="display: none; font-size: 0.75rem; padding: 2px 8px;" onclick="removeCurrentPhoto()">
+													<i class="bi bi-trash3 me-1"></i>Remove
+												</button>
 											</div>
 										</div>
 									</div>
@@ -489,12 +555,10 @@ if (isset($is_edit) and $is_edit != 'no') {
 
 						<!-- Right Column: Class-based Items (col-md-4) -->
 						<div class="col-md-4 d-flex flex-column">
-							<div class="card border-0 bg-light rounded-3 shadow-2xs w-100 flex-grow-1 h-100">
-								<div class="card-body p-3 d-flex flex-column">
-									<h6 class="card-title fw-bold text-primary mb-2 d-flex align-items-center gap-1">
-										<i class="bi bi-grid-fill fs-6"></i> Available Items
-									</h6>
-									<div id="availableItemsContainer" class="flex-grow-1 w-100" style="min-height: 380px; height: 100%; overflow-y: auto;">
+							<div class="card border-0 bg-light rounded-3 shadow-2xs w-100 flex-grow-1" style="min-height: 100%;">
+								<div class="card-body p-3 d-flex flex-column" style="min-height: 100%;">
+									<h6 class="card-title fw-bold text-primary mb-3" id="availableItemsHeaderText">Available Items</h6>
+									<div id="availableItemsContainer" class="w-100">
 										<div class="text-center text-muted py-4" id="noItemsMessage">
 											<i class="bi bi-info-circle fs-4 text-secondary mb-2 d-block"></i>
 											<p style="font-size: 0.85rem;" class="mb-0">Please select a class to view available items.</p>
@@ -543,6 +607,15 @@ if (isset($is_edit) and $is_edit != 'no') {
 			border-color: #0d6efd !important;
 			background-color: #f0f7ff !important;
 			box-shadow: 0 4px 12px rgba(13, 110, 253, 0.12) !important;
+			transform: translateY(-1px);
+		}
+		.hover-pinnany-card {
+			cursor: pointer;
+		}
+		.hover-pinnany-card:hover {
+			border-color: #f59e0b !important;
+			background-color: #fffbeb !important;
+			box-shadow: 0 4px 12px rgba(245, 158, 11, 0.18) !important;
 			transform: translateY(-1px);
 		}
 
@@ -762,10 +835,34 @@ if (isset($is_edit) and $is_edit != 'no') {
 			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
 		}
 
+		/* Item type icon (Single / Group) positioned inside right-center of input */
+		.item-code-wrapper {
+			position: relative !important;
+			display: block !important;
+			width: 100% !important;
+		}
+
+		.item-type-icon,
+		.pinnany-type-icon {
+			position: absolute !important;
+			top: 50% !important;
+			right: 8px !important;
+			transform: translateY(-50%) !important;
+			-webkit-transform: translateY(-50%) !important;
+			display: none;
+			align-items: center !important;
+			justify-content: center !important;
+			pointer-events: none !important;
+			z-index: 5 !important;
+			line-height: 1 !important;
+			width: 18px !important;
+			height: 18px !important;
+		}
+
+		/* Temporarily hide item name below item inputs as requested */
 		.item-details,
 		.pinnany-details {
-			font-size: 0.875rem !important;
-			border-left: 3px solid #667eea !important;
+			display: none !important;
 		}
 
 		/* Input group styling */
@@ -791,7 +888,7 @@ if (isset($is_edit) and $is_edit != 'no') {
 
 		#participantModal .modal-body {
 			padding: 0.75rem !important;
-			overflow-y: hidden !important;
+			overflow-y: auto !important;
 		}
 
 		#participantModal .card-body {
@@ -834,39 +931,49 @@ if (isset($is_edit) and $is_edit != 'no') {
 		}
 
 		#availableItemsContainer {
-			max-height: 38vh !important;
-			overflow-y: auto !important;
-			padding-right: 5px !important;
+			height: auto !important;
+			max-height: none !important;
+			overflow: visible !important;
+			padding-right: 0 !important;
+		}
+
+		/* Ensure SweetAlert popups always display on top of Bootstrap modal */
+		.swal2-container {
+			z-index: 999999 !important;
 		}
 
 		/* Responsive adjustments */
 		@media (min-width: 1200px) {
 			#participantModal .modal-dialog {
 				max-width: 970px !important;
-				height: 90vh !important;
+				height: auto !important;
+				max-height: 90vh !important;
 				margin: 5vh auto !important;
 			}
 			#participantModal .modal-content {
-				height: 100% !important;
+				max-height: 90vh !important;
 				display: flex !important;
 				flex-direction: column !important;
 			}
 			#participantModal .modal-body {
 				flex: 1 1 auto !important;
-				overflow-y: hidden !important;
+				overflow-y: auto !important;
 			}
 			#participantModal .card {
-				height: 100% !important;
+				min-height: 100% !important;
+				height: auto !important;
 			}
 			#participantModal .card-body {
-				height: 100% !important;
+				min-height: 100% !important;
+				height: auto !important;
 				display: flex !important;
 				flex-direction: column !important;
 			}
 			#availableItemsContainer {
-				flex: 1 1 auto !important;
-				max-height: calc(90vh - 180px) !important;
-				overflow-y: auto !important;
+				height: auto !important;
+				max-height: none !important;
+				overflow: visible !important;
+				padding-right: 0 !important;
 			}
 		}
 
@@ -884,6 +991,27 @@ if (isset($is_edit) and $is_edit != 'no') {
 			.col-md-8,
 			.col-md-4 {
 				margin-bottom: 1rem !important;
+			}
+		}
+
+		@media (max-width: 767.98px) {
+			.top-action-buttons-container {
+				display: flex !important;
+				flex-direction: row !important;
+				flex-wrap: nowrap !important;
+				gap: 0.5rem !important;
+				width: 100% !important;
+				margin-top: 0.5rem !important;
+			}
+			.top-action-buttons-container .btn {
+				flex: 1 1 0 !important;
+				min-width: 0 !important;
+				font-size: 0.8rem !important;
+				padding: 0.5rem 0.25rem !important;
+				white-space: nowrap !important;
+			}
+			.top-action-buttons-container .btn i {
+				font-size: 0.85rem !important;
 			}
 		}
 
@@ -1017,16 +1145,128 @@ if (isset($is_edit) and $is_edit != 'no') {
 			document.body.style.overflow = '';
 			document.body.style.paddingRight = '';
 		};
+
+		function extractSchoolCode(val) {
+			if (!val) return '';
+			val = String(val).trim();
+
+			if (/^\d+$/.test(val)) {
+				return val;
+			}
+
+			var match = val.match(/^(\d+)/);
+			if (match && match[1]) {
+				return match[1];
+			}
+
+			if (typeof SUBDISTRICT_SCHOOLS_LIST !== 'undefined' && Array.isArray(SUBDISTRICT_SCHOOLS_LIST)) {
+				var lowerVal = val.toLowerCase();
+				for (var i = 0; i < SUBDISTRICT_SCHOOLS_LIST.length; i++) {
+					var item = SUBDISTRICT_SCHOOLS_LIST[i];
+					if (item.code === val || item.name.toLowerCase().indexOf(lowerVal) !== -1) {
+						return item.code;
+					}
+				}
+			}
+
+			var list = document.getElementById('schoolOptionsList');
+			if (list && list.options) {
+				var lowerVal2 = val.toLowerCase();
+				for (var j = 0; j < list.options.length; j++) {
+					var opt = list.options[j];
+					var optVal = (opt.value || '').trim();
+					var optText = (opt.text || opt.innerText || '').trim();
+					if (optVal.toLowerCase().indexOf(lowerVal2) !== -1) {
+						var m = optVal.match(/^(\d+)/);
+						if (m && m[1]) return m[1];
+					}
+					if (optText.toLowerCase().indexOf(lowerVal2) !== -1) {
+						var m2 = optText.match(/^(\d+)/);
+						if (m2 && m2[1]) return m2[1];
+					}
+				}
+			}
+			return '';
+		}
+
+		function handleSchoolSearchInput(val) {
+			if (!val) return;
+			var code = extractSchoolCode(val);
+			if (code && code !== '0' && /^\d+$/.test(code)) {
+				if (typeof fetchSchoolDataAjax === 'function') {
+					fetchSchoolDataAjax(code);
+				}
+
+				if (val.indexOf(' - ') > -1) {
+					var current = '<?php echo esc($active_code); ?>';
+					if (code !== current) {
+						loadSchoolByCode(code);
+					}
+				}
+			}
+		}
+
+		function loadSchoolFromSearch() {
+			var input = document.getElementById('txtSearchSchool');
+			var val = input ? input.value.trim() : '';
+			if (!val) {
+				swal('Missing Information', 'Please enter a School Code or search a School Name.', 'warning');
+				return;
+			}
+			var code = extractSchoolCode(val);
+			if (!code || code === '0' || !/^\d+$/.test(code)) {
+				swal('Invalid School', 'Could not resolve a matching School Code. Please enter a valid numeric School Code.', 'warning');
+				return;
+			}
+			loadSchoolByCode(code);
+		}
+
+		function loadSchoolByCode(code) {
+			if (!code) {
+				var input = document.getElementById('txtSearchSchool');
+				if (input) code = extractSchoolCode(input.value.trim());
+			}
+			if (!code || code === '0' || !/^\d+$/.test(code)) {
+				swal('Missing Information', 'Please enter a valid School Code.', 'warning');
+				return;
+			}
+			var btn = document.getElementById('btnLoadSchool');
+			if (btn) {
+				btn.disabled = true;
+				btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Loading...';
+			}
+			window.location.href = '<?php echo base_url("schools/school_entry"); ?>?school_code=' + encodeURIComponent(code);
+		}
 	</script>
 
 <?php
 $db = \Config\Database::connect();
 $raw_items = !empty($all_festival_items) ? $all_festival_items : [];
 if (empty($raw_items)) {
-	$raw_items = $db->table('item_master IM')
+	$rawQuery = $db->table('item_master IM')
 		->select('IM.item_code, IM.item_name, IM.item_type, IM.gender as item_gender, IM.max_participants, IM.max_pinnani as max_pinnany, FM.fest_id, FM.fest_name, FM.class_start, FM.class_end')
-		->join('festival_master FM', 'IM.fest_id = FM.fest_id')
-		->orderBy('FM.fest_id', 'ASC')
+		->join('festival_master FM', 'IM.fest_id = FM.fest_id');
+
+	$user_type = (int)session('USER_TYPE');
+	$dist_code = (int)session('DISTRICT');
+	$sub_dist_code = (int)session('SUB_DISTRICT');
+
+	if ($user_type === 2) {
+		$rawQuery->where('FM.fest_id !=', 1);
+		if ($dist_code > 0) {
+			$rawQuery->groupStart()
+				->where('IM.is_common', 'Y')
+				->orWhere("IM.item_code IN (SELECT item_code FROM sd_item_allotment WHERE rev_district_code = {$dist_code})", null, false)
+				->groupEnd();
+		}
+	} elseif ($sub_dist_code > 0) {
+		$rawQuery->groupStart()
+			->where('IM.is_common', 'Y')
+			->orWhere("IM.item_code IN (SELECT item_code FROM sd_item_allotment WHERE sub_district_code = {$sub_dist_code})", null, false)
+			->groupEnd();
+	}
+
+	$raw_items = $rawQuery->orderBy('FM.fest_id', 'ASC')
 		->orderBy('IM.item_code', 'ASC')
 		->get()->getResultArray();
 }
@@ -1035,15 +1275,23 @@ $target_sch = !empty($school_details[0]['school_code']) ? $school_details[0]['sc
 $registered_school_items = [];
 if (!empty($target_sch)) {
 	$registered_school_items = $db->table('sd_participant_item_details PD')
-		->select('PD.item_code, IM.item_type, IM.max_participants, PD.admn_no')
+		->select('PD.item_code, PD.item_type, PD.item_type as participant_item_type, IM.item_type as master_item_type, IM.max_participants, IM.max_pinnani as max_pinnany, PD.admn_no')
 		->join('item_master IM', 'IM.item_code = PD.item_code', 'left')
 		->where('PD.school_code', $target_sch)
 		->get()->getResultArray();
+	if (empty($registered_school_items)) {
+		$registered_school_items = $db->table('d_participant_item_details PD')
+			->select('PD.item_code, PD.item_type, PD.item_type as participant_item_type, IM.item_type as master_item_type, IM.max_participants, IM.max_pinnani as max_pinnany, PD.admn_no')
+			->join('item_master IM', 'IM.item_code = PD.item_code', 'left')
+			->where('PD.school_code', $target_sch)
+			->get()->getResultArray();
+	}
 }
 ?>
 <script>
 window.allFestivalItems = <?php echo json_encode($raw_items); ?>;
 window.schoolRegisteredItems = <?php echo json_encode($registered_school_items); ?>;
+window.participantDistrictLimits = <?php echo json_encode($participant_district_limits ?? ['max_single_items' => 3, 'max_group_items' => 2]); ?>;
 window.loadedItemsMap = {};
 
 if (Array.isArray(window.allFestivalItems)) {
@@ -1051,8 +1299,14 @@ if (Array.isArray(window.allFestivalItems)) {
 		item.gender = (item.gender || item.item_gender || 'C').toUpperCase();
 		item.item_gender = item.gender;
 		item.item_type = (item.item_type || 'S').toUpperCase();
-		item.max_participants = parseInt(item.max_participants, 10) || (item.item_type === 'G' ? 7 : 1);
-		item.max_pinnani = parseInt(item.max_pinnani || item.max_pinnany, 10) || 0;
+		var isDrama = [159, 361, 560, 760].indexOf(parseInt(item.item_code, 10)) !== -1 || (item.item_name && item.item_name.toUpperCase().indexOf('DRAMA') !== -1);
+		if (isDrama) {
+			item.max_participants = 7;
+			item.max_pinnani = 3;
+		} else {
+			item.max_participants = parseInt(item.max_participants, 10) || (item.item_type === 'G' ? 7 : 1);
+			item.max_pinnani = parseInt(item.max_pinnani || item.max_pinnany, 10) || 0;
+		}
 		item.fest_name = item.fest_name || 'General';
 		item.class_start = parseInt(item.class_start, 10) || 1;
 		item.class_end = parseInt(item.class_end, 10) || 12;
@@ -1062,7 +1316,7 @@ if (Array.isArray(window.allFestivalItems)) {
 	});
 }
 
-window.getItemSchoolCount = function(itemCode, excludeAdmnNo) {
+window.getItemSchoolCount = function(itemCode, excludeAdmnNo, isPinnany) {
 	var count = 0;
 	if (Array.isArray(window.schoolRegisteredItems)) {
 		var codeNum = parseInt(itemCode, 10);
@@ -1070,7 +1324,14 @@ window.getItemSchoolCount = function(itemCode, excludeAdmnNo) {
 			var isSameCode = (String(reg.item_code).trim() === String(itemCode).trim()) || (parseInt(reg.item_code, 10) === codeNum);
 			if (isSameCode) {
 				if (!excludeAdmnNo || String(reg.admn_no).trim() !== String(excludeAdmnNo).trim()) {
-					count++;
+					var regIsPinnany = (reg.participant_item_type === 'P' || reg.item_type === 'P');
+					if (isPinnany === true) {
+						if (regIsPinnany) count++;
+					} else if (isPinnany === false) {
+						if (!regIsPinnany) count++;
+					} else {
+						count++;
+					}
 				}
 			}
 		});
@@ -1079,33 +1340,38 @@ window.getItemSchoolCount = function(itemCode, excludeAdmnNo) {
 };
 
 window.getSingleUserIconHtml = function() {
-	return '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="#198754" viewBox="0 0 16 16" title="Single Item"><path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/></svg>';
+	return '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#198754" viewBox="0 0 16 16" title="Single Item (S)" style="display: block;"><path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/></svg>';
 };
 
 window.getGroupUserIconHtml = function() {
-	return '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#0d6efd" viewBox="0 0 16 16" title="Group Item"><path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"/></svg>';
+	return '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#0d6efd" viewBox="0 0 16 16" title="Group Item (G)" style="display: block;"><path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"/></svg>';
 };
 
 window.updateItemCodeIcon = function(index, itemType, itemName) {
 	var iconSpan = document.getElementById('itemTypeIcon_' + index);
 	var detailDiv = document.getElementById('itemDetails_' + index);
 	var nameSpan = document.getElementById('itemName_' + index);
+	var inputEl = document.getElementById('txtItemCode_' + index);
 	if (iconSpan) {
 		if (itemType === 'G') {
 			iconSpan.innerHTML = window.getGroupUserIconHtml();
-			iconSpan.style.display = 'inline-flex';
+			iconSpan.style.display = 'flex';
 		} else if (itemType === 'S' || itemType === 'P') {
 			iconSpan.innerHTML = window.getSingleUserIconHtml();
-			iconSpan.style.display = 'inline-flex';
+			iconSpan.style.display = 'flex';
 		} else {
 			iconSpan.innerHTML = '';
 			iconSpan.style.display = 'none';
 		}
 	}
+	if (inputEl) {
+		inputEl.title = itemName ? (itemName + ' (' + (itemType || 'S') + ')') : '';
+	}
 	if (itemName && detailDiv && nameSpan) {
 		nameSpan.innerText = itemName + ' (' + (itemType || 'S') + ')';
 		nameSpan.title = itemName;
-		detailDiv.style.display = 'block';
+		// Item name below input temporarily hidden as per user request
+		detailDiv.style.display = 'none';
 	}
 };
 
@@ -1113,22 +1379,27 @@ window.updatePinnanyCodeIcon = function(index, itemType, itemName) {
 	var iconSpan = document.getElementById('pinnanyTypeIcon_' + index);
 	var detailDiv = document.getElementById('pinnanyDetails_' + index);
 	var nameSpan = document.getElementById('pinnanyName_' + index);
+	var inputEl = document.getElementById('txtPinnanyCode_' + index);
 	if (iconSpan) {
 		if (itemType === 'G') {
 			iconSpan.innerHTML = window.getGroupUserIconHtml();
-			iconSpan.style.display = 'inline-flex';
+			iconSpan.style.display = 'flex';
 		} else if (itemType === 'S' || itemType === 'P') {
 			iconSpan.innerHTML = window.getSingleUserIconHtml();
-			iconSpan.style.display = 'inline-flex';
+			iconSpan.style.display = 'flex';
 		} else {
 			iconSpan.innerHTML = '';
 			iconSpan.style.display = 'none';
 		}
 	}
+	if (inputEl) {
+		inputEl.title = itemName ? (itemName + ' (' + (itemType || 'P') + ')') : '';
+	}
 	if (itemName && detailDiv && nameSpan) {
 		nameSpan.innerText = itemName + ' (' + (itemType || 'P') + ')';
 		nameSpan.title = itemName;
-		detailDiv.style.display = 'block';
+		// Item name below input temporarily hidden as per user request
+		detailDiv.style.display = 'none';
 	}
 };
 
@@ -1190,6 +1461,41 @@ window.validateItemCodeFinal = function(index, isPinnany) {
 		inputEl.classList.remove('is-invalid');
 		inputEl.style.borderColor = '';
 		inputEl.style.boxShadow = '';
+		var hadVal = (inputEl.dataset.previousVal || '').trim();
+		inputEl.dataset.previousVal = '';
+		if (hadVal !== '' && typeof window.loadItemsByClass === 'function') {
+			window.loadItemsByClass();
+		}
+		return;
+	}
+
+	var originalVal = (inputEl.dataset.originalVal || '').trim();
+	var previousVal = (inputEl.dataset.previousVal !== undefined ? inputEl.dataset.previousVal : originalVal).trim();
+
+	// If the user has NOT changed this code from its saved value, bypass validation checks
+	if (originalVal !== '' && val === originalVal) {
+		var existingItem = window.loadedItemsMap && (window.loadedItemsMap[val] || window.loadedItemsMap[String(parseInt(val, 10))]);
+		if (!existingItem && Array.isArray(window.allFestivalItems)) {
+			existingItem = window.allFestivalItems.find(function(it) {
+				return String(it.item_code).trim() === val || parseInt(it.item_code, 10) === parseInt(val, 10);
+			});
+		}
+		if (existingItem) {
+			if (isPinnany && typeof window.updatePinnanyCodeIcon === 'function') {
+				window.updatePinnanyCodeIcon(index, existingItem.item_type || 'P', existingItem.item_name || '');
+			} else if (!isPinnany && typeof window.updateItemCodeIcon === 'function') {
+				window.updateItemCodeIcon(index, existingItem.item_type || 'S', existingItem.item_name || '');
+			}
+		}
+		inputEl.classList.remove('is-invalid');
+		inputEl.style.borderColor = '';
+		inputEl.style.boxShadow = '';
+		inputEl.dataset.previousVal = val;
+		return;
+	}
+
+	// If the code has not changed during this blur/change interaction, skip re-validation
+	if (previousVal !== '' && val === previousVal && !inputEl.classList.contains('is-invalid')) {
 		return;
 	}
 
@@ -1349,35 +1655,85 @@ window.validateItemCodeFinal = function(index, isPinnany) {
 		return;
 	}
 
-	// Check 5: Max participants limit check based on item_master.max_participants
+	// Check 5: Max participants limit check based on item_master.max_participants and max_pinnani
 	var currentAdmnNo = (jQuery('#hidADNO').val() || '').trim();
-	var maxParts = parseInt(found.max_participants, 10) || (found.item_type === 'G' ? 7 : 1);
-	var schoolCount = typeof window.getItemSchoolCount === 'function' ? window.getItemSchoolCount(val, currentAdmnNo) : 0;
+	var isDrama = [159, 361, 560, 760].indexOf(itemCodeNum) !== -1 || (found.item_name && found.item_name.toUpperCase().indexOf('DRAMA') !== -1);
 
-	if (schoolCount >= maxParts) {
-		inputEl.classList.add('is-invalid');
-		inputEl.style.borderColor = '#dc3545';
-		inputEl.style.boxShadow = '0 0 0 0.25rem rgba(220, 53, 69, 0.25)';
-		inputEl.value = '';
-		if (iconSpan) { iconSpan.style.display = 'none'; iconSpan.innerHTML = ''; }
-		if (detailDiv) detailDiv.style.display = 'none';
-		if (nameSpan) nameSpan.innerText = '';
+	if (isPinnany) {
+		var maxPinnani = isDrama ? 3 : (parseInt(found.max_pinnani || found.max_pinnany, 10) || 0);
+		if (maxPinnani <= 0) {
+			inputEl.classList.add('is-invalid');
+			inputEl.style.borderColor = '#dc3545';
+			inputEl.style.boxShadow = '0 0 0 0.25rem rgba(220, 53, 69, 0.25)';
+			inputEl.value = '';
+			if (iconSpan) { iconSpan.style.display = 'none'; iconSpan.innerHTML = ''; }
+			if (detailDiv) detailDiv.style.display = 'none';
+			if (nameSpan) nameSpan.innerText = '';
 
-		var limitMsg = (found.item_type === 'S')
-			? 'Single Item ' + val + ' (' + found.item_name + ') is already registered by another participant in this school.'
-			: 'Group Item ' + val + ' (' + found.item_name + ') has reached the maximum allowed limit of ' + maxParts + ' participants for this school.';
+			window.showWarningToast(
+				'Pinnany Not Allowed',
+				'Item ' + val + ' (' + found.item_name + ') does not allow Pinnany (background) participants.'
+			);
 
-		window.showWarningToast(
-			'Maximum Limit Reached',
-			limitMsg
-		);
+			setTimeout(function() {
+				inputEl.classList.remove('is-invalid');
+				inputEl.style.borderColor = '';
+				inputEl.style.boxShadow = '';
+			}, 2500);
+			return;
+		}
 
-		setTimeout(function() {
-			inputEl.classList.remove('is-invalid');
-			inputEl.style.borderColor = '';
-			inputEl.style.boxShadow = '';
-		}, 2500);
-		return;
+		var schoolPinnanyCount = typeof window.getItemSchoolCount === 'function' ? window.getItemSchoolCount(val, currentAdmnNo, true) : 0;
+		if (schoolPinnanyCount >= maxPinnani) {
+			inputEl.classList.add('is-invalid');
+			inputEl.style.borderColor = '#dc3545';
+			inputEl.style.boxShadow = '0 0 0 0.25rem rgba(220, 53, 69, 0.25)';
+			inputEl.value = '';
+			if (iconSpan) { iconSpan.style.display = 'none'; iconSpan.innerHTML = ''; }
+			if (detailDiv) detailDiv.style.display = 'none';
+			if (nameSpan) nameSpan.innerText = '';
+
+			window.showWarningToast(
+				'Maximum Pinnany Limit Reached',
+				'Item ' + val + ' (' + found.item_name + ') has reached the maximum allowed limit of ' + maxPinnani + ' Pinnany (background) participants for this school.'
+			);
+
+			setTimeout(function() {
+				inputEl.classList.remove('is-invalid');
+				inputEl.style.borderColor = '';
+				inputEl.style.boxShadow = '';
+			}, 2500);
+			return;
+		}
+	} else {
+		var maxParts = isDrama ? 7 : (parseInt(found.max_participants, 10) || (found.item_type === 'G' ? 7 : 1));
+		var schoolMainCount = typeof window.getItemSchoolCount === 'function' ? window.getItemSchoolCount(val, currentAdmnNo, false) : 0;
+
+		if (schoolMainCount >= maxParts) {
+			inputEl.classList.add('is-invalid');
+			inputEl.style.borderColor = '#dc3545';
+			inputEl.style.boxShadow = '0 0 0 0.25rem rgba(220, 53, 69, 0.25)';
+			inputEl.value = '';
+			if (iconSpan) { iconSpan.style.display = 'none'; iconSpan.innerHTML = ''; }
+			if (detailDiv) detailDiv.style.display = 'none';
+			if (nameSpan) nameSpan.innerText = '';
+
+			var limitMsg = (found.item_type === 'S')
+				? 'Single Item ' + val + ' (' + found.item_name + ') is already registered by another participant in this school.'
+				: 'Group Item ' + val + ' (' + found.item_name + ') has reached the maximum allowed limit of ' + maxParts + ' main participants for this school.';
+
+			window.showWarningToast(
+				'Maximum Limit Reached',
+				limitMsg
+			);
+
+			setTimeout(function() {
+				inputEl.classList.remove('is-invalid');
+				inputEl.style.borderColor = '';
+				inputEl.style.boxShadow = '';
+			}, 2500);
+			return;
+		}
 	}
 
 	inputEl.classList.remove('is-invalid');
@@ -1386,6 +1742,7 @@ window.validateItemCodeFinal = function(index, isPinnany) {
 	setTimeout(function() { if (inputEl.style.borderColor === 'rgb(25, 135, 84)') inputEl.style.borderColor = ''; }, 1200);
 
 	window.loadedItemsMap[val] = found;
+	inputEl.dataset.previousVal = val;
 	if (isPinnany) {
 		window.updatePinnanyCodeIcon(index, found.item_type, found.item_name);
 	} else {
@@ -1414,6 +1771,12 @@ window.checkItemTypeIcon = function(index) {
 		if (iconSpan) { iconSpan.style.display = 'none'; iconSpan.innerHTML = ''; }
 		if (detailDiv) detailDiv.style.display = 'none';
 		if (nameSpan) nameSpan.innerText = '';
+		if (inputEl.dataset.previousVal) {
+			inputEl.dataset.previousVal = '';
+			if (typeof window.loadItemsByClass === 'function') {
+				window.loadItemsByClass();
+			}
+		}
 	}
 };
 
@@ -1433,6 +1796,12 @@ window.checkPinnanyTypeIcon = function(index) {
 		if (iconSpan) { iconSpan.style.display = 'none'; iconSpan.innerHTML = ''; }
 		if (detailDiv) detailDiv.style.display = 'none';
 		if (nameSpan) nameSpan.innerText = '';
+		if (inputEl.dataset.previousVal) {
+			inputEl.dataset.previousVal = '';
+			if (typeof window.loadItemsByClass === 'function') {
+				window.loadItemsByClass();
+			}
+		}
 	}
 };
 
@@ -1449,11 +1818,22 @@ window.loadItemsByClass = function() {
 	var selectedGender = txtGender ? (txtGender.value || '').trim().toUpperCase() : '';
 
 	if (!selectedClass) {
+		var headerEl = document.getElementById('availableItemsHeaderText');
+		if (headerEl) headerEl.innerText = 'Available Items';
 		availableItemsContainer.innerHTML = '<div class="text-center text-muted py-4" id="noItemsMessage"><i class="bi bi-info-circle fs-4 text-secondary mb-2 d-block"></i><p style="font-size: 0.85rem;" class="mb-0">Please select a class to view available items.</p></div>';
 		return;
 	}
 
 	var classNum = parseInt(selectedClass, 10);
+	var txtADNO = document.getElementById('txtADNO');
+	var adnoHelp = document.getElementById('adnoHelpText');
+	if (classNum > 10) {
+		if (txtADNO && (!txtADNO.value || txtADNO.value.trim() === '')) txtADNO.placeholder = 'e.g. H1234 or V1234';
+		if (adnoHelp) adnoHelp.style.display = 'block';
+	} else {
+		if (txtADNO && (!txtADNO.value || txtADNO.value.trim() === '')) txtADNO.placeholder = 'Enter admission number';
+		if (adnoHelp) adnoHelp.style.display = 'none';
+	}
 	var hidAdnoEl = document.getElementById('hidADNO');
 	var currentAdmnNo = (hidAdnoEl ? hidAdnoEl.value : '').trim();
 
@@ -1477,9 +1857,11 @@ window.loadItemsByClass = function() {
 	}
 
 	// Filter items for the selected class category
-	var items = [];
+	var totalAvailableCount = 0;
+	var groupedItems = {};
+
 	if (Array.isArray(window.allFestivalItems) && window.allFestivalItems.length > 0) {
-		items = window.allFestivalItems.filter(function(it) {
+		window.allFestivalItems.forEach(function(it) {
 			var cStart = parseInt(it.class_start, 10);
 			var cEnd = parseInt(it.class_end, 10);
 
@@ -1493,45 +1875,75 @@ window.loadItemsByClass = function() {
 				else if (classNum <= 10) matchesClass = (parseInt(it.item_code, 10) >= 500 && parseInt(it.item_code, 10) < 700);
 				else matchesClass = (parseInt(it.item_code, 10) >= 700);
 			}
-			if (!matchesClass) return false;
+			if (!matchesClass) return;
 
 			// Gender matching
 			var itmGender = (it.gender || it.item_gender || 'C').toUpperCase();
 			if (selectedGender && selectedGender !== 'C') {
-				if (itmGender !== selectedGender && itmGender !== 'C') return false;
+				if (itmGender !== selectedGender && itmGender !== 'C') return;
 			}
 
-			// Rule 1: Hide if already chosen in this participant's current form slots
+			// Rule 1: Hide if already chosen in this participant's current form slots (either main or pinnany)
 			var codeStr = String(it.item_code);
 			var codeInt = String(parseInt(it.item_code, 10));
 			if (currentFormChosen[codeStr] || currentFormChosen[codeInt]) {
-				return false;
+				return;
 			}
 
-			// Rule 2: Hide if registered count has reached max_participants quota for this school
-			var maxParts = parseInt(it.max_participants, 10) || (it.item_type === 'G' ? 7 : 1);
-			var schoolCount = typeof window.getItemSchoolCount === 'function' ? window.getItemSchoolCount(it.item_code, currentAdmnNo) : 0;
-			if (schoolCount >= maxParts) {
-				return false;
+			var isDrama = [159, 361, 560, 760].indexOf(parseInt(it.item_code, 10)) !== -1 || (it.item_name && it.item_name.toUpperCase().indexOf('DRAMA') !== -1);
+			var maxParts = isDrama ? 7 : (parseInt(it.max_participants, 10) || (it.item_type === 'G' ? 7 : 1));
+			var maxPinnani = isDrama ? 3 : (parseInt(it.max_pinnani || it.max_pinnany, 10) || 0);
+
+			var fest = it.fest_name || 'Category Items';
+			if (!groupedItems[fest]) groupedItems[fest] = [];
+
+			// Check eligibility for regular / main items
+			var schoolMainCount = typeof window.getItemSchoolCount === 'function' ? window.getItemSchoolCount(it.item_code, currentAdmnNo, false) : 0;
+			if (schoolMainCount < maxParts) {
+				groupedItems[fest].push({
+					isPinnany: false,
+					item: it
+				});
+				totalAvailableCount++;
+				window.loadedItemsMap[it.item_code] = it;
+				window.loadedItemsMap[String(parseInt(it.item_code, 10))] = it;
 			}
 
-			return true;
+			// Check eligibility for Pinnany (background) items - displayed right next to normal list item
+			if (maxPinnani > 0) {
+				var schoolPinnanyCount = typeof window.getItemSchoolCount === 'function' ? window.getItemSchoolCount(it.item_code, currentAdmnNo, true) : 0;
+				if (schoolPinnanyCount < maxPinnani) {
+					var pItem = Object.assign({}, it);
+					pItem.pinnanySchoolCount = schoolPinnanyCount;
+					pItem.maxPinnani = maxPinnani;
+					pItem.remainingPinnani = maxPinnani - schoolPinnanyCount;
+					groupedItems[fest].push({
+						isPinnany: true,
+						item: pItem
+					});
+					totalAvailableCount++;
+					window.loadedItemsMap[it.item_code] = pItem;
+					window.loadedItemsMap[String(parseInt(it.item_code, 10))] = pItem;
+				}
+			}
 		});
 	}
 
-	if (items.length === 0) {
+	var catCode = '';
+	if (classNum <= 4) catCode = 'LP';
+	else if (classNum <= 7) catCode = 'UP';
+	else if (classNum <= 10) catCode = 'HS';
+	else if (classNum >= 11) catCode = 'HSS';
+
+	var headerEl = document.getElementById('availableItemsHeaderText');
+	if (headerEl) {
+		headerEl.innerText = 'Available Items (' + catCode + ' - ' + totalAvailableCount + ')';
+	}
+
+	if (totalAvailableCount === 0) {
 		availableItemsContainer.innerHTML = '<div class="text-center text-muted py-4"><i class="bi bi-check2-all text-success fs-3 mb-2 d-block"></i><p class="mb-0 small text-muted">All available items for Class ' + selectedClass + ' have been assigned.</p></div>';
 		return;
 	}
-
-	var groupedItems = {};
-	items.forEach(function (item) {
-		window.loadedItemsMap[item.item_code] = item;
-		window.loadedItemsMap[String(parseInt(item.item_code, 10))] = item;
-		var fest = item.fest_name || 'Category Items';
-		if (!groupedItems[fest]) groupedItems[fest] = [];
-		groupedItems[fest].push(item);
-	});
 
 	// Update icons for any existing item values in inputs
 	for (var k = 1; k <= 5; k++) {
@@ -1541,31 +1953,45 @@ window.loadItemsByClass = function() {
 		if (typeof window.checkPinnanyTypeIcon === 'function') window.checkPinnanyTypeIcon(p);
 	}
 
-	var itemsHtml = '<div class="items-container w-100">';
-	for (var festName in groupedItems) {
-		if (groupedItems.hasOwnProperty(festName)) {
-			itemsHtml += '<div class="festival-group mb-3">' +
-				'<div class="festival-title text-primary fw-bold mb-2 pb-1 border-bottom small d-flex align-items-center justify-content-between">' +
-				'<span><i class="bi bi-bookmark-star-fill text-primary me-1" style="font-size: 0.75rem;"></i> ' + festName + '</span>' +
-				'<span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" style="font-size: 0.68rem;">' + groupedItems[festName].length + ' items</span>' +
-				'</div>' +
-				'<div class="d-flex flex-column gap-2 w-100">';
+	var itemsHtml = '<div class="items-container w-100 d-flex flex-column gap-2 pb-2">';
 
-			groupedItems[festName].forEach(function (item) {
-				itemsHtml += '<div class="p-2 px-3 rounded-3 border bg-white border-light-subtle shadow-2xs hover-item-card item-selectable" data-item-code="' + item.item_code + '" data-item-name="' + item.item_name + '" data-item-type="' + item.item_type + '" style="cursor: pointer; transition: all 0.15s ease-in-out; width: 100%;">' +
-					'<div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem;" title="' + item.item_code + ' - ' + item.item_name + '">' +
-					'<span class="text-primary me-1">' + item.item_code + '</span> - ' + item.item_name +
-					'</div>' +
-					'</div>';
+	for (var festName in groupedItems) {
+		if (groupedItems.hasOwnProperty(festName) && groupedItems[festName].length > 0) {
+			groupedItems[festName].forEach(function (entry) {
+				var item = entry.item;
+				if (entry.isPinnany) {
+					// Normal list view with English (Pinnany) in orange color
+					itemsHtml += '<div class="p-2 px-3 rounded-3 border bg-white border-light-subtle shadow-2xs hover-item-card pinnany-selectable" data-item-code="' + item.item_code + '" data-item-name="' + item.item_name + '" data-item-type="P" style="cursor: pointer; transition: all 0.15s ease-in-out; width: 100%;">' +
+						'<div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem;" title="' + item.item_code + ' - ' + item.item_name + ' (Pinnany)">' +
+						'<span class="text-primary me-1">' + item.item_code + '</span> - ' + item.item_name + ' <span style="color: #ea580c; font-weight: 700;">(Pinnany)</span>' +
+						'</div>' +
+						'</div>';
+				} else {
+					itemsHtml += '<div class="p-2 px-3 rounded-3 border bg-white border-light-subtle shadow-2xs hover-item-card item-selectable" data-item-code="' + item.item_code + '" data-item-name="' + item.item_name + '" data-item-type="' + item.item_type + '" style="cursor: pointer; transition: all 0.15s ease-in-out; width: 100%;">' +
+						'<div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem;" title="' + item.item_code + ' - ' + item.item_name + '">' +
+						'<span class="text-primary me-1">' + item.item_code + '</span> - ' + item.item_name +
+						'</div>' +
+						'</div>';
+				}
 			});
-			itemsHtml += '</div></div>';
 		}
 	}
+
 	itemsHtml += '</div>';
 
 	availableItemsContainer.innerHTML = itemsHtml;
 
-	// Attach click event listeners to add item directly
+	// Prevent blur of active input element from unmounting DOM and swallowing the click event
+	if (!availableItemsContainer.dataset.hasMouseDown) {
+		availableItemsContainer.dataset.hasMouseDown = 'true';
+		availableItemsContainer.addEventListener('mousedown', function(e) {
+			if (e.target.closest('.item-selectable') || e.target.closest('.pinnany-selectable')) {
+				e.preventDefault();
+			}
+		});
+	}
+
+	// Attach click event listeners to add main item directly
 	var selectableItems = availableItemsContainer.querySelectorAll('.item-selectable');
 	selectableItems.forEach(function(elem) {
 		elem.addEventListener('click', function(e) {
@@ -1602,6 +2028,48 @@ window.loadItemsByClass = function() {
 					swal("Oops!", "All 5 item slots are filled. Clear a slot to add another item.", "warning");
 				} else {
 					alert("All 5 item slots are filled.");
+				}
+			}
+		});
+	});
+
+	// Attach click event listeners to add Pinnany (background) item directly
+	var selectablePinnany = availableItemsContainer.querySelectorAll('.pinnany-selectable');
+	selectablePinnany.forEach(function(elem) {
+		elem.addEventListener('click', function(e) {
+			e.preventDefault();
+			var itemCode = this.getAttribute('data-item-code');
+			var itemName = this.getAttribute('data-item-name');
+			var itemType = this.getAttribute('data-item-type') || 'P';
+			if (!itemCode || !itemName) return;
+
+			var emptyInput = null;
+			var fieldNumber = 0;
+			for (var p = 1; p <= 3; p++) {
+				var inP = document.getElementById('txtPinnanyCode_' + p);
+				if (inP && inP.value.trim() === '') {
+					emptyInput = inP;
+					fieldNumber = p;
+					break;
+				}
+			}
+
+			if (emptyInput && fieldNumber > 0) {
+				emptyInput.value = itemCode;
+				if (typeof window.validateItemCodeFinal === 'function') {
+					window.validateItemCodeFinal(fieldNumber, true);
+				} else if (typeof window.updatePinnanyCodeIcon === 'function') {
+					window.updatePinnanyCodeIcon(fieldNumber, itemType, itemName);
+				}
+				// Re-render available items so this chosen item is instantly hidden from the list
+				window.loadItemsByClass();
+			} else {
+				if (typeof Swal !== 'undefined') {
+					Swal.fire({ icon: 'warning', title: 'Oops!', text: 'All 3 Pinnany (Background) slots are filled. Clear a slot to add another pinnany item.' });
+				} else if (typeof swal !== 'undefined') {
+					swal("Oops!", "All 3 Pinnany (Background) slots are filled. Clear a slot to add another pinnany item.", "warning");
+				} else {
+					alert("All 3 Pinnany (Background) slots are filled.");
 				}
 			}
 		});
@@ -1733,6 +2201,7 @@ window.loadItemsByClass = function() {
 		var schoolCode = '<?php echo !empty($school_details) && !empty($school_details[0]['school_code']) ? $school_details[0]['school_code'] : ''; ?>';
 		var confirmStatus = '<?php echo !empty($school_details) && !empty($school_details[0]['is_finalize']) ? $school_details[0]['is_finalize'] : 'N'; ?>';
 		var schoolShow = '<?php echo isset($school_show) ? $school_show : ''; ?>';
+		window.IS_SCHOOL_DETAILS_SAVED = <?php echo !empty($is_school_details_saved) ? 'true' : 'false'; ?>;
 
 		var schoolCodeInput = document.getElementById('txtSchoolCode');
 		var schoolDetailsSection = document.getElementById('schoolDetailsSection');
@@ -1740,33 +2209,46 @@ window.loadItemsByClass = function() {
 		var schoolProfileBtn = document.getElementById('schoolProfileBtn');
 		var schoolProfileBtnText = document.getElementById('schoolProfileBtnText');
 
+		// Dynamic Add Participant Button visibility helper
+		// User requirement: "ஸ்கூல்டீடைல் சேமிக்கப்படாமல் இருந்தாலோ அல்லது ஸ்கூல் டீடைல் திறந்திருந்தாலோ ஆட் பார்டிசிபென்ட் பட்டனை மறைக்கவும்."
+		function updateAddParticipantButtonVisibility() {
+			var addBtn = document.getElementById('addParticipantBtn');
+			var sec = document.getElementById('schoolDetailsSection');
+			var isSaved = (typeof window.IS_SCHOOL_DETAILS_SAVED !== 'undefined') ? Boolean(window.IS_SCHOOL_DETAILS_SAVED) : false;
+			var isSectionOpen = (sec && sec.style.display !== 'none');
+
+			if (!addBtn) return;
+
+			if (!isSaved || isSectionOpen) {
+				addBtn.style.setProperty('display', 'none', 'important');
+			} else {
+				addBtn.style.setProperty('display', 'inline-flex', 'important');
+			}
+		}
+
 		// Enhanced visibility management function
 		function updateVisibility() {
 			var isAdmin = <?php echo (!empty($is_admin)) ? 'true' : 'false'; ?>;
 			var schoolDetailsSection = document.getElementById('schoolDetailsSection');
 			var registeredParticipantsWrapper = document.getElementById('registeredParticipantsWrapper');
 			var schoolDetailsToggleBtnText = document.getElementById('schoolDetailsToggleBtnText');
-			var addParticipantBtn = document.getElementById('addParticipantBtn');
 
 			var currentSchoolCode = '<?php echo esc($active_code); ?>';
 			var hasSchoolCode = (currentSchoolCode !== '' && currentSchoolCode !== '0');
+			var isSaved = (typeof window.IS_SCHOOL_DETAILS_SAVED !== 'undefined') ? Boolean(window.IS_SCHOOL_DETAILS_SAVED) : false;
 
 			if (!isAdmin) {
-				// School User: Always hide school details, always show registered participants, show Add Participant button
+				// School User: Always hide school details, always show registered participants
 				if (schoolDetailsSection) schoolDetailsSection.style.display = 'none';
 				if (registeredParticipantsWrapper) registeredParticipantsWrapper.style.display = 'block';
-				if (addParticipantBtn) addParticipantBtn.style.display = 'inline-block';
+				updateAddParticipantButtonVisibility();
 				return;
 			}
 
 			// Admin Users (IT Master, State Admin, District Admin, Sub District Admin):
-			// Only show Add Participant button if a school is loaded
-			if (addParticipantBtn) {
-				addParticipantBtn.style.display = hasSchoolCode ? 'inline-block' : 'none';
-			}
-
-			// When a school is loaded (hasSchoolCode), do NOT show/expand school details on page load or reload
-			if (hasSchoolCode) {
+			// User requirement: Only if all inputs are completely saved in the database should it auto-hide!
+			// Otherwise, it must NOT close/hide automatically; it must remain open until saved.
+			if (hasSchoolCode && isSaved) {
 				if (schoolDetailsSection) schoolDetailsSection.style.display = 'none';
 				if (registeredParticipantsWrapper) registeredParticipantsWrapper.style.display = 'block';
 				if (schoolDetailsToggleBtnText) schoolDetailsToggleBtnText.textContent = 'School Details';
@@ -1775,6 +2257,8 @@ window.loadItemsByClass = function() {
 				if (registeredParticipantsWrapper) registeredParticipantsWrapper.style.display = 'none';
 				if (schoolDetailsToggleBtnText) schoolDetailsToggleBtnText.textContent = 'Hide School Details';
 			}
+
+			updateAddParticipantButtonVisibility();
 		}
 
 		// Initialize the visibility state
@@ -1803,6 +2287,7 @@ window.loadItemsByClass = function() {
 				if (part) part.style.display = 'block';
 				if (btnText) btnText.textContent = 'School Details';
 			}
+			updateAddParticipantButtonVisibility();
 		}
 
 		function showSchoolDetailsSection() {
@@ -1812,6 +2297,7 @@ window.loadItemsByClass = function() {
 			if (sec) sec.style.display = 'block';
 			if (part) part.style.display = 'none';
 			if (btnText) btnText.textContent = 'Hide School Details';
+			updateAddParticipantButtonVisibility();
 		}
 
 		function hideSchoolDetailsSection() {
@@ -1821,58 +2307,12 @@ window.loadItemsByClass = function() {
 			if (sec) sec.style.display = 'none';
 			if (part) part.style.display = 'block';
 			if (btnText) btnText.textContent = 'School Details';
+			updateAddParticipantButtonVisibility();
 		}
 
 		function handleSchoolSelect(code) {
 			if (!code || code === '0' || code === 0) return;
 			loadSchoolByCode(code);
-		}
-
-		function extractSchoolCode(val) {
-			if (!val) return '';
-			val = String(val).trim();
-			
-			// 1. Direct number check (e.g. "12001")
-			if (/^\d+$/.test(val)) {
-				return val;
-			}
-			
-			// 2. Starts with digits (e.g. "12001 - GHSS Example")
-			var match = val.match(/^(\d+)/);
-			if (match && match[1]) {
-				return match[1];
-			}
-			
-			// 3. Search in SUBDISTRICT_SCHOOLS_LIST by name or code
-			if (typeof SUBDISTRICT_SCHOOLS_LIST !== 'undefined' && Array.isArray(SUBDISTRICT_SCHOOLS_LIST)) {
-				var lowerVal = val.toLowerCase();
-				for (var i = 0; i < SUBDISTRICT_SCHOOLS_LIST.length; i++) {
-					var item = SUBDISTRICT_SCHOOLS_LIST[i];
-					if (item.code === val || item.name.toLowerCase().indexOf(lowerVal) !== -1) {
-						return item.code;
-					}
-				}
-			}
-			
-			// 4. Search in datalist options
-			var list = document.getElementById('schoolOptionsList');
-			if (list && list.options) {
-				var lowerVal2 = val.toLowerCase();
-				for (var j = 0; j < list.options.length; j++) {
-					var opt = list.options[j];
-					var optVal = (opt.value || '').trim();
-					var optText = (opt.text || opt.innerText || '').trim();
-					if (optVal.toLowerCase().indexOf(lowerVal2) !== -1) {
-						var m = optVal.match(/^(\d+)/);
-						if (m && m[1]) return m[1];
-					}
-					if (optText.toLowerCase().indexOf(lowerVal2) !== -1) {
-						var m2 = optText.match(/^(\d+)/);
-						if (m2 && m2[1]) return m2[1];
-					}
-				}
-			}
-			return '';
 		}
 
 		var _fetchSchoolTimer = null;
@@ -1889,6 +2329,10 @@ window.loadItemsByClass = function() {
 					dataType: 'json',
 					success: function(resp) {
 						if (resp && resp.status === 'success' && resp.data) {
+							if (typeof resp.is_saved !== 'undefined') {
+								resp.data.is_saved = resp.is_saved;
+								window.IS_SCHOOL_DETAILS_SAVED = Boolean(resp.is_saved);
+							}
 							populateSchoolForm(resp.data);
 						}
 					},
@@ -1956,9 +2400,13 @@ window.loadItemsByClass = function() {
 			
 			var txtTotalHSS = document.getElementById('txtTotalHSS');
 			if (txtTotalHSS) txtTotalHSS.value = data.strength_hss || '';
+			var hidHSSNo = document.getElementById('hidHSSNo');
+			if (hidHSSNo) hidHSSNo.value = data.strength_hss || 0;
 			
 			var txtTotalVHSS = document.getElementById('txtTotalVHSS');
 			if (txtTotalVHSS) txtTotalVHSS.value = data.strength_vhss || '';
+			var hidVHSSNo = document.getElementById('hidVHSSNo');
+			if (hidVHSSNo) hidVHSSNo.value = data.strength_vhss || 0;
 			
 			var txtTotal = document.getElementById('txtTotal');
 			if (txtTotal) txtTotal.value = data.total_strength || '';
@@ -1971,6 +2419,17 @@ window.loadItemsByClass = function() {
 				badge.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Active: ' + schoolCode;
 				badge.className = 'badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill fs-7 fw-semibold';
 			}
+
+			if (typeof data.is_saved !== 'undefined') {
+				window.IS_SCHOOL_DETAILS_SAVED = Boolean(data.is_saved);
+			}
+			// Only auto-hide if all inputs are saved in DB; otherwise remain open
+			if (window.IS_SCHOOL_DETAILS_SAVED) {
+				hideSchoolDetailsSection();
+			} else {
+				showSchoolDetailsSection();
+			}
+			updateAddParticipantButtonVisibility();
 		}
 
 		function populateTeachersList(teachersStr) {
@@ -2027,55 +2486,6 @@ window.loadItemsByClass = function() {
 			} else if (container) {
 				container.appendChild(porow);
 			}
-		}
-
-		function handleSchoolSearchInput(val) {
-			if (!val) return;
-			var code = extractSchoolCode(val);
-			if (code && code !== '0' && /^\d+$/.test(code)) {
-				// Automatically fetch and populate form inputs!
-				fetchSchoolDataAjax(code);
-				
-				// If user selected full suggestion containing dash
-				if (val.indexOf(' - ') > -1) {
-					var current = '<?php echo esc($active_code); ?>';
-					if (code !== current) {
-						loadSchoolByCode(code);
-					}
-				}
-			}
-		}
-
-		function loadSchoolFromSearch() {
-			var input = document.getElementById('txtSearchSchool');
-			var val = input ? input.value.trim() : '';
-			if (!val) {
-				swal('Missing Information', 'Please enter a School Code or search a School Name.', 'warning');
-				return;
-			}
-			var code = extractSchoolCode(val);
-			if (!code || code === '0' || !/^\d+$/.test(code)) {
-				swal('Invalid School', 'Could not resolve a matching School Code. Please enter a valid numeric School Code.', 'warning');
-				return;
-			}
-			loadSchoolByCode(code);
-		}
-
-		function loadSchoolByCode(code) {
-			if (!code) {
-				var input = document.getElementById('txtSearchSchool');
-				if (input) code = extractSchoolCode(input.value.trim());
-			}
-			if (!code || code === '0' || !/^\d+$/.test(code)) {
-				swal('Missing Information', 'Please enter a valid School Code.', 'warning');
-				return;
-			}
-			var btn = document.getElementById('btnLoadSchool');
-			if (btn) {
-				btn.disabled = true;
-				btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Loading...';
-			}
-			window.location.href = '<?php echo base_url("schools/school_entry"); ?>?school_code=' + encodeURIComponent(code);
 		}
 
 		function saveSchoolDetailsWithSpinner() {
@@ -2137,29 +2547,13 @@ window.loadItemsByClass = function() {
 				try {
 					schoolCodeInputElement.addEventListener('input', handleSchoolCodeChange);
 					schoolCodeInputElement.addEventListener('blur', handleSchoolCodeChange);
-
-				} catch (e) {
-					console.error('❌ Error adding listeners to School Code Input:', e);
-				}
-			} else {
-				console.error('❌ School Code Input NOT FOUND - Available inputs:');
-				var inputs = document.querySelectorAll('input');
-				inputs.forEach(function (input, index) {
-				});
+				} catch (e) {}
 			}
 
 			if (schoolProfileBtnElement) {
 				try {
 					schoolProfileBtnElement.addEventListener('click', toggleSchoolProfile);
-
-				} catch (e) {
-					console.error('❌ Error adding click listener to School Profile Button:', e);
-				}
-			} else {
-				console.error('❌ School Profile Button NOT FOUND - Available buttons:');
-				var buttons = document.querySelectorAll('button');
-				buttons.forEach(function (button, index) {
-				});
+				} catch (e) {}
 			}
 
 			// Initialize visibility using the new unified function
@@ -2569,6 +2963,11 @@ window.loadItemsByClass = function() {
 				if (!input) return;
 
 				input.value = '';
+				input.dataset.originalVal = '';
+				input.dataset.previousVal = '';
+				input.classList.remove('is-invalid');
+				input.style.borderColor = '';
+				input.style.boxShadow = '';
 				input.disabled = false;
 				input.style.backgroundColor = '';
 
@@ -2585,6 +2984,33 @@ window.loadItemsByClass = function() {
 				}
 			};
 
+			// Function to clear pinnany selection
+			window.clearPinnanySelection = function(inputId) {
+				var input = document.getElementById(inputId);
+				if (!input) return;
+
+				input.value = '';
+				input.dataset.originalVal = '';
+				input.dataset.previousVal = '';
+				input.classList.remove('is-invalid');
+				input.style.borderColor = '';
+				input.style.boxShadow = '';
+				input.disabled = false;
+				input.style.backgroundColor = '';
+
+				var fieldNumber = inputId.replace('txtPinnanyCode_', '');
+				var detailDiv = document.getElementById('pinnanyDetails_' + fieldNumber);
+				if (detailDiv) detailDiv.style.display = 'none';
+				var iconSpan = document.getElementById('pinnanyTypeIcon_' + fieldNumber);
+				if (iconSpan) { iconSpan.style.display = 'none'; iconSpan.innerHTML = ''; }
+				var nameSpan = document.getElementById('pinnanyName_' + fieldNumber);
+				if (nameSpan) nameSpan.innerText = '';
+
+				if (typeof window.loadItemsByClass === 'function') {
+					window.loadItemsByClass();
+				}
+			};
+
 			// Function to clear all item selections
 			window.clearAllItemSelections = function() {
 				for (var i = 1; i <= 5; i++) {
@@ -2592,7 +3018,14 @@ window.loadItemsByClass = function() {
 				}
 				for (var p = 1; p <= 3; p++) {
 					var pInput = document.getElementById('txtPinnanyCode_' + p);
-					if (pInput) pInput.value = '';
+					if (pInput) {
+						pInput.value = '';
+						pInput.dataset.originalVal = '';
+						pInput.dataset.previousVal = '';
+						pInput.classList.remove('is-invalid');
+						pInput.style.borderColor = '';
+						pInput.style.boxShadow = '';
+					}
 					var pDetail = document.getElementById('pinnanyDetails_' + p);
 					if (pDetail) pDetail.style.display = 'none';
 					var pIcon = document.getElementById('pinnanyTypeIcon_' + p);
@@ -2614,7 +3047,12 @@ window.loadItemsByClass = function() {
 				var userfile = document.getElementById('userfile');
 				var hidADNO = document.getElementById('hidADNO');
 
-				if (txtADNO) txtADNO.value = '';
+				if (txtADNO) {
+					txtADNO.value = '';
+					txtADNO.placeholder = 'Enter admission number';
+				}
+				var adnoHelp = document.getElementById('adnoHelpText');
+				if (adnoHelp) adnoHelp.style.display = 'none';
 				if (txtParticipantName) txtParticipantName.value = '';
 				if (txtClass) txtClass.value = '';
 				if (txtGender) txtGender.value = '';
@@ -2631,7 +3069,11 @@ window.loadItemsByClass = function() {
 					window.clearAllItemSelections();
 				}
 
-				// Reset modal title and button for add
+				// Reset modal title, action, and button for add
+				var formParticipant = document.getElementById('formParticipant');
+				if (formParticipant) {
+					formParticipant.action = '<?php echo base_url('schools/registration/save_participant'); ?>';
+				}
 				var modalLabel = document.getElementById('participantModalLabel');
 				if (modalLabel) modalLabel.innerText = 'Add Participant';
 				var saveBtn = document.getElementById('save_participant_btn');
@@ -2646,6 +3088,8 @@ window.loadItemsByClass = function() {
 				if (availableItemsContainer) {
 					availableItemsContainer.innerHTML = '<div class="text-center text-muted py-4"><i class="bi bi-info-circle fs-4 text-secondary mb-2 d-block"></i><p style="font-size: 0.85rem;" class="mb-0">Please select a class to view available items.</p></div>';
 				}
+				var headerEl = document.getElementById('availableItemsHeaderText');
+				if (headerEl) headerEl.innerText = 'Available Items';
 			};
 
 			// Initialize item code input handlers when document is ready
@@ -2656,16 +3100,6 @@ window.loadItemsByClass = function() {
 						jQuery(this).on('input', function () {
 							handleItemCodeChange(this);
 						});
-					}
-				});
-
-				// Add clear buttons to item inputs
-				jQuery('.item-code-input').each(function () {
-					if (jQuery(this).length > 0) {
-						var inputId = jQuery(this).attr('id');
-						if (inputId) {
-							jQuery(this).after('<button type="button" class="btn btn-outline-danger btn-sm" onclick="clearItemSelection(\'' + inputId + '\')" title="Clear selection"><i class="fas fa-times"></i></button>');
-						}
 					}
 				});
 			});
@@ -2757,7 +3191,7 @@ window.loadItemsByClass = function() {
 
 			// Override the editParticipant function to set participant ID
 			// Enhanced editParticipant function with button spinner
-			window.editParticipant = function (admnNo, btn) {
+			window.editParticipant = function (admnNo, btn, schoolCode) {
 				if (!admnNo) {
 					console.error('Admission number is missing in editParticipant');
 					return;
@@ -2778,14 +3212,39 @@ window.loadItemsByClass = function() {
 				var hidADNO = document.getElementById('hidADNO');
 				if (hidADNO) hidADNO.value = admnNo;
 
-				var schCode = (document.getElementById('hidSchoolId') ? document.getElementById('hidSchoolId').value : '') ||
-				              (document.getElementById('formSchoolHidSchoolId') ? document.getElementById('formSchoolHidSchoolId').value : '') ||
+				var schCode = schoolCode ||
+				              (document.getElementById('hidSchoolId') && document.getElementById('hidSchoolId').value ? document.getElementById('hidSchoolId').value : '') ||
+				              (document.getElementById('formSchoolHidSchoolId') && document.getElementById('formSchoolHidSchoolId').value ? document.getElementById('formSchoolHidSchoolId').value : '') ||
+				              (document.querySelector('input[name="hidSchoolId"]') ? document.querySelector('input[name="hidSchoolId"]').value : '') ||
 				              '<?php echo esc($active_code ?? ''); ?>';
+
+				var hidSchoolIdEl = document.getElementById('hidSchoolId');
+				if (hidSchoolIdEl && schCode) hidSchoolIdEl.value = schCode;
+
+				// Immediately configure modal title, button and action for edit
+				var modalLabel = document.getElementById('participantModalLabel');
+				if (modalLabel) modalLabel.innerText = 'Edit Participant';
+				var saveBtn = document.getElementById('save_participant_btn');
+				if (saveBtn) {
+					saveBtn.innerText = 'Update Participant';
+					saveBtn.disabled = false;
+					saveBtn.setAttribute('onclick', 'fncUpdateParticipant(\'' + admnNo + '\')');
+				}
+				var formParticipant = document.getElementById('formParticipant');
+				if (formParticipant) {
+					formParticipant.action = '<?php echo base_url('schools/registration/update_participant_details'); ?>';
+				}
 
 				var requestUrl = '<?php echo base_url('schools/registration/get_participant_data'); ?>';
 				var formData = new FormData();
 				formData.append('hidSchoolId', schCode);
+				formData.append('school_code', schCode);
 				formData.append('hidADNO', admnNo);
+				formData.append('admn_no', admnNo);
+				if (typeof getCsrfToken === 'function') {
+					var csrfToken = getCsrfToken();
+					if (csrfToken) formData.append('csrf_test_name', csrfToken);
+				}
 
 				fetch(requestUrl, {
 					method: 'POST',
@@ -2799,6 +3258,15 @@ window.loadItemsByClass = function() {
 				})
 				.then(function (response) {
 					restoreBtn();
+					if (response.csrf_hash) {
+						if (typeof updateCsrfToken === 'function') {
+							updateCsrfToken(response.csrf_hash);
+						}
+						var csrfInputs = document.querySelectorAll('input[name="csrf_test_name"]');
+						for (var ci = 0; ci < csrfInputs.length; ci++) {
+							csrfInputs[ci].value = response.csrf_hash;
+						}
+					}
 					if (response.error) {
 						if (typeof Swal !== 'undefined') {
 							Swal.fire({ icon: 'error', title: 'Error', text: response.error });
@@ -2833,7 +3301,14 @@ window.loadItemsByClass = function() {
 					// Clear item inputs first
 					for (var c = 1; c <= 5; c++) {
 						var inpC = document.getElementById('txtItemCode_' + c);
-						if (inpC) inpC.value = '';
+						if (inpC) {
+							inpC.value = '';
+							inpC.dataset.originalVal = '';
+							inpC.dataset.previousVal = '';
+							inpC.classList.remove('is-invalid');
+							inpC.style.borderColor = '';
+							inpC.style.boxShadow = '';
+						}
 						var dC = document.getElementById('itemDetails_' + c);
 						if (dC) dC.style.display = 'none';
 						var iC = document.getElementById('itemTypeIcon_' + c);
@@ -2843,7 +3318,14 @@ window.loadItemsByClass = function() {
 					}
 					for (var p = 1; p <= 3; p++) {
 						var inP = document.getElementById('txtPinnanyCode_' + p);
-						if (inP) inP.value = '';
+						if (inP) {
+							inP.value = '';
+							inP.dataset.originalVal = '';
+							inP.dataset.previousVal = '';
+							inP.classList.remove('is-invalid');
+							inP.style.borderColor = '';
+							inP.style.boxShadow = '';
+						}
 						var dP = document.getElementById('pinnanyDetails_' + p);
 						if (dP) dP.style.display = 'none';
 						var iP = document.getElementById('pinnanyTypeIcon_' + p);
@@ -2862,7 +3344,10 @@ window.loadItemsByClass = function() {
 								if (pinnanyIdx <= 3) {
 									var pInput = document.getElementById('txtPinnanyCode_' + pinnanyIdx);
 									if (pInput && item && item.item_code) {
-										pInput.value = item.item_code;
+										var pCode = String(item.item_code).trim();
+										pInput.value = pCode;
+										pInput.dataset.originalVal = pCode;
+										pInput.dataset.previousVal = pCode;
 										if (typeof window.updatePinnanyCodeIcon === 'function') {
 											window.updatePinnanyCodeIcon(pinnanyIdx, item.item_type || 'P', item.item_name || '');
 										}
@@ -2873,7 +3358,10 @@ window.loadItemsByClass = function() {
 								if (regularIdx <= 5) {
 									var inputElement = document.getElementById('txtItemCode_' + regularIdx);
 									if (inputElement && item && item.item_code) {
-										inputElement.value = item.item_code;
+										var rCode = String(item.item_code).trim();
+										inputElement.value = rCode;
+										inputElement.dataset.originalVal = rCode;
+										inputElement.dataset.previousVal = rCode;
 										if (typeof window.updateItemCodeIcon === 'function') {
 											window.updateItemCodeIcon(regularIdx, item.item_type || 'S', item.item_name || '');
 										}
@@ -2897,6 +3385,10 @@ window.loadItemsByClass = function() {
 						saveBtn.innerText = 'Update Participant';
 						saveBtn.disabled = false;
 						saveBtn.setAttribute('onclick', 'fncUpdateParticipant(\'' + admnNo + '\')');
+					}
+					var formParticipant = document.getElementById('formParticipant');
+					if (formParticipant) {
+						formParticipant.action = '<?php echo base_url('schools/registration/update_participant_details'); ?>';
 					}
 
 					var modalEl = document.getElementById('participantModal');
@@ -2980,6 +3472,162 @@ window.loadItemsByClass = function() {
 
 	</script>
 <?php } ?>
+<?php if (!$can_edit): ?>
+	<script language="JavaScript">
+		window.toggleSchoolDetailsSection = function () {
+			var sec = document.getElementById('schoolDetailsSection');
+			var part = document.getElementById('registeredParticipantsWrapper');
+			var btnText = document.getElementById('schoolDetailsToggleBtnText');
+			if (!sec) return;
+			var isHidden = (sec.style.display === 'none' || sec.style.display === '');
+			if (isHidden) {
+				sec.style.display = 'block';
+				if (part) part.style.display = 'none';
+				if (btnText) btnText.textContent = 'Hide School Details';
+			} else {
+				sec.style.display = 'none';
+				if (part) part.style.display = 'block';
+				if (btnText) btnText.textContent = 'School Details';
+			}
+		};
+		window.showSchoolDetailsSection = function () {
+			var sec = document.getElementById('schoolDetailsSection');
+			var part = document.getElementById('registeredParticipantsWrapper');
+			var btnText = document.getElementById('schoolDetailsToggleBtnText');
+			if (sec) sec.style.display = 'block';
+			if (part) part.style.display = 'none';
+			if (btnText) btnText.textContent = 'Hide School Details';
+		};
+		window.hideSchoolDetailsSection = function () {
+			var sec = document.getElementById('schoolDetailsSection');
+			var part = document.getElementById('registeredParticipantsWrapper');
+			var btnText = document.getElementById('schoolDetailsToggleBtnText');
+			if (sec) sec.style.display = 'none';
+			if (part) part.style.display = 'block';
+			if (btnText) btnText.textContent = 'School Details';
+		};
+		window.editParticipant = function () {
+			if (typeof Swal !== 'undefined') {
+				Swal.fire({
+					icon: 'info',
+					title: 'Registration Finalized & Locked',
+					text: 'Registration has been finalized and locked for this school. Editing participants is not permitted.'
+				});
+			} else {
+				alert('Registration has been finalized and locked for this school. Editing participants is not permitted.');
+			}
+		};
+		window.deleteParticipant = function () {
+			if (typeof Swal !== 'undefined') {
+				Swal.fire({
+					icon: 'info',
+					title: 'Registration Finalized & Locked',
+					text: 'Registration has been finalized and locked for this school. Deleting participants is not permitted.'
+				});
+			} else {
+				alert('Registration has been finalized and locked for this school. Deleting participants is not permitted.');
+			}
+		};
+
+		function extractSchoolCode(val) {
+			if (!val) return '';
+			val = String(val).trim();
+
+			if (/^\d+$/.test(val)) {
+				return val;
+			}
+
+			var match = val.match(/^(\d+)/);
+			if (match && match[1]) {
+				return match[1];
+			}
+
+			if (typeof SUBDISTRICT_SCHOOLS_LIST !== 'undefined' && Array.isArray(SUBDISTRICT_SCHOOLS_LIST)) {
+				var lowerVal = val.toLowerCase();
+				for (var i = 0; i < SUBDISTRICT_SCHOOLS_LIST.length; i++) {
+					var item = SUBDISTRICT_SCHOOLS_LIST[i];
+					if (item.code === val || item.name.toLowerCase().indexOf(lowerVal) !== -1) {
+						return item.code;
+					}
+				}
+			}
+
+			var list = document.getElementById('schoolOptionsList');
+			if (list && list.options) {
+				var lowerVal2 = val.toLowerCase();
+				for (var j = 0; j < list.options.length; j++) {
+					var opt = list.options[j];
+					var optVal = (opt.value || '').trim();
+					var optText = (opt.text || opt.innerText || '').trim();
+					if (optVal.toLowerCase().indexOf(lowerVal2) !== -1) {
+						var m = optVal.match(/^(\d+)/);
+						if (m && m[1]) return m[1];
+					}
+					if (optText.toLowerCase().indexOf(lowerVal2) !== -1) {
+						var m2 = optText.match(/^(\d+)/);
+						if (m2 && m2[1]) return m2[1];
+					}
+				}
+			}
+			return '';
+		}
+
+		function handleSchoolSearchInput(val) {
+			if (!val) return;
+			var code = extractSchoolCode(val);
+			if (code && code !== '0' && /^\d+$/.test(code) && val.indexOf(' - ') > -1) {
+				var current = '<?php echo esc($active_code); ?>';
+				if (code !== current) {
+					loadSchoolByCode(code);
+				}
+			}
+		}
+
+		function loadSchoolFromSearch() {
+			var input = document.getElementById('txtSearchSchool');
+			var val = input ? input.value.trim() : '';
+			var code = extractSchoolCode(val);
+			if (!code || code === '0' || !/^\d+$/.test(code)) {
+				if (typeof Swal !== 'undefined') {
+					Swal.fire({
+						icon: 'warning',
+						title: 'Invalid School',
+						text: 'Please enter a valid numeric School Code.'
+					});
+				} else {
+					alert('Please enter a valid numeric School Code.');
+				}
+				return;
+			}
+			loadSchoolByCode(code);
+		}
+
+		function loadSchoolByCode(code) {
+			if (!code) {
+				var input = document.getElementById('txtSearchSchool');
+				if (input) code = extractSchoolCode(input.value.trim());
+			}
+			if (!code || code === '0' || !/^\d+$/.test(code)) {
+				if (typeof Swal !== 'undefined') {
+					Swal.fire({
+						icon: 'warning',
+						title: 'Invalid School',
+						text: 'Please enter a valid School Code.'
+					});
+				} else {
+					alert('Please enter a valid School Code.');
+				}
+				return;
+			}
+			var btn = document.getElementById('btnLoadSchool');
+			if (btn) {
+				btn.disabled = true;
+				btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Loading...';
+			}
+			window.location.href = '<?php echo base_url("schools/school_entry"); ?>?school_code=' + encodeURIComponent(code);
+		}
+	</script>
+<?php endif; ?>
 
 
 <?php
@@ -2990,15 +3638,17 @@ $show_participants_initial = !empty($active_code) || empty($initial_show_school_
 	<div class="row justify-content-center">
 		<div class="col-12">
 			<div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden" style="border: 1px solid #e2e8f0 !important;">
-				<div class="card-header bg-white py-3 px-4 border-0 d-flex flex-wrap justify-content-between align-items-center gap-2" style="background: linear-gradient(135deg, #f8fafc, #ffffff) !important; border-bottom: 1px solid #edf2f7 !important;">
-					<div class="d-flex align-items-center gap-2">
-						<i class="bi bi-person-lines-fill text-primary fs-5"></i>
-						<h5 class="fw-bold mb-0 text-dark">Registered Participants</h5>
-					</div>
-					<div class="d-flex align-items-center gap-2">
-						<span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-2 fw-semibold fs-7">
-							Total: <?php echo !empty($participant_details) ? count($participant_details) : 0; ?> Students
-						</span>
+				<div class="card-header bg-white py-3 px-4 border-0" style="background: linear-gradient(135deg, #f8fafc, #ffffff) !important; border-bottom: 1px solid #edf2f7 !important;">
+					<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-1 gap-md-3">
+						<div class="d-flex align-items-center gap-2">
+							<i class="bi bi-person-lines-fill text-primary fs-5"></i>
+							<h5 class="fw-bold mb-0 text-dark">Registered Participants</h5>
+						</div>
+						<div>
+							<span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 fw-semibold fs-7">
+								Total: <?php echo !empty($participant_details) ? count($participant_details) : 0; ?> Students
+							</span>
+						</div>
 					</div>
 				</div>
 
@@ -3052,7 +3702,7 @@ $show_participants_initial = !empty($active_code) || empty($initial_show_school_
 										<th class="py-3 px-3 sortable" data-sort="string" style="cursor: pointer;">
 											<span>Registered Items</span> <span class="sort-icon text-muted">⇅</span>
 										</th>
-										<?php if (isset($is_edit) and $is_edit != 'no') { ?>
+										<?php if ($can_edit) { ?>
 											<th class="py-3 px-3 text-center" style="width: 100px;">Actions</th>
 										<?php } ?>
 									</tr>
@@ -3062,14 +3712,23 @@ $show_participants_initial = !empty($active_code) || empty($initial_show_school_
 									$db = \Config\Database::connect();
 									$count = 1;
 									for ($j = 0; $j < count($participant_details); $j++) {
-										$target_sch = !empty($school_details[0]['school_code']) ? $school_details[0]['school_code'] : $active_code;
+										$part_school_code = !empty($participant_details[$j]['school_code']) ? $participant_details[$j]['school_code'] : $target_sch;
 										$items = $db->table('sd_participant_item_details PD')
 											->select('PD.*, IM.item_name')
 											->join('item_master IM', 'IM.item_code = PD.item_code')
-											->where('PD.school_code', $target_sch)
+											->where('PD.school_code', $part_school_code)
 											->where('PD.participant_id', $participant_details[$j]['participant_id'])
 											->where('PD.admn_no', $participant_details[$j]['admn_no'])
 											->get()->getResultArray();
+
+										if (empty($items)) {
+											$items = $db->table('d_participant_item_details PD')
+												->select('PD.*, IM.item_name')
+												->join('item_master IM', 'IM.item_code = PD.item_code')
+												->where('PD.school_code', $part_school_code)
+												->where('PD.admn_no', $participant_details[$j]['admn_no'])
+												->get()->getResultArray();
+										}
 										$photo_url = $participant_photos[$participant_details[$j]['admn_no']] ?? null;
 										$photo_display_url = $photo_url ? $photo_url : base_url('photos/img_user_nophoto.png');
 									?>
@@ -3133,11 +3792,11 @@ $show_participants_initial = !empty($active_code) || empty($initial_show_school_
 													?>
 												</div>
 											</td>
-											<?php if (isset($is_edit) and $is_edit != 'no') { ?>
+											<?php if ($can_edit) { ?>
 												<td class="text-center py-3">
 													<div class="d-flex justify-content-center gap-2">
 														<button type="button"
-															onClick="javascript:editParticipant('<?php echo $participant_details[$j]['admn_no'] ?>', this)"
+															onClick="javascript:editParticipant('<?php echo $participant_details[$j]['admn_no'] ?>', this, '<?php echo $participant_details[$j]['school_code'] ?? $active_code; ?>')"
 															class="btn btn-sm btn-outline-primary rounded-circle shadow-sm d-inline-flex align-items-center justify-content-center p-0"
 															style="width: 34px; height: 34px;" title="Edit Participant">
 															<i class="bi bi-pencil-fill fs-7"></i>
@@ -3179,12 +3838,26 @@ $show_participants_initial = !empty($active_code) || empty($initial_show_school_
 								<div class="empty-state-icon mb-3 bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 72px; height: 72px;">
 									<i class="bi bi-people fs-2"></i>
 								</div>
-								<h5 class="fw-bold text-dark mb-1">No Participants Registered Yet</h5>
-								<p class="text-muted mb-3 small" style="max-width: 360px; margin: 0 auto;">Start registering your students by clicking the Add Participant button below.</p>
-								<button type="button" class="btn btn-success rounded-pill px-4 py-2 fw-semibold shadow-sm" data-bs-toggle="modal"
-									data-bs-target="#participantModal" onclick="clearForm()">
-									<i class="bi bi-plus-circle-fill me-1"></i> Add Participant
-								</button>
+								<?php if (!$can_edit): ?>
+									<div class="mt-2">
+										<span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill fs-7 fw-semibold d-inline-flex align-items-center justify-content-center gap-1 shadow-2xs">
+											<i class="bi bi-lock-fill"></i> Registration Finalized & Locked
+										</span>
+										<p class="text-muted mt-2 mb-0 small">Registration is confirmed and locked. No further modifications or additions are allowed.</p>
+									</div>
+								<?php elseif (!empty($is_school_details_saved)): ?>
+									<p class="text-muted mb-3 small" style="max-width: 360px; margin: 0 auto;">Start registering your students by clicking the Add Participant button below.</p>
+									<button type="button" class="btn btn-success rounded-pill px-4 py-2 fw-semibold shadow-sm" data-bs-toggle="modal"
+										data-bs-target="#participantModal" onclick="clearForm()">
+										<i class="bi bi-plus-circle-fill me-1"></i> Add Participant
+									</button>
+								<?php else: ?>
+									<p class="text-muted mb-3 small" style="max-width: 360px; margin: 0 auto;">Start registering your students by clicking the Add Participant button below.</p>
+									<div class="alert alert-warning d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill small mb-0 text-start">
+										<i class="bi bi-exclamation-triangle-fill text-warning"></i>
+										<span>பள்ளி விவரங்கள் சேமிக்கப்பட்ட பின்னரே மாணவர் சேர்க்கை செய்ய முடியும்.</span>
+									</div>
+								<?php endif; ?>
 							</div>
 						</div>
 					</div>
@@ -3208,14 +3881,18 @@ if (!empty(@$group_details['group_array'])) {
 			<div class="row justify-content-center">
 				<div class="col-12">
 					<div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="border: 1px solid #e2e8f0 !important;">
-						<div class="card-header bg-white py-3 px-4 border-0 d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #f8fafc, #ffffff) !important; border-bottom: 1px solid #edf2f7 !important;">
-							<div class="d-flex align-items-center gap-2">
-								<i class="bi bi-award-fill text-warning fs-5"></i>
-								<h5 class="fw-bold mb-0 text-dark">Captains List</h5>
+						<div class="card-header bg-white py-3 px-4 border-0" style="background: linear-gradient(135deg, #f8fafc, #ffffff) !important; border-bottom: 1px solid #edf2f7 !important;">
+							<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-1 gap-md-3">
+								<div class="d-flex align-items-center gap-2">
+									<i class="bi bi-award-fill text-warning fs-5"></i>
+									<h5 class="fw-bold mb-0 text-dark">Captains List</h5>
+								</div>
+								<div>
+									<span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-1 fw-semibold">
+										Total: <?php echo count($group_details['group_array'] ?? []); ?> Groups
+									</span>
+								</div>
 							</div>
-							<span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-1 fw-semibold">
-								Total: <?php echo count($group_details['group_array'] ?? []); ?> Groups
-							</span>
 						</div>
 
 						<!-- Top Filter & Search Bar for Captains -->
@@ -3272,7 +3949,7 @@ if (!empty(@$group_details['group_array'])) {
 											</td>
 											<td class="py-3 px-3">
 												<?php
-												if (isset($is_edit) and $is_edit != 'no') {
+												if ($can_edit) {
 													print (form_dropdown(
 														'cmbGrpParticipant_' . $count,
 														$group_participant_array[$groups['item_code']] ?? [],
@@ -3294,7 +3971,7 @@ if (!empty(@$group_details['group_array'])) {
 								<input type="hidden" name="hidGrpCount" id="hidGrpCount" value="<?php echo $count ?>">
 								<div id="divCaptainSubmit" style="display:none;" class="p-3 text-center bg-light border-top">
 									<?php
-									if (isset($is_edit) and $is_edit != 'no') {
+									if ($can_edit) {
 										echo '<button type="submit" name="group_submit" id="btnSaveCaptains" class="btn btn-primary px-4 rounded-pill shadow-sm fw-semibold" onclick="this.disabled=true; this.innerHTML=\'<span class=\\\'spinner-border spinner-border-sm me-2\\\' role=\\\'status\\\'></span>Saving Captains...\'; this.form.submit();"><i class="bi bi-check2-circle me-1"></i> Save Captains</button>';
 									}
 									?>
@@ -3332,14 +4009,18 @@ if (!empty(@$participant_item_list)) {
 			<div class="row justify-content-center">
 				<div class="col-12">
 					<div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="border: 1px solid #e2e8f0 !important;">
-						<div class="card-header bg-white py-3 px-4 border-0 d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #f8fafc, #ffffff) !important; border-bottom: 1px solid #edf2f7 !important;">
-							<div class="d-flex align-items-center gap-2">
-								<i class="bi bi-grid-3x3-gap-fill text-primary fs-5"></i>
-								<h5 class="fw-bold mb-0 text-dark">Item wise Participants Summary</h5>
+						<div class="card-header bg-white py-3 px-4 border-0" style="background: linear-gradient(135deg, #f8fafc, #ffffff) !important; border-bottom: 1px solid #edf2f7 !important;">
+							<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-1 gap-md-3">
+								<div class="d-flex align-items-center gap-2">
+									<i class="bi bi-grid-3x3-gap-fill text-primary fs-5"></i>
+									<h5 class="fw-bold mb-0 text-dark">Item wise Participants Summary</h5>
+								</div>
+								<div>
+									<span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill px-3 py-1 fw-semibold">
+										Total: <?php echo count($participant_item_list); ?> Items
+									</span>
+								</div>
 							</div>
-							<span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill px-3 py-1 fw-semibold">
-								Total: <?php echo count($participant_item_list); ?> Items
-							</span>
 						</div>
 
 						<!-- Top Filter & Search Bar for Item-wise Summary -->
@@ -3405,7 +4086,7 @@ if (!empty(@$participant_item_list)) {
 												</span>
 											</td>
 											<td class="text-center">
-												<span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3 py-1 fw-bold">
+												<span class="badge bg-warning-subtle text-dark border border-warning-subtle rounded-pill px-3 py-1 fw-bold" style="color: #000000 !important;">
 													<?php echo $item_list['cnt_pinnany'] ?>
 												</span>
 											</td>
@@ -3527,9 +4208,102 @@ if (!empty(@$participant_item_list)) {
 	echo form_close();
 	?>
 	</div>
-	<?php if (@$error_msg) { ?>
+	<?php if (!empty($error_array) && is_array($error_array)) { ?>
 		<script language="JavaScript">
-				window.onload = alert('<?php echo @$error_msg; ?>');
+		window.addEventListener('DOMContentLoaded', function () {
+			var errors = <?php echo json_encode(array_values($error_array), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+			if (errors && errors.length) {
+				var html = '<div style="text-align:left;font-size:0.92rem;">' +
+					'<div style="margin-bottom:0.4rem;font-weight:600;">The participant was not saved. Please fix the following:</div>' +
+					'<ul style="margin:0;padding-left:1.2rem;">' +
+					errors.map(function (e) { return '<li>' + e + '</li>'; }).join('') +
+					'</ul><div style="margin-top:0.6rem;color:#64748b;font-size:0.85rem;">Please modify the item and try saving again.</div></div>';
+
+				// Repopulate submitted POST fields into modal so user does not lose their entries
+				<?php if (!empty($_POST['txtADNO'])): ?>
+					var txtADNO = document.getElementById('txtADNO');
+					if (txtADNO) txtADNO.value = <?php echo json_encode($_POST['txtADNO']); ?>;
+					var txtName = document.getElementById('txtParticipantName');
+					if (txtName) txtName.value = <?php echo json_encode($_POST['txtParticipantName'] ?? ''); ?>;
+					var txtClass = document.getElementById('txtClass');
+					if (txtClass) txtClass.value = <?php echo json_encode($_POST['txtClass'] ?? ''); ?>;
+					var txtGender = document.getElementById('txtGender');
+					if (txtGender) txtGender.value = <?php echo json_encode($_POST['txtGender'] ?? ''); ?>;
+					var hidADNO = document.getElementById('hidADNO');
+					var postedHidADNO = <?php echo json_encode($_POST['hidADNO'] ?? ''); ?>;
+					if (hidADNO) hidADNO.value = postedHidADNO;
+
+					<?php for ($i = 1; $i <= 10; $i++): ?>
+						<?php if (!empty($_POST['txtItemCode_' . $i])): ?>
+							var itemInp<?php echo $i; ?> = document.getElementById('txtItemCode_<?php echo $i; ?>');
+							if (itemInp<?php echo $i; ?>) {
+								itemInp<?php echo $i; ?>.value = <?php echo json_encode($_POST['txtItemCode_' . $i]); ?>;
+							}
+						<?php endif; ?>
+					<?php endfor; ?>
+
+					<?php for ($i = 1; $i <= 5; $i++): ?>
+						<?php if (!empty($_POST['txtPinnanyCode_' . $i])): ?>
+							var pinInp<?php echo $i; ?> = document.getElementById('txtPinnanyCode_<?php echo $i; ?>');
+							if (pinInp<?php echo $i; ?>) {
+								pinInp<?php echo $i; ?>.value = <?php echo json_encode($_POST['txtPinnanyCode_' . $i]); ?>;
+							}
+						<?php endif; ?>
+					<?php endfor; ?>
+
+					if (postedHidADNO) {
+						var modalLabel = document.getElementById('participantModalLabel');
+						if (modalLabel) modalLabel.innerText = 'Edit Participant';
+						var saveBtn = document.getElementById('save_participant_btn');
+						if (saveBtn) {
+							saveBtn.innerText = 'Update Participant';
+							saveBtn.disabled = false;
+							saveBtn.setAttribute('onclick', 'fncUpdateParticipant(\'' + postedHidADNO + '\')');
+						}
+						var formParticipant = document.getElementById('formParticipant');
+						if (formParticipant) {
+							formParticipant.action = '<?php echo base_url('schools/registration/update_participant_details'); ?>';
+						}
+					}
+
+					// Refresh items and update icon display
+					setTimeout(function() {
+						for (var k = 1; k <= 5; k++) {
+							var el = document.getElementById('txtItemCode_' + k);
+							if (el && el.value && typeof handleItemCodeChange === 'function') {
+								handleItemCodeChange(el);
+							}
+						}
+						for (var p = 1; p <= 3; p++) {
+							var pel = document.getElementById('txtPinnanyCode_' + p);
+							if (pel && pel.value && typeof handlePinnanyCodeChange === 'function') {
+								handlePinnanyCodeChange(pel);
+							}
+						}
+						if (typeof loadItemsByClass === 'function') loadItemsByClass();
+					}, 100);
+				<?php endif; ?>
+
+				// Keep modal open so the user can edit their inputs!
+				var modalEl = document.getElementById('participantModal');
+				if (modalEl) {
+					var modalObj = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+					modalObj.show();
+				}
+
+				if (typeof Swal !== 'undefined') {
+					Swal.fire({ 
+						icon: 'error', 
+						title: 'Registration Not Saved', 
+						html: html, 
+						confirmButtonText: 'OK',
+						target: 'body'
+					});
+				} else {
+					alert(errors.join('\n'));
+				}
+			}
+		});
 		</script>
 		<?php
 	} ?>
@@ -3976,3 +4750,5 @@ if (!empty(@$participant_item_list)) {
 				}
 			})();
 	</script>
+<?php echo view('schools/photo_crop_modal'); ?>
+

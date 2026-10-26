@@ -21,7 +21,9 @@
     }
     -->
 </style>
-<page backtop="25mm" backbottom="10mm">
+<?php $this->load->view('report/report_pdf_style'); ?>
+
+<page backtop="20mm" backbottom="10mm">
     <page_header>
         <?php
         $this->load->view('report/report_header');
@@ -33,9 +35,9 @@
         ?>
     </page_footer>       
 
-    <table width="103%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top:15px;">
+    <table width="103%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top: 2px;">
         <tr>
-            <td align="center" class="style1" height="27">Registration Fee Details </td>
+            <td align="center" class="report-pdf-title" height="27">Registration Fee Details </td>
         </tr> 
 
     </table>

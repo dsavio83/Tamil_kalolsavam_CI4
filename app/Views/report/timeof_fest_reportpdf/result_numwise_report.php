@@ -26,6 +26,8 @@
         color: #000000;
     }
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 
 <?php
 $result_numwise = $result_numwise ?? $result_num ?? [];
@@ -79,7 +81,12 @@ if (!empty($result_numwise)) {
             <tr>
                 <td style='border: 0 0 0.5px 0.5px 0 #666666; height:20px;' align="center"><?php echo $count; ?></td>
                 <td style='border: 0 0 0.5px 0.5px 0 #666666; height:20px;'>&nbsp;<?php echo wordwrap($data['participant_name'], 50, '<br>'); ?></td>
-                <td style='border: 0 0 0.5px 0.5px 0 #666666; height:20px;'>&nbsp;<?php echo wordwrap($data['school_code'] . ' - ' . $data['school_name'], 30, '<br>'); ?></td>
+                <td style='border: 0 0 0.5px 0.5px 0 #666666; height:20px;'>
+                    &nbsp;<?php echo wordwrap($data['school_code'] . ' - ' . $data['school_name'], 30, '<br>'); ?>
+                    <?php if (!empty($data['sub_district_name'])) { ?>
+                        <br/>&nbsp;<span style="font-size:8px; color:#555;">(<?php echo esc($data['sub_district_name']); ?>)</span>
+                    <?php } ?>
+                </td>
                 <td style='border: 0 0 0.5px 0.5px 0 #666666; height:20px;' align="center"><?php echo htmlspecialchars((string)$data['rank']); ?></td>
                 <td style='border: 0 0 0.5px 0.5px 0 #666666; height:20px;' align="center"><?php echo htmlspecialchars((string)$data['grade']); ?></td>
                 <td style='border: 0 0 0.5px 0.5px 0 #666666; height:20px;' align="center"><?php echo htmlspecialchars((string)$data['point']); ?></td>

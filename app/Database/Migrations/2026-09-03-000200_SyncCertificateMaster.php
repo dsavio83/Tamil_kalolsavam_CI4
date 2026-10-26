@@ -8,7 +8,7 @@ class SyncCertificateMaster extends Migration
 {
     public function up()
     {
-        $db = \Config\Database::connect();
+        $db = $this->db;
         
         // Sync confirmed results from sd_result_master into sd_certificate_master if empty
         $countRow = $db->query("SELECT COUNT(*) as c FROM sd_certificate_master")->getRowArray();

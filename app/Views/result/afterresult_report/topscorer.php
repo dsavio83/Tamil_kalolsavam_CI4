@@ -40,16 +40,13 @@
     -->
 </style>
 
-<page backtop="30mm" backbottom="25mm ">
+<?php $this->load->view('report/report_pdf_style'); ?>
+<page backtop="20mm" backbottom="25mm ">
     <page_header>
         <?php
         $this->load->view('report/report_header');
         ?>
-        <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center">
-            <tr>
-                <td align="center" class="style1" valign="top">Top Scorers</td>
-            </tr>  
-        </table>
+        
 
 
     </page_header>
@@ -57,7 +54,13 @@
         <?php
         $this->load->view('report/report_footer');
         ?>
-    </page_footer>       
+    </page_footer>
+<table width="100%" border="0" cellspacing="0" cellpadding="4" align="center">
+            <tr>
+                <td align="center" class="report-pdf-title" valign="top">Top Scorers</td>
+            </tr>  
+        </table>
+       
 
     <table width="130%" border="1" align="center" cellpadding="0" cellspacing="0" >
         <?php

@@ -4,6 +4,7 @@ $orders              = $orders              ?? [];
 $bank_details        = $bank_details        ?? [];
 $participant_details = $participant_details ?? [];
 $school_details      = $school_details      ?? [];
+$district_schools    = $district_schools    ?? [];
 $selected_participant = $selected_participant ?? [];
 $school_show         = @$school_show        ?? '';
 
@@ -231,14 +232,22 @@ if (!empty($sc['class_start'])) {
                     <div class="soe-lookup">
                         <span class="soe-lookup-icon"><i class="bi bi-search"></i></span>
                         <?php echo form_input('txtSchoolCode', (string) (@$sc['school_code'] ?? @$this->input->post('hidSchoolId') ?? ''),
-                            'id="txtSchoolCode" maxlength="6" autocomplete="off" data-soe-last="' . (string) (@$sc['school_code'] ?? '') . '"
+                            'id="txtSchoolCode" maxlength="6" autocomplete="off" list="schoolList" data-soe-last="' . (string) (@$sc['school_code'] ?? '') . '"
                             onkeypress="javascript:return numbersonly(this, event, false);"
                             onkeydown="javascript:if(event.key === \'Enter\'){event.preventDefault(); fetch_special_order_school_details();}"
+                            onchange="javascript:fetch_special_order_school_details()"
                             onblur="javascript:fetch_special_order_school_details()"'); ?>
                         <button type="button" class="soe-fetch-btn" onclick="javascript:fetch_special_order_school_details()">
                             <i class="bi bi-arrow-right-circle-fill me-1"></i>Fetch
                         </button>
                     </div>
+                    <?php if (!empty($district_schools)) { ?>
+                        <datalist id="schoolList">
+                            <?php foreach ($district_schools as $ds) { ?>
+                                <option value="<?php echo esc($ds['school_code']); ?>" label="<?php echo esc($ds['school_code'] . ' - ' . $ds['school_name']); ?>"></option>
+                            <?php } ?>
+                        </datalist>
+                    <?php } ?>
                     <?php echo form_close(); ?>
 
                     <?php if ($hasSchool) { ?>

@@ -17,7 +17,7 @@
   </div>
 </div>
 
-<?php echo form_open('stage/item_participant/participant_nodetails', array('id' => 'formIWP')); ?>
+<?php echo form_open('stage/item_participant/participant_nodetails', array('id' => 'formIWP', 'method' => 'get')); ?>
 <input type="hidden" name="hidUservalue" id="hidUservalue" value="SHOW" />
 
 <!-- Compact Single-Row Festival Filter Bar -->
@@ -36,14 +36,30 @@
       <div class="col-12 col-md">
         <div class="input-group">
           <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-tags-fill"></i></span>
-          <?php echo form_dropdown("cmbFestType", $fest, $fest_id, 'class="form-select border-start-0 py-2" id="cmbFestType" required'); ?>
+          <?php echo form_dropdown("cmbFestType", $fest, $fest_id, 'class="form-select border-start-0 py-2" id="cmbFestType" onchange="this.form.submit();" required'); ?>
         </div>
       </div>
+
+      <?php if (!empty($is_admin) && (int)session()->get('USER_TYPE') !== 2 && !empty($sub_districts)): ?>
+      <div class="col-12 col-md-auto d-flex align-items-center gap-2">
+        <label for="cmbSubDistrict" class="form-label fw-bold text-dark mb-0 text-nowrap">
+          <i class="bi bi-geo-alt-fill text-danger me-1"></i>Sub-District:
+        </label>
+      </div>
+      <div class="col-12 col-md">
+        <div class="input-group">
+          <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-building"></i></span>
+          <?php echo form_dropdown("cmbSubDistrict", $sub_districts, $sub_district, 'class="form-select border-start-0 py-2" id="cmbSubDistrict" onchange="this.form.submit();"'); ?>
+        </div>
+      </div>
+      <?php else: ?>
+        <input type="hidden" name="sub_district" value="<?php echo (int)($sub_district ?? 0); ?>">
+      <?php endif; ?>
 
       <div class="col-12 col-md-auto">
         <button type="submit" name="GET" value="GET" id="btnGet" class="btn btn-primary px-4 py-2 rounded-pill shadow-sm d-inline-flex align-items-center justify-content-center gap-2 fw-semibold w-100" onclick="showFormSpinner(this, 'Fetching...')">
           <i class="bi bi-search"></i>
-          <span>Get Item Details</span>
+          <span>Filter</span>
         </button>
       </div>
     </div>

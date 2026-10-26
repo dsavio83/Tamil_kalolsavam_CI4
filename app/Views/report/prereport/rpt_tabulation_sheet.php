@@ -26,6 +26,8 @@
     }
     -->
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 
 <page backtop="35mm" backbottom="35mm ">
     <page_header>
@@ -34,7 +36,7 @@
         ?>
         <table width="100%" border="0"  cellspacing="0" cellpadding="0" align="center">
             <tr>
-                <td align="center" class="style10" colspan="7">Tabulation Sheet</td>
+                <td align="center" class="report-pdf-title" colspan="7">Tabulation Sheet</td>
             </tr>
             <?php
             foreach ($retdata as $data) {

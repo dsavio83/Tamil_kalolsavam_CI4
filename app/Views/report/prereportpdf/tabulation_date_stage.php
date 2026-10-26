@@ -30,22 +30,13 @@
 foreach ($retvalue as $data) {
     ?>
 
-    <page backtop="35mm" backbottom="35mm">
+    <?php $this->load->view('report/report_pdf_style'); ?>
+<page backtop="20mm" backbottom="35mm">
         <page_header>
             <?php
             $this->load->view('report/report_header');
             ?>
-            <table width="800" border="0" align="center" bordercolor="#D4D0C8">
-
-                <tr>
-                    <td colspan="4" class="style10" align="center">Tabulation Sheet</td></tr>
-                <tr>
-                    <td width=50 height="32" class="style9">Item  :</td>
-                    <td width=300 height="32" class="style9"><?php echo $data['item_code']; ?>   -   <?php echo $data['item_name']; ?> (<?php echo $data['fest_name']; ?>)</td>
-                    <td width=50 height="32" class="style9">Date  :</td>
-                    <td width=80 height="30" class="style9"><?php echo datetophpmodel($data['date(sim.start_time)']); ?></td>
-                </tr>
-            </table>
+            
 
         </page_header>
         <page_footer>
@@ -75,7 +66,19 @@ foreach ($retvalue as $data) {
             $this->load->view('report/report_footer');
             ?>
 
-        </page_footer> 
+        </page_footer>
+<table width="800" border="0" align="center" bordercolor="#D4D0C8">
+
+                <tr>
+                    <td colspan="4" class="report-pdf-title" align="center">Tabulation Sheet</td></tr>
+                <tr>
+                    <td width=50 height="32" class="report-pdf-subtitle">Item  :</td>
+                    <td width=300 height="32" class="report-pdf-subtitle"><?php echo $data['item_code']; ?>   -   <?php echo $data['item_name']; ?> (<?php echo $data['fest_name']; ?>)</td>
+                    <td width=50 height="32" class="report-pdf-subtitle">Date  :</td>
+                    <td width=80 height="30" class="report-pdf-subtitle"><?php echo datetophpmodel($data['date(sim.start_time)'] ?? $data['ddate'] ?? $data['start_time'] ?? ''); ?></td>
+                </tr>
+            </table>
+ 
 
 
         <table width="62%" border="1" align="center" cellpadding="0" cellspacing="0" bordercolor="#D4D0C8">

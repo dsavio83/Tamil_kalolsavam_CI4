@@ -59,6 +59,12 @@ class CiLoader
         if (isset(ModelMap::$byPath[$key])) {
             return ModelMap::$byPath[$key];
         }
+        // Try PSR-4 App\Models\ path with converted slashes
+        $candidate = 'App\\Models\\' . str_replace('/', '\\', (string) $model);
+        if (class_exists($candidate)) {
+            return $candidate;
+        }
+
         // trim dirs to basename
         $base = strtolower(basename($key));
         if (isset(ModelMap::$byName[$base])) {

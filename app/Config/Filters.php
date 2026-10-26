@@ -76,10 +76,27 @@ class Filters extends BaseFilters
     public array $globals = [
         'before' => [
             'writefreeze',
-            // 'honeypot',
             'csrf' => [
                 'except' => [
+                    'publishresult/*',
+                    'district/report/*',
+                    'report/*',
                     'publishresult/publicresult/get_item_results_ajax',
+                    'ajax/loadajax/*',
+                    'admin/kalolsavam/*',
+                    'user/user_cluster/*_ajax',
+                    'welcome/toggle_manager_marks',
+                    'report/prereportpdf/*',
+                    'report/prereport/*',
+                    'district/certificate/save_certificate_template',
+                    'district/certificate/save_template',
+                    'district/certificate/*',
+                    'certificate/certificate/save_certificate_template',
+                    'certificate/*',
+                    'cover/*',
+                    'cover/save_template',
+                    'cover/upload_asset',
+                    'cover/ajax_filter_items',
                 ],
             ],
             // 'invalidchars',

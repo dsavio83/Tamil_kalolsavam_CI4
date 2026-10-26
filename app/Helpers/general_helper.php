@@ -142,7 +142,7 @@ if (!function_exists('get_sub_dist_name')) {
         $db = new \App\Libraries\CiDatabase(\Config\Database::connect());
         $db->where('sub_district_code', $sub_dist_code);
         $sub_district_master = $db->get('sub_district_master');
-        if ($sub_district_master->getNumRows() > 0) {
+        if ($sub_district_master && is_object($sub_district_master) && $sub_district_master->getNumRows() > 0) {
             $sub_district = $sub_district_master->getResultArray();
             return $sub_district[0]['sub_district_name'];
         }
@@ -158,8 +158,9 @@ if (!function_exists('get_dist_name')) {
         }
         $db = new \App\Libraries\CiDatabase(\Config\Database::connect());
         $db->where('rev_district_code', $dist_code);
+        $db->where('status', 'Y');
         $rev_district_master = $db->get('rev_district_master');
-        if ($rev_district_master->getNumRows() > 0) {
+        if ($rev_district_master && is_object($rev_district_master) && $rev_district_master->getNumRows() > 0) {
             $rev_district = $rev_district_master->getResultArray();
             return $rev_district[0]['rev_district_name'];
         }
@@ -188,7 +189,12 @@ if (!function_exists('is_import_data_finish')) {
         $db->join('sd_participant_details AS PM', 'PM.participant_id = PD.participant_id');
         $participant_item_details = $db->get('sd_participant_item_details AS PD');
 
-        if ($school_master->getNumRows() > 0 and $school_details->getNumRows() > 0 and $participant_details->getNumRows() > 0 and $participant_item_details->getNumRows() > 0) {
+        $school_master_ok = $school_master && is_object($school_master) && $school_master->getNumRows() > 0;
+        $school_details_ok = $school_details && is_object($school_details) && $school_details->getNumRows() > 0;
+        $participant_details_ok = $participant_details && is_object($participant_details) && $participant_details->getNumRows() > 0;
+        $participant_item_details_ok = $participant_item_details && is_object($participant_item_details) && $participant_item_details->getNumRows() > 0;
+
+        if ($school_master_ok and $school_details_ok and $participant_details_ok and $participant_item_details_ok) {
             return true;
         }
         return true;
@@ -577,7 +583,7 @@ if (!function_exists('pdf_render_id_card_header')) {
      * @param int $card_width Total card width in pixels (default: 275)
      * @return string HTML table row
      */
-    function pdf_render_id_card_header($file_path, $title, $venue, $card_width = 275)
+    function pdf_render_id_card_header($file_path, $title, $venue, $card_width = 290)
     {
         $logo_width = ($card_width > 300) ? 56 : 42;
         $center_width = $card_width - ($logo_width * 2);
@@ -592,9 +598,9 @@ if (!function_exists('pdf_render_id_card_header')) {
                 <?php } ?>
             </td>
             <td width="<?php echo $center_width; ?>" align="center" valign="middle" style="border-bottom: 1px solid #000000; padding: 2px 0px;">
-                <span style="font-size: 14px; font-weight: bold; color: #660033; line-height: 1.15;"><?php echo get_festival_title(); ?></span><br />
-                <span style="font-size: 10px; font-weight: bold; color: #000000; line-height: 1.15;"><?php echo @$title; ?></span><br />
-                <span style="font-size: 10px; font-weight: bold; color: #000000; line-height: 1.15;"><?php echo @$venue; ?></span>
+                <span style="font-size: 13px; font-weight: bold; color: #660033; line-height: 1.15;"><?php echo get_festival_title(); ?></span><br />
+                <span style="font-size: 9.5px; font-weight: bold; color: #000000; line-height: 1.15;"><?php echo @$title; ?></span><br />
+                <span style="font-size: 9.5px; font-weight: bold; color: #000000; line-height: 1.15;"><?php echo @$venue; ?></span>
             </td>
             <td width="<?php echo $logo_width; ?>" style="border-bottom: 1px solid #000000;">&nbsp;</td>
         </tr>
@@ -606,7 +612,7 @@ if (!function_exists('pdf_render_id_card_header')) {
 if (!function_exists('render_single_photo_card')) {
     /**
      * Render a single participant ID card with photo on left, vertical rotated number,
-     * participant details, and items with seamless border alignment (275px wide).
+     * participant details, and items with seamless border alignment and zero gap above/below photo (290px wide).
      */
     function render_single_photo_card($participant, $Photo = [], $file_path = '', $title = '', $venue = '', $ci = null, $item_details = null)
     {
@@ -614,6 +620,7 @@ if (!function_exists('render_single_photo_card')) {
             return '';
         }
 
+        $card_width = 290;
         $pid = $participant['participant_id'];
         $reg = @$participant['admn_no'];
 
@@ -624,6 +631,7 @@ if (!function_exists('render_single_photo_card')) {
             $candidates = [
                 defined('ROOTPATH') ? ROOTPATH . 'images/img_user_nophoto.jpg' : '',
                 defined('FCPATH') ? FCPATH . 'images/img_user_nophoto.jpg' : '',
+                defined('ROOTPATH') ? ROOTPATH . 'photos/img_user_nophoto.png' : '',
                 'images/img_user_nophoto.jpg',
             ];
             $pic_path = '';
@@ -638,7 +646,12 @@ if (!function_exists('render_single_photo_card')) {
             }
         }
 
-        $rot_img = pdf_vertical_text_image($pid, 22, 72, 13, '#660033');
+        $photo_w = 62;
+        $photo_h = 80;
+        $num_w = 22;
+        $details_w = $card_width - $photo_w - $num_w; // 206px
+
+        $rot_img = pdf_vertical_text_image($pid, $num_w, $photo_h, 14, '#660033');
 
         // Determine item details
         if ($item_details === null) {
@@ -657,8 +670,6 @@ if (!function_exists('render_single_photo_card')) {
         // Determine place / sub-district text:
         // Shown ONLY for District-level users/events, where participants from multiple
         // educational sub-districts participate together.
-        // For Sub-District level users/events, all participants belong to the same sub-district,
-        // so the sub-district line MUST be hidden.
         $sess = function_exists('session') ? session() : null;
         $sess_sub_district = $sess ? $sess->get('SUB_DISTRICT') : ($ci && isset($ci->session) ? $ci->session->get('SUB_DISTRICT') : null);
         $sess_district = $sess ? $sess->get('DISTRICT') : ($ci && isset($ci->session) ? $ci->session->get('DISTRICT') : null);
@@ -686,42 +697,42 @@ if (!function_exists('render_single_photo_card')) {
 
         ob_start();
         ?>
-        <table border="0" cellspacing="0" cellpadding="0" style="width: 275px; border: 1px solid #000000;">
+        <table border="0" cellspacing="0" cellpadding="0" style="width: <?php echo $card_width; ?>px; border: 1px solid #000000; background-color: #ffffff;">
             <!-- HEADER ROW: Balanced centered title -->
-            <?php echo pdf_render_id_card_header($file_path, $title, $venue, 275); ?>
+            <?php echo pdf_render_id_card_header($file_path, $title, $venue, $card_width); ?>
 
             <!-- BANNER ROW -->
             <tr bgcolor="#E5E5E5">
-                <td colspan="3" align="center" valign="middle" style="height: 18px; font-size: 12px; font-weight: bold; color: #000000; border-bottom: 1px solid #000000; padding: 1px 0px;">
+                <td colspan="3" align="center" valign="middle" style="height: 17px; font-size: 11px; font-weight: bold; color: #000000; border-bottom: 1px solid #000000; padding: 1px 0px;">
                     Participant's Card
                 </td>
             </tr>
 
             <!-- PARTICIPANT INFO ROW: Photo on left, vertical rotated number, details on right -->
             <tr>
-                <td colspan="3" style="border-bottom: 1px solid #000000;">
-                    <table border="0" cellspacing="0" cellpadding="0" style="width: 275px;">
+                <td colspan="3" style="border-bottom: 1px solid #000000; padding: 0px;">
+                    <table border="0" cellspacing="0" cellpadding="0" style="width: <?php echo $card_width; ?>px;">
                         <tr>
-                            <!-- Photo: exact 3:4 aspect ratio fit: width 54 x height 72, zero padding -->
-                            <td width="54" height="72" align="center" valign="middle" style="border-right: 1px solid #000000; padding: 0px;">
-                                <img src="<?php echo $pic_path; ?>" width="54" height="72">
+                            <!-- Photo: fills height completely, zero padding, zero margin: no gap above/below -->
+                            <td width="<?php echo $photo_w; ?>" height="<?php echo $photo_h; ?>" align="center" valign="top" style="border-right: 1px solid #000000; padding: 0px; margin: 0px; font-size: 0px; line-height: 0px;">
+                                <img src="<?php echo $pic_path; ?>" width="<?php echo $photo_w; ?>" height="<?php echo $photo_h; ?>" style="display: block; margin: 0px; padding: 0px;">
                             </td>
-                            <!-- Rotated Number: width 22 x height 72, vertical borders before and after -->
-                            <td width="22" height="72" align="center" valign="middle" style="border-right: 1px solid #000000; padding: 0px;">
+                            <!-- Rotated Number: width 22 x height 80, vertical borders before and after -->
+                            <td width="<?php echo $num_w; ?>" height="<?php echo $photo_h; ?>" align="center" valign="top" style="border-right: 1px solid #000000; padding: 0px; margin: 0px; font-size: 0px; line-height: 0px;">
                                 <?php if (!empty($rot_img) && is_file($rot_img)) { ?>
-                                    <img src="<?php echo $rot_img; ?>" width="22" height="72">
+                                    <img src="<?php echo $rot_img; ?>" width="<?php echo $num_w; ?>" height="<?php echo $photo_h; ?>" style="display: block; margin: 0px; padding: 0px;">
                                 <?php } else { ?>
-                                    <span style="font-size: 18px; font-weight: bold; color: #660033;"><?php echo $pid; ?></span>
+                                    <span style="font-size: 16px; font-weight: bold; color: #660033;"><?php echo $pid; ?></span>
                                 <?php } ?>
                             </td>
                             <!-- Details: Name, School, Place, Class strictly matching photo height -->
-                            <td width="199" height="72" valign="middle" style="padding: 2px 5px; font-size: 9px; line-height: 1.25;">
-                                <span style="font-size: 11px; font-weight: bold; color: #000000;"><?php echo wordwrap($participant['participant_name'], 27, '<br/>'); ?></span><br />
-                                <span style="font-size: 9px; color: #000000;"><?php echo wordwrap($participant['school_code'] . ' ' . @$participant['school_name'], 29, '<br/>'); ?></span><br />
+                            <td width="<?php echo $details_w; ?>" height="<?php echo $photo_h; ?>" valign="middle" style="padding: 0px 4px 0px 7px; line-height: 1.35;">
+                                <span style="font-size: 12px; font-weight: bold; color: #000000;"><?php echo wordwrap($participant['participant_name'], 26, '<br/>'); ?></span><br />
+                                <span style="font-size: 9.5px; color: #111111;"><?php echo wordwrap($participant['school_code'] . ' ' . @$participant['school_name'], 38, '<br/>'); ?></span><br />
                                 <?php if ($place !== '') { ?>
-                                    <span style="font-size: 9px; color: #000000;"><?php echo wordwrap($place, 29, '<br/>'); ?></span><br />
+                                    <span style="font-size: 9.5px; color: #111111;"><?php echo wordwrap($place, 38, '<br/>'); ?></span><br />
                                 <?php } ?>
-                                <span style="font-size: 9px; color: #000000;">Class : <?php echo $participant['class']; ?></span>
+                                <span style="font-size: 9.5px; font-weight: bold; color: #222222;">Class : <?php echo $participant['class']; ?></span>
                             </td>
                         </tr>
                     </table>
@@ -739,12 +750,12 @@ if (!function_exists('render_single_photo_card')) {
                 ?>
                 <tr>
                     <td colspan="3" style="<?php echo $b_style; ?> padding: 2px 5px;">
-                        <table border="0" cellspacing="0" cellpadding="0" style="width: 265px;">
+                        <table border="0" cellspacing="0" cellpadding="0" style="width: <?php echo ($card_width - 10); ?>px;">
                             <tr>
-                                <td width="135" style="font-size: 9px; color: #000000;" align="left" valign="top">
+                                <td width="145" style="font-size: 8.5px; color: #000000;" align="left" valign="top">
                                     <?php echo $item['item_code'] . '&nbsp;' . $item['item_name']; ?>
                                 </td>
-                                <td width="130" style="font-size: 9px; color: #000000;" align="right" valign="top">
+                                <td width="<?php echo ($card_width - 10 - 145); ?>" style="font-size: 8.5px; color: #000000;" align="right" valign="top">
                                     <?php
                                     echo (!empty($item['cluster_no'])) ? 'CL ' . $item['cluster_no'] . '&nbsp;:&nbsp;' : '';
                                     echo (!empty($item['stage_name'])) ? $item['stage_name'] . '&nbsp;on&nbsp;' . $dat_itme : $dat_itme;
@@ -767,7 +778,7 @@ if (!function_exists('render_single_photo_card')) {
 if (!function_exists('render_single_nophoto_card')) {
     /**
      * Render a single participant ID card without photo,
-     * centered header, seamless borders, and proper spacing (275px wide).
+     * centered header, seamless borders, and proper spacing (290px wide).
      */
     function render_single_nophoto_card($participant, $file_path = '', $title = '', $venue = '', $ci = null, $item_details = null)
     {
@@ -775,6 +786,7 @@ if (!function_exists('render_single_nophoto_card')) {
             return '';
         }
 
+        $card_width = 290;
         $pid = $participant['participant_id'];
 
         // Determine item details
@@ -792,10 +804,6 @@ if (!function_exists('render_single_nophoto_card')) {
         $cnt = count($item_details);
 
         // Determine place / sub-district text:
-        // Shown ONLY for District-level users/events, where participants from multiple
-        // educational sub-districts participate together.
-        // For Sub-District level users/events, all participants belong to the same sub-district,
-        // so the sub-district line MUST be hidden.
         $sess = function_exists('session') ? session() : null;
         $sess_sub_district = $sess ? $sess->get('SUB_DISTRICT') : ($ci && isset($ci->session) ? $ci->session->get('SUB_DISTRICT') : null);
         $sess_district = $sess ? $sess->get('DISTRICT') : ($ci && isset($ci->session) ? $ci->session->get('DISTRICT') : null);
@@ -823,33 +831,33 @@ if (!function_exists('render_single_nophoto_card')) {
 
         ob_start();
         ?>
-        <table border="0" cellspacing="0" cellpadding="0" style="width: 275px; border: 1px solid #000000;">
+        <table border="0" cellspacing="0" cellpadding="0" style="width: <?php echo $card_width; ?>px; border: 1px solid #000000; background-color: #ffffff;">
             <!-- HEADER ROW: Balanced centered title -->
-            <?php echo pdf_render_id_card_header($file_path, $title, $venue, 275); ?>
+            <?php echo pdf_render_id_card_header($file_path, $title, $venue, $card_width); ?>
 
             <!-- BANNER ROW -->
             <tr bgcolor="#E5E5E5">
-                <td colspan="3" align="center" valign="middle" style="height: 18px; font-size: 12px; font-weight: bold; color: #000000; border-bottom: 1px solid #000000; padding: 1px 0px;">
+                <td colspan="3" align="center" valign="middle" style="height: 17px; font-size: 11px; font-weight: bold; color: #000000; border-bottom: 1px solid #000000; padding: 1px 0px;">
                     Participant's Card
                 </td>
             </tr>
 
             <!-- PARTICIPANT INFO ROW: Reg No box on left, details on right -->
             <tr>
-                <td colspan="3" style="border-bottom: 1px solid #000000;">
-                    <table border="0" cellspacing="0" cellpadding="0" style="width: 275px;">
+                <td colspan="3" style="border-bottom: 1px solid #000000; padding: 0px;">
+                    <table border="0" cellspacing="0" cellpadding="0" style="width: <?php echo $card_width; ?>px;">
                         <tr>
-                            <td width="60" height="72" align="center" valign="middle" style="border-right: 1px solid #000000; padding: 2px;">
-                                <span style="font-size: 9px; color: #555555;">Reg. No</span><br />
+                            <td width="60" height="80" align="center" valign="middle" style="border-right: 1px solid #000000; padding: 2px;">
+                                <span style="font-size: 8.5px; color: #555555;">Reg. No</span><br />
                                 <span style="font-size: 18px; font-weight: bold; color: #660033;"><?php echo $pid; ?></span>
                             </td>
-                            <td width="215" height="72" valign="middle" style="padding: 2px 5px; font-size: 9px; line-height: 1.25;">
-                                <span style="font-size: 11px; font-weight: bold; color: #000000;"><?php echo wordwrap($participant['participant_name'], 28, '<br/>'); ?></span><br />
-                                <span style="font-size: 9px; color: #000000;"><?php echo wordwrap($participant['school_code'] . ' ' . @$participant['school_name'], 30, '<br/>'); ?></span><br />
+                            <td width="230" height="80" valign="middle" style="padding: 0px 4px 0px 7px; line-height: 1.35;">
+                                <span style="font-size: 12px; font-weight: bold; color: #000000;"><?php echo wordwrap($participant['participant_name'], 30, '<br/>'); ?></span><br />
+                                <span style="font-size: 9.5px; color: #111111;"><?php echo wordwrap($participant['school_code'] . ' ' . @$participant['school_name'], 42, '<br/>'); ?></span><br />
                                 <?php if ($place !== '') { ?>
-                                    <span style="font-size: 9px; color: #000000;"><?php echo wordwrap($place, 30, '<br/>'); ?></span><br />
+                                    <span style="font-size: 9.5px; color: #111111;"><?php echo wordwrap($place, 42, '<br/>'); ?></span><br />
                                 <?php } ?>
-                                <span style="font-size: 9px; color: #000000;">Class : <?php echo $participant['class']; ?></span>
+                                <span style="font-size: 9.5px; font-weight: bold; color: #222222;">Class : <?php echo $participant['class']; ?></span>
                             </td>
                         </tr>
                     </table>
@@ -867,12 +875,12 @@ if (!function_exists('render_single_nophoto_card')) {
                 ?>
                 <tr>
                     <td colspan="3" style="<?php echo $b_style; ?> padding: 2px 5px;">
-                        <table border="0" cellspacing="0" cellpadding="0" style="width: 265px;">
+                        <table border="0" cellspacing="0" cellpadding="0" style="width: <?php echo ($card_width - 10); ?>px;">
                             <tr>
-                                <td width="135" style="font-size: 9px; color: #000000;" align="left" valign="top">
+                                <td width="145" style="font-size: 8.5px; color: #000000;" align="left" valign="top">
                                     <?php echo $item['item_code'] . '&nbsp;' . $item['item_name']; ?>
                                 </td>
-                                <td width="130" style="font-size: 9px; color: #000000;" align="right" valign="top">
+                                <td width="<?php echo ($card_width - 10 - 145); ?>" style="font-size: 8.5px; color: #000000;" align="right" valign="top">
                                     <?php
                                     echo (!empty($item['cluster_no'])) ? 'CL ' . $item['cluster_no'] . '&nbsp;:&nbsp;' : '';
                                     echo (!empty($item['stage_name'])) ? $item['stage_name'] . '&nbsp;on&nbsp;' . $dat_itme : $dat_itme;
@@ -891,6 +899,5 @@ if (!function_exists('render_single_nophoto_card')) {
         return ob_get_clean();
     }
 }
-
 
 

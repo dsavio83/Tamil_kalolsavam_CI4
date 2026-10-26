@@ -21,6 +21,8 @@
         color: #000000;
     }
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 <style>
     @media print {
         h1 { page-break-before: always; }
@@ -58,7 +60,7 @@ if (!empty($rankwise)) {
 
                 <table width="100%" border="0" cellspacing="0" cellpadding="0" align="center" style="margin-bottom: 8px;">
                     <tr>
-                        <td height="30" align="center" class="style1">
+                        <td height="30" align="center" class="report-pdf-title">
                             Item Wise Participants Details - <?php echo htmlspecialchars((string)$value['fest_name']); ?>
                         </td>
                     </tr>

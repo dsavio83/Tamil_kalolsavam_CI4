@@ -9,7 +9,7 @@
 					<i class="bi bi-mortarboard-fill fs-4"></i>
 					<h5 class="modal-title fw-bold m-0" id="schoolMasterModalLabel">Update School</h5>
 				</div>
-				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" onclick="forceRemoveModalBackdrop()"></button>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 
 			<!-- Modal Body -->
@@ -121,7 +121,7 @@
 
 					<!-- Modal Footer Actions -->
 					<div class="d-flex justify-content-end align-items-center gap-2 mt-4 pt-3 border-top">
-						<button type="button" class="btn btn-light border rounded-pill px-4" data-bs-dismiss="modal" onclick="forceRemoveModalBackdrop()">
+						<button type="button" class="btn btn-light border rounded-pill px-4" data-bs-dismiss="modal">
 							<i class="bi bi-x-circle me-1"></i> Cancel
 						</button>
 
@@ -135,7 +135,7 @@
 							<button type="submit" id="btnAddSchool" class="btn btn-primary rounded-pill px-4 fw-semibold" 
 									style="background: linear-gradient(135deg, #4338ca 0%, #3b82f6 100%); border: none;"
 									onClick="javascript: return fncAddSchool('<?php echo esc($this->session->get('USER_TYPE')); ?>')">
-								<i class="bi bi-check-circle-fill me-1"></i> Update School
+								<i class="bi bi-check-circle-fill me-1"></i> Add School
 							</button>
 						<?php } ?>
 					</div>

@@ -106,7 +106,8 @@ class Template
     public function write($region, $content, $overwrite = false)
     {
         if (isset($this->regions[$region])) {
-            if ($overwrite === true) {
+            // Singleton layout components must never be duplicated into the DOM
+            if ($overwrite === true || in_array($region, ['menu', 'left_panel', 'header'], true)) {
                 $this->regions[$region]['content'] = [$content];
             } else {
                 $this->regions[$region]['content'][] = $content;
@@ -143,7 +144,9 @@ class Template
     public function add_js($script, $type = 'import', $defer = false)
     {
         $js = null;
-        $filepath = base_url() . $script . '?v=20260831a';
+        $realPath = (defined('FCPATH') ? FCPATH : '') . ltrim($script, '/\\');
+        $v = (is_string($realPath) && is_file($realPath)) ? filemtime($realPath) : '20260905a';
+        $filepath = base_url() . ltrim($script, '/\\') . '?v=' . $v;
 
         if ($type === 'import') {
             $js = '<script type="text/javascript" src="' . $filepath . '"';
@@ -171,7 +174,9 @@ class Template
     public function add_css($style, $type = 'link', $media = false)
     {
         $css = null;
-        $filepath = base_url() . $style . '?v=20260831a';
+        $realPath = (defined('FCPATH') ? FCPATH : '') . ltrim($style, '/\\');
+        $v = (is_string($realPath) && is_file($realPath)) ? filemtime($realPath) : '20260905a';
+        $filepath = base_url() . ltrim($style, '/\\') . '?v=' . $v;
 
         if ($type === 'link') {
             $css = '<link type="text/css" rel="stylesheet" href="' . $filepath . '"';

@@ -49,17 +49,11 @@ $start_time = isset($first['start_time']) ? datetophpmodel($first['start_time'])
 $no_of_participant = isset($first['no_of_participant']) ? $first['no_of_participant'] : count($fees_details);
 ?>
 
-<page backtop="36mm" backbottom="30mm" backleft="15mm" backright="15mm">
+<?php $this->load->view('report/report_pdf_style'); ?>
+<page backtop="20mm" backbottom="30mm" backleft="15mm" backright="15mm">
     <page_header>
         <?php $this->load->view('report/report_header'); ?>
-        <table width="100%" style="width: 100%; margin-top: 10px;" border="0" cellspacing="0" cellpadding="0" align="center">
-            <tr>
-                <td align="center" class="style1" height="27">
-                    Call sheet <?php echo $fest_name; ?><br />
-                    <?php echo $item_code . ' - ' . $item_name; ?>
-                </td>
-            </tr>
-        </table>
+        
     </page_header>
 
     <page_footer>
@@ -70,6 +64,15 @@ $no_of_participant = isset($first['no_of_participant']) ? $first['no_of_particip
             <span class="style9">** </span> <span class="style8">Special Order Entry (Result to be Withheld)</span>
         </div>
     </page_footer>
+<table width="100%" style="width: 100%; margin-top: 10px;" border="0" cellspacing="0" cellpadding="0" align="center">
+            <tr>
+                <td align="center" class="report-pdf-title" height="27">
+                    Call sheet <?php echo $fest_name; ?><br />
+                    <?php echo $item_code . ' - ' . $item_name; ?>
+                </td>
+            </tr>
+        </table>
+
 
     <!-- Meta Info Table -->
     <table width="100%" style="width: 100%; margin-bottom: 6px;" border="0" cellpadding="0" cellspacing="0">

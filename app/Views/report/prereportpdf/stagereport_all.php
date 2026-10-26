@@ -48,22 +48,25 @@ for ($j = 0; $j < count($retdata); $j++) {
         }
         $datt = datetophpmodel($retdata[$j]['ddt']);
         ?>
-        <page backtop="25mm" backbottom="20mm " >
+        <?php $this->load->view('report/report_pdf_style'); ?>
+<page backtop="20mm" backbottom="20mm " >
             <page_header>
                 <?php
                 $this->load->view('report/report_header');
                 ?>
-                <table width="100%" border="0" cellspacing="0" cellpadding="0" align="center" >
-                    <tr>
-                        <td align="center" class="style1">Stage Report</td>
-                    </tr>
-                </table>
+                
             </page_header>
             <page_footer>
                 <?php
                 $this->load->view('report/report_footer');
                 ?>
             </page_footer>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" align="center" >
+                    <tr>
+                        <td align="center" class="report-pdf-title">Stage Report</td>
+                    </tr>
+                </table>
+
 
 
 
@@ -71,7 +74,7 @@ for ($j = 0; $j < count($retdata); $j++) {
 
             <table width="100%" align="center" border="1" cellpadding="0" cellspacing="0" >
                 <tr>
-                    <td colspan="8" align="center" class="style2" height="26" style="border-bottom:0px #000000; border-right:0px #000000; padding:2px;">&nbsp;&nbsp;Date:&nbsp;&nbsp;<?php
+                    <td colspan="7" width="685" align="center" class="style2" height="26" style="border-bottom:0px #000000; border-right:0px #000000; padding:2px;">&nbsp;&nbsp;Date:&nbsp;&nbsp;<?php
                         echo $datt;
                         ;
                         ?>
@@ -85,7 +88,7 @@ for ($j = 0; $j < count($retdata); $j++) {
                 $s = 0;
                 ?>
                 <tr>
-                    <td colspan="8" align="center" class="style2" height="24" style="border-top:1px #000000; border-bottom:1px #000000; padding:2px;">
+                    <td colspan="7" width="685" align="center" class="style2" height="24" style="border-top:1px #000000; border-bottom:1px #000000; padding:2px;">
                         Stage :&nbsp;<?php
                         echo $retdata[$j]['stage_name'];
                         ;
@@ -93,12 +96,13 @@ for ($j = 0; $j < count($retdata); $j++) {
                 </tr>
 
                 <tr>
-                    <td class="tb" align="center"  style="border-right:1px #000000; padding:2px;">Sl.No</td>
-                    <td class="tb" align="left"  style="border-right:1px #000000; padding:2px;">Item</td>
-                    <td class="tb" align="center"  style="border-right:1px #000000; padding:2px;">No. of Participants/Teams</td>
-                    <td class="tb" align="left" style="border-right:1px #000000; padding:2px;">Tentative Time</td>
-                    <td class="tb" align="left" style="border-right:1px #000000; padding:2px;">Start Time</td>
-                    <td width="150" class="tb" align="center"  style="border-right:0px #000000; padding:2px;">Remarks</td>
+                    <td class="tb" width="30" align="center"  style="border-right:1px #000000; padding:2px;">Sl.No</td>
+                    <td class="tb" width="197" align="left"  style="border-right:1px #000000; padding:2px;">&nbsp;Item</td>
+                    <td class="tb" width="163" align="left"  style="border-right:1px #000000; padding:2px;">&nbsp;Fest Name</td>
+                    <td class="tb" width="90" align="center"  style="border-right:1px #000000; padding:2px;">No. of Participants/Teams</td>
+                    <td class="tb" width="75" align="center" style="border-right:1px #000000; padding:2px;">Tentative Time</td>
+                    <td class="tb" width="65" align="center" style="border-right:1px #000000; padding:2px;">Start Time</td>
+                    <td class="tb" width="65" align="center"  style="border-right:0px #000000; padding:2px;">Remarks</td>
                 </tr>
                 <?php
             }
@@ -114,13 +118,14 @@ for ($j = 0; $j < count($retdata); $j++) {
             }
             $s++;
             ?>
-<tr>
-            <td  class="ety" align="center" style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $s; ?></td>
-            <td  class="ety" align="left" style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo wordwrap($retdata[$j]['item_code'] . ' - ' . $retdata[$j]['item_name'] . ' (' . $retdata[$j]['fest_name'] . ')',35,'<br>'); ?></td>
-            <td  class="ety" align="center" style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $retdata[$j]['no_of_participant']; ?></td>
-            <td   class="ety"align="left" style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $time; ?></td>
-            <td  class="ety" align="center" style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $retdata[$j]['dtm']; ?></td>
-        <td  class="ety" style="border-top:1px #000000; border-right:0px #000000; padding:2px;">&nbsp;</td>
+        <tr>
+            <td class="ety" width="30" align="center" style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $s; ?></td>
+            <td class="ety" width="197" align="left" style="border-top:1px #000000; border-right:1px #000000; padding:2px;">&nbsp;<?php echo $retdata[$j]['item_code'] . ' - ' . $retdata[$j]['item_name']; ?></td>
+            <td class="ety" width="163" align="left" style="border-top:1px #000000; border-right:1px #000000; padding:2px;">&nbsp;<?php echo $retdata[$j]['fest_name']; ?></td>
+            <td class="ety" width="90" align="center" style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $retdata[$j]['no_of_participant']; ?></td>
+            <td class="ety" width="75" align="center" style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $time; ?></td>
+            <td class="ety" width="65" align="center" style="border-top:1px #000000; border-right:1px #000000; padding:2px;"><?php echo $retdata[$j]['dtm']; ?></td>
+            <td class="ety" width="65" style="border-top:1px #000000; border-right:0px #000000; padding:2px;">&nbsp;</td>
         </tr>
         <?php
         }

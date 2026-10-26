@@ -47,7 +47,7 @@
         <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
         <input type="text" id="allStudentsSearch" class="form-control bg-light border-start-0" placeholder="Filter by name, reg no, item..." onkeyup="filterAllStudents()" style="font-size: 13.5px;">
       </div>
-      <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 d-flex align-items-center gap-1.5" onclick="window.print();" style="font-size: 13px;">
+      <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 d-flex align-items-center gap-1.5" onclick="printRoster();" style="font-size: 13px;">
         <i class="bi bi-printer"></i> Print
       </button>
     </div>
@@ -84,6 +84,9 @@
                 </td>
                 <td class="py-3" style="font-size: 13.5px;">
                   <div class="text-dark"><?php echo htmlspecialchars($row['school_name'] ?? ''); ?></div>
+                  <?php if (!empty($row['sub_district_name'])): ?>
+                    <small class="text-primary d-block fw-semibold" style="font-size: 11.5px;"><i class="bi bi-geo-alt-fill me-1"></i><?php echo htmlspecialchars($row['sub_district_name']); ?></small>
+                  <?php endif; ?>
                   <small class="text-muted" style="font-size: 12px;"><?php echo htmlspecialchars($row['school_code'] ?? ''); ?></small>
                 </td>
                 <td class="py-3">
@@ -141,6 +144,24 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Pagination Controls -->
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 px-4 py-3 border-top border-light" id="rosterPaginationBar">
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <label for="rosterPageSize" class="text-muted mb-0" style="font-size: 12.5px;">Rows per page:</label>
+          <select id="rosterPageSize" class="form-select form-select-sm border-secondary-subtle" style="width: auto; font-size: 13px;" onchange="setRosterPageSize(this.value)">
+            <option value="10">10</option>
+            <option value="25" selected>25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="all">All</option>
+          </select>
+          <span id="rosterPageInfo" class="text-muted ms-1" style="font-size: 12.5px;"></span>
+        </div>
+        <nav aria-label="Roster pages">
+          <ul class="pagination pagination-sm mb-0" id="rosterPagination"></ul>
+        </nav>
+      </div>
     <?php else: ?>
       <div class="text-center py-5 text-muted">
         <i class="bi bi-inbox fs-3 d-block mb-2"></i>
@@ -152,6 +173,111 @@
 </div>
 
 <script>
+var rosterPageSize = 25;
+var rosterCurrentPage = 1;
+var rosterFilteredRows = [];
+
+function getRosterRows() {
+  var table = document.getElementById('allStudentsTable');
+  if (!table || !table.tBodies.length) return [];
+  return Array.prototype.slice.call(table.tBodies[0].getElementsByTagName('tr'));
+}
+
+function isRowMatchingFilter(row) {
+  var input = document.getElementById('allStudentsSearch');
+  var filter = input ? input.value.toLowerCase().trim() : '';
+  if (filter === '') return true;
+  var text = row.textContent || row.innerText || '';
+  return text.toLowerCase().indexOf(filter) > -1;
+}
+
+function appendEllipsis(nav) {
+  var li = document.createElement('li');
+  li.className = 'page-item disabled';
+  li.innerHTML = '<span class="page-link">&hellip;</span>';
+  nav.appendChild(li);
+}
+
+function appendPageBtn(nav, label, page, disabled, active) {
+  var li = document.createElement('li');
+  li.className = 'page-item' + (disabled ? ' disabled' : '') + (active ? ' active' : '');
+  var a = document.createElement('a');
+  a.className = 'page-link';
+  a.href = 'javascript:void(0)';
+  a.innerHTML = label;
+  if (!disabled) {
+    a.addEventListener('click', function () {
+      rosterCurrentPage = page;
+      renderRosterPagination();
+    });
+  }
+  li.appendChild(a);
+  nav.appendChild(li);
+}
+
+function renderRosterPagination() {
+  var rows = getRosterRows();
+  rosterFilteredRows = rows.filter(isRowMatchingFilter);
+
+  var total = rosterFilteredRows.length;
+  var pageSize = (rosterPageSize === 'all') ? (total || 1) : parseInt(rosterPageSize, 10);
+  var totalPages = Math.max(1, Math.ceil(total / pageSize));
+  if (rosterCurrentPage > totalPages) rosterCurrentPage = totalPages;
+  if (rosterCurrentPage < 1) rosterCurrentPage = 1;
+
+  var start = (rosterCurrentPage - 1) * pageSize;
+  var end = Math.min(start + pageSize, total);
+
+  // Hide everything first, then show only the current page slice
+  rows.forEach(function (row) { row.style.display = 'none'; });
+  rosterFilteredRows.slice(start, end).forEach(function (row) { row.style.display = ''; });
+
+  var info = document.getElementById('rosterPageInfo');
+  if (info) {
+    info.textContent = total > 0
+      ? 'Showing ' + (start + 1) + '\u2013' + end + ' of ' + total + ' students'
+      : 'Showing 0 of 0 students';
+  }
+
+  var nav = document.getElementById('rosterPagination');
+  if (!nav) return;
+  nav.innerHTML = '';
+  if (total === 0) return;
+
+  appendPageBtn(nav, '&laquo;', rosterCurrentPage - 1, rosterCurrentPage <= 1, false);
+
+  var windowSize = 5;
+  var startPage = Math.max(1, rosterCurrentPage - Math.floor(windowSize / 2));
+  var endPage = Math.min(totalPages, startPage + windowSize - 1);
+  if (endPage - startPage < windowSize - 1) {
+    startPage = Math.max(1, endPage - windowSize + 1);
+  }
+  if (startPage > 1) {
+    appendPageBtn(nav, '1', 1, false, false);
+    if (startPage > 2) appendEllipsis(nav);
+  }
+  for (var p = startPage; p <= endPage; p++) {
+    appendPageBtn(nav, p, p, false, p === rosterCurrentPage);
+  }
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) appendEllipsis(nav);
+    appendPageBtn(nav, totalPages, totalPages, false, false);
+  }
+
+  appendPageBtn(nav, '&raquo;', rosterCurrentPage + 1, rosterCurrentPage >= totalPages, false);
+}
+
+function setRosterPageSize(val) {
+  rosterPageSize = (val === 'all') ? 'all' : parseInt(val, 10);
+  rosterCurrentPage = 1;
+  renderRosterPagination();
+}
+
+function filterAllStudents() {
+  rosterCurrentPage = 1;
+  renderRosterPagination();
+}
+
 function quickSelectStudent(regNo) {
   var input = document.getElementById('txtParticipantId');
   if (input) {
@@ -161,20 +287,19 @@ function quickSelectStudent(regNo) {
   }
 }
 
-function filterAllStudents() {
-  const input = document.getElementById('allStudentsSearch');
-  const filter = input.value.toLowerCase();
-  const table = document.getElementById('allStudentsTable');
-  if (!table) return;
-  const rows = table.getElementsByTagName('tr');
-
-  for (let i = 1; i < rows.length; i++) {
-    const text = rows[i].textContent || rows[i].innerText;
-    if (text.toLowerCase().indexOf(filter) > -1) {
-      rows[i].style.display = '';
-    } else {
-      rows[i].style.display = 'none';
-    }
-  }
+// Print the full filtered roster (all matching rows, not just current page),
+// then restore the paginated view.
+function printRoster() {
+  var rows = getRosterRows();
+  rows.forEach(function (row) { row.style.display = 'none'; });
+  rosterFilteredRows.forEach(function (row) { row.style.display = ''; });
+  var bar = document.getElementById('rosterPaginationBar');
+  if (bar) bar.style.display = 'none';
+  window.print();
+  if (bar) bar.style.display = '';
+  renderRosterPagination();
 }
+
+// Initialize pagination on page load
+renderRosterPagination();
 </script>

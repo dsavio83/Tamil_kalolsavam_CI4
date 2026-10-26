@@ -10,7 +10,7 @@ Options -Indexes
 	# Block access to internal app directories
 	RewriteRule ^(?:app|application|writable|vendor|tests|database|dbBackup)/ - [F,L,NC]
 	RewriteRule ^(?:system_ci3_old|system)/ - [F,L,NC]
-	RewriteRule ^\.(?:env|git)(?:/|$|.*) - [F,L,NC]
+	RewriteRule ^\.(?:env|git|automation)(?:/|$|.*) - [F,L,NC]
 	RewriteRule ^composer\.(?:json|lock)$ - [F,L,NC]
 	RewriteRule ^(?:phpunit\.dist\.xml|spark)$ - [F,L,NC]
 </IfModule>

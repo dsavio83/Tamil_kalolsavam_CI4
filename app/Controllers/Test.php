@@ -2,30 +2,29 @@
 
 namespace App\Controllers;
 
-class Test extends \App\Controllers\BaseController
+class Test extends BaseController
 {
-    public function __construct()
+    public function nodata()
     {
-        parent::__construct();
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: inline; filename="No_Data.pdf"');
+
+        $this->load->library('_fpdf/fpdf');
+
+        $this->fpdf->Open();
+        $this->fpdf->AddPage();
+        $this->fpdf->SetFont('Arial', 'B', 16);
+        $this->fpdf->SetY(40);
+        $this->fpdf->Cell(190, 15, 'No Data Found!', 0, 1, 'C');
+        $this->fpdf->Output('No_Data.pdf', 'I');
+        exit;
     }
 
     public function index()
     {
         return $this->nodata();
-    }
-
-    public function nodata()
-    {
-        if (!class_exists('FPDF', false)) {
-            require_once APPPATH . 'Libraries/fpdf.php';
-        }
-        $fpdf = new \FPDF('P', 'mm', 'A4');
-        $fpdf->Open();
-        $fpdf->AddPage();
-        $fpdf->SetFont('Arial', 'B', 18);
-        $fpdf->SetY(50);
-        $fpdf->Cell(0, 20, 'No Data Found!', 0, 1, 'C');
-        $fpdf->Output('nodata.pdf', 'I');
-        exit;
     }
 }

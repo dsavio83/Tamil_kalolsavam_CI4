@@ -15,6 +15,8 @@
         color: #000000;
     }
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 <style>
     @media print
     {
@@ -63,7 +65,7 @@ foreach ($gradewise as $value) {
                 <table width="77%" border="0" cellspacing="0" cellpadding="0" align="center" >
 
                     <tr>
-                        <td height="30" align="center" class="style1">Grade Wise Report&nbsp;&nbsp;<?php echo $value['fest_name']; ?></td>
+                        <td height="30" align="center" class="report-pdf-title">Grade Wise Report&nbsp;&nbsp;<?php echo $value['fest_name']; ?></td>
                     </tr>
 
                 </table>
@@ -106,7 +108,12 @@ foreach ($gradewise as $value) {
                     <tr>
                         <td height="30" width="30" align="center" class="style2" style="border-bottom:1px #000000; border-right:1px #000000; padding:0px;"><?php echo $count; ?></td>
                         <td width="175" align="left" class="style2" style="border-bottom:1px #000000; border-right:1px #000000; padding:0px;">&nbsp;<?php echo $withart . wordwrap($value['participant_name'], 33, '<br>'); ?></td>
-                        <td width="190" align="left" class="style2" style="border-bottom:1px #000000; border-right:1px #000000; padding:0px;">&nbsp;<?php echo wordwrap($value['school_code'] . '-' . $value['school_name'], 40, '<br>'); ?></td>
+                        <td width="190" align="left" class="style2" style="border-bottom:1px #000000; border-right:1px #000000; padding:0px;">
+                            &nbsp;<?php echo wordwrap($value['school_code'] . '-' . $value['school_name'], 40, '<br>'); ?>
+                            <?php if (!empty($value['sub_district_name'])) { ?>
+                                <br>&nbsp;<small style="color:#555;">(<?php echo esc($value['sub_district_name']); ?>)</small>
+                            <?php } ?>
+                        </td>
                         <td width="175" align="left" class="style2" style="border-bottom:1px #000000; border-right:1px #000000; padding:0px;">&nbsp;<?php
                             echo wordwrap($value['item_code'] . '-' . $value['item_name'], 30, '<br>');
                             ;

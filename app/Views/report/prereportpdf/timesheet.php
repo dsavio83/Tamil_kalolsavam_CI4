@@ -12,34 +12,38 @@
     }
     -->
 </style>
-<page backtop="40mm" backbottom="20mm ">
+<?php $this->load->view('report/report_pdf_style'); ?>
+<page backtop="20mm" backbottom="20mm ">
     <page_header>
         <?php
         $this->load->view('report/report_header');
         ?>
-        <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top:15px;">
-            <tr>
-                <td class="style1" align="center">Time Sheet </td>
-            </tr>
-            <tr>
-                <td class="style1" align="center"><?php echo @$itemtime[0]['item_code'] . ' - ' . @$itemtime[0]['item_name'] ?> (<?php echo @$festname[0]['fest_name'] ?>)</td>
-            </tr>
-        </table>
-        <table width="100%" border="0">
-            <tr>
-                <td align="center" width="250" class="style2">Stage : <?php echo @$itemtime[0]['stage_name'] . ' on   ' . datetophpmodel(@$itemtime[0]['ttime']); ?></td>
-                <td align="center" width="250" class="style2">Max Time : <?php
-                    $time_type = (@$itemtime[0]['time_type'] == 'M') ? 'Min' : 'Sec';
-                    echo @$itemtime[0]['max_time'] . ' ' . @$time_type;
-                    ?></td>
-            </tr>
-        </table>
+        
+        
     </page_header>
     <page_footer>
         <?php
         $this->load->view('report/report_footer');
         ?>
-    </page_footer>     
+    </page_footer>
+<table width="100%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top: 2px;">
+            <tr>
+                <td class="report-pdf-title" align="center">Time Sheet </td>
+            </tr>
+            <tr>
+                <td class="report-pdf-title" align="center"><?php echo @$itemtime[0]['item_code'] . ' - ' . @$itemtime[0]['item_name'] ?> (<?php echo @$festname[0]['fest_name'] ?>)</td>
+            </tr>
+        </table>
+<table width="100%" border="0">
+            <tr>
+                <td align="center" width="250" class="report-pdf-subtitle">Stage : <?php echo @$itemtime[0]['stage_name'] . ' on   ' . datetophpmodel(@$itemtime[0]['ttime']); ?></td>
+                <td align="center" width="250" class="report-pdf-subtitle">Max Time : <?php
+                    $time_type = (@$itemtime[0]['time_type'] == 'M') ? 'Min' : 'Sec';
+                    echo @$itemtime[0]['max_time'] . ' ' . @$time_type;
+                    ?></td>
+            </tr>
+        </table>
+     
 
     <table width="100%" border="1" cellpadding="5" cellspacing="0">
 

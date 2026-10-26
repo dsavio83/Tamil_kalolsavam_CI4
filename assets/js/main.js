@@ -27,7 +27,8 @@
     if (all) {
       select(el, all).forEach(e => e.addEventListener(type, listener))
     } else {
-      select(el, all).addEventListener(type, listener)
+      const target = select(el, all)
+      if (target) target.addEventListener(type, listener)
     }
   }
 
@@ -42,15 +43,18 @@
    * Classic Sidebar Toggle & Active Navigation Handling
    */
   const initSidebar = () => {
-    // Toggle sidebar on header hamburger click
-    on('click', '.toggle-sidebar-btn', function(e) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      select('body').classList.toggle('toggle-sidebar');
-      if (window.innerWidth < 1200) {
-        document.documentElement.classList.toggle('toggle-sidebar', select('body').classList.contains('toggle-sidebar'));
+    // Toggle sidebar on header hamburger click (delegated for bulletproof reliability)
+    document.addEventListener('click', function(e) {
+      var toggleBtn = e.target && e.target.closest ? e.target.closest('.toggle-sidebar-btn') : null;
+      if (toggleBtn) {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        select('body').classList.toggle('toggle-sidebar');
+        if (window.innerWidth < 1200) {
+          document.documentElement.classList.toggle('toggle-sidebar', select('body').classList.contains('toggle-sidebar'));
+        }
       }
     });
 
@@ -115,16 +119,18 @@
         }
       });
 
-      // 1. Explicit Domain Mapping for Certificate Sub-routes
+      // 1. Explicit Domain Mapping for Certificate Sub-routes (Only when on a certificate page)
       const pathStr = (currentPath + ' ' + currentUrl).toLowerCase();
-      if (pathStr.includes('school_wise') || pathStr.includes('schoolwise')) {
-        bestMatch = document.getElementById('menu-cert-school') || document.querySelector('a[href*="list_school_wise"]');
-      } else if (pathStr.includes('item_wise') || pathStr.includes('itemwise') || pathStr.includes('item_certificate')) {
-        bestMatch = document.getElementById('menu-cert-item') || document.querySelector('a[href*="list_item_wise"]');
-      } else if (pathStr.includes('reg_no_wise') || pathStr.includes('participant_wise') || pathStr.includes('regnowise')) {
-        bestMatch = document.getElementById('menu-cert-reg') || document.querySelector('a[href*="list_reg_no_wise"]');
-      } else if (pathStr.includes('save_certificate_template') || pathStr.includes('test_certificate') || pathStr.endsWith('/certificate/certificate') || pathStr.endsWith('/certificate/certificate/index')) {
-        bestMatch = document.getElementById('menu-cert-template') || document.querySelector('a[href*="certificate/certificate"]');
+      if (pathStr.includes('certificate')) {
+        if (pathStr.includes('school_wise') || pathStr.includes('schoolwise')) {
+          bestMatch = document.getElementById('menu-cert-school') || document.querySelector('a[href*="list_school_wise"]');
+        } else if (pathStr.includes('item_wise') || pathStr.includes('itemwise') || pathStr.includes('item_certificate')) {
+          bestMatch = document.getElementById('menu-cert-item') || document.querySelector('a[href*="list_item_wise"]');
+        } else if (pathStr.includes('reg_no_wise') || pathStr.includes('participant_wise') || pathStr.includes('regnowise')) {
+          bestMatch = document.getElementById('menu-cert-reg') || document.querySelector('a[href*="list_reg_no_wise"]');
+        } else if (pathStr.includes('save_certificate_template') || pathStr.includes('test_certificate') || pathStr.endsWith('/certificate/certificate') || pathStr.endsWith('/certificate/certificate/index') || pathStr.endsWith('/district/certificate')) {
+          bestMatch = document.getElementById('menu-cert-template') || document.querySelector('a[href*="certificate/certificate"]') || document.querySelector('a[href*="district/certificate"]');
+        }
       }
 
       // 2. Generic URL Prefix Matching if no explicit match above

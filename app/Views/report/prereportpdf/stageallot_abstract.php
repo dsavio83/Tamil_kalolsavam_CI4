@@ -16,194 +16,118 @@
     }
 </style>
 
-<page backtop="30mm" backbottom="20mm">
+<?php $this->load->view('report/report_pdf_style'); ?>
+<page backtop="20mm" backbottom="20mm">
     <page_header>
         <?php
         $this->load->view('report/report_header');
         ?>
-        <table align="center" width="100%">
-            <tr><td align="center" class="style1"> Stage Report(Abstract)</td></tr>
-        </table>
+        
     </page_header>
 
     <page_footer>
         <?php
         $this->load->view('report/report_footer');
         ?>
-    </page_footer>  
+    </page_footer>
+<table align="center" width="100%">
+            <tr><td align="center" class="report-pdf-title"> Stage Report(Abstract)</td></tr>
+        </table>
+  
 
-    <table width="96%" border="1" align="center" cellpadding="0" cellspacing="0">
+    <table width="100%" border="1" align="center" cellpadding="0" cellspacing="0">
+        <?php $isDistrict = ((int)session()->get('USER_TYPE') === 2); ?>
         <tr>
-            <td width="50" rowspan="2" align="center" class="style2" style="border-bottom:0px #000000; border-right:1px #000000; padding:0px;">Stage</td>
-            <td width="100" rowspan="2" align="center" class="style2" style="border-bottom:1px #000000; border-right:1px #000000; padding:0px;">Date</td>
-            <td colspan="9" width="500" align="center" style="border-bottom:1px #000000; border-right:0px #000000; padding:0px;">Number of Items</td>
+            <td width="105" rowspan="2" align="center" class="style2" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">Stage</td>
+            <td width="135" rowspan="2" align="center" class="style2" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">Date</td>
+            <td width="480" colspan="<?php echo $isDistrict ? 3 : 4; ?>" align="center" class="style2" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;">Number of Items</td>
         </tr>
         <tr>
-            <td width="50" class="style2" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">LP General</td>
-            <td width="50" class="style2" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">UP General</td>
-            <td width="50" class="style2" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">HS General </td>
-            <td width="50" class="style2" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">HSS General</td>
-            <td  width="50" class="style2" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">UP Sanskrit</td>
-            <td width="50" class="style2" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">HS Sanskrit</td>
-            <td width="50" class="style2" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">LPArabic</td>
-            <td width="50" class="style2" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">UPArabic</td>
-            <td width="50" class="style2" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;">HS Arabic</td>
+            <?php if (!$isDistrict): ?>
+            <td width="120" align="center" class="style2" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">LP Tamil<br />Kalaivizha</td>
+            <td width="120" align="center" class="style2" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">UP Tamil<br />Kalaivizha</td>
+            <td width="120" align="center" class="style2" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">HS Tamil<br />Kalaivizha</td>
+            <td width="120" align="center" class="style2" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;">HSS Tamil<br />Kalaivizha</td>
+            <?php else: ?>
+            <td width="160" align="center" class="style2" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">UP Tamil<br />Kalaivizha</td>
+            <td width="160" align="center" class="style2" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">HS Tamil<br />Kalaivizha</td>
+            <td width="160" align="center" class="style2" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;">HSS Tamil<br />Kalaivizha</td>
+            <?php endif; ?>
         </tr>
 
         <?php
-        $prev_stageid = "";
-        $prevdate = "";
-        $cnt = 1;
-
-        for ($j = 0; $j < count($abstract); $j++) {
-            //if($cnt==10)$cnt=1;
-
-
-            $timet = datetophpmodel($abstract[$j]['dt']);
-
-            if ($prev_stageid != $abstract[$j]['stage_id']) {
-
-                if (($j != 0) && ($cnt != 10)) {
-                    for ($i = $cnt; $i < 10; $i++) {
-                        print("<td class=style3  align=center style='border-bottom:1px #000000; border-right:1px #000000; padding:0px;'>0</td>");
-                        $cnt++;
-                    }
+        // Group items by stage and date
+        $stages_data = array();
+        if (!empty($abstract)) {
+            foreach ($abstract as $row) {
+                $stage_id = $row['stage_id'];
+                $dt = $row['dt'];
+                if (!isset($stages_data[$stage_id])) {
+                    $stages_data[$stage_id] = array(
+                        'stage_name' => $row['stage_name'],
+                        'dates'      => array()
+                    );
                 }
-
-
-                if ($cnt == 10)
-                    $cnt = 1;
-                if ($j != 0)
-                    print("</tr>");
-
-                $prev_stageid = $abstract[$j]['stage_id'];
-                $prevdate = $abstract[$j]['dt'];
-                $stage_name = $abstract[$j]['stage_name'];
-
-                print("<tr><td class='style3' valign='bottom'  align='center' style='border-top:1px #000000; border-right:1px #000000; padding:0px;'>$stage_name</td>
-									  <td class='style3'  align='center' style='border-bottom:1px #000000; border-right:1px #000000; padding:0px;'>$timet</td>");
-            }
-            else {
-                if ($prevdate != $abstract[$j]['dt']) {
-                    $prevdate = $abstract[$j]['dt'];
-                    if (($j != 0) && ($cnt != 10)) {
-                        for ($i = $cnt; $i < 10; $i++) {
-                            print("<td class='style3'  align='center' style='border-bottom:1px #000000; border-right:1px #000000; padding:0px;'>0</td>");
-                            $cnt++;
-                        }
-                    }
-                    if ($cnt == 10)
-                        $cnt = 1;
-
-                    if ($j != 0)
-                        print("</tr>");
-
-                    print("<tr> <td class=style3  style='border-bottom:0px #000000; border-right:1px #000000; padding:0px;'></td>
-							 <td  class=style3 align=center  style='border-bottom:1px #000000; border-right:1px #000000; padding:0px;'>$timet</td>");
+                if (!isset($stages_data[$stage_id]['dates'][$dt])) {
+                    $stages_data[$stage_id]['dates'][$dt] = array(
+                        1 => 0, // LP Tamil Kalaivizha
+                        2 => 0, // UP Tamil Kalaivizha
+                        3 => 0, // HS Tamil Kalaivizha
+                        4 => 0  // HSS Tamil Kalaivizha
+                    );
                 }
-            }
-
-
-
-            $itcode = $abstract[$j]['itcode'];
-
-
-            if ($abstract[$j]['fest_id'] == 1) {
-
-                print("<td class=style3 align=center style='border-bottom:1px #000000; border-right:1px #000000; padding:0px;'> $itcode</td>");
-                $cnt++;
-            }
-            if ($abstract[$j]['fest_id'] == 2) {
-                if ($cnt != 2) {
-                    print("<td class=style3  align=center style='border-bottom:1px #000000; border-right:1px #000000; padding:0px;'>0</td>");
-                    $cnt++;
+                $fest_id = (int)$row['fest_id'];
+                if (isset($stages_data[$stage_id]['dates'][$dt][$fest_id])) {
+                    $stages_data[$stage_id]['dates'][$dt][$fest_id] = (int)$row['itcode'];
                 }
-                print("<td class=style3  align=center style='border-bottom:1px #000000; border-right:1px #000000; padding:0px;'>$itcode</td>");
-                $cnt++;
-            }
-
-            if ($abstract[$j]['fest_id'] == 3) {
-                for ($i = $cnt; $i < 3; $i++) {
-
-                    print("<td class=style3  align=center style='border-bottom:1px #000000; border-right:1px #000000; padding:0px;'>0</td>");
-                    $cnt++;
-                }
-
-                print("<td class=style3  align=center style='border-bottom:1px #000000; border-right:1px #000000; padding:0px;'>$itcode</td>");
-                $cnt++;
-            }
-
-            if ($abstract[$j]['fest_id'] == 4) {
-                for ($i = $cnt; $i < 4; $i++) {
-                    print("<td align=center style='border-bottom:1px #000000; border-right:1px #000000; padding:0px;'>0</td>");
-                    $cnt++;
-                }
-                print("<td class=style3  align=center style='border-bottom:1px #000000; border-right:1px #000000; padding:0px;'>$itcode</td>");
-                $cnt++;
-            }
-
-            if ($abstract[$j]['fest_id'] == 5) {
-                for ($i = $cnt; $i < 5; $i++) {
-                    print("<td class=style3  align=center style='border-bottom:1px #000000; border-right:1px #000000; padding:0px;'>0</td>");
-                    $cnt++;
-                }
-
-                print("<td class=style3  align=center style='border-bottom:1px #000000; border-right:1px #000000; padding:0px;'>$itcode</td>");
-                $cnt++;
-            }
-
-            if ($abstract[$j]['fest_id'] == 6) {
-                for ($i = $cnt; $i < 6; $i++) {
-
-                    print("<td class=style3  align=center style='border-bottom:1px #000000; border-right:1px #000000; padding:0px;'>0</td>");
-                    $cnt++;
-                }
-
-
-                print("<td  class=style3 align=center style='border-bottom:1px #000000; border-right:1px #000000; padding:0px;'>$itcode</td>");
-                $cnt++;
-            }
-            if ($abstract[$j]['fest_id'] == 7) {
-                for ($i = $cnt; $i < 7; $i++) {
-
-                    print("<td class=style3  align=center style='border-bottom:1px #000000; border-right:1px #000000; padding:0px;'>0</td>");
-                    $cnt++;
-                }
-                print("<td class=style3  align=center style='border-bottom:1px #000000; border-right:1px #000000; padding:0px;'>$itcode</td>");
-                $cnt++;
-            }
-
-            if ($abstract[$j]['fest_id'] == 8) {
-                for ($i = $cnt; $i < 8; $i++) {
-
-                    print("<td class=style3  align=center style='border-bottom:1px #000000; border-right:1px #000000; padding:0px;'>0</td>");
-                    $cnt++;
-                }
-                print("<td class=style3  align=center style='border-bottom:1px #000000; border-right:1px #000000; padding:0px;'>$itcode</td>");
-                $cnt++;
-            }
-
-            if ($abstract[$j]['fest_id'] == 9) {
-                for ($i = $cnt; $i < 9; $i++) {
-
-                    print("<td class=style3  align=center style='border-bottom:1px #000000; border-right:1px #000000; padding:0px;'>0</td>");
-                    $cnt++;
-                }
-                print("<td class=style3  align=center style='border-bottom:1px #000000; border-right:0px #000000; padding:0px;'>$itcode</td>");
-                $cnt++;
             }
         }
-        if (($j != 0) && ($cnt != 10)) {
-            for ($i = $cnt; $i < 10; $i++) {
-                print("<td class=style3  align=center style='border-bottom:1px #000000; border-right:1px #000000; padding:0px;'>0</td>");
-                $cnt++;
+
+        foreach ($stages_data as $stage_id => $sdata) {
+            $num_dates = count($sdata['dates']);
+            $d_idx = 0;
+            foreach ($sdata['dates'] as $dt => $fcounts) {
+                $d_idx++;
+                $is_first = ($d_idx === 1);
+                $is_last  = ($d_idx === $num_dates);
+                $stage_border_bottom = $is_last ? '1px #000000' : '0px #000000';
+                ?>
+                <tr>
+                    <td width="105" align="center" class="style3" style="border-bottom:<?php echo $stage_border_bottom; ?>; border-right:1px #000000; padding:2px;">
+                        <?php echo $is_first ? $sdata['stage_name'] : ''; ?>
+                    </td>
+                    <td width="135" align="center" class="style3" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">
+                        <?php echo datetophpmodel($dt); ?>
+                    </td>
+                    <?php if (!$isDistrict): ?>
+                    <td width="120" align="center" class="style3" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">
+                        <?php echo $fcounts[1]; ?>
+                    </td>
+                    <td width="120" align="center" class="style3" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">
+                        <?php echo $fcounts[2]; ?>
+                    </td>
+                    <td width="120" align="center" class="style3" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">
+                        <?php echo $fcounts[3]; ?>
+                    </td>
+                    <td width="120" align="center" class="style3" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;">
+                        <?php echo $fcounts[4]; ?>
+                    </td>
+                    <?php else: ?>
+                    <td width="160" align="center" class="style3" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">
+                        <?php echo $fcounts[2]; ?>
+                    </td>
+                    <td width="160" align="center" class="style3" style="border-bottom:1px #000000; border-right:1px #000000; padding:2px;">
+                        <?php echo $fcounts[3]; ?>
+                    </td>
+                    <td width="160" align="center" class="style3" style="border-bottom:1px #000000; border-right:0px #000000; padding:2px;">
+                        <?php echo $fcounts[4]; ?>
+                    </td>
+                    <?php endif; ?>
+                </tr>
+                <?php
             }
         }
         ?>
-
-
-        </tr>
-
     </table>
 
 

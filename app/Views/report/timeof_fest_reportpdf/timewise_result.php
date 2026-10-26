@@ -27,6 +27,8 @@
     }
     p.page1 { page-break-after:always; }
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 
 <?php
 $timewise = $timewise ?? $time_wise ?? [];
@@ -96,7 +98,12 @@ if (!empty($timewise['values'])) {
                                 <tr>
                                     <td style='border: 0 0 0.5px 0.5px 0 #666666; height:20px;' align="center"><?php echo $count; ?></td>
                                     <td style='border: 0 0 0.5px 0.5px 0 #666666; height:20px;'>&nbsp;<?php echo wordwrap($parti_data['participant_name'], 50, '<br>'); ?></td>
-                                    <td style='border: 0 0 0.5px 0.5px 0 #666666; height:20px;'>&nbsp;<?php echo wordwrap($parti_data['school_code'] . ' - ' . $parti_data['school_name'], 30, '<br>'); ?></td>
+                                    <td style='border: 0 0 0.5px 0.5px 0 #666666; height:20px;'>
+                                        &nbsp;<?php echo wordwrap($parti_data['school_code'] . ' - ' . $parti_data['school_name'], 30, '<br>'); ?>
+                                        <?php if (!empty($parti_data['sub_district_name'])) { ?>
+                                            <br/>&nbsp;<span style="font-size:8px; color:#555;">(<?php echo esc($parti_data['sub_district_name']); ?>)</span>
+                                        <?php } ?>
+                                    </td>
                                     <td style='border: 0 0 0.5px 0.5px 0 #666666; height:20px;' align="center"><?php echo $parti_data['rank']; ?></td>
                                     <td style='border: 0 0 0.5px 0.5px 0 #666666; height:20px;' align="center"><?php echo $parti_data['grade']; ?></td>
                                     <td style='border: 0 0 0.5px 0.5px 0 #666666; height:20px;' align="center"><?php echo $parti_data['point']; ?></td>
@@ -112,7 +119,12 @@ if (!empty($timewise['values'])) {
                                 <tr>
                                     <td style='border: 0 0 0.5px 0.5px 0 #666666; height:20px;' align="center"><?php echo $count; ?></td>
                                     <td style='border: 0 0 0.5px 0.5px 0 #666666; height:20px;'>&nbsp;<?php echo wordwrap($parti_data['participant_name'], 50, '<br>'); ?></td>
-                                    <td style='border: 0 0 0.5px 0.5px 0 #666666; height:20px;'>&nbsp;<?php echo wordwrap($parti_data['school_code'] . ' - ' . $parti_data['school_name'], 30, '<br>'); ?></td>
+                                    <td style='border: 0 0 0.5px 0.5px 0 #666666; height:20px;'>
+                                        &nbsp;<?php echo wordwrap($parti_data['school_code'] . ' - ' . $parti_data['school_name'], 30, '<br>'); ?>
+                                        <?php if (!empty($parti_data['sub_district_name'])) { ?>
+                                            <br/>&nbsp;<span style="font-size:8px; color:#555;">(<?php echo esc($parti_data['sub_district_name']); ?>)</span>
+                                        <?php } ?>
+                                    </td>
                                     <td style='border: 0 0 0.5px 0.5px 0 #666666; height:20px;' align="center"><?php echo $parti_data['rank']; ?></td>
                                     <td style='border: 0 0 0.5px 0.5px 0 #666666; height:20px;' align="center"><?php echo $parti_data['grade']; ?></td>
                                     <td style='border: 0 0 0.5px 0.5px 0 #666666; height:20px;' align="center"><?php echo $parti_data['point']; ?></td>

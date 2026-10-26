@@ -64,22 +64,24 @@ if (!empty($fest_master_details) && count($fest_master_details) > 0) {
 }
 ?>
 
-<page backtop="3mm" backbottom="3mm" backleft="3mm" backright="3mm">
-    <table align="left" border="0" cellspacing="0" cellpadding="0">
+<page backtop="7mm" backbottom="7mm" backleft="7.2mm" backright="12.8mm">
+    <table align="center" border="0" cellspacing="0" cellpadding="0">
         <tr>
             <?php if (!empty($partcard) && is_array($partcard) && count($partcard) > 0 && !empty($partcard[0]['participant_id'])) { ?>
                 <td valign="top">
                     <?php echo render_single_photo_card($partcard[0], $Photo, $file_path, $title, $venue, $this, $partcard); ?>
                 </td>
+            <?php } else { ?>
+                <td width="290" valign="top">&nbsp;</td>
             <?php } ?>
             <?php if (!empty($partcard1) && is_array($partcard1) && count($partcard1) > 0 && !empty($partcard1[0]['participant_id'])) { ?>
-                <td width="10">&nbsp;</td>
+                <td width="40" align="center" valign="middle">&nbsp;</td>
                 <td valign="top">
                     <?php echo render_single_photo_card($partcard1[0], $Photo, $file_path, $title, $venue, $this, $partcard1); ?>
                 </td>
             <?php } ?>
             <?php if (!empty($partcard2) && is_array($partcard2) && count($partcard2) > 0 && !empty($partcard2[0]['participant_id'])) { ?>
-                <td width="10">&nbsp;</td>
+                <td width="40" align="center" valign="middle">&nbsp;</td>
                 <td valign="top">
                     <?php echo render_single_photo_card($partcard2[0], $Photo, $file_path, $title, $venue, $this, $partcard2); ?>
                 </td>

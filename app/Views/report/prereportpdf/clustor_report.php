@@ -25,6 +25,8 @@
     }
     -->
 </style>
+<?php $this->load->view('report/report_pdf_style'); ?>
+
 <page backtop="20mm" backbottom="20mm" pageleft="50mm">
     <page_header>
         <?php
@@ -37,22 +39,23 @@
         ?>
     </page_footer>       
 
+<?php if (!empty($retdata) && count($retdata) > 0): ?>
     <table width="100%" align="center" >
         <tr>
-            <td colspan="3" align="center" class="style1" >Cluster Report
+            <td colspan="3" align="center" class="report-pdf-title" >Cluster Report
             </td>
         </tr>
         <tr>
-            <td colspan="3" align="center" class="style4" height="25" valign="middle" >Festival :&nbsp;&nbsp;<?php echo $retdata[0]['fest_name']; ?></td>
+            <td colspan="3" align="center" class="style4" height="25" valign="middle" >Festival :&nbsp;&nbsp;<?php echo $retdata[0]['fest_name'] ?? ($fest_name ?? ''); ?></td>
         </tr>
         <tr>
-            <td  align="left" class="style2" >Item :&nbsp;&nbsp;&nbsp;<?php echo $retdata[0]['item_code'] . ' - ' . $retdata[0]['item_name']; ?>&nbsp;&nbsp;</td>
+            <td  align="left" class="style2" >Item :&nbsp;&nbsp;&nbsp;<?php echo ($retdata[0]['item_code'] ?? '') . ' - ' . ($retdata[0]['item_name'] ?? ''); ?>&nbsp;&nbsp;</td>
             <td colspan="2"  align="center" class="style2" ></td>
         </tr>
         <tr>
-            <td  align="left" colspan="2" class="style2"> <?php echo $retdata[0]['stage_name'] . ' on  ' . datetophpmodel($retdata[0]['stime']) . ' at ' . timephpmodel($retdata[0]['stime']); ?>&nbsp;</td>
+            <td  align="left" colspan="2" class="style2"> <?php echo ($retdata[0]['stage_name'] ?? '') . ' on  ' . (isset($retdata[0]['stime']) ? datetophpmodel($retdata[0]['stime']) : '') . ' at ' . (isset($retdata[0]['stime']) ? timephpmodel($retdata[0]['stime']) : ''); ?>&nbsp;</td>
             <td class="style2" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Maximum 
-                Time for item :&nbsp;&nbsp;<?php echo $retdata[0]['max_time']; ?></td>
+                Time for item :&nbsp;&nbsp;<?php echo $retdata[0]['max_time'] ?? ''; ?></td>
         </tr>
     </table>
     <br />
@@ -83,7 +86,25 @@
         }
         $prev_array = $clustarray;
         ?>
-        <tr><td width="50"></td><td class="style3" ><span class="style5">Cluster &nbsp;&nbsp; <?php echo $retdata[$j - 1]['cluster_no']; ?>:</span>&nbsp;&nbsp;&nbsp;<?php echo wordwrap($prev_array, 120, '<br>'); ?>  </td></tr></table>
+        <?php if ($j > 0 && isset($retdata[$j - 1])): ?>
+        <tr><td width="50"></td><td class="style3" ><span class="style5">Cluster &nbsp;&nbsp; <?php echo $retdata[$j - 1]['cluster_no']; ?>:</span>&nbsp;&nbsp;&nbsp;<?php echo wordwrap($prev_array, 120, '<br>'); ?>  </td></tr>
+        <?php endif; ?>
+    </table>
+<?php else: ?>
+    <table width="100%" align="center">
+        <tr>
+            <td colspan="3" align="center" class="style1">Cluster Report</td>
+        </tr>
+        <?php if (!empty($fest_name)): ?>
+        <tr>
+            <td colspan="3" align="center" class="style4" height="25" valign="middle">Festival :&nbsp;&nbsp;<?php echo htmlspecialchars($fest_name); ?></td>
+        </tr>
+        <?php endif; ?>
+        <tr>
+            <td colspan="3" align="center" class="style4" height="40" valign="middle">No data found for the selected criteria.</td>
+        </tr>
+    </table>
+<?php endif; ?>
 
 </page>
 

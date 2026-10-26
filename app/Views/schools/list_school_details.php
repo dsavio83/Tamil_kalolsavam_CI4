@@ -3,6 +3,7 @@
  * School Master Directory View - Ultra-Modern, Colorful & Responsive
  */
 $total_schools = count($retvalue ?? []);
+$can_delete_schools = ((int) (session()->get('USER_TYPE') ?? -1) === 0) || (session()->get('USER_GROUP') === 'W');
 $govt_count = 0;
 $aided_count = 0;
 $unaided_count = 0;
@@ -19,6 +20,10 @@ if (!empty($retvalue)) {
 
 <style>
 /* Modern Colorful Theme */
+.swal2-container {
+  z-index: 1000001 !important;
+}
+
 :root {
   --primary-gradient: linear-gradient(135deg, #4338ca 0%, #3b82f6 50%, #06b6d4 100%);
   --accent-indigo: #4338ca;
@@ -546,25 +551,30 @@ if (!empty($retvalue)) {
   <div class="content-box-card">
     
     <!-- Optional District/Sub-District Filtering Form -->
-    <?php if ($this->Session_Model->check_user_permission(26) && ($this->session->get('USER_GROUP') == 'W' || isset($districts))) { ?>
-      <?php echo form_open('schools/school_master/', array('id' => 'filter', 'class' => 'm-0')); ?>
+    <?php if (!empty($can_use_zone_filter)) { ?>
+      <?php echo form_open('schools/school_master/', array('id' => 'filter', 'class' => 'm-0', 'method' => 'get')); ?>
         <div class="geo-filter-bar">
           <span class="small fw-bold text-dark d-flex align-items-center gap-1">
             <i class="bi bi-geo-alt-fill text-primary"></i> Zone Filter:
           </span>
 
-          <?php if ($this->session->get('USER_GROUP') == 'W') { ?>
+          <?php if ($this->session->get('USER_GROUP') == 'W' || in_array((int)$this->session->get('USER_TYPE'), [0, 1], true)) { ?>
             <div id="divDistrictFilter" style="min-width: 200px;">
-              <?php echo form_dropdown("cmbDistrictFilter", $districts, @$_POST['cmbDistrictFilter'], 'id="cmbDistrictFilter" class="form-select form-select-sm" onChange="javascript:loadSubDistrictFilter()"'); ?>
+              <?php echo form_dropdown("cmbDistrictFilter", $districts, $selected_filter_district ?? 0, 'id="cmbDistrictFilter" class="form-select form-select-sm" onChange="javascript:loadSubDistrictFilter()"'); ?>
             </div>
+          <?php } else if ($this->session->get('DISTRICT')) { ?>
+            <input type="hidden" name="cmbDistrictFilter" id="cmbDistrictFilter" value="<?php echo esc((string)$this->session->get('DISTRICT')); ?>" />
           <?php } ?>
 
-          <div id="divSubDistrictFilter" style="min-width: 200px; display:<?php echo (isset($_POST['cmbDistrictFilter']) && trim($_POST['cmbDistrictFilter']) != 0) ? 'block' : 'none'; ?>">
-            <?php echo form_dropdown("cmbSubDistrictFilter", @$sub_districts, @$_POST['cmbSubDistrictFilter'], 'id="cmbSubDistrictFilter" class="form-select form-select-sm"'); ?>
+          <div id="divSubDistrictFilter" style="min-width: 200px; display:<?php echo (!empty($selected_filter_district) || $this->session->get('DISTRICT')) ? 'block' : 'none'; ?>;">
+            <?php echo form_dropdown("cmbSubDistrictFilter", @$sub_districts, $selected_filter_sub_district ?? 0, 'id="cmbSubDistrictFilter" class="form-select form-select-sm"'); ?>
           </div>
 
           <button type="submit" name="filter" value="filter" class="btn btn-sm btn-primary rounded-pill px-3">
             <i class="bi bi-arrow-right-circle me-1"></i> Apply Filter
+          </button>
+          <button type="submit" name="clear_filter" value="1" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+            <i class="bi bi-x-circle me-1"></i> Clear
           </button>
         </div>
       <?php echo form_close(); ?>
@@ -665,10 +675,17 @@ if (!empty($retvalue)) {
                   </span>
                 </td>
 
-                <td class="text-center">
+                <td class="text-center text-nowrap">
+                  <div class="d-inline-flex align-items-center justify-content-center gap-2 flex-nowrap">
                   <button type="button" class="btn-table-edit" title="Edit School Details" onclick="editUser('<?php echo esc($code); ?>');">
                     <i class="bi bi-pencil-square"></i>
                   </button>
+                  <?php if ($can_delete_schools) { ?>
+                    <button type="button" class="btn-table-edit text-danger" title="Delete School" onclick="deleteSchool('<?php echo esc($code); ?>', '<?php echo esc($name, 'js'); ?>');">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  <?php } ?>
+                  </div>
                 </td>
 
               </tr>
@@ -713,6 +730,11 @@ if (!empty($retvalue)) {
 <?php echo form_open('schools/school_master/', array('id' => 'editUser', 'style' => 'display:none;')); ?>
   <input type="hidden" name="UserIdty" id="UserIdty" value="" />
 <?php echo form_close(); ?>
+<?php if ($can_delete_schools) { ?>
+  <?php echo form_open('schools/school_master/delete_school_details', array('id' => 'deleteSchoolForm', 'style' => 'display:none;')); ?>
+    <input type="hidden" name="UserIdty" id="deleteSchoolCode" value="" />
+  <?php echo form_close(); ?>
+<?php } ?>
 
 <!-- Print Content Container -->
 <div id="print_content" class="display_none">
@@ -750,6 +772,76 @@ if (!empty($retvalue)) {
 
 <script>
 var currentSchoolType = 'ALL';
+function deleteSchool(code, name) {
+  Swal.fire({
+    target: document.body,
+    title: 'Delete this school?',
+    text: 'Delete "' + name + '" (Code: ' + code + ')? Its school master and details records will be removed.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, delete school',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#dc2626',
+    reverseButtons: true
+  }).then(function (result) {
+    if (!result.isConfirmed) return;
+
+    var deleteForm = document.getElementById('deleteSchoolForm');
+    var deleteCode = document.getElementById('deleteSchoolCode');
+    deleteCode.value = code;
+    var formData = new FormData(deleteForm);
+
+    Swal.fire({
+      title: 'Deleting school...',
+      text: 'Please wait while the school is deleted.',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: function () { Swal.showLoading(); }
+    });
+
+    fetch(deleteForm.action, {
+      method: 'POST',
+      body: formData,
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    }).then(function (response) {
+      return response.json().then(function (data) {
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || 'The school could not be deleted.');
+        }
+        return data;
+      });
+    }).then(function () {
+      Swal.fire({
+        title: 'School deleted',
+        text: 'The school was deleted successfully.',
+        icon: 'success',
+        showConfirmButton: false,
+        timer: 1200,
+        confirmButtonColor: '#4338ca'
+      }).then(function () {
+        var listUrl = new URL(deleteForm.action.replace(/delete_school_details\/?$/, ''), window.location.href);
+        var currentUrl = new URL(window.location.href);
+        ['cmbDistrictFilter', 'cmbSubDistrictFilter'].forEach(function (filterName) {
+          var filterValue = currentUrl.searchParams.get(filterName);
+          if (filterValue !== null && filterValue !== '') {
+            listUrl.searchParams.set(filterName, filterValue);
+          }
+        });
+        var freshUrl = listUrl;
+        freshUrl.searchParams.set('_refresh', Date.now().toString());
+        window.location.assign(freshUrl.toString());
+      });
+    }).catch(function (error) {
+      Swal.fire({
+        title: 'Delete failed',
+        text: error.message || 'The school could not be deleted. Please try again.',
+        icon: 'error',
+        confirmButtonColor: '#4338ca'
+      });
+    });
+  });
+}
 
 function filterBySchoolType(typeKey) {
   currentSchoolType = typeKey;

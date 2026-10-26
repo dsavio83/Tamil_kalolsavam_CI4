@@ -5,6 +5,13 @@
 $fest = $fest ?? [];
 $selected_fest = $selected_fest ?? 'ALL';
 $allot_data = $allot_data ?? [];
+$isDistrict = $isDistrict ?? ((int)$this->session->get('USER_TYPE') === 2 || !empty($this->session->get('DISTRICT')));
+$subdistricts = $subdistricts ?? [];
+$selected_subdistrict = $selected_subdistrict ?? 'ALL';
+
+if ($isDistrict && isset($fest[1])) {
+    unset($fest[1]);
+}
 
 // Calculate initial metrics
 $total_items = count($allot_data);
@@ -145,14 +152,26 @@ $formatted_total_duration = ($duration_hours > 0 ? "{$duration_hours}h " : "") .
 }
 
 .btn-pdf-export {
-  background: var(--primary-gradient);
+  background: var(--primary-gradient) !important;
   color: #ffffff !important;
-  border: none;
-  box-shadow: 0 4px 12px rgba(67, 56, 202, 0.3);
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(67, 56, 202, 0.35) !important;
 }
 
-.btn-pdf-export:hover {
-  box-shadow: 0 6px 16px rgba(67, 56, 202, 0.4);
+.btn-pdf-export:hover,
+.btn-pdf-export:focus,
+.btn-pdf-export:active {
+  background: linear-gradient(135deg, #3730a3 0%, #2563eb 50%, #0891b2 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 6px 20px rgba(67, 56, 202, 0.5) !important;
+  transform: translateY(-2px);
+}
+
+.btn-pdf-export i,
+.btn-pdf-export:hover i,
+.btn-pdf-export:focus i,
+.btn-pdf-export:active i {
   color: #ffffff !important;
 }
 
@@ -265,11 +284,13 @@ $formatted_total_duration = ($duration_hours > 0 ? "{$duration_hours}h " : "") .
   border-color: #94a3b8;
 }
 
-.filter-pill-btn.active {
-  background: linear-gradient(135deg, #4338ca 0%, #3b82f6 100%);
-  color: #ffffff;
-  border-color: #4338ca;
-  box-shadow: 0 2px 6px rgba(67, 56, 202, 0.25);
+.filter-pill-btn.active,
+.filter-pill-btn.active:hover,
+.filter-pill-btn.active:focus {
+  background: linear-gradient(135deg, #4338ca 0%, #3b82f6 100%) !important;
+  color: #ffffff !important;
+  border-color: #4338ca !important;
+  box-shadow: 0 3px 8px rgba(67, 56, 202, 0.3) !important;
 }
 
 /* Secondary Filter / Search Controls */
@@ -350,10 +371,12 @@ $formatted_total_duration = ($duration_hours > 0 ? "{$duration_hours}h " : "") .
 }
 
 .type-filter-btn:hover { background: #f1f5f9; color: #1e293b; }
-.type-filter-btn.active {
-  background: #0284c7;
-  color: #ffffff;
-  border-color: #0284c7;
+.type-filter-btn.active,
+.type-filter-btn.active:hover,
+.type-filter-btn.active:focus {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  border-color: #0284c7 !important;
 }
 
 /* Modern Data Table */
@@ -542,7 +565,7 @@ $formatted_total_duration = ($duration_hours > 0 ? "{$duration_hours}h " : "") .
         <button type="button" class="btn-nav-action" onclick="window.print();" title="Print Current View">
           <i class="bi bi-printer-fill text-secondary"></i> Print View
         </button>
-        <a href="<?php echo base_url('report/prereport/timesheet'); ?>" class="btn-nav-action" title="View Time Sheet">
+        <a href="<?php echo base_url('report/prereport/timesheetinterface'); ?>" class="btn-nav-action" title="View Time Sheet">
           <i class="bi bi-clock-history text-primary"></i> Time Sheet
         </a>
       </div>
@@ -608,9 +631,26 @@ $formatted_total_duration = ($duration_hours > 0 ? "{$duration_hours}h " : "") .
         </span>
       </div>
 
-      <!-- Quick PDF Generation Shortcut -->
-      <div class="d-flex align-items-center gap-2">
-        <span class="small text-muted d-none d-md-inline">Selected Category:</span>
+      <!-- Sub-District Selector for District Users & Category Display -->
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <?php if (!empty($isDistrict) && !empty($subdistricts)) { ?>
+          <div class="d-flex align-items-center gap-1.5 bg-light border rounded-pill px-2.5 py-1">
+            <i class="bi bi-geo-alt-fill text-primary small"></i>
+            <span class="small fw-semibold text-muted">Sub-District:</span>
+            <select id="cmbSubDistrictSelector" class="form-select form-select-sm border-0 bg-transparent py-0 ps-1 pe-4 fw-bold text-dark" style="font-size:0.84rem; cursor:pointer;" onchange="onSubDistrictChange(this.value);">
+              <option value="ALL" <?php echo ($selected_subdistrict === 'ALL' || empty($selected_subdistrict)) ? 'selected' : ''; ?>>All Sub-Districts (Consolidated)</option>
+              <?php foreach ($subdistricts as $sd) { 
+                $sCode = (string)$sd['sub_district_code'];
+                $sName = $sd['sub_district_name'];
+                $isSel = ($selected_subdistrict == $sCode);
+              ?>
+                <option value="<?php echo esc($sCode); ?>" <?php echo $isSel ? 'selected' : ''; ?>>
+                  <?php echo esc($sCode . ' - ' . $sName); ?>
+                </option>
+              <?php } ?>
+            </select>
+          </div>
+        <?php } ?>
         <span class="badge bg-light text-dark border px-2 py-1" id="activeCategoryDisplay">All Festivals</span>
       </div>
     </div>
@@ -818,11 +858,24 @@ $formatted_total_duration = ($duration_hours > 0 ? "{$duration_hours}h " : "") .
 <!-- Hidden PDF Export Form -->
 <?php echo form_open('report/prereportpdf/stageallot_duration', array('id' => 'formExportPdf', 'target' => '_blank', 'style' => 'display:none;')); ?>
   <input type="hidden" name="cmbFestType" id="pdfFestType" value="<?php echo esc($selected_fest); ?>" />
+  <input type="hidden" name="cmbSubDistrict" id="pdfSubDistrict" value="<?php echo esc($selected_subdistrict); ?>" />
 <?php echo form_close(); ?>
 
 <script>
 var currentFestival = '<?php echo esc($selected_fest); ?>';
+var currentSubDistrict = '<?php echo esc($selected_subdistrict); ?>';
 var currentTypeFilter = 'ALL';
+
+function onSubDistrictChange(subDistCode) {
+  currentSubDistrict = subDistCode;
+  var subDistInput = document.getElementById('pdfSubDistrict');
+  if (subDistInput) subDistInput.value = subDistCode;
+
+  var url = new URL(window.location.href);
+  url.searchParams.set('fest', currentFestival);
+  url.searchParams.set('sub_district', subDistCode);
+  window.location.href = url.toString();
+}
 
 // Festival Pill Selection
 function filterByFestival(festId, festName) {

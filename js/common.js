@@ -631,13 +631,148 @@ function fncEditSchoolDeatils() {
     $('formSchool').submit();
 }
 
-function fncSaveParticipant() {
+function showItemValidationError(msg) {
+    var saveBtn = document.getElementById('save_participant_btn');
+    if (saveBtn) {
+        saveBtn.disabled = false;
+        var defaultText = (document.getElementById('hidADNO') && document.getElementById('hidADNO').value) ? 'Update Participant' : 'Save Participant';
+        saveBtn.innerHTML = saveBtn.getAttribute('data-original-text') || defaultText;
+    }
+
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            icon: 'error',
+            title: 'Registration Not Saved',
+            html: '<div style="text-align:left;font-size:0.92rem;">' +
+                  '<div style="margin-bottom:0.4rem;font-weight:600;">The participant was not saved. Please fix the following:</div>' +
+                  '<ul style="margin:0;padding-left:1.2rem;"><li>' + msg + '</li></ul>' +
+                  '<div style="margin-top:0.6rem;color:#64748b;font-size:0.85rem;">Please modify the item and try saving again.</div></div>',
+            confirmButtonText: 'OK',
+            target: 'body'
+        });
+    } else if (typeof swal !== 'undefined') {
+        swal('Registration Not Saved', msg, 'error');
+    } else {
+        alert(msg);
+    }
+}
+
+function validateParticipantFormItems(isUpdate, adno) {
     var txtADNO = document.getElementById('txtADNO');
     var txtClass = document.getElementById('txtClass');
-    var txtParticipantName = document.getElementById('txtParticipantName');
-    var hidVHSSNo = document.getElementById('hidVHSSNo');
-    var hidHSSNo = document.getElementById('hidHSSNo');
+    var txtGender = document.getElementById('txtGender');
+    var selectedClass = txtClass ? parseInt(trim(txtClass.value), 10) : 0;
+    var selectedGender = txtGender ? trim(txtGender.value).toUpperCase() : '';
 
+    var limits = window.participantDistrictLimits || { max_single_items: 3, max_group_items: 2 };
+    var maxSingle = parseInt(limits.max_single_items, 10) || 3;
+    var maxGroup = parseInt(limits.max_group_items, 10) || 2;
+
+    var mainCodes = [];
+    var pinnanyCodes = [];
+    var allEnteredCodes = {};
+
+    // 1. Check main item codes
+    for (var i = 1; i <= 10; i++) {
+        var el = document.getElementById('txtItemCode_' + i);
+        if (el && trim(el.value) !== '') {
+            var code = trim(el.value);
+            if (allEnteredCodes[code]) {
+                showItemValidationError('Repeated item code: ' + code);
+                if (el) el.focus();
+                return false;
+            }
+            allEnteredCodes[code] = true;
+            mainCodes.push(code);
+        }
+    }
+
+    // 2. Check pinnany item codes
+    for (var i = 1; i <= 5; i++) {
+        var el = document.getElementById('txtPinnanyCode_' + i);
+        if (el && trim(el.value) !== '') {
+            var code = trim(el.value);
+            if (allEnteredCodes[code]) {
+                showItemValidationError('Repeated item code: ' + code);
+                if (el) el.focus();
+                return false;
+            }
+            allEnteredCodes[code] = true;
+            pinnanyCodes.push(code);
+        }
+    }
+
+    // 3. Validate main items
+    var festSingles = {};
+    var festGroups = {};
+
+    for (var m = 0; m < mainCodes.length; m++) {
+        var code = mainCodes[m];
+        var item = (window.loadedItemsMap && window.loadedItemsMap[code]) || 
+                   (Array.isArray(window.allFestivalItems) && window.allFestivalItems.find(function(it) {
+                       return String(it.item_code).trim() === code || parseInt(it.item_code, 10) === parseInt(code, 10);
+                   }));
+
+        if (!item) {
+            showItemValidationError('Invalid Item Code: ' + code + '.');
+            return false;
+        }
+
+        // Validate Class
+        var cStart = parseInt(item.class_start, 10);
+        var cEnd = parseInt(item.class_end, 10);
+        if (!isNaN(cStart) && !isNaN(cEnd) && selectedClass > 0) {
+            if (selectedClass < cStart || selectedClass > cEnd) {
+                showItemValidationError(code + ' is not valid for Class ' + selectedClass);
+                return false;
+            }
+        }
+
+        // Validate Gender
+        var iGender = (item.gender || item.item_gender || 'C').toUpperCase();
+        if (iGender !== 'C' && selectedGender !== 'C' && selectedGender !== '' && selectedGender !== iGender) {
+            showItemValidationError(code + ' Wrong Gender');
+            return false;
+        }
+
+        // Validate Festival single vs group item limits
+        var festId = item.fest_id || 'default';
+        var iType = (item.item_type || 'S').toUpperCase();
+
+        if (iType === 'G') {
+            festGroups[festId] = (festGroups[festId] || 0) + 1;
+            if (festGroups[festId] > maxGroup) {
+                showItemValidationError('Maximum number of group items exceeded. Maximum group items: ' + maxGroup + '. Maximum single items: ' + maxSingle + '.');
+                return false;
+            }
+        } else {
+            festSingles[festId] = (festSingles[festId] || 0) + 1;
+            if (festSingles[festId] > maxSingle) {
+                showItemValidationError('Maximum number of single items exceeded. Maximum single items: ' + maxSingle + '. Maximum group items: ' + maxGroup + '.');
+                return false;
+            }
+        }
+    }
+
+    // 4. Validate Pinnany items
+    for (var p = 0; p < pinnanyCodes.length; p++) {
+        var pCode = pinnanyCodes[p];
+        var pItem = (window.loadedItemsMap && window.loadedItemsMap[pCode]) || 
+                    (Array.isArray(window.allFestivalItems) && window.allFestivalItems.find(function(it) {
+                        return String(it.item_code).trim() === pCode || parseInt(it.item_code, 10) === parseInt(pCode, 10);
+                    }));
+
+        if (!pItem) {
+            showItemValidationError('Invalid Item Code: ' + pCode + '.');
+            return false;
+        }
+
+    }
+
+    return true;
+}
+
+function validateParticipantAdmissionNumber(txtADNO, txtClass, hidHSSNo, hidVHSSNo) {
     if (!txtADNO || trim(txtADNO.value) == '') {
         if (typeof Swal !== 'undefined') {
             Swal.fire({ icon: 'error', title: 'Oops!', text: 'Please enter the admission number' });
@@ -649,34 +784,197 @@ function fncSaveParticipant() {
         if (txtADNO) txtADNO.focus();
         return false;
     }
-    var admn_no = trim(txtADNO.value);
+
+    txtADNO.value = trim(txtADNO.value).toUpperCase();
+    var admn_val = txtADNO.value;
+
     if (txtClass && parseInt(trim(txtClass.value), 10) > 10) {
-        var hss_vhse_chr = trim(txtADNO.value).substring(0, 1).toUpperCase();
-        var vhssVal = hidVHSSNo ? parseInt(hidVHSSNo.value, 10) : 0;
-        var hssVal = hidHSSNo ? parseInt(hidHSSNo.value, 10) : 0;
-        if (!((hss_vhse_chr == 'V' && vhssVal > 0) || (hss_vhse_chr == 'H' && hssVal > 0))) {
+        // Auto-clean any space, hyphen or symbol between prefix and number (e.g. "H 1234", "H-1234" -> "H1234")
+        admn_val = admn_val.replace(/^([HV])[\s\-_]+(\d+)/i, '$1$2');
+        txtADNO.value = admn_val;
+
+        var prefix = admn_val.substring(0, 1);
+        if (prefix !== 'H' && prefix !== 'V') {
+            var hssErrorHtml = '<div style="text-align: left; font-size: 0.95rem; line-height: 1.6;">' +
+                'For Higher Secondary, please enter prefix before Admission Number:<br><br>' +
+                '• <b>HSS:</b> Add <b>H</b> before Admission Number (Example: <b>H1234</b>)<br>' +
+                '• <b>Vocational:</b> Add <b>V</b> before Admission Number (Example: <b>V1234</b>)' +
+                '</div>';
+            var hssErrorText = 'For Higher Secondary, please enter prefix before Admission Number:\n' +
+                '- HSS: Add H before Admission Number (Example: H1234)\n' +
+                '- Vocational: Add V before Admission Number (Example: V1234)';
+
             if (typeof Swal !== 'undefined') {
-                Swal.fire({ icon: 'error', title: 'Oops!', text: 'Invalid admission number' });
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Admission Number',
+                    html: hssErrorHtml
+                });
             } else if (typeof swal !== 'undefined') {
-                swal("Oops!", "Invalid admission number", "error");
+                swal("Invalid Admission Number", hssErrorText, "error");
             } else {
-                alert('Invalid admission number');
+                alert(hssErrorText);
             }
             txtADNO.focus();
             return false;
         }
-        admn_no = trim(txtADNO.value).substring(1);
+
+        var numDigits = admn_val.substring(1);
+        if (numDigits === '' || isNaN(numDigits) || !/^\d+$/.test(numDigits)) {
+            var numHtml = '<div style="text-align: left; font-size: 0.95rem; line-height: 1.6;">' +
+                'Please enter valid numeric digits after the prefix.<br><br>' +
+                '• <b>HSS:</b> Example: <b>H1234</b><br>' +
+                '• <b>Vocational:</b> Example: <b>V1234</b>' +
+                '</div>';
+            var numText = 'Please enter valid numeric digits after the prefix (Example: H1234 or V1234).';
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'error', title: 'Invalid Admission Number', html: numHtml });
+            } else if (typeof swal !== 'undefined') {
+                swal("Invalid Admission Number", numText, "error");
+            } else {
+                alert(numText);
+            }
+            txtADNO.focus();
+            return false;
+        }
+    } else if (txtClass && parseInt(trim(txtClass.value), 10) <= 10) {
+        var cls = parseInt(trim(txtClass.value), 10);
+        var firstChr = admn_val.substring(0, 1);
+        if (firstChr === 'H' || firstChr === 'V') {
+            var notHssMsg = 'Prefix \'' + firstChr + '\' is only for Higher Secondary (Class 11 & 12).<br>For Class ' + cls + ', please enter numeric admission number only.';
+            var notHssText = 'Prefix \'' + firstChr + '\' is only for Higher Secondary (Class 11 & 12). For Class ' + cls + ', please enter numeric admission number only.';
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'error', title: 'Invalid Admission Number', html: notHssMsg });
+            } else if (typeof swal !== 'undefined') {
+                swal("Invalid Admission Number", notHssText, "error");
+            } else {
+                alert(notHssText);
+            }
+            txtADNO.focus();
+            return false;
+        }
+        if (isNaN(admn_val) || !/^\d+$/.test(admn_val)) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'error', title: 'Oops!', text: 'Please enter a valid numeric admission number' });
+            } else if (typeof swal !== 'undefined') {
+                swal("Oops!", "Please enter a valid numeric admission number", "error");
+            } else {
+                alert('Please enter a valid numeric admission number');
+            }
+            txtADNO.focus();
+            return false;
+        }
+    } else {
+        if (isNaN(admn_val) || !/^\d+$/.test(admn_val)) {
+            var defaultChr = admn_val.substring(0, 1);
+            if (defaultChr === 'H' || defaultChr === 'V') {
+                var dNum = admn_val.substring(1);
+                if (dNum === '' || isNaN(dNum) || !/^\d+$/.test(dNum)) {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({ icon: 'error', title: 'Invalid Admission Number', text: 'Please enter valid numeric digits following the prefix.' });
+                    } else if (typeof swal !== 'undefined') {
+                        swal("Invalid Admission Number", "Please enter valid numeric digits following the prefix.", "error");
+                    } else {
+                        alert('Please enter valid numeric digits following the prefix.');
+                    }
+                    txtADNO.focus();
+                    return false;
+                }
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({ icon: 'error', title: 'Oops!', text: 'Please enter a valid numeric admission number' });
+                } else if (typeof swal !== 'undefined') {
+                    swal("Oops!", "Please enter a valid numeric admission number", "error");
+                } else {
+                    alert('Please enter a valid numeric admission number');
+                }
+                txtADNO.focus();
+                return false;
+            }
+        }
     }
 
-    if (isNaN(admn_no)) {
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({ icon: 'error', title: 'Oops!', text: 'Invalid admission number' });
-        } else if (typeof swal !== 'undefined') {
-            swal("Oops!", "Invalid admission number", "error");
-        } else {
-            alert('Invalid admission number');
+    return true;
+}
+
+function participantPhotoIsPresent() {
+    var hiddenField = document.getElementById('cropped_image_data');
+    if (hiddenField && hiddenField.value && hiddenField.value.trim() !== '') {
+        return true;
+    }
+
+    var userfile = document.getElementById('userfile');
+    if (userfile && userfile.files && userfile.files.length > 0) {
+        return true;
+    }
+
+    var currentPhoto = document.getElementById('currentPhoto');
+    if (currentPhoto && currentPhoto.style.display !== 'none') {
+        var src = currentPhoto.getAttribute('src');
+        if (src && src.trim() !== '') {
+            return true;
         }
-        txtADNO.focus();
+    }
+
+    return false;
+}
+
+function clearParticipantPhotoHighlight() {
+    var preview = document.getElementById('photoPreview');
+    if (preview) {
+        preview.classList.remove('photo-required-error');
+    }
+}
+
+function validateParticipantPhoto() {
+    if (participantPhotoIsPresent()) {
+        clearParticipantPhotoHighlight();
+        return true;
+    }
+
+    var preview = document.getElementById('photoPreview');
+    if (preview) {
+        preview.classList.add('photo-required-error');
+        if (typeof preview.scrollIntoView === 'function') {
+            preview.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    var message = 'Participant photo is required. Please upload a photo using "Take Photo" or "Choose from Gallery" and crop it to the 3:4 ratio.';
+
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Photo Required',
+            html: '<div style="text-align:left;font-size:0.95rem;line-height:1.6;">'
+                + '<p style="margin:0 0 0.6rem;">A participant photo is <b>mandatory</b>. The record cannot be saved without it.</p>'
+                + '<p style="margin:0;color:#64748b;font-size:0.88rem;">'
+                + '<i class="bi bi-camera-fill me-1"></i>Use <b>Take Photo</b> or <b>Choose from Gallery</b>, then crop to the fixed <b>3:4</b> ratio.'
+                + '</p></div>',
+            confirmButtonText: '<i class="bi bi-check2-circle me-1"></i> OK, I\'ll Upload',
+            confirmButtonColor: '#4338ca',
+            allowOutsideClick: false
+        }).then(function () {
+            var takePhotoBtn = document.querySelector('button[onclick="triggerCameraCapture()"]');
+            if (takePhotoBtn) {
+                takePhotoBtn.focus();
+            }
+        });
+    } else {
+        alert(message);
+    }
+
+    return false;
+}
+
+function fncSaveParticipant() {
+    var txtADNO = document.getElementById('txtADNO');
+    var txtClass = document.getElementById('txtClass');
+    var txtParticipantName = document.getElementById('txtParticipantName');
+    var hidVHSSNo = document.getElementById('hidVHSSNo');
+    var hidHSSNo = document.getElementById('hidHSSNo');
+
+    if (!validateParticipantAdmissionNumber(txtADNO, txtClass, hidHSSNo, hidVHSSNo)) {
         return false;
     }
 
@@ -703,6 +1001,10 @@ function fncSaveParticipant() {
             txtParticipantName.focus();
             return false;
         }
+    }
+
+    if (!validateParticipantPhoto()) {
+        return false;
     }
 
     var items = 0;
@@ -732,6 +1034,13 @@ function fncSaveParticipant() {
         if (firstItem) firstItem.focus();
         return false;
     }
+
+    // Validate item limits and compatibility before saving
+    if (typeof validateParticipantFormItems === 'function') {
+        if (!validateParticipantFormItems(false)) {
+            return false;
+        }
+    }
     
     // Show spinner on button
     var saveBtn = document.getElementById('save_participant_btn');
@@ -743,17 +1052,53 @@ function fncSaveParticipant() {
 
     var formParticipant = document.getElementById('formParticipant');
     if (formParticipant) {
-        formParticipant.action = (typeof path !== 'undefined' ? path : '') + 'schools/registration/save_participant';
+        if (typeof getCsrfToken === 'function') {
+            var tok = getCsrfToken();
+            if (tok) {
+                var cInp = formParticipant.querySelector('input[name="csrf_test_name"]');
+                if (!cInp) {
+                    cInp = document.createElement('input');
+                    cInp.type = 'hidden';
+                    cInp.name = 'csrf_test_name';
+                    formParticipant.appendChild(cInp);
+                }
+                cInp.value = tok;
+            }
+        }
+        var participantRoute = (typeof PARTICIPANTS_REGISTRATION_ROUTE !== 'undefined') ? PARTICIPANTS_REGISTRATION_ROUTE : 'schools/registration';
+        formParticipant.action = (typeof path !== 'undefined' ? path : '') + participantRoute + '/save_participant';
         formParticipant.submit();
     }
 }
 
-function editParticipant(adno) {
+function editParticipant(adno, btn, schoolCode) {
     var hidADNO = document.getElementById('hidADNO');
     if (hidADNO) hidADNO.value = adno;
 
-    var hidSchoolId = document.getElementById('hidSchoolId');
-    var schCode = hidSchoolId ? hidSchoolId.value : '';
+    var schCode = schoolCode ||
+                  (document.getElementById('hidSchoolId') && document.getElementById('hidSchoolId').value ? document.getElementById('hidSchoolId').value : '') ||
+                  (document.getElementById('formSchoolHidSchoolId') && document.getElementById('formSchoolHidSchoolId').value ? document.getElementById('formSchoolHidSchoolId').value : '') ||
+                  (document.querySelector('input[name="hidSchoolId"]') ? document.querySelector('input[name="hidSchoolId"]').value : '');
+
+    var hidSchoolIdEl = document.getElementById('hidSchoolId');
+    if (hidSchoolIdEl && schCode) hidSchoolIdEl.value = schCode;
+
+    // Immediately prepare modal title, button and action for edit
+    var modalLabel = document.getElementById('participantModalLabel');
+    if (modalLabel) modalLabel.innerText = 'Edit Participant';
+
+    var saveBtn = document.getElementById('save_participant_btn');
+    if (saveBtn) {
+        saveBtn.innerText = 'Update Participant';
+        saveBtn.disabled = false;
+        saveBtn.setAttribute('onclick', 'fncUpdateParticipant(\'' + adno + '\')');
+    }
+
+    var formParticipant = document.getElementById('formParticipant');
+    if (formParticipant) {
+        var participantRoute = (typeof PARTICIPANTS_REGISTRATION_ROUTE !== 'undefined') ? PARTICIPANTS_REGISTRATION_ROUTE : 'schools/registration';
+        formParticipant.action = (typeof path !== 'undefined' ? path : '') + participantRoute + '/update_participant_details';
+    }
 
     var txtADNO = document.getElementById('txtADNO');
     var txtParticipantName = document.getElementById('txtParticipantName');
@@ -761,7 +1106,7 @@ function editParticipant(adno) {
     var txtGender = document.getElementById('txtGender');
     var userfile = document.getElementById('userfile');
 
-    if (txtADNO) txtADNO.value = '';
+    if (txtADNO) txtADNO.value = adno;
     if (txtParticipantName) txtParticipantName.value = '';
     if (txtClass) txtClass.value = '';
     if (txtGender) txtGender.value = '';
@@ -792,7 +1137,13 @@ function editParticipant(adno) {
     var requestUrl = (typeof path !== 'undefined' ? path : '') + 'schools/registration/get_participant_data';
     var formData = new FormData();
     formData.append('hidSchoolId', schCode);
+    formData.append('school_code', schCode);
     formData.append('hidADNO', adno);
+    formData.append('admn_no', adno);
+    if (typeof getCsrfToken === 'function') {
+        var csrfToken = getCsrfToken();
+        if (csrfToken) formData.append('csrf_test_name', csrfToken);
+    }
 
     fetch(requestUrl, {
         method: 'POST',
@@ -800,6 +1151,16 @@ function editParticipant(adno) {
     })
     .then(function(res) { return res.json(); })
     .then(function(data) {
+        if (data.csrf_hash) {
+            if (typeof updateCsrfToken === 'function') {
+                updateCsrfToken(data.csrf_hash);
+            }
+            var csrfInputs = document.querySelectorAll('input[name="csrf_test_name"]');
+            for (var i = 0; i < csrfInputs.length; i++) {
+                csrfInputs[i].value = data.csrf_hash;
+            }
+        }
+
         if (data.error) {
             if (typeof Swal !== 'undefined') {
                 Swal.fire({ icon: 'error', title: 'Error', text: data.error });
@@ -917,7 +1278,8 @@ function deleteParticipant(adno) {
             }
 
             if (formParticipant) {
-                formParticipant.action = (typeof path !== 'undefined' ? path : '') + 'schools/registration/delete_participant_details';
+                var participantRoute = (typeof PARTICIPANTS_REGISTRATION_ROUTE !== 'undefined') ? PARTICIPANTS_REGISTRATION_ROUTE : 'schools/registration';
+                formParticipant.action = (typeof path !== 'undefined' ? path : '') + participantRoute + '/delete_participant_details';
                 formParticipant.submit();
             } else {
                 console.error('CRITICAL: formParticipant element not found!');
@@ -978,45 +1340,7 @@ function fncCancelParticipant() {
     var hidVHSSNo = document.getElementById('hidVHSSNo');
     var hidHSSNo = document.getElementById('hidHSSNo');
 
-    if (!txtADNO || trim(txtADNO.value) == '') {
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({ icon: 'error', title: 'Oops!', text: 'Please enter the admission number' });
-        } else if (typeof swal !== 'undefined') {
-            swal("Oops!", "Please enter the admission number", "error");
-        } else {
-            alert('Please enter the admission number');
-        }
-        if (txtADNO) txtADNO.focus();
-        return false;
-    }
-    var admn_no = trim(txtADNO.value);
-    if (txtClass && parseInt(trim(txtClass.value), 10) > 10) {
-        var hss_vhse_chr = trim(txtADNO.value).substring(0, 1).toUpperCase();
-        var vhssVal = hidVHSSNo ? parseInt(hidVHSSNo.value, 10) : 0;
-        var hssVal = hidHSSNo ? parseInt(hidHSSNo.value, 10) : 0;
-        if (!((hss_vhse_chr == 'V' && vhssVal > 0) || (hss_vhse_chr == 'H' && hssVal > 0))) {
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({ icon: 'error', title: 'Oops!', text: 'Invalid admission number' });
-            } else if (typeof swal !== 'undefined') {
-                swal("Oops!", "Invalid admission number", "error");
-            } else {
-                alert('Invalid admission number');
-            }
-            txtADNO.focus();
-            return false;
-        }
-        admn_no = trim(txtADNO.value).substring(1);
-    }
-
-    if (isNaN(admn_no)) {
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({ icon: 'error', title: 'Oops!', text: 'Invalid admission number' });
-        } else if (typeof swal !== 'undefined') {
-            swal("Oops!", "Invalid admission number", "error");
-        } else {
-            alert('Invalid admission number');
-        }
-        txtADNO.focus();
+    if (!validateParticipantAdmissionNumber(txtADNO, txtClass, hidHSSNo, hidVHSSNo)) {
         return false;
     }
 
@@ -1043,6 +1367,10 @@ function fncCancelParticipant() {
             txtParticipantName.focus();
             return false;
         }
+    }
+
+    if (!validateParticipantPhoto()) {
+        return false;
     }
 
     var items = 0;
@@ -1073,6 +1401,13 @@ function fncCancelParticipant() {
         return false;
     }
 
+    // Validate item limits and compatibility before updating
+    if (typeof validateParticipantFormItems === 'function') {
+        if (!validateParticipantFormItems(true, adno)) {
+            return false;
+        }
+    }
+
     var hidAdnoEl = document.getElementById('hidADNO');
     if (hidAdnoEl) hidAdnoEl.value = adno;
     
@@ -1086,45 +1421,63 @@ function fncCancelParticipant() {
 
     var formParticipant = document.getElementById('formParticipant');
     if (formParticipant) {
-        formParticipant.action = (typeof path !== 'undefined' ? path : '') + 'schools/registration/update_participant_details';
+        if (typeof getCsrfToken === 'function') {
+            var tok = getCsrfToken();
+            if (tok) {
+                var cInp = formParticipant.querySelector('input[name="csrf_test_name"]');
+                if (!cInp) {
+                    cInp = document.createElement('input');
+                    cInp.type = 'hidden';
+                    cInp.name = 'csrf_test_name';
+                    formParticipant.appendChild(cInp);
+                }
+                cInp.value = tok;
+            }
+        }
+        var participantRoute = (typeof PARTICIPANTS_REGISTRATION_ROUTE !== 'undefined') ? PARTICIPANTS_REGISTRATION_ROUTE : 'schools/registration';
+        formParticipant.action = (typeof path !== 'undefined' ? path : '') + participantRoute + '/update_participant_details';
         formParticipant.submit();
     }
 }
 
 function fnschgpwdAdd() {
+    var oldPwd = $('txtOLDPassword') ? $('txtOLDPassword').value.trim() : '';
+    var newPwd = $('txtNewPassword') ? $('txtNewPassword').value.trim() : '';
+    var cfmPwd = $('txtCFMPassword') ? $('txtCFMPassword').value.trim() : '';
 
-    if ($('txtOLDPassword').value == "") {
-        swal ( "Oops!" ,  "please enter current password" ,  "error" )
-        //alert("please enter current password");
-        $('txtOLDPassword').focus();
-        return false;
-    }
+    var isChangingPwd = (oldPwd !== '' || newPwd !== '' || cfmPwd !== '');
 
-    if ($('txtNewPassword').value == "") {
-        swal ( "Oops!" ,  "please enter password" ,  "error" )
-        //alert("please enter password");
-        $('txtNewPassword').focus();
-        return false;
-    }
-    if ($('txtCFMPassword').value == "") {
-        swal ( "Oops!" ,  "please Re-Type your password" ,  "error" )
-        //alert("please Re-Type your password");
-        $('txtCFMPassword').focus();
-        return false;
-    }
-    if (($('txtNewPassword').value) != ($('txtCFMPassword').value)) {
-        swal ( "Oops!" ,  "Your reentered  password is not correct" ,  "error" )
-        //alert("Your reentered  password is not correct");
-        $('txtCFMPassword').focus();
-        return false;
-    }
-
-    if (($('txtOLDPassword').value) == ($('txtNewPassword').value))
-    {
-        swal ( "Oops!" ,  "Old Password and New Password are Same!!! Please enter a new one" ,  "error" )
-        //alert("Old Password and New Password are Same!!! Please enter a new one");
-        $('txtNewPassword').focus();
-        return false;
+    if (isChangingPwd) {
+        if (oldPwd == "") {
+            swal ( "Oops!" ,  "please enter current password" ,  "error" );
+            $('txtOLDPassword').focus();
+            return false;
+        }
+        if (newPwd == "") {
+            swal ( "Oops!" ,  "please enter password" ,  "error" );
+            $('txtNewPassword').focus();
+            return false;
+        }
+        if (newPwd.length < 2 || newPwd.length > 16) {
+            swal ( "Oops!" ,  "New password must be between 2 and 16 characters" ,  "error" );
+            $('txtNewPassword').focus();
+            return false;
+        }
+        if (cfmPwd == "") {
+            swal ( "Oops!" ,  "please Re-Type your password" ,  "error" );
+            $('txtCFMPassword').focus();
+            return false;
+        }
+        if (newPwd != cfmPwd) {
+            swal ( "Oops!" ,  "Your reentered password is not correct" ,  "error" );
+            $('txtCFMPassword').focus();
+            return false;
+        }
+        if (oldPwd == newPwd) {
+            swal ( "Oops!" ,  "Old Password and New Password are Same!!! Please enter a new one" ,  "error" );
+            $('txtNewPassword').focus();
+            return false;
+        }
     }
 
     if ($('Name').value == "") {
@@ -1355,9 +1708,13 @@ function goschooldet(shid) {
 }
 
 function fncShowClusterSchools(shid) {
-    $('hidClusterId').value = shid;
-    $('clustschool').action = path + 'welcome/cluster_schools/';
-    $('clustschool').submit();
+    var hidClusterId = document.getElementById('hidClusterId');
+    var clustschool = document.getElementById('clustschool');
+    if (hidClusterId) hidClusterId.value = shid;
+    if (clustschool) {
+        clustschool.action = path + 'welcome/cluster_schools';
+        clustschool.submit();
+    }
 }
 
 function fncConfirmSubDistAdmin() {
@@ -1411,7 +1768,10 @@ function fnc_change_confirmation_status(message, school_code, element_id)
         return;
     }
 
-    var testElement = $(element_id);
+    var testElement = document.getElementById(element_id);
+    if (!testElement && typeof $ === 'function') {
+        testElement = $(element_id);
+    }
     if (!testElement) {
         console.error('CRITICAL ERROR: Element not found:', element_id);
         return;
@@ -1453,8 +1813,9 @@ function fnc_change_confirmation_status(message, school_code, element_id)
                 },
                 onSuccess: function (transport) {
                     var response = transport.responseText.trim();
-                    var element = $(element_id);
-                    var disElement = $(element_id + '_dis');
+                    var element = document.getElementById(element_id);
+                    var disElement = document.getElementById(element_id + '_dis');
+                    var resetBtn = document.getElementById('reset_' + school_code) || document.getElementById('reset_nonschool_' + school_code);
 
                     if (!element) {
                         console.error('Element not found after AJAX:', element_id);
@@ -1464,6 +1825,7 @@ function fnc_change_confirmation_status(message, school_code, element_id)
                     if (response == 'Yes' || response == 'No') {
                         element.innerHTML = response;
                         if (disElement) disElement.innerHTML = '';
+                        if (resetBtn) resetBtn.style.display = 'none';
                         
                         Swal.fire({
                             title: 'Success!',

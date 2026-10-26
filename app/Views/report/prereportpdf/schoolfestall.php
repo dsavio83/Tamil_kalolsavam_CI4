@@ -44,32 +44,35 @@ for ($j = 0; $j < count($school_details); $j++) {
         }
         ?>
 
-        <page backtop="30mm" backbottom="20mm ">
+        <?php $this->load->view('report/report_pdf_style'); ?>
+<page backtop="20mm" backbottom="20mm ">
             <page_header>
                 <?php
                 $this->load->view('report/report_header');
                 ?>
-                <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center">
-                    <tr>
-                        <td align="center" class="style1">List of Participating Schools with School Code</td>
-                    </tr>
-                    <tr>
-                        <td align="center" class="style2">
-                            Festival :&nbsp;<?php echo $school_details[$j]['fest_name']; ?>
-                        </td>
-                    </tr>
-                </table>
+                
 
             </page_header>
             <page_footer>
                 <?php
                 $this->load->view('report/report_footer');
                 ?>
-            </page_footer>     
+            </page_footer>
+<table width="100%" border="0" cellspacing="0" cellpadding="4" align="center">
+                    <tr>
+                        <td align="center" class="report-pdf-title">List of Participating Schools with School Code</td>
+                    </tr>
+                    <tr>
+                        <td align="center" class="report-pdf-subtitle">
+                            Festival :&nbsp;<?php echo $school_details[$j]['fest_name']; ?>
+                        </td>
+                    </tr>
+                </table>
+     
 
 
 
-            <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top:15px;">
+            <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center" class="heading_tab" style="margin-top: 2px;">
                 <tr height="30">
                     <th width="79" height="30" align="center" class="style2">Sl.No</th>
 

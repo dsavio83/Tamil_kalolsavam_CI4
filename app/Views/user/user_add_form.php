@@ -2,6 +2,9 @@
 /**
  * Standalone Add User View - Sub-District Admin
  */
+$is_district = !empty($is_district) || ((int)session()->get('USER_TYPE') === 2);
+$admin_role_label = $is_district ? 'District User' : 'Sub-District Admin';
+
 // Group user rights by label_name
 $grouped_rights = [];
 if (!empty($user_rights)) {
@@ -223,7 +226,7 @@ $category_icons = [
     <div class="form-header-bar">
       <div>
         <h2 class="form-title">
-          <i class="bi bi-person-plus text-primary"></i> Create Sub-District Admin User
+          <i class="bi bi-person-plus text-primary"></i> Create <?php echo $admin_role_label; ?>
         </h2>
         <p class="text-muted small mb-0 mt-1">Configure account credentials and authorized module rights.</p>
       </div>
@@ -233,7 +236,7 @@ $category_icons = [
       </a>
     </div>
 
-    <!-- Credentials -->
+    <!-- Credentials & Role Assignment -->
     <div class="row g-3 mb-4">
       <div class="col-12 col-md-6">
         <label class="custom-form-label" for="txtNewUserName">
@@ -242,7 +245,7 @@ $category_icons = [
         <div class="input-with-icon">
           <i class="bi bi-person input-icon"></i>
           <input type="text" name="txtNewUserName" id="txtNewUserName" class="custom-text-input" 
-                 placeholder="Enter username (e.g. subdist_user)" required />
+                 placeholder="Enter username (e.g. subdist_user or stagemanager1)" required />
         </div>
       </div>
 
@@ -259,63 +262,177 @@ $category_icons = [
           </button>
         </div>
       </div>
-    </div>
 
-    <!-- Permissions Control Bar -->
-    <div class="perm-controls-bar">
-      <div class="fw-bold text-primary d-flex align-items-center gap-2">
-        <i class="bi bi-shield-lock-fill"></i> User Rights & Module Permissions
+      <!-- User Role Selector -->
+      <div class="col-12 col-md-6">
+        <label class="custom-form-label" for="selUserType">
+          User Role <span class="text-danger">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="bi bi-shield-lock input-icon"></i>
+          <select name="selUserType" id="selUserType" class="custom-text-input form-select" onchange="handleRoleChange(this.value);" required>
+            <option value="3" selected><?php echo $admin_role_label; ?></option>
+            <option value="6">Stage Manager</option>
+          </select>
+        </div>
+        <div class="form-text small text-muted">
+          <?php echo $admin_role_label; ?> manages portal data; Stage Manager operates live stage schedule and lot stepping.
+        </div>
       </div>
-      <div class="d-flex gap-2">
-        <button type="button" class="btn btn-sm btn-light border fw-semibold" onclick="toggleAllPermissions(true)">
-          <i class="bi bi-check-all text-success me-1"></i> Select All
-        </button>
-        <button type="button" class="btn btn-sm btn-light border fw-semibold" onclick="toggleAllPermissions(false)">
-          <i class="bi bi-x text-danger me-1"></i> Deselect All
-        </button>
-      </div>
-    </div>
 
-    <!-- Categorized Permissions Grid -->
-    <?php if (!empty($grouped_rights)) { ?>
-      <?php foreach ($grouped_rights as $cat_name => $items) { 
-        $cat_icon = $category_icons[$cat_name] ?? 'bi-folder2-open';
-        $cat_slug = preg_replace('/[^a-zA-Z0-9]/', '_', strtolower($cat_name));
-      ?>
-        <div class="permission-category-card">
-          <div class="permission-category-header">
-            <div class="category-title-wrap">
-              <i class="bi <?php echo $cat_icon; ?>"></i>
-              <span><?php echo esc($cat_name); ?></span>
-              <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2 py-1 small">
-                <?php echo count($items); ?>
-              </span>
-            </div>
-            <div class="form-check m-0">
-              <input class="form-check-input category-master-check" type="checkbox" id="checkCat_<?php echo $cat_slug; ?>" 
-                     onchange="toggleCategoryGroup('<?php echo $cat_slug; ?>', this.checked)">
-              <label class="form-check-label small text-muted user-select-none" for="checkCat_<?php echo $cat_slug; ?>">
-                Select All
-              </label>
-            </div>
-          </div>
-
-          <div class="permission-items-grid">
-            <?php foreach ($items as $ur) { 
-              $rf_id = (int)$ur['rf_id'];
-            ?>
-              <label class="permission-check-item" for="chkRight_<?php echo $rf_id; ?>">
-                <input type="checkbox" name="chkRight_<?php echo $rf_id; ?>" id="chkRight_<?php echo $rf_id; ?>" 
-                       class="perm-checkbox group-<?php echo $cat_slug; ?>" 
-                       value="<?php echo $rf_id; ?>" 
-                       onchange="syncCategoryHeader('<?php echo $cat_slug; ?>');" />
-                <span class="permission-check-label"><?php echo esc($ur['rf_functionality']); ?></span>
-              </label>
+      <!-- Assigned Stage Dropdown (Dynamic for Stage Manager) -->
+      <div class="col-12 col-md-6" id="stageAssignmentWrapper" style="display:none;">
+        <label class="custom-form-label" for="selAssignedStage">
+          Assigned Festival Stage <span class="text-danger" id="stageReqAsterisk">*</span>
+        </label>
+        <div class="input-with-icon">
+          <i class="bi bi-soundwave input-icon"></i>
+          <select name="selAssignedStage" id="selAssignedStage" class="custom-text-input form-select">
+            <option value="">-- Select Festival Stage --</option>
+            <?php if (!empty($stages)) { ?>
+              <?php foreach ($stages as $stg) { ?>
+                <option value="<?php echo $stg['stage_id']; ?>">
+                  <?php echo esc($stg['stage_name']) . (!empty($stg['stage_desc']) ? ' (' . esc($stg['stage_desc']) . ')' : ''); ?>
+                </option>
+              <?php } ?>
             <?php } ?>
+          </select>
+        </div>
+        <div class="form-text small text-muted">
+          The assigned manager will conduct live programs and control participant lot sequencing on this stage.
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage Manager Workflow Notice -->
+    <div id="stageManagerInfoBox" class="alert alert-light border border-purple-subtle bg-purple bg-opacity-10 rounded-3 mb-4 p-3" style="display:none; align-items:center; gap:12px;">
+      <i class="bi bi-info-circle-fill text-purple fs-4"></i>
+      <div class="small text-dark">
+        <strong>Stage Manager Onboarding Note:</strong> When created, Stage Managers start with initial password pending (<code>CHANGEPWD = 'N'</code>). Upon first login, they will change their password and will be directly routed to their dedicated <strong>Stage Manager Console</strong> (<code>stage/manager</code>).
+      </div>
+    </div>
+
+    <!-- Stage Manager Role Permissions (Exclusive & Strictly Scoped) -->
+    <div id="stageManagerPermissionsWrapper" style="display:none;">
+      <div class="perm-controls-bar border-purple-subtle bg-purple bg-opacity-10 mb-3 p-3 rounded-3">
+        <div>
+          <div class="fw-bold text-purple d-flex align-items-center gap-2">
+            <i class="bi bi-shield-lock-fill"></i> Stage Manager Permissions (Role Restricted)
+          </div>
+          <div class="small text-muted mt-1">
+            Stage Managers have strictly restricted scope. Standard created accounts have NO other module rights. Only Stage Management, Participant Viewing, and Mark Entry may be granted.
           </div>
         </div>
+      </div>
+
+      <div class="permission-category-card border-purple-subtle mb-3">
+        <div class="permission-category-header bg-purple bg-opacity-10">
+          <div class="category-title-wrap">
+            <i class="bi bi-person-check-fill text-purple"></i>
+            <span>Authorized Stage Manager Permissions</span>
+            <span class="badge bg-purple text-white rounded-pill px-2 py-1 small">3 Permitted</span>
+          </div>
+        </div>
+
+        <div class="permission-items-grid p-3">
+          <!-- 1. Stage Management -->
+          <label class="permission-check-item border rounded-3 p-3 d-flex align-items-start gap-2" for="chkSmRight_3">
+            <input type="checkbox" name="chkRight_3" id="chkSmRight_3" 
+                   class="perm-checkbox-sm form-check-input mt-1" 
+                   value="3" checked disabled />
+            <div>
+              <span class="permission-check-label fw-bold d-block text-dark">Stage Management &amp; Console</span>
+              <span class="text-muted small">Access to Stage Manager Console (stage/manager), live program dispatch, lot stepping &amp; schedule delay tracking.</span>
+            </div>
+          </label>
+
+          <!-- 2. Participant View -->
+          <label class="permission-check-item border rounded-3 p-3 d-flex align-items-start gap-2" for="chkSmRight_29">
+            <input type="checkbox" name="chkRight_29" id="chkSmRight_29" 
+                   class="perm-checkbox-sm form-check-input mt-1" 
+                   value="29" disabled />
+            <div>
+              <span class="permission-check-label fw-bold d-block text-dark">View Participant Details (Confidential)</span>
+              <span class="text-muted small">Allows viewing student names, schools, and rosters. Leave unchecked unless explicitly authorized by Admin.</span>
+            </div>
+          </label>
+
+          <!-- 3. Result / Mark Entry -->
+          <label class="permission-check-item border rounded-3 p-3 d-flex align-items-start gap-2" for="chkSmRight_12">
+            <input type="checkbox" name="chkRight_12" id="chkSmRight_12" 
+                   class="perm-checkbox-sm form-check-input mt-1" 
+                   value="12" disabled />
+            <div>
+              <span class="permission-check-label fw-bold d-block text-dark">Result &amp; Mark Entry</span>
+              <span class="text-muted small">Allows entering judges' scores and competition marks directly from the stage console.</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="alert alert-warning py-2 px-3 rounded-12 small mb-4">
+        <i class="bi bi-shield-exclamation me-1"></i> <strong>Confidentiality Policy:</strong> In accordance with festival integrity rules, student identities are kept anonymous by default. Stage Managers have no access to School Registration, Reports, Certificates, or System Configuration.
+      </div>
+    </div>
+
+    <!-- Sub-District Admin Permissions (Hidden for Stage Manager) -->
+    <div id="adminPermissionsWrapper">
+      <!-- Permissions Control Bar -->
+      <div class="perm-controls-bar">
+        <div class="fw-bold text-primary d-flex align-items-center gap-2">
+          <i class="bi bi-shield-lock-fill"></i> User Rights & Module Permissions
+        </div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-sm btn-light border fw-semibold" onclick="toggleAllPermissions(true)">
+            <i class="bi bi-check-all text-success me-1"></i> Select All
+          </button>
+          <button type="button" class="btn btn-sm btn-light border fw-semibold" onclick="toggleAllPermissions(false)">
+            <i class="bi bi-x text-danger me-1"></i> Deselect All
+          </button>
+        </div>
+      </div>
+
+      <!-- Categorized Permissions Grid -->
+      <?php if (!empty($grouped_rights)) { ?>
+        <?php foreach ($grouped_rights as $cat_name => $items) { 
+          $cat_icon = $category_icons[$cat_name] ?? 'bi-folder2-open';
+          $cat_slug = preg_replace('/[^a-zA-Z0-9]/', '_', strtolower($cat_name));
+        ?>
+          <div class="permission-category-card">
+            <div class="permission-category-header">
+              <div class="category-title-wrap">
+                <i class="bi <?php echo $cat_icon; ?>"></i>
+                <span><?php echo esc($cat_name); ?></span>
+                <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2 py-1 small">
+                  <?php echo count($items); ?>
+                </span>
+              </div>
+              <div class="form-check m-0">
+                <input class="form-check-input category-master-check" type="checkbox" id="checkCat_<?php echo $cat_slug; ?>" 
+                       onchange="toggleCategoryGroup('<?php echo $cat_slug; ?>', this.checked)">
+                <label class="form-check-label small text-muted user-select-none" for="checkCat_<?php echo $cat_slug; ?>">
+                  Select All
+                </label>
+              </div>
+            </div>
+
+            <div class="permission-items-grid">
+              <?php foreach ($items as $ur) { 
+                $rf_id = (int)$ur['rf_id'];
+              ?>
+                <label class="permission-check-item" for="chkRight_<?php echo $rf_id; ?>">
+                  <input type="checkbox" name="chkRight_<?php echo $rf_id; ?>" id="chkRight_<?php echo $rf_id; ?>" 
+                         class="perm-checkbox group-<?php echo $cat_slug; ?>" 
+                         value="<?php echo $rf_id; ?>" 
+                         onchange="syncCategoryHeader('<?php echo $cat_slug; ?>');" />
+                  <span class="permission-check-label"><?php echo esc($ur['rf_functionality']); ?></span>
+                </label>
+              <?php } ?>
+            </div>
+          </div>
+        <?php } ?>
       <?php } ?>
-    <?php } ?>
+    </div>
 
     <!-- Actions -->
     <div class="d-flex justify-content-center align-items-center gap-3 mt-4 pt-3 border-top flex-wrap">
@@ -333,6 +450,43 @@ $category_icons = [
 </div>
 
 <script>
+function handleRoleChange(roleVal) {
+  var role = parseInt(roleVal, 10);
+  var stageWrap = document.getElementById('stageAssignmentWrapper');
+  var infoBox = document.getElementById('stageManagerInfoBox');
+  var asterisk = document.getElementById('stageReqAsterisk');
+  var stageSelect = document.getElementById('selAssignedStage');
+  var adminPerms = document.getElementById('adminPermissionsWrapper');
+  var smPerms = document.getElementById('stageManagerPermissionsWrapper');
+
+  if (role === 6) {
+    if (stageWrap) stageWrap.style.display = 'block';
+    if (infoBox) infoBox.style.display = 'flex';
+    if (asterisk) asterisk.style.display = 'inline';
+    if (adminPerms) {
+      adminPerms.style.display = 'none';
+      adminPerms.querySelectorAll('input').forEach(function(el) { el.disabled = true; });
+    }
+    if (smPerms) {
+      smPerms.style.display = 'block';
+      smPerms.querySelectorAll('input').forEach(function(el) { el.disabled = false; });
+    }
+  } else {
+    if (stageWrap) stageWrap.style.display = 'none';
+    if (infoBox) infoBox.style.display = 'none';
+    if (asterisk) asterisk.style.display = 'none';
+    if (stageSelect) stageSelect.value = '';
+    if (smPerms) {
+      smPerms.style.display = 'none';
+      smPerms.querySelectorAll('input').forEach(function(el) { el.disabled = true; });
+    }
+    if (adminPerms) {
+      adminPerms.style.display = 'block';
+      adminPerms.querySelectorAll('input').forEach(function(el) { el.disabled = false; });
+    }
+  }
+}
+
 function togglePasswordVisibility(inputId, iconId) {
   var input = document.getElementById(inputId);
   var icon = document.getElementById(iconId);

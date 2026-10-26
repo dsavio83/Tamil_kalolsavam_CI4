@@ -1,0 +1,2677 @@
+<?php
+
+namespace App\Models\Schools;
+
+
+class Registration_Model extends \App\Models\BaseModel {
+
+    function __construct () {
+        parent::__construct ();
+    }
+
+    public function get_all_festival_items($schoolCode = null, $sub_district_code = null) {
+        $db = \Config\Database::connect();
+        $builder = $db->table('item_master IM')
+            ->select('IM.item_code, IM.item_name, IM.item_type, IM.gender as item_gender, IM.max_participants, IM.max_pinnani as max_pinnany, FM.fest_name, FM.class_start, FM.class_end')
+            ->join('festival_master FM', 'FM.fest_id = IM.fest_id', 'left');
+
+        // Resolve sub_district_code if not provided
+        if (empty($sub_district_code)) {
+            if (!empty($schoolCode)) {
+                $sch = $this->db->table('sd_school_master')->select('sub_district_code')->where('school_code', (int)$schoolCode)->get()->getRowArray();
+                if (!empty($sch['sub_district_code'])) {
+                    $sub_district_code = (int)$sch['sub_district_code'];
+                }
+            } elseif (!empty(session('SUB_DISTRICT'))) {
+                $sub_district_code = (int)session('SUB_DISTRICT');
+            }
+        }
+
+        $user_type = (int)session('USER_TYPE');
+        $dist_code = (int)session('DISTRICT');
+
+        if ($user_type === 2) {
+            // Strictly exclude LP for District
+            $builder->where('IM.fest_id !=', 1);
+            if ($dist_code > 0) {
+                $builder->groupStart();
+                $builder->where('IM.is_common', 'Y');
+                $builder->orWhere("IM.item_code IN (SELECT item_code FROM sd_item_allotment WHERE rev_district_code = {$dist_code})", null, false);
+                $builder->groupEnd();
+            }
+        } elseif (!empty($sub_district_code)) {
+            // If sub-district is identified, only show Common items OR items allotted to this sub-district
+            $builder->groupStart();
+            $builder->where('IM.is_common', 'Y');
+            $builder->orWhere("IM.item_code IN (SELECT item_code FROM sd_item_allotment WHERE sub_district_code = " . (int)$sub_district_code . ")", null, false);
+            $builder->groupEnd();
+        }
+
+        $items = $builder->orderBy('IM.item_code', 'ASC')
+            ->get()->getResultArray();
+
+        // Items whose eligible class band differs from their festival's default range.
+        $class_overrides = [166 => [1, 2]];
+        foreach ($items as &$item) {
+            $code = (int) ($item['item_code'] ?? 0);
+            if (isset($class_overrides[$code])) {
+                $item['class_start'] = $class_overrides[$code][0];
+                $item['class_end'] = $class_overrides[$code][1];
+            }
+        }
+        unset($item);
+
+        return $items;
+    }
+
+    function get_school_details($schoolCode) {
+
+        if (trim($this->session->get('SUB_DISTRICT')) != 0)
+            $this->db->where('SM.sub_district_code', trim($this->session->get('SUB_DISTRICT')));
+
+        if (trim($this->session->get('DISTRICT')) != 0)
+            $this->db->where('SM.rev_district_code', trim($this->session->get('DISTRICT')));
+
+        $this->db->where('SM.school_code', $schoolCode);
+        $this->db->from('sd_school_master AS SM');
+
+        /** check if the user is cluster user */
+        if (trim($this->session->get('USER_TYPE')) == 5) {
+            $this->db->join('sd_user_cluster AS UC', 'SM.school_code = UC.school_code', 'INNER');
+            $this->db->where('UC.user_id', trim($this->session->get('USERID')));
+        }
+        /** check if the user is cluster user ends */
+        $this->db->select('SM.*, sd_id, class_start, class_end, school_phone, school_email, hm_name, hm_phone, principal_name, principal_phone, 
+										teachers, strength_lp, strength_up, strength_hs, strength_hss, strength_vhss, total_strength, is_create_report, is_finalize');
+        $this->db->join('sd_school_details AS SD', 'SM.school_code = SD.school_code', 'LEFT');
+        $result = $this->db->get();
+        return $result->getResultArray();
+    }
+
+    function get_participant_details($schoolCode, $filters = array(), $limit = null, $offset = 0) {
+        $this->db->where('PD.school_code', $schoolCode);
+
+        // Apply filters
+        if (!empty($filters['class']) && $filters['class'] != 'all') {
+            $this->db->where('PD.class', $filters['class']);
+        }
+
+        if (!empty($filters['gender']) && $filters['gender'] != 'all') {
+            $this->db->where('PD.gender', $filters['gender']);
+        }
+
+        if (!empty($filters['category']) && $filters['category'] != 'all') {
+            switch ($filters['category']) {
+                case 'LP':
+                    $this->db->where('PD.class >=', 1);
+                    $this->db->where('PD.class <=', 4);
+                    break;
+                case 'UP':
+                    $this->db->where('PD.class >=', 5);
+                    $this->db->where('PD.class <=', 7);
+                    break;
+                case 'HS':
+                    $this->db->where('PD.class >=', 8);
+                    $this->db->where('PD.class <=', 10);
+                    break;
+                case 'HSS':
+                    $this->db->where('PD.class >=', 11);
+                    $this->db->where('PD.class <=', 12);
+                    break;
+            }
+        }
+
+        $this->db->from('sd_participant_details AS PD');
+        $this->db->select('PD.*, MIN(PID.item_code) as min_item_code');
+        $this->db->join('sd_participant_item_details AS PID', 'PD.participant_id = PID.participant_id', 'LEFT');
+        $this->db->groupBy('PD.participant_id');
+        $this->db->orderBy('min_item_code', 'ASC');
+        $this->db->orderBy('PD.class', 'ASC');
+        $this->db->orderBy('PD.participant_name', 'ASC');
+
+        if ($limit !== null) {
+            $this->db->limit($limit, $offset);
+        }
+
+        $result = $this->db->get();
+        return $result->getResultArray();
+    }
+
+    function get_participant_count($schoolCode, $filters = array()) {
+        $this->db->where('PD.school_code', $schoolCode);
+
+        // Apply same filters
+        if (!empty($filters['class']) && $filters['class'] != 'all') {
+            $this->db->where('PD.class', $filters['class']);
+        }
+
+        if (!empty($filters['gender']) && $filters['gender'] != 'all') {
+            $this->db->where('PD.gender', $filters['gender']);
+        }
+
+        if (!empty($filters['category']) && $filters['category'] != 'all') {
+            switch ($filters['category']) {
+                case 'LP':
+                    $this->db->where('PD.class >=', 1);
+                    $this->db->where('PD.class <=', 4);
+                    break;
+                case 'UP':
+                    $this->db->where('PD.class >=', 5);
+                    $this->db->where('PD.class <=', 7);
+                    break;
+                case 'HS':
+                    $this->db->where('PD.class >=', 8);
+                    $this->db->where('PD.class <=', 10);
+                    break;
+                case 'HSS':
+                    $this->db->where('PD.class >=', 11);
+                    $this->db->where('PD.class <=', 12);
+                    break;
+            }
+        }
+
+        $this->db->from('sd_participant_details AS PD');
+        return $this->db->countAllResults();
+    }
+
+    function get_group_details($schoolCode) {
+        /* if(isset($_POST['code']) && trim($_POST['code']) != ''){
+          $schoolCode = $_POST['code'];
+          } else {
+          $schoolCode	=	$this->input->post('hidSchoolId');
+          } */
+        $this->db->where('PD.school_code', $schoolCode);
+        $this->db->where('PD.item_type', 'G');
+        $this->db->from('sd_participant_item_details AS PD');
+        $this->db->join('item_master AS IM', 'PD.item_code = IM.item_code');
+        $this->db->select('IM.item_code,IM.item_name');
+        $this->db->groupBy('PD.item_code');
+        $group_items = $this->db->get();
+        if ($group_items->getNumRows() > 0) {
+            $participants_array = array();
+            $group_leader = array();
+            $group_array = $group_items->getResultArray();
+            foreach ($group_array as $groups) {
+                $group_leader[$groups['item_code']] = 0;
+                $this->db->where('PD.school_code', $schoolCode);
+                $this->db->where('PD.item_type', 'G');
+                $this->db->where('PD.item_code', $groups['item_code']);
+                $this->db->from('sd_participant_item_details AS PD');
+                $this->db->join('sd_participant_details AS PM', 'PM.school_code = PD.school_code AND PM.admn_no = PD.admn_no');
+                $this->db->select("PM.admn_no,PM.participant_name,PD.is_captain");
+                $participant_details = $this->db->get();
+
+                //$participants_array[$groups['item_code']][0]		=	"-- Select Captain --";	
+                foreach ($participant_details->getResultArray() as $participant) {
+                    if ($participant['is_captain'] == 'Y') {
+                        $group_leader[$groups['item_code']] = $participant['admn_no'];
+                    }
+                    $participants_array[$groups['item_code']][$participant['admn_no']] = $participant['participant_name'] . '(' . $participant['admn_no'] . ')';
+                }
+            }
+            $return_array['group_array'] = $group_array;
+            $return_array['group_leader'] = $group_leader;
+            $return_array['group_participant_array'] = $participants_array;
+            return $return_array;
+        }
+        return false;
+    }
+
+    function get_participant_item_details($id, $adno, $item_type = '', $is_special = '', $schoolCode = '') { /// C means Common for both Single and Group P for Pinnany
+        if (trim($item_type) != '') {
+            if (trim($item_type) == 'C') {
+                $this->db->where("(PD.item_type = 'S' or PD.item_type = 'G')");
+            } else {
+                $this->db->where('PD.item_type', trim($item_type));
+            }
+        }
+        if (empty($schoolCode)) {
+            if (isset($_POST['code']) && trim($_POST['code']) != '') {
+                $schoolCode = $_POST['code'];
+            } elseif ($this->input->post('hidSchoolId')) {
+                $schoolCode = $this->input->post('hidSchoolId');
+            } elseif ($this->session->get('SCHOOL_CODE')) {
+                $schoolCode = $this->session->get('SCHOOL_CODE');
+            }
+        }
+        if ($is_special == 'N') {
+            $this->db->where('PD.spo_id', '0');
+        }
+        if (!empty($schoolCode)) {
+            $this->db->where('PD.school_code', $schoolCode);
+        }
+        $this->db->where('PD.participant_id', $id);
+        $this->db->where('PD.admn_no', $adno);
+        $this->db->from('sd_participant_item_details AS PD');
+        $this->db->join('item_master AS IM', 'IM.item_code = PD.item_code');
+        $this->db->select('PD.*,IM.item_name');
+        $result = $this->db->get();
+        $items = $result->getResultArray();
+        if (empty($items)) {
+            $builder = $this->db->table('d_participant_item_details PD')
+                ->select('PD.*, IM.item_name')
+                ->join('item_master IM', 'IM.item_code = PD.item_code')
+                ->where('PD.admn_no', $adno);
+            if (!empty($schoolCode)) {
+                $builder->where('PD.school_code', $schoolCode);
+            }
+            $items = $builder->get()->getResultArray();
+        }
+        return $items;
+    }
+
+    function log_school_details($schoolCode, $status) {
+        $this->db->where('school_code', $schoolCode);
+        $school_details = $this->db->get('sd_school_details');
+        if ($school_details->getNumRows() > 0) {
+            $school = $school_details->getResultArray();
+
+            $data = array();
+            $data['school_code'] = $school[0]['school_code'] ?? $schoolCode;
+            $data['class_start'] = $school[0]['class_start'] ?? 1;
+            $data['class_end'] = $school[0]['class_end'] ?? 10;
+            $data['school_phone'] = (string)($school[0]['school_phone'] ?? '');
+            $data['hm_name'] = (string)($school[0]['hm_name'] ?? '');
+            $data['hm_phone'] = (string)($school[0]['hm_phone'] ?? '');
+            $data['principal_name'] = (string)($school[0]['principal_name'] ?? '');
+            $data['principal_phone'] = (string)($school[0]['principal_phone'] ?? '');
+            $data['teachers'] = (string)($school[0]['teachers'] ?? '');
+            $data['strength_lp'] = (int)($school[0]['strength_lp'] ?? 0);
+            $data['strength_up'] = (int)($school[0]['strength_up'] ?? 0);
+            $data['strength_hs'] = (int)($school[0]['strength_hs'] ?? 0);
+            $data['strength_hss'] = (int)($school[0]['strength_hss'] ?? 0);
+            $data['strength_vhss'] = (int)($school[0]['strength_vhss'] ?? 0);
+            $data['total_strength'] = (int)($school[0]['total_strength'] ?? 0);
+            $data['ip'] = (string)($this->input->ip_address() ?? '');
+            $data['user_id'] = (int)($this->session->get('USERID') ?? 0);
+            $data['status'] = $status;
+
+            $this->db->insert('z_school_details_log', $data);
+        }
+    }
+
+    function log_participant_details($schoolCode, $admnNo, $status) {
+        $this->db->where('school_code', $schoolCode);
+        $this->db->where('admn_no', $admnNo);
+        $participant_details = $this->db->get('sd_participant_details');
+        if ($participant_details->getNumRows() > 0) {
+            $participant = $participant_details->getResultArray();
+            $data = array();
+            $data['participant_id'] = $participant[0]['participant_id'];
+            $data['school_code'] = $participant[0]['school_code'];
+            $data['admn_no'] = $participant[0]['admn_no'];
+            $data['participant_name'] = $participant[0]['participant_name'];
+            $data['class'] = $participant[0]['class'];
+            $data['gender'] = $participant[0]['gender'];
+
+            $data['ip'] = $this->input->ip_address();
+            $data['user_id'] = $this->session->get('USERID');
+            $data['status'] = $status;
+
+            $this->db->insert('z_participant_details_log', $data);
+        }
+
+        $this->db->where('school_code', $schoolCode);
+        $this->db->where('admn_no', $admnNo);
+        $participant_item_details = $this->db->get('sd_participant_item_details');
+        foreach ($participant_item_details->getResultArray() as $participant_item) {
+            $data = array();
+            $data['pi_id'] = $participant_item['pi_id'];
+            $data['participant_id'] = $participant_item['participant_id'];
+            $data['school_code'] = $participant_item['school_code'];
+            $data['admn_no'] = $participant_item['admn_no'];
+            $data['parent_admn_no'] = $participant_item['parent_admn_no'];
+            $data['item_code'] = $participant_item['item_code'];
+            $data['item_type'] = $participant_item['item_type'];
+            $data['spo_id'] = $participant_item['spo_id'];
+            $data['spo_remarks'] = $participant_item['spo_remarks'];
+            $data['is_captain'] = $participant_item['is_captain'];
+            $data['ip'] = $this->input->ip_address();
+            $data['user_id'] = $this->session->get('USERID');
+            $data['status'] = $status;
+
+            $this->db->insert('z_participant_item_details_log', $data);
+        }
+    }
+
+    function save_school_details() {
+        $schoolCode = $this->input->post('hidSchoolId');
+
+        $this->db->where('school_code', $schoolCode);
+        $old_school_details = $this->db->get('sd_school_details');
+        if ($old_school_details->getNumRows() > 0) {
+            $this->log_school_details($schoolCode, 'O');
+        }
+
+
+        $this->db->where('school_code', $schoolCode);
+        $this->db->where("(class < '" . (int) $this->input->post('txtStandardFrom') . "' OR class > '" . (int) $this->input->post('txtStandardTo') . "')");
+        //$this->db->where('class >',(int)$this->input->post('txtStandardTo'));
+        $cnt_participant = $this->db->countAllResults('sd_participant_details');
+        if ($cnt_participant > 0) {
+            $error_array[] = 'Please select valid standards as participants from other category is already added';
+            $return_array['error_array'] = $error_array;
+            return $return_array;
+        }
+
+
+        $this->db->where('school_code', $schoolCode);
+        $count = $this->db->countAllResults('sd_school_details');
+        if ($count > 0) {
+            $this->db->where('school_code', $schoolCode);
+        } else {
+            $data['school_code'] = $schoolCode;
+        }
+        $teachers = '';
+        for ($i = 1; $i <= $this->input->post('hidTeachers'); $i++) {
+            if (isset($_POST['txtTeacher_' . $i]) && trim($_POST['txtTeacher_' . $i]) != '') {
+
+                $teachers .= $_POST['txtTeacher_' . $i] . '#$#' . (int) $_POST['txtPhone_' . $i] . '#@#';
+            }
+        }
+        $data['class_start'] = (int) $this->input->post('txtStandardFrom');
+        $data['class_end'] = (int) $this->input->post('txtStandardTo');
+        $data['school_phone'] = (string) ($this->input->post('txtSchoolPhone') ?? '');
+        $data['school_email'] = (string) ($this->input->post('txtSchoolEmail') ?? '');
+        $data['hm_name'] = (string) ($this->input->post('txtHeadmaster') ?? '');
+        $data['hm_phone'] = (string) ($this->input->post('txtHeadmasterPhone') ?? '');
+        $data['principal_name'] = (string) ($this->input->post('txtPrincipal') ?? '');
+        $data['principal_phone'] = (string) ($this->input->post('txtPrincipalPhone') ?? '');
+        $data['teachers'] = $teachers;
+        $data['strength_lp'] = (int) $this->input->post('txtTotalLP');
+        $data['strength_up'] = (int) $this->input->post('txtTotalUP');
+        $data['strength_hs'] = (int) $this->input->post('txtTotalHS');
+        $data['strength_hss'] = (int) $this->input->post('txtTotalHSS');
+        $data['strength_vhss'] = (int) $this->input->post('txtTotalVHSS');
+        $data['total_strength'] = (int) $this->input->post('txtTotal');
+        if ($count > 0) {
+            $this->db->update('sd_school_details', $data);
+        } else {
+            $this->db->insert('sd_school_details', $data);
+        }
+        $this->log_school_details($schoolCode, 'N');
+        return false;
+    }
+
+    function stage_allot_new_participant_item($item_code, $participant_id, $sub_district_code = null) {
+        if (!$sub_district_code) {
+            $sub_district_code = $this->session->get('SUB_DISTRICT');
+        }
+        if (!$sub_district_code) {
+            $part = $this->db->table('sd_participant_details')->select('sub_district_code')->where('participant_id', (int)$participant_id)->get()->getRowArray();
+            if (!empty($part['sub_district_code'])) {
+                $sub_district_code = $part['sub_district_code'];
+            }
+        }
+        if ($sub_district_code) {
+            $this->db->where('sub_district_code', (int)$sub_district_code);
+        }
+        $this->db->where('item_code', $item_code);
+        $stage_item_master = $this->db->get('sd_stage_item_master');
+        if ($stage_item_master->getNumRows() > 0) {
+            $stage_item = $stage_item_master->getResultArray();
+            $no_of_participant = $stage_item[0]['no_of_participant'];
+            $no_of_participant++;
+            $data_stage = array();
+            $data_stage['no_of_participant'] = $no_of_participant;
+            if ($sub_district_code) {
+                $this->db->where('sub_district_code', (int)$sub_district_code);
+            }
+            $this->db->where('item_code', $item_code);
+            $this->db->update('sd_stage_item_master', $data_stage);
+
+            if ($sub_district_code) {
+                $this->db->where('sub_district_code', (int)$sub_district_code);
+            }
+            $this->db->where('item_code', $item_code);
+            $this->db->selectMax('cluster_no');
+            $cluster_master = $this->db->get('sd_cluster_master');
+            $cluster = $cluster_master->getResultArray();
+            $cluster_no = $cluster[0]['cluster_no'];
+
+            // No cluster row allotted for this item yet (admin allotment pending):
+            // nothing to increment or insert here, only the stage item count above.
+            if (empty($cluster_no)) {
+                return;
+            }
+
+            if ($sub_district_code) {
+                $this->db->where('sub_district_code', (int)$sub_district_code);
+            }
+            $this->db->where('item_code', $item_code);
+            $this->db->where('cluster_no', $cluster_no);
+            $cluster_master = $this->db->get('sd_cluster_master');
+            $cluster = $cluster_master->getResultArray();
+            if (count($cluster) <= 0) {
+                return;
+            }
+            $no_of_participant = $cluster[0]['no_of_participant'];
+            $no_of_participant++;
+
+            $data_cluser = array();
+            $data_cluser['no_of_participant'] = $no_of_participant;
+            if ($sub_district_code) {
+                $this->db->where('sub_district_code', (int)$sub_district_code);
+            }
+            $this->db->where('item_code', $item_code);
+            $this->db->where('cluster_no', $cluster_no);
+            $this->db->update('sd_cluster_master', $data_cluser);
+
+            $data_cluster_participant = array();
+            if ($sub_district_code) {
+                $data_cluster_participant['sub_district_code'] = (int)$sub_district_code;
+            }
+            $data_cluster_participant['cluster_id'] = $cluster[0]['cluster_id'];
+            $data_cluster_participant['stage_id'] = $cluster[0]['stage_id'];
+            $data_cluster_participant['participant_id'] = $participant_id;
+            $data_cluster_participant['item_code'] = $item_code;
+            $data_cluster_participant['cluster_no'] = $cluster_no;
+            $this->db->insert('sd_cluster_participant_details', $data_cluster_participant);
+        }
+    }
+
+    function change_stage_allot_new_participant_item($item_code, $old_participant_id, $new_participant_id, $sub_district_code = null) {
+        if (!$sub_district_code) {
+            $sub_district_code = $this->session->get('SUB_DISTRICT');
+        }
+        if (!$sub_district_code) {
+            $part = $this->db->table('sd_participant_details')->select('sub_district_code')->where('participant_id', (int)$new_participant_id)->get()->getRowArray();
+            if (!empty($part['sub_district_code'])) {
+                $sub_district_code = $part['sub_district_code'];
+            }
+        }
+        if ($sub_district_code) {
+            $this->db->where('sub_district_code', (int)$sub_district_code);
+        }
+        $this->db->where('item_code', $item_code);
+        $stage_item_master = $this->db->get('sd_stage_item_master');
+        if ($stage_item_master->getNumRows() > 0) {
+            if ($sub_district_code) {
+                $this->db->where('sub_district_code', (int)$sub_district_code);
+            }
+            $this->db->where('item_code', $item_code);
+            $this->db->where('participant_id', $old_participant_id);
+
+            $data_cluster_participant = array();
+            $data_cluster_participant['participant_id'] = $new_participant_id;
+            $this->db->update('sd_cluster_participant_details', $data_cluster_participant);
+        }
+    }
+
+    function remove_stage_allot_new_participant_item($item_code, $participant_id, $sub_district_code = null) {
+        if (!$sub_district_code) {
+            $sub_district_code = $this->session->get('SUB_DISTRICT');
+        }
+        if (!$sub_district_code) {
+            $part = $this->db->table('sd_participant_details')->select('sub_district_code')->where('participant_id', (int)$participant_id)->get()->getRowArray();
+            if (!empty($part['sub_district_code'])) {
+                $sub_district_code = $part['sub_district_code'];
+            }
+        }
+        if ($sub_district_code) {
+            $this->db->where('sub_district_code', (int)$sub_district_code);
+        }
+        $this->db->where('item_code', $item_code);
+        $stage_item_master = $this->db->get('sd_stage_item_master');
+        if ($stage_item_master->getNumRows() > 0) {
+            if ($sub_district_code) {
+                $this->db->where('sub_district_code', (int)$sub_district_code);
+            }
+            $this->db->where('item_code', $item_code);
+            $this->db->where('participant_id', $participant_id);
+            $sd_cluster_participant_details = $this->db->get('sd_cluster_participant_details');
+            if ($sd_cluster_participant_details->getNumRows() > 0) {
+                $stage_item = $stage_item_master->getResultArray();
+                $no_of_participant = $stage_item[0]['no_of_participant'];
+                $no_of_participant--;
+                $data_stage = array();
+                $data_stage['no_of_participant'] = $no_of_participant;
+                if ($sub_district_code) {
+                    $this->db->where('sub_district_code', (int)$sub_district_code);
+                }
+                $this->db->where('item_code', $item_code);
+                $this->db->update('sd_stage_item_master', $data_stage);
+
+                $cluster_participant = $sd_cluster_participant_details->getResultArray();
+                $cluster_no = $cluster_participant[0]['cluster_no'];
+
+                if ($sub_district_code) {
+                    $this->db->where('sub_district_code', (int)$sub_district_code);
+                }
+                $this->db->where('item_code', $item_code);
+                $this->db->where('cluster_no', $cluster_no);
+                $cluster_master = $this->db->get('sd_cluster_master');
+                $cluster = $cluster_master->getResultArray();
+                if (count($cluster) > 0) {
+                    $no_of_participant = $cluster[0]['no_of_participant'];
+                    $no_of_participant--;
+
+                    $data_cluser = array();
+                    $data_cluser['no_of_participant'] = $no_of_participant;
+                    if ($sub_district_code) {
+                        $this->db->where('sub_district_code', (int)$sub_district_code);
+                    }
+                    $this->db->where('item_code', $item_code);
+                    $this->db->where('cluster_no', $cluster_no);
+                    $this->db->update('sd_cluster_master', $data_cluser);
+                }
+
+                if ($sub_district_code) {
+                    $this->db->where('sub_district_code', (int)$sub_district_code);
+                }
+                $this->db->where('item_code', $item_code);
+                $this->db->where('participant_id', $participant_id);
+                $this->db->delete('sd_cluster_participant_details');
+            }
+        }
+    }
+
+    function save_participant_details() {
+        $error_array = array();
+        $schoolCode = $this->input->post('hidSchoolId');
+        $admnNo = strtoupper(trim((string)($this->input->post('txtADNO') ?? '')));
+        $admnNo = preg_replace('/^([HV])[\s\-_]+(\d+)/i', '$1$2', $admnNo);
+        $class = $this->input->post('txtClass');
+
+        $this->db->where('school_code', $schoolCode);
+        $school_master = $this->db->get('sd_school_master');
+
+        if ($school_master->getNumRows() > 0) {
+            $school = $school_master->getResultArray();
+            $sub_district_code = $school[0]['sub_district_code'];
+
+            $limits = $this->get_participant_district_limits($schoolCode);
+            $max_single_items = (int)$limits['max_single_items'];
+            $max_group_items  = (int)$limits['max_group_items'];
+
+            // 1. Check item limit counts and duplicates in submitted input codes
+            $seen_codes = array();
+            $fest_singles = array();
+            $fest_groups = array();
+            $validated_items = array();
+            $validated_pinnany = array();
+
+            for ($i = 1; $i <= 10; $i++) {
+                if (isset($_POST['txtItemCode_' . $i]) && trim($_POST['txtItemCode_' . $i]) != '') {
+                    $item_code = trim($_POST['txtItemCode_' . $i]);
+                    if (isset($seen_codes[$item_code])) {
+                        $error_array[] = "repeated item code: " . $item_code;
+                    }
+                    $seen_codes[$item_code] = true;
+
+                    $this->db->where('item_code', $item_code);
+                    $this->db->select('item_type, fest_id');
+                    $result = $this->db->get('item_master');
+                    $itemcode = $result->getResultArray();
+                    if (count($itemcode) <= 0) {
+                        $error_array[] = 'Invalid Item Code : ' . $item_code . '.';
+                    } else {
+                        $fid = $itemcode[0]['fest_id'];
+                        $itype = $itemcode[0]['item_type'];
+                        if ($itype == 'G') {
+                            $fest_groups[$fid] = ($fest_groups[$fid] ?? 0) + 1;
+                        } else {
+                            $fest_singles[$fid] = ($fest_singles[$fid] ?? 0) + 1;
+                        }
+
+                        $item_validation = $this->validate_item_school_participant($item_code, $admnNo, $schoolCode, $class, '', '', 'R');
+                        if ($item_validation) {
+                            $error_array[] = $item_validation;
+                        } else {
+                            $validated_items[] = array(
+                                'code' => $item_code,
+                                'type' => $itype
+                            );
+                        }
+                    }
+                }
+            }
+
+            foreach ($fest_singles as $fid => $cnt) {
+                if ($cnt > $max_single_items) {
+                    $error_array[] = "Maximum number of single items exceeded. Maximum single items: {$max_single_items}. Maximum group items: {$max_group_items}.";
+                }
+            }
+            foreach ($fest_groups as $fid => $cnt) {
+                if ($cnt > $max_group_items) {
+                    $error_array[] = "Maximum number of group items exceeded. Maximum group items: {$max_group_items}. Maximum single items: {$max_single_items}.";
+                }
+            }
+
+            for ($i = 1; $i <= 5; $i++) {
+                if (isset($_POST['txtPinnanyCode_' . $i]) && trim($_POST['txtPinnanyCode_' . $i]) != '') {
+                    $item_code = trim($_POST['txtPinnanyCode_' . $i]);
+                    if (isset($seen_codes[$item_code])) {
+                        $error_array[] = "repeated item code: " . $item_code;
+                    }
+                    $seen_codes[$item_code] = true;
+
+                    $this->db->where('item_code', $item_code);
+                    $this->db->select('item_type');
+                    $result = $this->db->get('item_master');
+                    $itemcode = $result->getResultArray();
+                    if (count($itemcode) <= 0) {
+                        $error_array[] = 'Invalid Item Code : ' . $item_code . '.';
+                    } else {
+                        $item_validation = $this->validate_item_school_participant($item_code, $admnNo, $schoolCode, $class, 'P', '', 'R');
+                        if ($item_validation) {
+                            $error_array[] = $item_validation;
+                        } else {
+                            $this->db->where('item_code', $item_code);
+                            $this->db->where('school_code', $schoolCode);
+                            $this->db->where('is_captain', 'Y');
+                            $this->db->where('spo_id', '0');
+                            $this->db->select('admn_no');
+                            $caption = $this->db->get('sd_participant_item_details')->getResultArray();
+
+                            // Also check if any main item in the current submission is for this code
+                            $hasMainInCurrent = false;
+                            foreach ($validated_items as $vi) {
+                                if ($vi['code'] == $item_code) {
+                                    $hasMainInCurrent = true;
+                                    break;
+                                }
+                            }
+
+                            $parent_admn = count($caption) > 0 ? $caption[0]['admn_no'] : $admnNo;
+                            $validated_pinnany[] = array(
+                                'code' => $item_code,
+                                'parent_admn_no' => $parent_admn
+                            );
+                        }
+                    }
+                }
+            }
+
+            // If ANY error exists, ABORT! Do NOT modify the database at all.
+            if (count($error_array) > 0) {
+                $return_array['error_array'] = array_values(array_unique($error_array));
+                return $return_array;
+            }
+
+            // 2. Only proceed to save if all validations passed
+            $this->db->where('sub_district_code', $sub_district_code);
+            $this->db->selectMax('participant_id');
+            $participant_details = $this->db->get('sd_participant_details');
+            $participant_id = 0;
+            if ($participant_details->getNumRows() > 0) {
+                $participant = $participant_details->getResultArray();
+                $participant_id = $participant[0]['participant_id'];
+                $participant_id++;
+            }
+            if ($participant_id < 100) {
+                $participant_id = 100;
+            }
+
+            $this->db->where('school_code', $schoolCode);
+            $this->db->where('admn_no', $admnNo);
+            $this->db->select('participant_id');
+            $result = $this->db->get('sd_participant_details');
+            $participant = $result->getResultArray();
+
+            $data['school_code'] = (int) $schoolCode;
+            $data['sub_district_code'] = (int) $sub_district_code;
+            $data['admn_no'] = $admnNo;
+            $data['participant_name'] = $this->input->post('txtParticipantName');
+            $data['class'] = $this->input->post('txtClass');
+            $data['gender'] = $this->input->post('txtGender');
+
+            if (count($participant) > 0) {
+                $participant_id = $participant[0]['participant_id'];
+                $this->db->where('school_code', $schoolCode);
+                $this->db->where('admn_no', $admnNo);
+                $this->db->update('sd_participant_details', $data);
+            } else {
+                $this->db->insert('sd_participant_details', $data);
+                $participant_id = $this->db->insertID();
+            }
+
+            // Insert validated main items
+            foreach ($validated_items as $vItem) {
+                $item_code = $vItem['code'];
+                $is_captain = 'Y';
+                $parent_admn_no = $admnNo;
+
+                if ($vItem['type'] == 'G') {
+                    $this->db->where('item_code', $item_code);
+                    $this->db->where('school_code', $schoolCode);
+                    $this->db->where('is_captain', 'Y');
+                    $this->db->where('spo_id', '0');
+                    $this->db->select('admn_no');
+                    $caption = $this->db->get('sd_participant_item_details')->getResultArray();
+                    if (count($caption) > 0) {
+                        $is_captain = 'N';
+                        $parent_admn_no = $caption[0]['admn_no'];
+                    }
+                }
+
+                $items = array();
+                $items['sub_district_code'] = (int) $sub_district_code;
+                $items['participant_id'] = $participant_id;
+                $items['school_code'] = (int) $schoolCode;
+                $items['admn_no'] = $admnNo;
+                $items['item_code'] = $item_code;
+                $items['item_type'] = $vItem['type'];
+                $items['parent_admn_no'] = $parent_admn_no;
+                $items['is_captain'] = $is_captain;
+                $this->db->insert('sd_participant_item_details', $items);
+                if ($is_captain == 'Y') {
+                    $this->stage_allot_new_participant_item($item_code, $participant_id);
+                    // Link any pre-registered pinnany items for this school & item to this captain
+                    $this->db->where('school_code', $schoolCode);
+                    $this->db->where('item_code', $item_code);
+                    $this->db->where('item_type', 'P');
+                    $this->db->where('spo_id', '0');
+                    $this->db->update('sd_participant_item_details', array('parent_admn_no' => $admnNo));
+                }
+            }
+
+            // Insert validated pinnany items
+            foreach ($validated_pinnany as $vPin) {
+                $items = array();
+                $items['sub_district_code'] = (int) $sub_district_code;
+                $items['participant_id'] = $participant_id;
+                $items['school_code'] = (int) $schoolCode;
+                $items['admn_no'] = $admnNo;
+                $items['item_code'] = $vPin['code'];
+                $items['item_type'] = 'P';
+                $items['parent_admn_no'] = $vPin['parent_admn_no'];
+                $items['is_captain'] = 'N';
+                $this->db->insert('sd_participant_item_details', $items);
+            }
+
+            $this->log_participant_details($schoolCode, $admnNo, 'N');
+            $return_array['error_array'] = array();
+            return $return_array;
+        }
+    }
+
+    function save_special_order_participant_details() {
+        $this->Content  = array();
+        $error_array = array();
+        $schoolCode = $this->input->post('hidSchoolId');
+       
+        
+        $bankDetails = array('' => 'Select Bank');
+        $this->Content['bank_details'] = $bankDetails;
+        if ($this->input->post('cmbParticipant') != '0' && $this->input->post('cmbParticipant') !='') {
+            $admnNo = $this->input->post('cmbParticipant');
+            $this->db->where('school_code', $schoolCode);
+            $this->db->where('admn_no', $admnNo);
+            $this->db->select('participant_id');
+            $result = $this->db->get('sd_participant_details');
+            $participant = $result->getResultArray();
+            if (count($participant) > 0) {
+                $participant_id = $participant[0]['participant_id'];
+            } else {
+                return;
+            }
+        } else {
+            $admnNo = $this->input->post('txtADNO');
+
+            $this->db->where('school_code', $schoolCode);
+            $this->db->where('admn_no', $admnNo);
+            $this->db->select('participant_id');
+            $result = $this->db->get('sd_participant_details');
+            $participant = $result->getResultArray();
+            //print('<pre>');print_r($participant);exit;
+            if (count($participant) > 0) {
+                $error_array[] = 'Participant already registered';
+                $return_array['error_array'] = $error_array;
+                return $return_array;
+            }
+            $data['school_code'] = (int) $schoolCode;
+            $data['admn_no'] = $admnNo;
+            $data['participant_name'] = $this->input->post('txtParticipantName');
+            $data['sub_district_code'] = $this->session->get('SUB_DISTRICT');
+            $data['class'] = $this->input->post('txtClass');
+            $data['gender'] = $this->input->post('txtGender');
+            
+            //$part_id = @$participant[0]['participant_id'];
+            $this->db->insert('sd_participant_details', $data);
+            $participant_id = $this->db->insertID();
+        }
+
+        $this->db->where('school_code', $schoolCode);
+        $this->db->where('admn_no', $admnNo);
+        $participant_details = $this->db->get('sd_participant_details');
+        $participant = $participant_details->getResultArray();
+        $class = @$participant[0]['class'];
+
+        if (isset($_POST['txtItemCode_1']) && trim($_POST['txtItemCode_1']) != '') {
+            $item_code = $_POST['txtItemCode_1'];
+
+            //$item_validation		=	$this->validate_item_school_participant($item_code,$admnNo,$schoolCode,$class);
+
+            $item_validation = $this->validate_item_school_participant($item_code, $admnNo, $schoolCode, $class, '', 'S');
+
+            if ($item_validation) {
+                $error_array[] = $item_validation;
+            } else {
+
+
+
+                /* Check the item code is valid one */
+                $this->db->where('item_code', $item_code);
+                $this->db->select('item_type');
+                $result = $this->db->get('item_master');
+                $itemcode = $result->getResultArray();
+                if (count($itemcode) > 0) {
+                    /**
+                      Check here for already registered for this item
+                     */
+                    if (isset($_POST['chkIsPinnany'])) {
+                        $this->db->where('school_code', $schoolCode);
+                        $this->db->where('admn_no', $this->input->post('txtCaptionAdNo'));
+                        $this->db->where('item_code', $item_code);
+                        $this->db->where('spo_id', $this->input->post('cmbOrder'));
+                        $this->db->select('pi_id');
+                        $result = $this->db->get('sd_participant_item_details');
+                        $caption = $result->getResultArray();
+                        if (count($caption) > 0) {
+                            $item_type = 'P';
+                            $parent_admn_no = $this->input->post('txtCaptionAdNo');
+                            $is_caption = 'N';
+                        } else {
+                            $error_array[] = 'Caption AD NO is invalid';
+                            $return_array['error_array'] = $error_array;
+                            return $return_array;
+                        }
+                    } else {
+                        $item_type = $itemcode[0]['item_type'];
+                        $parent_admn_no = $admnNo;
+                        $is_caption = 'Y';
+                    }
+                    if ($itemcode[0]['item_type'] == 'G') {
+                        /** check the caption admission no */
+                        if (isset($_POST['txtCaptionAdNo']) && trim($_POST['txtCaptionAdNo']) != '') {
+                            $this->db->where('school_code', $schoolCode);
+                            $this->db->where('admn_no', $this->input->post('txtCaptionAdNo'));
+                            $this->db->where('item_code', $item_code);
+                            $this->db->where('spo_id', $this->input->post('cmbOrder'));
+                            $this->db->select('pi_id');
+                            $result = $this->db->get('sd_participant_item_details');
+                            $caption = $result->getResultArray();
+                            if (count($caption) > 0) {
+
+
+                                $items = array();
+                                $items['sub_district_code'] = (int) $this->session->get('SUB_DISTRICT');
+                                $items['participant_id'] = $participant_id;
+                                $items['school_code'] = (int) $schoolCode;
+                                $items['admn_no'] = $admnNo;
+                                $items['item_code'] = $item_code;
+                                $items['item_type'] = $item_type;
+                                $items['parent_admn_no'] = $this->input->post('txtCaptionAdNo');
+                                $items['spo_id'] = $this->input->post('cmbOrder');
+                                $items['spo_remarks'] = $this->input->post('txtRemarks');
+                                $items['is_captain'] = 'N';
+                                $this->db->insert('sd_participant_item_details', $items);
+                            } else {
+                                if ($this->input->post('txtCaptionAdNo') == $admnNo) {
+                                    $items = array();
+                                    $items['sub_district_code'] = (int) $this->session->get('SUB_DISTRICT');
+                                    $items['participant_id'] = $participant_id;
+                                    $items['school_code'] = (int) $schoolCode;
+                                    $items['admn_no'] = $admnNo;
+                                    $items['item_code'] = $item_code;
+                                    $items['item_type'] = $item_type;
+                                    $items['parent_admn_no'] = $admnNo;
+                                    $items['spo_id'] = $this->input->post('cmbOrder');
+                                    $items['spo_remarks'] = $this->input->post('txtRemarks');
+                                    $items['is_captain'] = 'Y';
+                                    $this->db->insert('sd_participant_item_details', $items);
+                                } else {
+                                    $error_array[] = 'Caption AD NO or special order is wrong';
+                                }
+                            }
+                        } else {
+                            $error_array[] = 'Please enter Caption AD NO for group items';
+                        }
+                    } else {
+                        /* for single item */
+                        $items = array();
+                        $items['sub_district_code'] = (int) $this->session->get('SUB_DISTRICT');
+                        $items['participant_id'] = $participant_id;
+                        $items['school_code'] = (int) $schoolCode;
+                        $items['admn_no'] = $admnNo;
+                        $items['item_code'] = $item_code;
+                        $items['item_type'] = $item_type;
+                        $items['parent_admn_no'] = $parent_admn_no;
+                        $items['spo_id'] = $this->input->post('cmbOrder');
+                        $items['spo_remarks'] = $this->input->post('txtRemarks');
+                        $items['is_captain'] = $is_caption;
+                        $this->db->insert('sd_participant_item_details', $items);
+                        if ($is_caption == 'Y') {
+                            $this->stage_allot_new_participant_item($item_code, $participant_id);
+                        }
+                    }
+                } else {
+                    $error_array[] = 'Invalid Item Code : ' . $_POST['txtItemCode_1'] . '.';
+                }
+            }
+        }
+        $this->log_participant_details($schoolCode, $admnNo, 'S');
+        $return_array['error_array'] = $error_array;
+        return $return_array;
+    }
+
+    function update_participant_details() {
+        $error_array = array();
+
+        $schoolCode = $this->input->post('hidSchoolId');
+        $admnNo = strtoupper(trim((string)($this->input->post('txtADNO') ?? '')));
+        $admnNo = preg_replace('/^([HV])[\s\-_]+(\d+)/i', '$1$2', $admnNo);
+        $hidADNO = $this->input->post('hidADNO');
+
+        if ($admnNo != $hidADNO) {
+            $this->db->where('school_code', $schoolCode);
+            $this->db->where('admn_no', $admnNo);
+            $this->db->select('participant_id');
+            $result = $this->db->get('sd_participant_details');
+            $participant = $result->getResultArray();
+            if (count($participant) > 0) {
+                $error_array[] = 'Participant already registered';
+                $return_array['error_array'] = $error_array;
+                return $return_array;
+            }
+        }
+
+        $this->db->where('school_code', $schoolCode);
+        $this->db->where('admn_no', $hidADNO);
+        $this->db->select('participant_id, class, sub_district_code');
+        $result = $this->db->get('sd_participant_details');
+        $participant = $result->getResultArray();
+
+        if (count($participant) <= 0) {
+            $error_array[] = 'Invalid details.';
+            $return_array['error_array'] = $error_array;
+            return $return_array;
+        }
+        $participant_id = $participant[0]['participant_id'];
+        $postClass = $this->input->post('txtClass');
+        $class = !empty($postClass) ? $postClass : $participant[0]['class'];
+        $sub_district_code = !empty($participant[0]['sub_district_code']) ? (int)$participant[0]['sub_district_code'] : (int)$this->session->get('SUB_DISTRICT');
+
+        $this->db->where('school_code', $schoolCode);
+        $this->db->where('admn_no', $hidADNO);
+        $this->db->where('spo_id', '0');
+        $this->db->select('item_code, item_type, is_captain');
+        $exist_item_details = $this->db->get('sd_participant_item_details');
+        $pre_main_items = array();
+        $pre_pinnany_items = array();
+        foreach ($exist_item_details->getResultArray() as $exist_item) {
+            if ($exist_item['item_type'] == 'P') {
+                $pre_pinnany_items[] = (string)$exist_item['item_code'];
+            } else {
+                $pre_main_items[] = (string)$exist_item['item_code'];
+            }
+        }
+
+        $limits = $this->get_participant_district_limits($schoolCode);
+        $max_single_items = (int)$limits['max_single_items'];
+        $max_group_items  = (int)$limits['max_group_items'];
+
+        $seen_update_codes = array();
+        $fest_update_singles = array();
+        $fest_update_groups = array();
+
+        for ($i = 1; $i <= 10; $i++) {
+            if (isset($_POST['txtItemCode_' . $i]) && trim($_POST['txtItemCode_' . $i]) != '') {
+                $code = trim($_POST['txtItemCode_' . $i]);
+                if (isset($seen_update_codes[$code])) {
+                    $error_array[] = "repeated item code: " . $code;
+                }
+                $seen_update_codes[$code] = true;
+
+                $this->db->where('item_code', $code);
+                $this->db->select('item_type, fest_id');
+                $imRes = $this->db->get('item_master')->getResultArray();
+                if (!empty($imRes)) {
+                    $fid = $imRes[0]['fest_id'];
+                    if ($imRes[0]['item_type'] == 'G') {
+                        $fest_update_groups[$fid] = ($fest_update_groups[$fid] ?? 0) + 1;
+                    } else {
+                        $fest_update_singles[$fid] = ($fest_update_singles[$fid] ?? 0) + 1;
+                    }
+                }
+            }
+        }
+
+        foreach ($fest_update_singles as $fid => $cnt) {
+            if ($cnt > $max_single_items) {
+                $error_array[] = "Maximum number of single items exceeded. Maximum single items: {$max_single_items}. Maximum group items: {$max_group_items}.";
+            }
+        }
+        foreach ($fest_update_groups as $fid => $cnt) {
+            if ($cnt > $max_group_items) {
+                $error_array[] = "Maximum number of group items exceeded. Maximum group items: {$max_group_items}. Maximum single items: {$max_single_items}.";
+            }
+        }
+
+        for ($i = 1; $i <= 10; $i++) {
+            if (isset($_POST['txtItemCode_' . $i]) && trim($_POST['txtItemCode_' . $i]) != '') {
+                $item_code = trim($_POST['txtItemCode_' . $i]);
+                if (in_array((string)$item_code, $pre_main_items, true)) {
+                    // Code not changed - already registered for this participant
+                    $not_valid_item_fest = $this->is_not_valid_item_fest($item_code, $class);
+                    $not_valid_gender = $this->is_not_valid_gender($item_code, $hidADNO, $schoolCode);
+                    if ($not_valid_item_fest) {
+                        $error_array[] = $item_code . " " . $not_valid_item_fest;
+                    } elseif ($not_valid_gender) {
+                        $error_array[] = $item_code . " " . $not_valid_gender;
+                    }
+                } else {
+                    // Code is changed or new - run validation
+                    $item_validation = $this->validate_item_school_participant($item_code, $hidADNO, $schoolCode, $class, '', '', 'R');
+                    if ($item_validation) {
+                        $error_array[] = $item_validation;
+                    } else {
+                        $this->db->where('item_code', $item_code);
+                        $this->db->select('item_type');
+                        $result = $this->db->get('item_master');
+                        $itemcode = $result->getResultArray();
+                        if (count($itemcode) <= 0) {
+                            $error_array[] = 'Invalid Item Code : ' . $_POST['txtItemCode_' . $i] . '.';
+                        }
+                    }
+                }
+            }
+        }
+
+        for ($i = 1; $i <= 5; $i++) {
+            if (isset($_POST['txtPinnanyCode_' . $i]) && trim($_POST['txtPinnanyCode_' . $i]) != '') {
+                $item_code = trim($_POST['txtPinnanyCode_' . $i]);
+                if (isset($seen_update_codes[$item_code])) {
+                    $error_array[] = "repeated item code: " . $item_code;
+                }
+                $seen_update_codes[$item_code] = true;
+
+                if (in_array((string)$item_code, $pre_pinnany_items, true)) {
+                    // Pinnany code not changed - already registered for this participant
+                    $this->db->where('item_code', $item_code);
+                    $this->db->select('item_type');
+                    $result = $this->db->get('item_master');
+                    $itemcode = $result->getResultArray();
+                    if (count($itemcode) <= 0) {
+                        $error_array[] = 'Invalid Item Code : ' . $_POST['txtPinnanyCode_' . $i] . '.';
+                    }
+                } else {
+                    // Pinnany code is changed or new - run validation
+                    $item_validation = $this->validate_item_school_participant($item_code, $hidADNO, $schoolCode, $class, 'P', '', 'R');
+                    if ($item_validation) {
+                        $error_array[] = $item_validation;
+                    } else {
+                        $this->db->where('item_code', $item_code);
+                        $this->db->select('item_type');
+                        $result = $this->db->get('item_master');
+                        $itemcode = $result->getResultArray();
+                        if (count($itemcode) <= 0) {
+                            $error_array[] = 'Invalid Item Code : ' . $_POST['txtPinnanyCode_' . $i] . '.';
+                        }
+                    }
+                }
+            }
+        }
+
+        if (count($error_array) > 0) {
+            $return_array['error_array'] = $error_array;
+            return $return_array;
+        }
+
+        $this->log_participant_details($schoolCode, $admnNo, 'O');
+
+        if ($admnNo != $hidADNO) {
+            $this->db->where('school_code', $schoolCode);
+            $this->db->where('parent_admn_no', $hidADNO);
+            $data = array();
+            $data['parent_admn_no'] = $admnNo;
+            $this->db->update('sd_participant_item_details', $data);
+
+            $this->db->where('school_code', $schoolCode);
+            $this->db->where('admn_no', $hidADNO);
+            $data = array();
+            $data['admn_no'] = $admnNo;
+            $this->db->update('sd_participant_item_details', $data);
+        }
+
+        $data = array();
+        $data['school_code'] = $schoolCode;
+        $data['admn_no'] = $admnNo;
+        $data['participant_name'] = $this->input->post('txtParticipantName');
+        $data['class'] = $this->input->post('txtClass');
+        $data['gender'] = $this->input->post('txtGender');
+        $this->db->where('school_code', $schoolCode);
+        $this->db->where('admn_no', $hidADNO);
+        $this->db->update('sd_participant_details', $data);
+
+
+        $this->db->where('school_code', $schoolCode);
+        $this->db->where('admn_no', $admnNo);
+        $this->db->where('is_captain', 'Y');
+        $this->db->where('spo_id', '0');
+        $this->db->select('item_code');
+        $exist_item_details = $this->db->get('sd_participant_item_details');
+        $exist_item_array = array();
+        foreach ($exist_item_details->getResultArray() as $exist_item) {
+            $exist_item_array[] = $exist_item['item_code'];
+        }
+
+        $balance_item_array = $exist_item_array;
+        for ($i = 1; $i <= 10; $i++) {
+            if (isset($_POST['txtItemCode_' . $i]) && trim($_POST['txtItemCode_' . $i]) != '' && in_array($_POST['txtItemCode_' . $i], $exist_item_array)) {
+                $balance_item_array = array_remove($balance_item_array, $_POST['txtItemCode_' . $i]);
+            }
+        }
+
+        /**
+         * * Removing and changing the captain for deleteing item codes
+         */
+        $is_error = $this->removing_item_wt_transfer_captain($balance_item_array, $schoolCode, $admnNo);
+        if ($is_error) {
+            //$error_array[]    =   $is_error;
+        }
+        /**
+         * * End Removing and changing the captain for deleteing item codes
+         */
+        /**
+         * * Removing itemcdes for not a captain
+         */
+        $this->db->where('school_code', $schoolCode);
+        $this->db->where('admn_no', $admnNo);
+        $this->db->where("is_captain != 'Y'");
+        //$this->db->where('item_type !=', 'G');
+        $this->db->where('spo_id', '0');
+        $this->db->delete('sd_participant_item_details');
+
+        $this->db->where('school_code', $schoolCode);
+        $this->db->where('admn_no', $admnNo);
+        $participant_details = $this->db->get('sd_participant_details');
+        $participant = $participant_details->getResultArray();
+        $class = $participant[0]['class'];
+
+
+
+
+        for ($i = 1; $i <= 10; $i++) {
+
+            if (isset($_POST['txtItemCode_' . $i]) && trim($_POST['txtItemCode_' . $i]) != '') {
+
+                $item_code = $_POST['txtItemCode_' . $i];
+
+                /**
+                 * * Checking whether the item code is valid for this student
+                 */
+                if (in_array($item_code, $exist_item_array)) {
+                    $not_valid_item_fest = $this->is_not_valid_item_fest($item_code, $class);
+                    $not_valid_gender = $this->is_not_valid_gender($item_code, $admnNo, $schoolCode);
+                    if ($not_valid_item_fest or $not_valid_gender) {
+                        $this->db->where('school_code', $schoolCode);
+                        $this->db->where('admn_no', $admnNo);
+                        $this->db->where("is_captain  != 'Y'");
+                        $this->db->where('item_code', $item_code);
+                        $this->db->where('spo_id', '0');
+                        $this->db->delete('sd_participant_item_details');
+                        if ($not_valid_item_fest) {
+                            $error_array[] = $item_code . " " . $not_valid_item_fest;
+                        } else {
+                            $error_array[] = $item_code . " " . $not_valid_gender;
+                        }
+                    } else {
+                        $exist_item_array = array_remove($exist_item_array, $item_code);
+                    }
+                } else {
+
+                    $item_validation = in_array((string)$item_code, $pre_main_items, true)
+                        ? false
+                        : $this->validate_item_school_participant($item_code, $admnNo, $schoolCode, $class);
+
+                    if ($item_validation) {
+                        $error_array[] = $item_validation;
+                    } else {
+
+                        /* Check the item code is valid one */
+                        $this->db->where('item_code', $item_code);
+                        $this->db->select('item_type');
+                        $result = $this->db->get('item_master');
+                        $itemcode = $result->getResultArray();
+                        if (count($itemcode) > 0) {
+                            /**
+                              Check here for already registered for this item
+                             */
+                            $is_captain = 'Y';
+                            $parent_admn_no = $admnNo;
+
+                            if ($itemcode[0]['item_type'] == 'G') {
+                                $this->db->where('item_code', $item_code);
+                                $this->db->where('school_code', $schoolCode);
+                                $this->db->where('is_captain', 'Y');
+                                $this->db->where('spo_id', '0');
+
+                                $this->db->select('admn_no');
+                                $result = $this->db->get('sd_participant_item_details');
+                                $caption = $result->getResultArray();
+                                if (count($caption) > 0) {
+                                    $is_captain = 'N';
+                                    $parent_admn_no = $caption[0]['admn_no'];
+                                }
+                            }
+
+                            $items = array();
+                            $items['sub_district_code'] = $sub_district_code;
+                            $items['participant_id'] = $participant_id;
+                            $items['school_code'] = (int) $schoolCode;
+                            $items['admn_no'] = $admnNo;
+                            $items['item_code'] = $item_code;
+                            $items['item_type'] = $itemcode[0]['item_type'];
+
+                            $items['parent_admn_no'] = $parent_admn_no;
+                            $items['is_captain'] = $is_captain;
+
+                            $this->db->insert('sd_participant_item_details', $items);
+                            if ($is_captain == 'Y') {
+                                $this->stage_allot_new_participant_item($item_code, $participant_id);
+                                // Link any pre-registered pinnany items for this school & item to this captain
+                                $this->db->where('school_code', $schoolCode);
+                                $this->db->where('item_code', $item_code);
+                                $this->db->where('item_type', 'P');
+                                $this->db->where('spo_id', '0');
+                                $this->db->update('sd_participant_item_details', array('parent_admn_no' => $admnNo));
+                            }
+                        } else {
+                            $error_array[] = 'Invalid Item Code : ' . $_POST['txtItemCode_' . $i] . '.';
+                        }
+                    }
+                }
+            }
+        }
+
+        $is_error = $this->removing_item_wt_transfer_captain($exist_item_array, $schoolCode, $admnNo);
+        if ($is_error) {
+            $error_array[] = $is_error;
+        }
+
+        for ($i = 1; $i <= 5; $i++) {
+
+            if (isset($_POST['txtPinnanyCode_' . $i]) && trim($_POST['txtPinnanyCode_' . $i]) != '') {
+
+                $item_code = trim($_POST['txtPinnanyCode_' . $i]);
+
+                $item_validation = in_array((string)$item_code, $pre_pinnany_items, true)
+                    ? false
+                    : $this->validate_item_school_participant($item_code, $admnNo, $schoolCode, $class, 'P', '', 'R');
+
+                if ($item_validation) {
+                    $error_array[] = $item_validation;
+                } else {
+
+                    /* Check the item code is valid one */
+                    $this->db->where('item_code', $item_code);
+                    $this->db->select('item_type');
+                    $result = $this->db->get('item_master');
+                    $itemcode = $result->getResultArray();
+                    if (count($itemcode) > 0) {
+
+                        $this->db->where('item_code', $item_code);
+                        $this->db->where('school_code', $schoolCode);
+                        $this->db->where('is_captain', 'Y');
+                        $this->db->where('spo_id', '0');
+
+                        $this->db->select('admn_no');
+                        $result = $this->db->get('sd_participant_item_details');
+                        $caption = $result->getResultArray();
+                        $is_captain = 'N';
+                        $parent_admn_no = count($caption) > 0 ? $caption[0]['admn_no'] : $admnNo;
+                        /**
+                          Check here for already registered for this item
+                         */
+                        $items = array();
+                        $items['sub_district_code'] = $sub_district_code;
+                        $items['participant_id'] = $participant_id;
+                        $items['school_code'] = (int) $schoolCode;
+                        $items['admn_no'] = $admnNo;
+                        $items['item_code'] = $item_code;
+                        $items['item_type'] = 'P';
+
+                        $items['parent_admn_no'] = $parent_admn_no;
+                        $items['is_captain'] = $is_captain;
+
+                        $this->db->insert('sd_participant_item_details', $items);
+                    } else {
+                        $error_array[] = 'Invalid Item Code : ' . $_POST['txtPinnanyCode_' . $i] . '.';
+                    }
+                }
+            }
+        }
+        $this->log_participant_details($schoolCode, $admnNo, 'N');
+
+        $return_array['error_array'] = $error_array;
+        return $return_array;
+    }
+
+    function removing_item_wt_transfer_captain($balance_item_array, $schoolCode, $admnNo) {
+        /**
+         * * Get Old Participant ID
+         */
+        $this->db->where('school_code', $schoolCode);
+        $this->db->where('admn_no', $admnNo);
+        $participant_details = $this->db->get('sd_participant_details');
+        $participant = $participant_details->getResultArray();
+        $old_participant_id = $participant[0]['participant_id'];
+
+        /**
+         * * Removing and changing the captain for deleteing item codes
+         */
+        foreach ($balance_item_array as $balance_item) {
+            /**
+             * * Change Captain to other person
+             */
+            $result_confirm_item = $this->is_result_confirm_item($balance_item, $schoolCode);
+            if ($result_confirm_item) {
+                return $balance_item . " " . $result_confirm_item;
+            }
+
+            $this->db->where('school_code', $schoolCode);
+            $this->db->where('admn_no !=', $admnNo);
+            $this->db->where('item_code', $balance_item);
+            $this->db->where('is_captain !=', 'Y');
+            $this->db->where('item_type !=', 'P');
+            $this->db->where('spo_id', '0');
+            $part_item_deta = $this->db->get('sd_participant_item_details');
+            if ($part_item_deta->getNumRows() > 0) {
+                $part_item = $part_item_deta->getResultArray();
+                $new_capt_adno = $part_item[0]['admn_no'];
+                $this->db->where('school_code', $schoolCode);
+                $this->db->where('admn_no', $new_capt_adno);
+                $this->db->where('item_code', $balance_item);
+                $this->db->where('is_captain !=', 'Y');
+                $this->db->where('spo_id', '0');
+                $up_captain_data['parent_admn_no'] = $new_capt_adno;
+                $up_captain_data['is_captain'] = 'Y';
+                $this->db->update('sd_participant_item_details', $up_captain_data);
+
+                $this->db->where('school_code', $schoolCode);
+                $this->db->where('item_code', $balance_item);
+                $this->db->where('is_captain !=', 'Y');
+                $this->db->where('spo_id', '0');
+
+                $up_all_captain_data['parent_admn_no'] = $new_capt_adno;
+
+                $this->db->update('sd_participant_item_details', $up_all_captain_data);
+
+
+                $this->db->where('school_code', $schoolCode);
+                $this->db->where('admn_no', $new_capt_adno);
+                $participant_details = $this->db->get('sd_participant_details');
+                $participant = $participant_details->getResultArray();
+                $new_participant_id = $participant[0]['participant_id'];
+
+                /**
+                 * * Change Stage Allot to captain
+                 */
+                $this->change_stage_allot_new_participant_item($balance_item, $old_participant_id, $new_participant_id);
+            }
+
+            /**
+             * * Preserve pinnanies even if no main participant exists
+             */
+            $this->db->where('school_code', $schoolCode);
+            $this->db->where('item_code', $balance_item);
+            $this->db->where('is_captain', 'Y');
+            $this->db->where('spo_id', '0');
+            $pinnany_no_mn_part = $this->db->get('sd_participant_item_details');
+            if ($pinnany_no_mn_part->getNumRows() <= 0) {
+                // If no captain remains, preserve remaining pinnanies and set parent_admn_no to their own admn_no
+                $this->db->where('school_code', $schoolCode);
+                $this->db->where('item_code', $balance_item);
+                $this->db->where('item_type', 'P');
+                $this->db->where('spo_id', '0');
+                $rem_pinnany = $this->db->get('sd_participant_item_details')->getResultArray();
+                foreach ($rem_pinnany as $rp) {
+                    if ($rp['admn_no'] != $admnNo) {
+                        $this->db->where('pi_id', $rp['pi_id']);
+                        $this->db->update('sd_participant_item_details', array('parent_admn_no' => $rp['admn_no']));
+                    }
+                }
+            }
+
+
+            /**
+             * * Remove balance items
+             */
+            $this->remove_stage_allot_new_participant_item($balance_item, $old_participant_id);
+
+            $this->db->where('school_code', $schoolCode);
+            $this->db->where('admn_no', $admnNo);
+            $this->db->where('item_code', $balance_item);
+            $this->db->where('spo_id', '0');
+            $part_item_deta = $this->db->delete('sd_participant_item_details');
+        }
+        /**
+         * * End Removing and changing the captain for deleteing item codes
+         */
+        return false;
+    }
+
+    function validate_item_school_participant($item_code, $admn_no, $school_code, $class, $item_type = '', $is_special = '', $check_repeat = '') {
+
+        $result_confirm_item = $this->is_result_confirm_item($item_code, $school_code);
+        if ($result_confirm_item) {
+            return $item_code . " " . $result_confirm_item;
+        }
+
+
+        $not_valid_item_code = $this->is_not_valid_item_code($item_code);
+        if ($not_valid_item_code) {
+            return $item_code . " " . $not_valid_item_code;
+        }
+
+        $not_valid_item_fest = $this->is_not_valid_item_fest($item_code, $class);
+        if ($not_valid_item_fest) {
+            return $item_code . " " . $not_valid_item_fest;
+        }
+        $not_valid_gender = $this->is_not_valid_gender($item_code, $admn_no, $school_code);
+        if ($not_valid_gender) {
+            return $item_code . " " . $not_valid_gender;
+        }
+
+        if ($check_repeat != 'R') {
+            $repeat_item_code = $this->is_repeate_item_code($item_code, $admn_no, $school_code);
+            if ($repeat_item_code) {
+                return $item_code . " " . $repeat_item_code;
+            }
+        }
+
+
+        
+
+        $over_max_item = $this->is_over_max_item($admn_no, $school_code, $item_code);
+        if ($over_max_item) {
+            return $over_max_item;
+        }
+
+        if ($is_special != 'S') {
+            $over_max_item = $this->is_over_max_item_school($admn_no, $school_code, $item_code, $item_type);
+            if ($over_max_item) {
+                return $item_code . " " . $over_max_item;
+            }
+
+
+            $over_max_vibhagam = $this->is_over_max_vibhagam_school($item_code, $school_code);
+            if ($over_max_vibhagam) {
+                return $item_code . " " . $over_max_vibhagam;
+            }
+        } else {
+            
+        }
+
+        return false;
+    }
+
+    function is_result_confirm_item($item_code, $school_code = '') {
+        $subDist = $this->session->get('SUB_DISTRICT');
+        if (empty($subDist) && !empty($school_code)) {
+            $sch = $this->db->table('sd_school_master')->select('sub_district_code')->where('school_code', (int)$school_code)->get()->getRowArray();
+            if (!empty($sch['sub_district_code'])) {
+                $subDist = $sch['sub_district_code'];
+            }
+        }
+        if (!empty($subDist)) {
+            $this->db->where('sub_district_code', (int)$subDist);
+        }
+        $this->db->where('item_code', $item_code);
+        $this->db->where('is_finish', 'Y');
+        $cnt_item = $this->db->countAllResults('sd_result_master');
+        if ($cnt_item > 0) {
+            return "Result Confirmed";
+        }
+        return false;
+    }
+
+    function is_not_valid_item_code_123456($item_code) {
+        $this->db->where('item_code', $item_code);
+        $cnt_item = $this->db->countAllResults('item_master');
+        if ($cnt_item <= 0) {
+            return "is not valid item code";
+        }
+        return false;
+    }
+
+    function is_not_valid_item_code($item_code) {
+        $this->db->where('item_code', $item_code);
+        $cnt_item = $this->db->countAllResults('item_master');
+        if ($cnt_item <= 0) {
+            return "is not valid item code";
+        }
+        return false;
+    }
+
+    function is_not_valid_item_fest($item_code, $class) {
+        $special_class_ranges = [160 => [3, 4], 360 => [5, 7], 560 => [8, 10], 760 => [11, 12]];
+        $item_code_int = (int) $item_code;
+        if (isset($special_class_ranges[$item_code_int])) {
+            [$class_start, $class_end] = $special_class_ranges[$item_code_int];
+            if ((int) $class < $class_start || (int) $class > $class_end) {
+                return "is not in his category";
+            }
+        } else {
+            $this->db->where('FM.class_start <=', (int) $class);
+            $this->db->where('FM.class_end >=', (int) $class);
+        }
+        $this->db->where('IM.item_code', $item_code);
+        $this->db->from('item_master AS IM');
+        $this->db->join('festival_master AS FM', 'IM.fest_id = FM.fest_id');
+        $item_details = $this->db->get();
+
+        if ($item_details->getNumRows() <= 0) {
+            return "is not in his category";
+        }
+//        if (($item_code == '111' or $item_code == '112') and $class > 2) {
+//            return "is not in his category";
+//        }
+//        
+        // Updation - New user manual
+        if (($item_code == '154') and ( $class < 3 or $class > 4)) {
+            return "Class 3 and 4 only registration in his category";
+        }
+        
+        if (($item_code == '151') and ( $class < 1 or $class > 2)) {
+            return "Class 1 and 2 only registration in his category";
+        }
+
+        if (($item_code == '166') and ( $class < 1 or $class > 2)) {
+            return "Class 1 and 2 only registration in his category";
+        }
+        return false;
+    }
+
+    
+
+    function is_not_valid_gender($item_code, $admn_no, $school_code) {
+        $this->db->where('item_code', $item_code);
+
+        $item_master = $this->db->get('item_master');
+        $item = $item_master->getRow();
+        if (!$item || $item->gender == 'C') {
+            return false;
+        }
+
+        $post_gender = $this->input->post('txtGender');
+        if (!empty($post_gender)) {
+            if ($post_gender != $item->gender) {
+                return "Wrong Gender";
+            }
+            return false;
+        }
+
+        $this->db->where('admn_no', $admn_no);
+        $this->db->where('school_code', $school_code);
+        $this->db->where('gender', $item->gender);
+        $participant_details = $this->db->get('sd_participant_details');
+        if ($participant_details->getNumRows() <= 0) {
+            return "Wrong Gender";
+        }
+        return false;
+    }
+
+    function is_repeate_item_code($item_code, $admn_no, $school_code) {
+        $this->db->where('item_code', $item_code);
+        $this->db->where('admn_no', $admn_no);
+        $this->db->where('school_code', $school_code);
+        $cnt_item = $this->db->countAllResults('sd_participant_item_details');
+        if ($cnt_item > 0) {
+            return "repeated item code";
+        }
+        return false;
+    }
+
+
+
+    function is_over_max_item($admn_no, $school_code, $item_code) {
+        $this->db->where('IM.item_code', $item_code);
+        $this->db->from('item_master AS IM');
+        $this->db->join('festival_master AS FM', 'IM.fest_id = FM.fest_id');
+        $this->db->select('IM.item_type,FM.fest_id');
+        $item_details = $this->db->get();
+
+        if ($item_details->getNumRows() > 0) {
+            $items = $item_details->getResultArray();
+            $fest_id = $items[0]['fest_id'];
+            $item_type = $items[0]['item_type'];
+
+            $limits = $this->get_participant_district_limits($school_code);
+            $max_single_items = (int)$limits['max_single_items'];
+            $max_group_items  = (int)$limits['max_group_items'];
+            if ($item_type == 'G') {
+                $max_no = $max_group_items;
+            } else {
+                $max_no = $max_single_items;
+            }
+
+            $this->db->where('PD.admn_no', $admn_no);
+            $this->db->where('PD.school_code', $school_code);
+            $this->db->where('IM.item_type', $item_type);
+            $this->db->where('IM.fest_id', $fest_id);
+            $this->db->from('sd_participant_item_details AS PD');
+            $this->db->join('item_master AS IM', 'PD.item_code = IM.item_code');
+            $this->db->groupBy('PD.item_code');
+            $this->db->select('PD.item_code');
+
+            $item = $this->db->get('sd_participant_item_details');
+            if ($item->getNumRows() >= $max_no) {
+                if ($item_type == 'G') {
+                    return "Maximum number of group items exceeded. Maximum group items: {$max_group_items}. Maximum single items: {$max_single_items}.";
+                } else {
+                    return "Maximum number of single items exceeded. Maximum single items: {$max_single_items}. Maximum group items: {$max_group_items}.";
+                }
+            } else {
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Resolve per-district participant item limits (max single / max group).
+     * Falls back to defaults 3 single / 2 group when the district has no row.
+     */
+    function get_participant_district_limits($school_code) {
+        $default = ['max_single_items' => 3, 'max_group_items' => 2];
+
+        $rev_district_code = null;
+        if (!empty($school_code)) {
+            $sch = $this->db->table('sd_school_master')
+                ->select('rev_district_code')
+                ->where('school_code', (int)$school_code)
+                ->get()
+                ->getRowArray();
+            if (!empty($sch['rev_district_code'])) {
+                $rev_district_code = (int)$sch['rev_district_code'];
+            }
+        }
+        if (!$rev_district_code) {
+            return $default;
+        }
+
+        $this->db->where('rev_district_code', $rev_district_code);
+        $row = $this->db->get('district_item_settings')->getRowArray();
+        if (empty($row)) {
+            return $default;
+        }
+        return [
+            'max_single_items' => (int)$row['max_single_items'],
+            'max_group_items'  => (int)$row['max_group_items'],
+        ];
+    }
+
+    function is_over_max_item_school($admn_no, $school_code, $item_code, $item_type = '') {
+        $this->db->where('item_code', $item_code);
+        $item_master = $this->db->get('item_master');
+        $item = $item_master->getResultArray();
+        $itemRow = !empty($item[0]) ? $item[0] : [];
+        $itemName = !empty($itemRow['item_name']) ? $itemRow['item_name'] : '';
+
+        $is_drama = in_array((int)$item_code, [159, 361, 560, 760], true)
+            || (!empty($itemName) && stripos($itemName, 'DRAMA') !== false)
+            || (!empty($itemName) && mb_strpos($itemName, 'நாடகம்') !== false);
+
+        if ($is_drama) {
+            $max_no = ($item_type == 'P') ? 3 : 7;
+        } else {
+            if ($item_type == 'P') {
+                $max_no = isset($itemRow['max_pinnani']) ? (int)$itemRow['max_pinnani'] : 0;
+            } else {
+                $max_no = !empty($itemRow['max_participants']) ? (int)$itemRow['max_participants'] : 1;
+            }
+        }
+
+        $this->db->where('school_code', $school_code);
+        $this->db->where('item_code', $item_code);
+        if (!empty($admn_no)) {
+            $this->db->where('admn_no !=', $admn_no);
+        }
+        if ($item_type == 'P') {
+            $this->db->where('item_type', 'P');
+        } else {
+            $this->db->where("item_type != 'P'");
+        }
+        $cnt_item = $this->db->countAllResults('sd_participant_item_details');
+
+        if ($cnt_item >= $max_no) {
+            if ($item_type == 'P') {
+                if ($max_no == 0) {
+                    return "No Pinnany";
+                } else {
+                    return "Maximum number of Pinnany was exceed";
+                }
+            } else {
+                return "Maximum number of students was exceed";
+            }
+        }
+        return false;
+    }
+
+    function is_over_max_vibhagam_school($item_code, $school_code) {
+        $this->db->where('IM.item_code', $item_code);
+        $this->db->from('item_master AS IM');
+        $this->db->join('vibhagam_master AS VM', 'IM.vibhagam_id = VM.vibhagam_id');
+        $this->db->select('VM.vibhagam_id,VM.vibhagam_name,VM.max_items,IM.item_type');
+        $vibhagam_details = $this->db->get();
+        $vibhagam = $vibhagam_details->getResultArray();
+
+        $vibhagam_id = $vibhagam[0]['vibhagam_id'];
+        $vibhagam_name = $vibhagam[0]['vibhagam_name'];
+        $max_items = $vibhagam[0]['max_items'];
+        $item_type = $vibhagam[0]['item_type'];
+
+
+        $this->db->where('PD.school_code', $school_code);
+        $this->db->where('IM.vibhagam_id', $vibhagam_id);
+        $this->db->where('PD.item_code !=', $item_code);
+        //$this->db->where('PD.item_type !=',$item_type);
+        $this->db->from('sd_participant_item_details AS PD');
+        $this->db->join('item_master AS IM', 'PD.item_code = IM.item_code');
+        $this->db->groupBy('PD.item_code');
+        $this->db->select('PD.item_code');
+        $item_details = $this->db->get();
+        if ($item_details->getNumRows() >= $max_items) {
+            return "Maximum number of students in " . $vibhagam_name . " was exceed";
+        } else {
+            return false;
+        }
+    }
+
+    function update_group_captains() {
+        $schoolCode = $this->input->post('hidSchoolId');
+        $group_count = $this->input->post('hidGrpCount');
+
+        for ($i = 0; $i < $group_count; $i++) {
+            if (isset($_POST['hidGrpItemCode_' . $i]) && trim($_POST['hidGrpItemCode_' . $i]) != '') {
+                $item_code = trim($_POST['hidGrpItemCode_' . $i]);
+                $admn_no = trim($_POST['cmbGrpParticipant_' . $i]);
+
+                $old_participant_id = '';
+                $this->db->where('school_code', $schoolCode);
+                $this->db->where('item_code', $item_code);
+                $this->db->where('spo_id', '0');
+                $this->db->where('is_captain', 'Y');
+                $participant_item_details = $this->db->get('sd_participant_item_details');
+                if ($participant_item_details->getNumRows() > 0) {
+                    $participant_item = $participant_item_details->getResultArray();
+                    $old_participant_id = $participant_item[0]['participant_id'];
+                }
+
+
+                $this->db->where('school_code', $schoolCode);
+                $this->db->where('item_code', $item_code);
+                $this->db->where('spo_id', '0');
+                $this->db->update('sd_participant_item_details', array('is_captain' => 'N', 'parent_admn_no' => $admn_no));
+
+                $this->db->where('school_code', $schoolCode);
+                $this->db->where('item_code', $item_code);
+                $this->db->where('spo_id', '0');
+                $this->db->where('admn_no', $admn_no);
+                $this->db->update('sd_participant_item_details', array('is_captain' => 'Y', 'parent_admn_no' => $admn_no));
+
+
+                $new_participant_id = '';
+                $this->db->where('school_code', $schoolCode);
+                $this->db->where('item_code', $item_code);
+                $this->db->where('spo_id', '0');
+                $this->db->where('is_captain', 'Y');
+                $participant_item_details = $this->db->get('sd_participant_item_details');
+                if ($participant_item_details->getNumRows() > 0) {
+                    $participant_item = $participant_item_details->getResultArray();
+                    $new_participant_id = $participant_item[0]['participant_id'];
+                }
+
+                if ($old_participant_id and $new_participant_id) {
+                    //echo $old_participant_id.' '.$new_participant_id;exit;
+                    $this->change_stage_allot_new_participant_item($item_code, $old_participant_id, $new_participant_id);
+                } else if ($new_participant_id) {
+                    $this->stage_allot_new_participant_item($item_code, $new_participant_id);
+                }
+            }
+        }
+    }
+
+    function finalize_school_details($school_code) {
+        /*
+         * * Check whether a group item has no captain
+         */
+        $this->db->where('school_code', $school_code);
+        $this->db->where('item_type', 'G');
+        $group_details = $this->db->get('sd_participant_item_details');
+        foreach ($group_details->getResultArray() as $group) {
+            $item_code = $group['item_code'];
+            $this->db->where('school_code', $school_code);
+            $this->db->where('item_code', $item_code);
+            $this->db->where('is_captain', 'Y');
+            $this->db->where('spo_id', '0');
+            $count = $this->db->countAllResults('sd_participant_item_details');
+            if ($count <= 0) {
+                $error_array[] = "Please fix a captain for all group items";
+                $return_array['error_array'] = $error_array;
+                return $return_array;
+            }
+        }
+        /*
+         * * End Check whether a group item has no captain
+         */
+
+        /**
+         * * Delete who is not participating any items
+         */
+        $this->db->where('PD.school_code', $school_code);
+        $this->db->where('PI.pi_id IS NULL');
+        $this->db->from('sd_participant_details AS PD');
+        $this->db->join('sd_participant_item_details AS PI', 'PD.participant_id = PI.participant_id', 'LEFT');
+        $this->db->select('PD.participant_id');
+        $pd_details = $this->db->get();
+        foreach ($pd_details->getResultArray() as $pd) {
+            $this->db->where('participant_id', $pd['participant_id']);
+            $this->db->delete('sd_participant_details');
+        }
+        /**
+         * * End Delete who is not participating any items
+         */
+        $this->db->where('school_code', $school_code);
+        $this->db->update('sd_school_details', array('is_finalize' => 'Y'));
+
+        $data = array();
+        $data['school_code'] = $school_code;
+        $data['status'] = 'Y';
+        $data['ip'] = $this->input->ip_address();
+        $data['user_id'] = $this->session->get('USERID');
+        $this->db->insert('z_school_confirm_log', $data);
+    }
+
+    function create_csv_generation($school_code) {
+        $this->db->where('school_code', $school_code);
+        $this->db->where('is_finalize', 'Y');
+        $school_details = $this->db->get('sd_school_details');
+        if ($school_details->getNumRows() <= 0) {
+            $error_array[] = "Please finalize the school details";
+            $return_array['error_array'] = $error_array;
+            return $return_array;
+        }
+
+        $this->db->where('school_code', $school_code);
+        $this->db->where('item_type', 'G');
+        $group_details = $this->db->get('sd_participant_item_details');
+        foreach ($group_details->getResultArray() as $group) {
+            $item_code = $group['item_code'];
+            $this->db->where('school_code', $school_code);
+            $this->db->where('item_code', $item_code);
+            $this->db->where('is_captain', 'Y');
+            $count = $this->db->countAllResults('sd_participant_item_details');
+            if ($count <= 0) {
+                $error_array[] = "Please fix a captain for all group items";
+                $return_array['error_array'] = $error_array;
+                return $return_array;
+            }
+        }
+
+        /* $this->db->where('school_code',$school_code);
+          $this->db->update('sd_school_details',array('is_csv_taken' => 'Y'));
+
+          $this->db->where('school_code',$school_code);
+          $school_details		=	$this->db->get('sd_school_details');
+          query_to_csv($school_details,true,'dddd.csv'); */
+    }
+
+    function is_editable_school($school_code) {
+        $this->db->where('school_code', $school_code);
+        $school_details = $this->db->get('sd_school_details');
+        if ($school_details->getNumRows() > 0) {
+            $school = $school_details->getResultArray();
+            if ((@$school[0]['is_finalize'] ?? '') == 'Y') {
+                return 'no';
+            }
+        }
+
+        // Check if this school was master confirmed. The sub-district level
+        // confirm_data_entry flag must not lock a school on its own, otherwise a
+        // per-school reset would not unlock it (the sub-district flag stays Y).
+        $subdist = $this->db->table('sd_school_master sm')
+            ->select('sm.master_confirm')
+            ->where('sm.school_code', (string)$school_code)
+            ->get()->getRowArray();
+        if (!empty($subdist['master_confirm']) && $subdist['master_confirm'] === 'Y') {
+            return 'no';
+        }
+
+        $user_type = (int)$this->session->get('USER_TYPE');
+        if (in_array($user_type, [0, 1, 2, 3], true)) {
+            return 'yes';
+        }
+        $this->db->where('school_code', $school_code);
+        $master_details = $this->db->get('sd_school_master');
+        if ($master_details->getNumRows() > 0) {
+            return 'yes';
+        } else {
+            return 'no';
+        }
+    }
+
+    function delete_participant_details($school_code, $admn_no) {
+
+        $this->db->where('school_code', $school_code);
+        $this->db->where('admn_no', $admn_no);
+        $this->db->where('spo_id > 0');
+        $cnt_special_order = $this->db->countAllResults('sd_participant_item_details');
+        if ($cnt_special_order > 0) {
+            $error_array[] = 'This Participant has special order items';
+            $return_array['error_array'] = $error_array;
+            return $return_array;
+        }
+
+        // Check if this participant is a captain for group items
+        $this->db->where('school_code', $school_code);
+        $this->db->where('admn_no', $admn_no);
+        $this->db->where('is_captain', 'Y');
+        $this->db->where('item_type', 'G');
+        $cnt_captains = $this->db->countAllResults('sd_participant_item_details');
+
+        if ($cnt_captains > 0) {
+            $error_array[] = 'This Participant is a captain for group items and cannot be deleted. Please change the captain first.';
+            $return_array['error_array'] = $error_array;
+            return $return_array;
+        }
+
+
+        $this->db->where('school_code', $school_code);
+        $this->db->where('admn_no', $admn_no);
+        $this->db->where('is_captain', 'Y');
+        $participant_item_details = $this->db->get('sd_participant_item_details');
+        foreach ($participant_item_details->getResultArray() as $participant_item) {
+            $participant_id = $participant_item['participant_id'];
+            $item_code = $participant_item['item_code'];
+            $this->remove_stage_allot_new_participant_item($item_code, $participant_id);
+        }
+
+
+
+
+        $this->db->where('school_code', $school_code);
+        $this->db->where('admn_no', $admn_no);
+        $this->db->delete('sd_participant_item_details');
+
+        $this->db->where('school_code', $school_code);
+        $this->db->where('admn_no', $admn_no);
+        $this->db->delete('sd_participant_details');
+    }
+
+    function get_special_order_participant_details($schoolCode, $pi_id = '') {
+        if ($pi_id != '')
+            $this->db->where('PID.pi_id', $pi_id);
+        $this->db->where('PD.school_code', $schoolCode);
+        $this->db->where('PID.spo_id != 0');
+        $this->db->from('sd_participant_details AS PD');
+        $this->db->join('sd_participant_item_details AS PID', "PD.participant_id = PID.participant_id", 'INNER');
+        $this->db->join('item_master AS IM', "IM.item_code = PID.item_code", 'INNER');
+        $this->db->join('special_order_master AS SOM', "SOM.spo_id = PID.spo_id", 'INNER');
+        $this->db->select('PD.*, PID.spo_id, PID.parent_admn_no, PID.item_type, PID.pi_id, PID.item_code, IM.item_name, SOM.spo_title');
+        $this->db->orderBy('PID.item_code, PID.parent_admn_no, PID.is_captain DESC');
+        $result = $this->db->get();
+        return $result->getResultArray();
+    }
+
+    function delete_special_order_participant_details() {
+        $adno = $this->input->post('hidADNO');
+        $item_code = $this->input->post('hidItemId');
+        $school_id = $this->input->post('hidSchoolId');
+        $this->db->where('parent_admn_no', $adno);
+        $this->db->where('school_code', $school_id);
+        $this->db->where('item_code', $item_code);
+        $this->db->where('spo_id != 0');
+        $this->db->select('admn_no,participant_id');
+        $participants = $this->db->get('sd_participant_item_details');
+        $participants = $participants->getResultArray();
+        for ($i = 0; $i < count($participants); $i++) {
+
+            $this->log_participant_details($school_id, $participants[$i]['admn_no'], 'O');
+
+            $participant_id = $participants[$i]['participant_id'];
+            $this->db->where('participant_id', $participant_id);
+            $this->db->where('item_code', $item_code);
+            $this->db->where('is_captain', 'Y');
+            $part_capt_item = $this->db->get('sd_participant_item_details');
+            if ($part_capt_item->getNumRows() > 0) {
+                $this->remove_stage_allot_new_participant_item($item_code, $participant_id);
+            }
+
+            $this->db->where('school_code', $school_id);
+            $this->db->where('item_code', $item_code);
+            $this->db->where('admn_no', $participants[$i]['admn_no']);
+            $this->db->delete('sd_participant_item_details');
+
+            $this->db->where('school_code', $school_id);
+            $this->db->where('admn_no', $participants[$i]['admn_no']);
+            $this->db->select('admn_no');
+            $participants_other_items = $this->db->get('sd_participant_item_details');
+            $participants_other_items = $participants_other_items->getResultArray();
+            if (count($participants_other_items) == 0) {
+                $this->db->where('school_code', $school_id);
+                $this->db->where('admn_no', $participants[$i]['admn_no']);
+                $this->db->delete('sd_participant_details');
+            }
+
+            $this->log_participant_details($school_id, $participants[$i]['admn_no'], 'N');
+        }
+    }
+
+    function update_special_order_participant_details() {
+        $error_array = array();
+
+        $schoolCode = $this->input->post('hidSchoolId');
+        $pi_id      = $this->input->post('hidPiId');
+        $admnNo     = $this->input->post('txtADNO');
+        $item_code  = $this->input->post('txtItemCode_1');
+        $spo_id     = $this->input->post('cmbOrder');
+        $parent_admn_no = $this->input->post('txtCaptionAdNo');
+        $remarks    = $this->input->post('txtRemarks');
+        $is_pinnany = isset($_POST['chkIsPinnany']);
+
+        if (trim((string) $pi_id) == '') {
+            $error_array[] = 'Invalid record. Please refresh and try again.';
+            $return_array['error_array'] = $error_array;
+            return $return_array;
+        }
+        if (trim((string) $schoolCode) == '') {
+            $error_array[] = 'Please select a school.';
+        }
+        if ($spo_id == '0' || trim((string) $spo_id) == '') {
+            $error_array[] = 'Please select the order type';
+        }
+        if (trim((string) $item_code) == '') {
+            $error_array[] = 'Please enter the item code';
+        }
+        if (trim((string) $admnNo) == '') {
+            $error_array[] = 'Please enter the admission number';
+        }
+        if ($is_pinnany && trim((string) $parent_admn_no) == '') {
+            $error_array[] = 'Please enter the Captain AD No for pinnany';
+        }
+
+        $this->db->where('pi_id', $pi_id);
+        $existing = $this->db->get('sd_participant_item_details');
+        $existing_row = $existing->getResultArray();
+        if (count($existing_row) <= 0) {
+            $error_array[] = 'Invalid participant entry.';
+            $return_array['error_array'] = $error_array;
+            return $return_array;
+        }
+
+        $this->db->where('school_code', $schoolCode);
+        $this->db->where('admn_no', $admnNo);
+        $this->db->select('participant_id, class');
+        $pdx = $this->db->get('sd_participant_details');
+        $pd = $pdx->getResultArray();
+        if (count($pd) <= 0) {
+            $error_array[] = 'Invalid admission number';
+        }
+
+        $this->db->where('item_code', $item_code);
+        $this->db->select('item_type');
+        $im = $this->db->get('item_master');
+        $item_row = $im->getResultArray();
+        if (count($item_row) <= 0) {
+            $error_array[] = 'Invalid Item Code : ' . $item_code;
+        }
+
+        if (count($error_array) > 0) {
+            $return_array['error_array'] = $error_array;
+            return $return_array;
+        }
+
+        $participant_id = $pd[0]['participant_id'];
+        $class = $pd[0]['class'];
+        $item_type = $item_row[0]['item_type'];
+
+        if ($is_pinnany) {
+            $this->db->where('school_code', $schoolCode);
+            $this->db->where('admn_no', $parent_admn_no);
+            $this->db->where('item_code', $item_code);
+            $this->db->where('spo_id', $spo_id);
+            $this->db->where('pi_id !=', $pi_id);
+            $this->db->select('pi_id');
+            $capt = $this->db->get('sd_participant_item_details');
+            $caption = $capt->getResultArray();
+            if (count($caption) > 0) {
+                $item_type = 'P';
+                $is_captain = 'N';
+            } else {
+                $error_array[] = 'Caption AD NO is invalid';
+                $return_array['error_array'] = $error_array;
+                return $return_array;
+            }
+        } else {
+            $item_type = $item_type;
+            $parent_admn_no = $admnNo;
+            $is_captain = 'Y';
+        }
+
+        $data = array(
+            'participant_id'   => $participant_id,
+            'school_code'      => (int) $schoolCode,
+            'admn_no'          => $admnNo,
+            'item_code'        => $item_code,
+            'item_type'        => $item_type,
+            'parent_admn_no'   => $parent_admn_no,
+            'spo_id'           => $spo_id,
+            'spo_remarks'      => $remarks,
+            'is_captain'       => $is_captain,
+        );
+        $this->db->where('pi_id', $pi_id);
+        $this->db->update('sd_participant_item_details', $data);
+
+        $base = array();
+        $base['participant_name'] = $this->input->post('txtParticipantName');
+        $base['class']            = $this->input->post('txtClass');
+        $base['gender']           = $this->input->post('txtGender');
+        $this->db->where('participant_id', $participant_id);
+        $this->db->update('sd_participant_details', $base);
+
+        $this->log_participant_details($schoolCode, $admnNo, 'O');
+
+        $return_array['error_array'] = $error_array;
+        return $return_array;
+    }
+
+    function get_participant_item_list($school_code) {
+        $this->db->where('PD.school_code', $school_code);
+        $this->db->groupBy('PD.item_code');
+        $this->db->select('PD.item_code,IM.item_name');
+        $this->db->join('item_master AS IM', 'PD.item_code = IM.item_code');
+        $participant_item_details = $this->db->get('sd_participant_item_details AS PD');
+        $item_details_array = array();
+        if ($participant_item_details->getNumRows() > 0) {
+            $count = 0;
+            foreach ($participant_item_details->getResultArray() as $item_details) {
+
+                $item_code = $item_details['item_code'];
+                $this->db->where('school_code', $school_code);
+                $this->db->where('item_code', $item_code);
+                $this->db->where("(item_type ='G' OR item_type = 'S')");
+                $cnt_participant = $this->db->countAllResults('sd_participant_item_details');
+
+                $this->db->where('school_code', $school_code);
+                $this->db->where('item_code', $item_code);
+                $this->db->where("item_type ='P'");
+                $cnt_pinnany = $this->db->countAllResults('sd_participant_item_details');
+
+                $this->db->where('PD.school_code', $school_code);
+                $this->db->where('PD.item_code', $item_code);
+                $this->db->where("PD.is_captain ='Y'");
+                $this->db->join('sd_participant_details as PM', 'PD.school_code = PM.school_code AND PD.admn_no = PM.admn_no');
+                $this->db->select('PM.participant_name');
+                $captian_details = $this->db->get('sd_participant_item_details AS PD');
+                if ($captian_details->getNumRows() > 0) {
+                    $captian = $captian_details->getResultArray();
+                    $item_details_array[$count]['captian'] = $captian[0]['participant_name'];
+                }
+
+                $item_details_array[$count]['item_code'] = $item_code;
+                $item_details_array[$count]['item_name'] = $item_details['item_name'];
+                $item_details_array[$count]['cnt_participant'] = $cnt_participant;
+                $item_details_array[$count]['cnt_pinnany'] = $cnt_pinnany;
+                $count++;
+            }
+            return $item_details_array;
+        }
+        return $item_details_array;
+    }
+
+    function get_all_schools_list() {
+        // First get all school codes that have sd_school_details entries
+        $this->db->select('SD.school_code');
+        $this->db->from('sd_school_details AS SD');
+        $this->db->join('sd_school_master AS SM', 'SD.school_code = SM.school_code');
+
+        // Apply district/sub-district filters if available
+        if (trim($this->session->get('SUB_DISTRICT')) != 0) {
+            $this->db->where('SM.sub_district_code', trim($this->session->get('SUB_DISTRICT')));
+        }
+
+        if (trim($this->session->get('DISTRICT')) != 0) {
+            $this->db->where('SM.rev_district_code', trim($this->session->get('DISTRICT')));
+        }
+
+        /** check if the user is cluster user */
+        if (trim($this->session->get('USER_TYPE')) == 5) {
+            $this->db->join('sd_user_cluster AS UC', 'SM.school_code = UC.school_code', 'INNER');
+            $this->db->where('UC.user_id', trim($this->session->get('USERID')));
+        }
+        /** check if the user is cluster user ends */
+
+        $school_codes_result = $this->db->get();
+        $school_codes = $school_codes_result->getResultArray();
+
+        if (empty($school_codes)) {
+            return array();
+        }
+
+        // Extract school codes into array
+        $codes_array = array_column($school_codes, 'school_code');
+
+        // Now get complete details for these schools
+        $this->db->whereIn('SM.school_code', $codes_array);
+
+        // Re-apply the same filters
+        if (trim($this->session->get('SUB_DISTRICT')) != 0) {
+            $this->db->where('SM.sub_district_code', trim($this->session->get('SUB_DISTRICT')));
+        }
+
+        if (trim($this->session->get('DISTRICT')) != 0) {
+            $this->db->where('SM.rev_district_code', trim($this->session->get('DISTRICT')));
+        }
+
+        /** check if the user is cluster user */
+        if (trim($this->session->get('USER_TYPE')) == 5) {
+            $this->db->join('sd_user_cluster AS UC', 'SM.school_code = UC.school_code', 'INNER');
+            $this->db->where('UC.user_id', trim($this->session->get('USERID')));
+        }
+        /** check if the user is cluster user ends */
+
+        $this->db->from('sd_school_master AS SM');
+        $this->db->join('sd_school_details AS SD', 'SM.school_code = SD.school_code', 'LEFT');
+        $this->db->select('SM.school_code, SM.school_name, SM.sub_district_code, SM.rev_district_code, SD.is_create_report, SD.is_finalize');
+        $this->db->orderBy('SM.school_name', 'ASC');
+        $result = $this->db->get();
+
+        return $result->getResultArray();
+    }
+
+    function get_schools_by_sub_district($sub_district_code) {
+        // FIRST TASK: Get schools from sd_school_master table based on sub_district_code
+        $this->db->where('SM.sub_district_code', $sub_district_code);
+
+        /** check if the user is cluster user */
+        if (trim($this->session->get('USER_TYPE')) == 5) {
+            $this->db->join('sd_user_cluster AS UC', 'SM.school_code = UC.school_code', 'INNER');
+            $this->db->where('UC.user_id', trim($this->session->get('USERID')));
+        }
+        /** check if the user is cluster user ends */
+
+        // Get basic school information from sd_school_master
+        $this->db->from('sd_school_master AS SM');
+        $this->db->select('SM.school_code, SM.school_name, SM.sub_district_code, SM.rev_district_code');
+        $this->db->orderBy('SM.school_name', 'ASC');
+
+        // Debug: Log the SQL query
+        $sql = $this->db->getCompiledSelect();
+        log_message('debug', 'Sub-district Query: ' . $sql);
+
+        $result = $this->db->get();
+        $schools = $result->getResultArray();
+
+        // Debug: Log how many schools found
+        log_message('debug', 'Sub-district Schools Found: ' . count($schools) . ' for sub_district: ' . $sub_district_code);
+
+        // Add sd_school_details information for each school
+        foreach ($schools as &$school) {
+            $school_code = $school['school_code'];
+
+            // Get sd_school_details for this school
+            $this->db->where('school_code', $school_code);
+            $details_result = $this->db->get('sd_school_details');
+            $details = $details_result->getResultArray();
+
+            if (!empty($details)) {
+                $school['is_create_report'] = $details[0]['is_create_report'];
+                $school['is_finalize'] = $details[0]['is_finalize'];
+            } else {
+                $school['is_create_report'] = 'N';
+                $school['is_finalize'] = 'N';
+            }
+        }
+
+        return $schools;
+    }
+
+    function get_schools_by_district($district_code) {
+        // FIRST TASK: Get schools from sd_school_master table based on rev_district_code
+        $this->db->where('SM.rev_district_code', $district_code);
+
+        /** check if the user is cluster user */
+        if (trim($this->session->get('USER_TYPE')) == 5) {
+            $this->db->join('sd_user_cluster AS UC', 'SM.school_code = UC.school_code', 'INNER');
+            $this->db->where('UC.user_id', trim($this->session->get('USERID')));
+        }
+        /** check if the user is cluster user ends */
+
+        // Get basic school information from sd_school_master
+        $this->db->from('sd_school_master AS SM');
+        $this->db->select('SM.school_code, SM.school_name, SM.sub_district_code, SM.rev_district_code');
+        $this->db->orderBy('SM.school_name', 'ASC');
+
+        // Debug: Log the SQL query
+        $sql = $this->db->getCompiledSelect();
+        log_message('debug', 'District Query: ' . $sql);
+
+        $result = $this->db->get();
+        $schools = $result->getResultArray();
+
+        // Debug: Log how many schools found
+        log_message('debug', 'District Schools Found: ' . count($schools) . ' for district: ' . $district_code);
+
+        // Add sd_school_details information for each school
+        foreach ($schools as &$school) {
+            $school_code = $school['school_code'];
+
+            // Get sd_school_details for this school
+            $this->db->where('school_code', $school_code);
+            $details_result = $this->db->get('sd_school_details');
+            $details = $details_result->getResultArray();
+
+            if (!empty($details)) {
+                $school['is_create_report'] = $details[0]['is_create_report'];
+                $school['is_finalize'] = $details[0]['is_finalize'];
+            } else {
+                $school['is_create_report'] = 'N';
+                $school['is_finalize'] = 'N';
+            }
+        }
+
+        return $schools;
+    }
+
+    function update_confirmation_status($school_code, $action) {
+        // First check current status
+        $this->db->where('school_code', $school_code);
+        $current_details = $this->db->get('sd_school_details');
+        $current = $current_details->getResultArray();
+
+        if (empty($current)) {
+            return false; // School details don't exist
+        }
+
+        $current_status = $current[0]['is_finalize'];
+        $update_data = array();
+
+        if ($action == 'confirm') {
+            if ($current_status == 'Y') {
+                return false; // Already confirmed
+            }
+            $update_data['is_finalize'] = 'Y';
+        } elseif ($action == 'reset') {
+            if ($current_status == 'N') {
+                return false; // Already reset
+            }
+            $update_data['is_finalize'] = 'N';
+        } else {
+            return false;
+        }
+
+        $this->db->where('school_code', $school_code);
+        $result = $this->db->update('sd_school_details', $update_data);
+
+        if ($result) {
+            // Log the action with more details
+            $log_data = array(
+                'school_code' => $school_code,
+                'status' => $update_data['is_finalize'],
+                'old_status' => $current_status,
+                'action' => $action,
+                'ip' => $this->input->ip_address(),
+                'user_id' => $this->session->get('USERID')
+            );
+            $this->db->insert('z_school_confirm_log', $log_data);
+        }
+
+        return $result;
+    }
+
+    function debug_schools_by_sub_district($sub_district_code) {
+        $this->db->where('SM.sub_district_code', $sub_district_code);
+        $this->db->from('sd_school_master AS SM');
+        $this->db->select('SM.school_code, SM.school_name, SM.sub_district_code, SM.rev_district_code');
+        $this->db->orderBy('SM.school_name', 'ASC');
+        $this->db->limit(5); // Just get first 5 for debugging
+        $result = $this->db->get();
+
+        return $result->getResultArray();
+    }
+
+    function debug_schools_by_district($district_code) {
+        $this->db->where('SM.rev_district_code', $district_code);
+        $this->db->from('sd_school_master AS SM');
+        $this->db->select('SM.school_code, SM.school_name, SM.sub_district_code, SM.rev_district_code');
+        $this->db->orderBy('SM.school_name', 'ASC');
+        $this->db->limit(5); // Just get first 5 for debugging
+        $result = $this->db->get();
+
+        return $result->getResultArray();
+    }
+
+    function get_schools_from_master_only($sub_district_code = null, $district_code = null) {
+        $this->db->from('sd_school_master AS SM');
+
+        if ($sub_district_code) {
+            $this->db->where('SM.sub_district_code', $sub_district_code);
+        }
+
+        if ($district_code) {
+            $this->db->where('SM.rev_district_code', $district_code);
+        }
+
+        /** check if the user is cluster user */
+        if (trim($this->session->get('USER_TYPE')) == 5) {
+            $this->db->join('sd_user_cluster AS UC', 'SM.school_code = UC.school_code', 'INNER');
+            $this->db->where('UC.user_id', trim($this->session->get('USERID')));
+        }
+        /** check if the user is cluster user ends */
+
+        $this->db->select('SM.school_code, SM.school_name, SM.sub_district_code, SM.rev_district_code');
+        $this->db->orderBy('SM.school_name', 'ASC');
+        $this->db->limit(5); // Just get first 5 for testing
+        $result = $this->db->get();
+
+        return $result->getResultArray();
+    }
+
+    function test_database_connection() {
+        // Test basic query to sd_school_master table
+        $this->db->select('COUNT(*) as count');
+        $this->db->from('sd_school_master');
+        $result = $this->db->get();
+        $count_data = $result->getResultArray();
+
+        // Test query to sd_school_details table
+        $this->db->select('COUNT(*) as count');
+        $this->db->from('sd_school_details');
+        $result = $this->db->get();
+        $details_count_data = $result->getResultArray();
+
+        return array(
+            'school_master_count' => $count_data[0]['count'],
+            'school_details_count' => $details_count_data[0]['count']
+        );
+    }
+
+    function get_comprehensive_school_debug_info($sub_district_code = null, $district_code = null) {
+        $debug_info = array();
+
+        // Count schools in sd_school_master only
+        $this->db->from('sd_school_master AS SM');
+        if ($sub_district_code) {
+            $this->db->where('SM.sub_district_code', $sub_district_code);
+        }
+        if ($district_code) {
+            $this->db->where('SM.rev_district_code', $district_code);
+        }
+        $debug_info['school_master_count'] = $this->db->countAllResults();
+
+        // Count schools in sd_school_details only
+        $this->db->from('sd_school_details AS SD');
+        $debug_info['school_details_count'] = $this->db->countAllResults();
+
+        // Count schools that exist in both tables (with details)
+        $this->db->from('sd_school_master AS SM');
+        $this->db->join('sd_school_details AS SD', 'SM.school_code = SD.school_code', 'INNER');
+        if ($sub_district_code) {
+            $this->db->where('SM.sub_district_code', $sub_district_code);
+        }
+        if ($district_code) {
+            $this->db->where('SM.rev_district_code', $district_code);
+        }
+        $debug_info['schools_with_details_count'] = $this->db->countAllResults();
+
+        // Get sample schools from sd_school_master
+        $this->db->select('SM.school_code, SM.school_name, SM.sub_district_code, SM.rev_district_code');
+        $this->db->from('sd_school_master AS SM');
+        if ($sub_district_code) {
+            $this->db->where('SM.sub_district_code', $sub_district_code);
+        }
+        if ($district_code) {
+            $this->db->where('SM.rev_district_code', $district_code);
+        }
+        $this->db->orderBy('SM.school_name', 'ASC');
+        $this->db->limit(3);
+        $debug_info['sample_schools_master'] = $this->db->get()->getResultArray();
+
+        // Get sample schools from sd_school_details with master info
+        $this->db->select('SM.school_code, SM.school_name, SM.sub_district_code, SM.rev_district_code, SD.is_create_report, SD.is_finalize');
+        $this->db->from('sd_school_master AS SM');
+        $this->db->join('sd_school_details AS SD', 'SM.school_code = SD.school_code', 'INNER');
+        if ($sub_district_code) {
+            $this->db->where('SM.sub_district_code', $sub_district_code);
+        }
+        if ($district_code) {
+            $this->db->where('SM.rev_district_code', $district_code);
+        }
+        $this->db->orderBy('SM.school_name', 'ASC');
+        $this->db->limit(3);
+        $debug_info['sample_schools_with_details'] = $this->db->get()->getResultArray();
+
+        return $debug_info;
+    }
+
+    /**
+     * Get items based on class selection for dynamic dropdown
+     * @param int $class Class selected
+     * @param string $gender Gender (B/G)
+     * @return array Array of items available for the class
+     */
+    function get_items_by_class($class, $gender = '') {
+        $this->db->select('IM.item_code, IM.item_name, IM.item_type, IM.gender, FM.fest_name, FM.fest_id');
+        $this->db->from('item_master AS IM');
+        $this->db->join('festival_master AS FM', 'IM.fest_id = FM.fest_id');
+        // These items have fixed class bands independent of festival metadata.
+        $special_class_ranges = [160 => [3, 4], 166 => [1, 2], 360 => [5, 7], 560 => [8, 10], 760 => [11, 12]];
+        $special_codes = array_keys($special_class_ranges);
+        $class = (int) $class;
+        $matching_special_codes = [];
+        foreach ($special_class_ranges as $code => [$class_start, $class_end]) {
+            if ($class >= $class_start && $class <= $class_end) {
+                $matching_special_codes[] = $code;
+            }
+        }
+        $this->db->groupStart();
+        $this->db->groupStart()
+            ->whereNotIn('IM.item_code', $special_codes)
+            ->where('FM.class_start <=', $class)
+            ->where('FM.class_end >=', $class)
+            ->groupEnd();
+        if ($matching_special_codes) {
+            $this->db->orWhereIn('IM.item_code', $matching_special_codes);
+        }
+        $this->db->groupEnd();
+
+        $user_type = (int)session('USER_TYPE');
+        $dist_code = (int)session('DISTRICT');
+        $sub_dist_code = (int)session('SUB_DISTRICT');
+
+        if ($user_type === 2) {
+            // Strictly exclude LP for District
+            $this->db->where('FM.fest_id !=', 1);
+            if ($dist_code > 0) {
+                $this->db->where("(IM.is_common = 'Y' OR IM.item_code IN (SELECT item_code FROM sd_item_allotment WHERE rev_district_code = {$dist_code}))");
+            }
+        } elseif ($sub_dist_code > 0) {
+            $this->db->where("(IM.is_common = 'Y' OR IM.item_code IN (SELECT item_code FROM sd_item_allotment WHERE sub_district_code = {$sub_dist_code}))");
+        }
+
+        // Filter by gender if provided (include Common 'C' along with 'B' or 'G')
+        if ($gender && $gender != 'C') {
+            $this->db->whereIn('IM.gender', array($gender, 'C'));
+        }
+
+        $this->db->orderBy('FM.fest_name', 'ASC');
+        $this->db->orderBy('IM.item_code', 'ASC');
+        $result = $this->db->get();
+
+        return $result->getResultArray();
+    }
+
+    /**
+     * Get items already selected by other participants for a school
+     * @param int $school_code School code
+     * @param int $exclude_participant_id Participant ID to exclude from check
+     * @return array Array of selected item codes
+     */
+    function get_selected_items_by_school($school_code, $exclude_participant_id = null) {
+        $this->db->select('DISTINCT(PID.item_code)');
+        $this->db->from('sd_participant_item_details AS PID');
+        $this->db->join('sd_participant_details AS PD', 'PID.participant_id = PD.participant_id');
+        $this->db->where('PD.school_code', $school_code);
+        $this->db->where('PID.spo_id', 0); // Only regular items, not special order
+
+        if ($exclude_participant_id) {
+            $this->db->where('PD.participant_id !=', $exclude_participant_id);
+        }
+
+        $result = $this->db->get();
+        $selected = $result ? array_column($result->getResultArray(), 'item_code') : [];
+
+        if (empty($selected) && (int)session('USER_TYPE') === 2) {
+            $builder = $this->db->table('d_participant_item_details PID')
+                ->select('DISTINCT(PID.item_code)')
+                ->join('d_participant_details PD', 'PID.participant_id = PD.participant_id')
+                ->where('PD.school_code', $school_code);
+            if ($exclude_participant_id) {
+                $builder->where('PD.participant_id !=', $exclude_participant_id);
+            }
+            $res = $builder->get();
+            if ($res) {
+                $selected = array_column($res->getResultArray(), 'item_code');
+            }
+        }
+
+        return $selected;
+    }
+
+    /**
+     * Get item details by item code
+     * @param string $item_code Item code to fetch details for
+     * @return array Item details
+     */
+    function get_item_details($item_code) {
+        $this->db->select('IM.*, FM.fest_name, FM.class_start, FM.class_end');
+        $this->db->from('item_master AS IM');
+        $this->db->join('festival_master AS FM', 'IM.fest_id = FM.fest_id');
+        $this->db->where('IM.item_code', (int)$item_code);
+        $result = $this->db->get();
+
+        return $result->getResultArray();
+    }
+
+    /**
+     * Get available classes for a school
+     * @param int $school_code School code
+     * @return array Array of available classes
+     */
+    function get_available_classes($school_code) {
+        $school_details = $this->get_school_details($school_code);
+        $classes = array();
+
+        if (!empty($school_details)) {
+            for ($i = $school_details[0]['class_start']; $i <= $school_details[0]['class_end']; $i++) {
+                $classes[$i] = $i;
+            }
+        }
+
+        return $classes;
+    }
+
+}

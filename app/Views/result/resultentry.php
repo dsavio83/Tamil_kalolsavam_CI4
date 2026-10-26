@@ -17,7 +17,11 @@ $cnt_judges = $item_info ? (int)($item_info['no_of_judges'] ?? 0) : 0;
 $cnt_item_list = is_countable($selected_item_list) ? count($selected_item_list) : 0;
 $progress_pct = ($total_participants > 0) ? min(100, (int)round(($cnt_item_list / $total_participants) * 100)) : 0;
 ?>
-<div id="divEntryForm" class="w-100">
+<div id="divEntryForm" class="w-100"
+     data-entry-blocked="<?php echo !empty($stage_manager_blocked) ? 'yes' : 'no'; ?>"
+     data-entry-block-reason="<?php echo htmlspecialchars((string)($entry_block_reason ?? ''), ENT_QUOTES); ?>"
+     data-entry-block-message="<?php echo htmlspecialchars((string)($stage_block_message ?? ''), ENT_QUOTES); ?>"
+     data-program-state="<?php echo htmlspecialchars((string)($program_state ?? ''), ENT_QUOTES); ?>">
   <style>
     @font-face {
       font-family: 'TAU-Pallai';
@@ -105,6 +109,124 @@ $progress_pct = ($total_participants > 0) ? min(100, (int)round(($cnt_item_list 
     .btn-action-icon:hover {
       transform: scale(1.08);
     }
+    .delete-progress-wrap {
+      text-align: center;
+      padding: 6px 4px 2px;
+    }
+    .delete-progress-bin {
+      position: relative;
+      width: 84px;
+      height: 94px;
+      margin: 0 auto 16px;
+      filter: drop-shadow(0 10px 18px rgba(220, 38, 38, 0.18));
+    }
+    .delete-progress-lid {
+      position: absolute;
+      top: 2px;
+      left: 8px;
+      width: 68px;
+      height: 10px;
+      background: #dc2626;
+      border-radius: 3px;
+      transform-origin: 50% 5px;
+      animation: deleteLidShake 0.55s ease-in-out infinite;
+      z-index: 3;
+    }
+    .delete-progress-lid::before {
+      content: '';
+      position: absolute;
+      left: 16px;
+      top: -6px;
+      width: 12px;
+      height: 8px;
+      background: #dc2626;
+      border-radius: 3px 3px 0 0;
+    }
+    .delete-progress-body {
+      position: absolute;
+      top: 14px;
+      left: 12px;
+      width: 60px;
+      height: 62px;
+      background: linear-gradient(180deg, #f87171 0%, #dc2626 90%);
+      border-radius: 5px 5px 12px 12px;
+      animation: deleteBodyPulse 0.7s ease-in-out infinite alternate;
+      z-index: 2;
+    }
+    .delete-progress-body::before,
+    .delete-progress-body::after {
+      content: '';
+      position: absolute;
+      top: 12px;
+      width: 4px;
+      height: 36px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 3px;
+    }
+    .delete-progress-body::before { left: 16px; }
+    .delete-progress-body::after { right: 16px; }
+    .delete-progress-paper {
+      position: absolute;
+      top: 14px;
+      width: 13px;
+      height: 15px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 2px;
+      opacity: 0;
+      z-index: 4;
+    }
+    .delete-progress-paper-a { left: 16px; --dx: -18px; --rot: -32deg; animation: deletePaperFly 1.3s ease-out 0s infinite; }
+    .delete-progress-paper-b { left: 35px; --dx: 2px; --rot: 12deg; animation: deletePaperFly 1.3s ease-out 0.45s infinite; }
+    .delete-progress-paper-c { left: 52px; --dx: 20px; --rot: 40deg; animation: deletePaperFly 1.3s ease-out 0.9s infinite; }
+    @keyframes deleteLidShake {
+      0%, 100% { transform: rotate(0deg); }
+      30% { transform: rotate(6deg); }
+      70% { transform: rotate(-6deg); }
+    }
+    @keyframes deleteBodyPulse {
+      0% { transform: scaleY(1); }
+      100% { transform: scaleY(1.06); }
+    }
+    @keyframes deletePaperFly {
+      0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+      15% { opacity: 1; }
+      100% { transform: translate(var(--dx), -46px) rotate(var(--rot)); opacity: 0; }
+    }
+    .delete-progress-bar {
+      position: relative;
+      width: 190px;
+      height: 6px;
+      margin: 0 auto 10px;
+      background: #fee2e2;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .delete-progress-bar span {
+      position: absolute;
+      top: 0;
+      left: -40%;
+      width: 40%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, #dc2626, transparent);
+      border-radius: 999px;
+      animation: deleteBarSlide 1.1s ease-in-out infinite;
+    }
+    @keyframes deleteBarSlide {
+      0% { left: -40%; }
+      100% { left: 100%; }
+    }
+    .delete-progress-text {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #b91c1c;
+      margin-bottom: 0;
+      animation: deleteTextPulse 1.1s ease-in-out infinite;
+    }
+    @keyframes deleteTextPulse {
+      0%, 100% { opacity: 0.55; }
+      50% { opacity: 1; }
+    }
   </style>
 
   <!-- Page Title & Breadcrumbs -->
@@ -131,6 +253,7 @@ $progress_pct = ($total_participants > 0) ? min(100, (int)round(($cnt_item_list 
   </div>
 
   <!-- Card 1: Item Search & Overview -->
+  <?php echo form_open('', array('id' => 'resultEntry', 'name' => 'resultEntry', 'onsubmit' => 'return false;')); ?>
   <div class="glass-card mb-4 overflow-hidden">
     <div class="p-4" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);">
       <div class="row align-items-center g-3 text-white">
@@ -147,7 +270,6 @@ $progress_pct = ($total_participants > 0) ? min(100, (int)round(($cnt_item_list 
         </div>
 
         <div class="col-lg-6">
-          <?php echo form_open('', array('id' => 'resultEntry', 'name' => 'resultEntry', 'onsubmit' => 'return false;')); ?>
           <div class="row g-2 align-items-center justify-content-lg-end">
             <div class="col-sm-8 col-md-7 col-lg-8">
               <div class="input-group input-group-lg shadow-sm rounded-pill overflow-hidden bg-white p-1">
@@ -156,8 +278,8 @@ $progress_pct = ($total_participants > 0) ? min(100, (int)round(($cnt_item_list 
                 </span>
                 <?php echo form_input(
                     "txtItemCode",
-                    "",
-                    'type="number" class="form-control border-0 fw-bold fs-5 text-dark shadow-none" id="txtItemCode" placeholder="Item Code (e.g. 101)" inputmode="numeric" onkeypress="javascript:return numbersonly(this, event, false);" onkeydown="if(event.key===\'Enter\'||event.keyCode===13){event.preventDefault();fetch_item_details_result(true);}" oninput="if(this.value.length===3){fetch_item_details_result();}" onfocus="this.select();" onBlur="javascript:fetch_item_details_result()" maxlength="3" autofocus'
+                    (string)$item_code_val,
+                    'type="number" form="resultEntry" class="form-control border-0 fw-bold fs-5 text-dark shadow-none" id="txtItemCode" placeholder="Item Code (e.g. 101)" inputmode="numeric" onkeypress="javascript:return numbersonly(this, event, false);" onkeydown="if(event.key===\'Enter\'||event.keyCode===13){event.preventDefault();fetch_item_details_result(true);}" oninput="if(this.value.length===3){fetch_item_details_result();}" onfocus="this.select();" onBlur="javascript:fetch_item_details_result()" maxlength="3" autofocus'
                 ); ?>
                 <span class="input-group-text bg-white border-0 pe-3">
                   <div id="itemCodeSpinner" class="d-none align-items-center justify-content-center" title="Fetching item details...">
@@ -217,8 +339,52 @@ $progress_pct = ($total_participants > 0) ? min(100, (int)round(($cnt_item_list 
 
         <!-- Marks Entry Compact Single Row Console -->
         <?php
-        $is_editing = !empty($selected_result);
-        if ($add_edit == 'yes') {
+        $post_code_no = (request()->getPost('txt_code_no') !== null && request()->getPost('txt_code_no') !== '') ? request()->getPost('txt_code_no') : ($_POST['txt_code_no'] ?? '');
+        $post_reg_no  = (request()->getPost('txt_reg_no') !== null && request()->getPost('txt_reg_no') !== '') ? request()->getPost('txt_reg_no') : ($_POST['txt_reg_no'] ?? '');
+        $post_total   = (request()->getPost('totalMark') !== null && request()->getPost('totalMark') !== '') ? request()->getPost('totalMark') : ($_POST['totalMark'] ?? '');
+        $post_rm_id   = (request()->getPost('hidResultId') !== null && request()->getPost('hidResultId') !== '') ? request()->getPost('hidResultId') : ($_POST['hidResultId'] ?? '');
+
+        $has_post = ($post_reg_no !== '') || ($post_code_no !== '');
+        $preserve_inputs = !empty($preserve_inputs) || (!empty($error_msg) && $has_post);
+
+        $cur_code_no = $preserve_inputs ? $post_code_no : (@$selected_result[0]['code_no'] ?? '');
+        $cur_reg_no  = $preserve_inputs ? $post_reg_no : (@$selected_result[0]['participant_id'] ?? '');
+        $cur_total   = $preserve_inputs ? $post_total : (@$selected_result[0]['total_mark'] ?? '');
+        $cur_rm_id   = $preserve_inputs ? $post_rm_id : (@$selected_result[0]['rm_id'] ?? '');
+        $is_editing  = !empty($selected_result) || (!empty($cur_rm_id));
+
+        if ($preserve_inputs) {
+            $marks_array = [];
+            for ($i = 1; $i <= $cnt_judges; $i++) {
+                $val = (request()->getPost('mark_' . $i) !== null && request()->getPost('mark_' . $i) !== '') ? request()->getPost('mark_' . $i) : ($_POST['mark_' . $i] ?? '');
+                $marks_array[] = $val;
+            }
+        } else {
+            $marks_array = explode('#$#', (string) (@$selected_result[0]['marks'] ?? ''));
+        }
+
+        $_block_reason = (string)($entry_block_reason ?? '');
+        $_block_messages = [
+            'program_in_progress' => 'The Stage Manager has STARTED this program but has not COMPLETED it yet. Mark entry is locked until the program is completed. This applies to all users, including admins.',
+            'confirmed'           => 'The results for this competition item have already been confirmed. Mark entry is closed.',
+            'manager_permission'  => 'The Sub-District Administrator has not enabled mark entry permissions for Stage Managers on this competition item.',
+        ];
+        $_block_msg = $_block_messages[$_block_reason] ?? (string)($stage_block_message ?? 'Mark entry is locked for this competition item.');
+        if (!empty($stage_manager_blocked)) {
+        ?>
+          <hr class="my-3 border-secondary-subtle">
+          <div class="alert alert-warning d-flex align-items-center mb-0 p-3 rounded-3">
+            <i class="bi bi-shield-lock-fill fs-3 text-warning me-3"></i>
+            <div>
+              <strong class="text-dark">Mark Entry Locked</strong>
+              <div class="small text-muted"><?php echo htmlspecialchars($_block_msg, ENT_QUOTES); ?></div>
+              <?php if ($_block_reason === 'program_in_progress') { ?>
+                <div class="small fw-semibold text-warning mt-1">நிகழ்ச்சி ஸ்டேஜ்-ல் நடைபெற்றுக் கொண்டிருக்கிறது. நிகழ்ச்சி முடியும் வரை மதிப்பெண் பதிவு தடுக்கப்பட்டுள்ளது.</div>
+              <?php } ?>
+            </div>
+          </div>
+        <?php
+        } elseif ($add_edit == 'yes') {
         ?>
           <hr class="my-3 border-secondary-subtle">
           
@@ -237,14 +403,26 @@ $progress_pct = ($total_participants > 0) ? min(100, (int)round(($cnt_item_list 
 
             <div class="d-flex align-items-end gap-2 flex-wrap flex-lg-nowrap">
               <!-- Code No -->
-              <div class="flex-shrink-0" style="width: 100px;">
+              <div class="flex-shrink-0" style="width: 110px;">
                 <label for="txt_code_no" class="form-label small fw-bold text-secondary mb-1" style="font-size: 0.78rem;">
                   Code No <span class="text-danger">*</span>
+                  <?php if (!empty($lot_end)): ?>
+                    <span class="badge bg-info bg-opacity-10 text-primary border border-info border-opacity-25" style="font-size: 0.65rem;" title="Configured Lot Range: <?= (int)$lot_start ?> to <?= (int)$lot_end ?>">
+                      (<?= (int)$lot_start ?>-<?= (int)$lot_end ?>)
+                    </span>
+                  <?php endif; ?>
                 </label>
-                <?php echo form_input(
+                <?php
+                $codeDigits = !empty($max_code_digits) ? (int)$max_code_digits : 3;
+                $lotStartVal = !empty($lot_start) ? (int)$lot_start : 1;
+                $lotEndVal = !empty($lot_end) ? (int)$lot_end : '';
+                $maxAttr = ($lotEndVal !== '') ? 'max="' . $lotEndVal . '"' : '';
+                $minAttr = 'min="' . $lotStartVal . '"';
+                $placeholder = ($lotEndVal !== '') ? 'Code (' . $lotStartVal . '-' . $lotEndVal . ')' : 'Code';
+                echo form_input(
                     "txt_code_no",
-                    (string) (@$selected_result[0]['code_no'] ?? ''),
-                    'type="number" class="form-control form-control-sm text-center fw-bold border-secondary-subtle" id="txt_code_no" maxlength="3" inputmode="numeric" placeholder="Code" oninput="moveFocus(this, \'txt_reg_no\', 3)"'
+                    (string)$cur_code_no,
+                    'type="number" form="resultEntry" class="form-control form-control-sm text-center fw-bold border-secondary-subtle" id="txt_code_no" maxlength="' . $codeDigits . '" ' . $minAttr . ' ' . $maxAttr . ' inputmode="numeric" placeholder="' . $placeholder . '" oninput="moveFocus(this, \'txt_reg_no\', ' . $codeDigits . ')" onkeydown="if(event.key===\'Enter\'||event.keyCode===13){event.preventDefault();var r=document.getElementById(\'txt_reg_no\');if(r){r.focus();r.select();}}"'
                 ); ?>
               </div>
 
@@ -253,16 +431,17 @@ $progress_pct = ($total_participants > 0) ? min(100, (int)round(($cnt_item_list 
                 <label for="txt_reg_no" class="form-label small fw-bold text-secondary mb-1" style="font-size: 0.78rem;">
                   Reg No <span class="text-danger">*</span>
                 </label>
-                <?php echo form_input(
+                <?php 
+                $firstJudgeOrTotal = ($cnt_judges > 0) ? 'mark_1' : 'totalMark';
+                echo form_input(
                     "txt_reg_no",
-                    (string) (@$selected_result[0]['participant_id'] ?? ''),
-                    'type="number" class="form-control form-control-sm text-center fw-bold border-secondary-subtle" id="txt_reg_no" maxlength="4" inputmode="numeric" placeholder="Reg No" oninput="moveFocus(this, \'mark_1\', 4)"'
+                    (string)$cur_reg_no,
+                    'type="number" form="resultEntry" class="form-control form-control-sm text-center fw-bold border-secondary-subtle" id="txt_reg_no" maxlength="4" min="1" max="9999" inputmode="numeric" placeholder="4 Digits" oninput="if(this.value.length>4)this.value=this.value.slice(0,4);moveFocus(this, \'' . $firstJudgeOrTotal . '\', 4)" onkeydown="if(event.key===\'Enter\'||event.keyCode===13){event.preventDefault();var m=document.getElementById(\'' . $firstJudgeOrTotal . '\');if(m){m.focus();m.select();}}"'
                 ); ?>
               </div>
 
               <!-- Judge Marks in same row -->
               <?php
-              $marks_array = explode('#$#', (string) (@$selected_result[0]['marks'] ?? ''));
               for ($i = 1; $i <= $cnt_judges; $i++) {
                   $currentInputId = "mark_" . $i;
                   $nextInputId = ($i < $cnt_judges) ? "mark_" . ($i + 1) : "totalMark";
@@ -274,7 +453,7 @@ $progress_pct = ($total_participants > 0) ? min(100, (int)round(($cnt_item_list 
                   <?php echo form_input(
                       $currentInputId,
                       (string) (@$marks_array[$i - 1] ?? ''),
-                      'type="number" id="' . $currentInputId . '" maxlength="2" class="form-control form-control-sm text-center fw-bold border-primary-subtle" inputmode="numeric" placeholder="0" oninput="onJudgeMarkInput(this, \'' . $nextInputId . '\')"'
+                      'type="number" form="resultEntry" id="' . $currentInputId . '" maxlength="2" class="form-control form-control-sm text-center fw-bold border-primary-subtle" inputmode="numeric" placeholder="0" oninput="onJudgeMarkInput(this, \'' . $nextInputId . '\')" onkeydown="if(event.key===\'Enter\'||event.keyCode===13){event.preventDefault();var nxt=document.getElementById(\'' . $nextInputId . '\');if(nxt){nxt.focus();nxt.select();}}"'
                   ); ?>
                 </div>
               <?php } ?>
@@ -286,18 +465,20 @@ $progress_pct = ($total_participants > 0) ? min(100, (int)round(($cnt_item_list 
                 </label>
                 <?php echo form_input(
                     "totalMark",
-                    (string) (@$selected_result[0]['total_mark'] ?? ''),
-                    'type="number" id="totalMark" maxlength="3" class="form-control form-control-sm text-center fw-bold text-primary bg-primary bg-opacity-10 border-primary" inputmode="numeric" placeholder="Total" onkeydown="if(event.key===\'Enter\'||event.keyCode===13){event.preventDefault();document.getElementById(\'saveButton\').click();}" oninput="checkTotalMark(this)"'
+                    (string)$cur_total,
+                    'type="number" form="resultEntry" id="totalMark" maxlength="3" class="form-control form-control-sm text-center fw-bold text-primary bg-primary bg-opacity-10 border-primary" inputmode="numeric" placeholder="Total" onkeydown="if(event.key===\'Enter\'||event.keyCode===13){event.preventDefault();document.getElementById(\'saveButton\').click();}" oninput="checkTotalMark(this)"'
                 ); ?>
               </div>
 
               <!-- Hidden Result Id for Editing -->
-              <input type="hidden" name="hidResultId" id="resultEntry_hidResultId" value="<?php echo htmlspecialchars((string)(@$selected_result[0]['rm_id'] ?? '')); ?>">
+              <input type="hidden" form="resultEntry" name="hidResultId" id="resultEntry_hidResultId" value="<?php echo htmlspecialchars((string)$cur_rm_id); ?>">
 
               <!-- Action Buttons in same row -->
               <div class="d-flex gap-1 align-items-end flex-shrink-0 ms-auto">
-                <button type="button" class="btn btn-sm btn-primary px-3 fw-bold shadow-sm d-flex align-items-center gap-1" id="saveButton" onClick="javascript:fncSaveResultEntry()" title="<?php echo $is_editing ? 'Update Score' : 'Save Score (Enter)'; ?>">
-                  <i class="bi <?php echo $is_editing ? 'bi-save2' : 'bi-check2-circle'; ?>"></i> <span><?php echo $is_editing ? 'Update' : 'Save'; ?></span>
+                <button type="button" class="btn btn-sm btn-primary px-3 fw-bold shadow-sm d-flex align-items-center gap-1.5" id="saveButton" onClick="javascript:fncSaveResultEntry()" title="<?php echo $is_editing ? 'Update Score' : 'Save Score (Enter)'; ?>">
+                  <span id="saveBtnSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                  <i class="bi <?php echo $is_editing ? 'bi-save2' : 'bi-check2-circle'; ?>" id="saveBtnIcon"></i> 
+                  <span id="saveBtnText"><?php echo $is_editing ? 'Update' : 'Save'; ?></span>
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-secondary px-2.5 <?php echo $is_editing ? '' : 'd-none'; ?>" id="cancelEditButton" onClick="javascript:fncCancel()" title="Cancel Edit">
                   Cancel
@@ -317,10 +498,10 @@ $progress_pct = ($total_participants > 0) ? min(100, (int)round(($cnt_item_list 
     <?php } ?>
 
     <!-- Hidden Fields for Item Search Form -->
-    <input type="hidden" name="hidItemId" id="hidItemId" value="<?php echo htmlspecialchars((string)$item_code_val); ?>">
-    <input type="hidden" name="hidNoJudge" id="hidNoJudge" value="<?php echo (int)$cnt_judges; ?>">
-    <?php echo form_close(); ?>
+    <input type="hidden" form="resultEntry" name="hidItemId" id="hidItemId" value="<?php echo htmlspecialchars((string)$item_code_val); ?>">
+    <input type="hidden" form="resultEntry" name="hidNoJudge" id="hidNoJudge" value="<?php echo (int)$cnt_judges; ?>">
   </div>
+  <?php echo form_close(); ?>
 
   <!-- Card 2: Results Table & Actions -->
   <?php if (!empty($selected_item_list) && count($selected_item_list) > 0) {
@@ -563,6 +744,12 @@ $progress_pct = ($total_participants > 0) ? min(100, (int)round(($cnt_item_list 
     </table>
   </div>
 
+  <script>
+    if (window.history && window.history.replaceState && window.location.pathname.indexOf('save_result_entry') !== -1) {
+      var cleanUrl = '<?php echo base_url('result/resultentry' . (!empty($item_code_val) ? '/index/' . $item_code_val : '')); ?>';
+      window.history.replaceState(null, '', cleanUrl);
+    }
+  </script>
   <?php if (!empty($item_code_val) && ($show_conirm_button ?? 'yes') == 'yes') { ?>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
@@ -574,6 +761,32 @@ $progress_pct = ($total_participants > 0) ? min(100, (int)round(($cnt_item_list 
         <?php } ?>
         var el = document.getElementById('txt_code_no');
         if (el) el.focus();
+      });
+    </script>
+  <?php } ?>
+
+  <?php if (!empty($item_code_val) && !empty($stage_manager_blocked) && ($entry_block_reason ?? '') === 'program_in_progress') { ?>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        var blockMsg = <?php echo json_encode($_block_msg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'Mark Entry Locked',
+            html: '<div class="text-start">' +
+              '<p class="fw-semibold mb-1">This program is currently <span class="text-warning">in progress</span> on stage.</p>' +
+              '<p class="mb-1 text-muted">' + (blockMsg || 'The Stage Manager has started this program but has not completed it yet.') + '</p>' +
+              '<p class="mb-0 text-muted">Please type a different item code, or come back after the Stage Manager completes the program.</p>' +
+              '</div>',
+            icon: 'warning',
+            confirmButtonText: 'OK',
+            customClass: { popup: 'rounded-4 shadow-lg border-0' }
+          });
+        }
+        var itemCodeInput = document.getElementById('txtItemCode');
+        if (itemCodeInput) {
+          itemCodeInput.focus();
+          if (typeof itemCodeInput.select === 'function') itemCodeInput.select();
+        }
       });
     </script>
   <?php } ?>

@@ -1,7 +1,8 @@
  
 Cluster Report  
 
-Festival : <?php echo $retdata[0]['fest_name']; ?>
+<?php if (!empty($retdata) && count($retdata) > 0): ?>
+Festival : <?php echo $retdata[0]['fest_name'] ?? ($fest_name ?? ''); ?>
 
 <?php
 $prev_cluster = "";
@@ -35,7 +36,12 @@ for ($j = 0; $j < count($retdata); $j++) {
 }$prev_array = $clustarray;
 ?>
 
-Cluster  <?php echo $retdata[$j - 1]['clustno']; ?>:  <?php echo $prev_array; ?>
+Cluster  <?php echo isset($retdata[$j - 1]) ? $retdata[$j - 1]['clustno'] : ''; ?>:  <?php echo $prev_array; ?>
+<?php else: ?>
+<?php if (!empty($fest_name)): ?>Festival : <?php echo $fest_name; ?><?php endif; ?>
+
+No data found for the selected criteria.
+<?php endif; ?>
 
 
 

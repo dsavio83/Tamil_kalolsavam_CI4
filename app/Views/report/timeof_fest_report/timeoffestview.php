@@ -3,7 +3,7 @@
 <input type="hidden" name="hidFestcode" id="hidFestcode" value="<?php echo htmlspecialchars((string)@$fest); ?>" />
 <?php echo form_close(); ?>
 
-<div class="row justify-content-center mt-4">
+<div class="row justify-content-center mt-1">
   <div class="col-lg-10 col-xl-9">
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
       

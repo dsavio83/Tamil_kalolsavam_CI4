@@ -2,17 +2,17 @@
     "packages": [
         {
             "name": "codeigniter4/framework",
-            "version": "v4.7.4",
-            "version_normalized": "4.7.4.0",
+            "version": "v4.7.5",
+            "version_normalized": "4.7.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/codeigniter4/framework.git",
-                "reference": "67ead895b7491703e5e5bc17436778806192008f"
+                "reference": "a1f129d56df3278702a8d1048af955d0ebf68c03"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/codeigniter4/framework/zipball/67ead895b7491703e5e5bc17436778806192008f",
-                "reference": "67ead895b7491703e5e5bc17436778806192008f",
+                "url": "https://api.github.com/repos/codeigniter4/framework/zipball/a1f129d56df3278702a8d1048af955d0ebf68c03",
+                "reference": "a1f129d56df3278702a8d1048af955d0ebf68c03",
                 "shasum": ""
             },
             "require": {
@@ -56,7 +56,7 @@
                 "ext-sqlsrv": "If you use SQL Server",
                 "ext-xdebug": "If you use CIUnitTestCase::assertHeaderEmitted()"
             },
-            "time": "2026-07-07T09:23:35+00:00",
+            "time": "2026-10-09T15:41:56+00:00",
             "type": "project",
             "installation-source": "dist",
             "autoload": {

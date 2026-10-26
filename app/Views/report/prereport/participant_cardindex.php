@@ -167,12 +167,21 @@
         
         <!-- School Dropdown -->
         <div class="mb-4">
+          <?php if (empty($retdat)): ?>
+            <div class="alert alert-warning small mb-2 d-flex align-items-start gap-2" role="alert" style="font-size: 0.82rem;">
+              <i class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-0.5"></i>
+              <div>
+                <strong>No schools found &mdash; the list is empty.</strong><br />
+                There are no participating schools to generate cards for. Please register schools first.
+              </div>
+            </div>
+          <?php endif; ?>
           <label for="txtSchoolCode" class="form-label fw-semibold text-dark small mb-1.5 d-flex align-items-center gap-1.5">
             <i class="bi bi-building text-primary"></i>
             <span>Select School</span>
             <span class="text-danger">*</span>
           </label>
-          <select name="txtSchoolCode" id="txtSchoolCode" class="form-select py-2 fs-6 font-tamil" required>
+          <select name="txtSchoolCode" id="txtSchoolCode" class="form-select py-2 fs-6 font-tamil" required <?php echo empty($retdat) ? 'disabled' : ''; ?>>
             <option value="" disabled selected>-- Select Participating School --</option>
             <?php
             if (!empty($retdat)) {
