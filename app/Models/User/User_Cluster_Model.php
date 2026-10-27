@@ -150,15 +150,21 @@ class User_Cluster_Model extends \App\Models\BaseModel {
         $this->db->from('user_right_functionalities');
         $this->db->select('rf_functionality, rf_id');
         $result = $this->db->get();
-        $rights = $result ? $result->getResultArray() : [];
+        if ($result === false) {
+            return false;
+        }
+        $rights = $result->getResultArray();
         if (count($rights) > 0) {
             for ($i = 0; $i < count($rights); $i++) {
                 $user_right = array();
                 $user_right['user_id'] = $userId;
                 $user_right['rf_id'] = $rights[$i]['rf_id'];
-                $this->db->insert('user_rights', $user_right);
+                if ($this->db->insert('user_rights', $user_right) === false) {
+                    return false;
+                }
             }
         }
+        return true;
     }
 
     function existing_cluster_details() {
@@ -499,39 +505,64 @@ class User_Cluster_Model extends \App\Models\BaseModel {
             'created_by'         => $created_by
         ];
 
-        $this->db->query("SET @app_context = ?", ['cluster-user-create']);
-        $this->db->table('user_master')->insert($data);
-        $userId = $this->db->insertID();
-
-        // Assign schools
-        $assigned = [];
-        if (!empty($schoolCodes)) {
-            foreach ($schoolCodes as $code) {
-                $code = trim((string)$code);
-                if (!empty($code)) {
-                    $exists = $this->db->table('sd_user_cluster')
-                        ->where('school_code', $code)
-                        ->where('sub_district_code', $sub_district_code)
-                        ->countAllResults();
-                    if ($exists == 0) {
-                        $this->db->table('sd_user_cluster')->insert([
-                            'user_id'           => $userId,
-                            'school_code'       => $code,
-                            'sub_district_code' => $sub_district_code
-                        ]);
-                        $assigned[] = $code;
-                    }
-                }
-            }
+        $schoolCodes = array_values(array_unique(array_filter(array_map(
+            static fn($code) => trim((string)$code),
+            $schoolCodes
+        ), static fn($code) => $code !== '')));
+        if (empty($schoolCodes)) {
+            throw new \InvalidArgumentException('At least one school is required.');
         }
 
-        // Grant permissions
-        $this->save_user_rights($userId);
+        $this->db->transBegin();
+        try {
+            // Detect existing assignments before creating the account. The unique
+            // sd_user_cluster.school_code constraint remains the final safeguard.
+            foreach ($schoolCodes as $code) {
+                $existing = $this->db->table('sd_user_cluster')
+                    ->where('school_code', $code)
+                    ->countAllResults();
+                if ($existing === false) {
+                    throw new \RuntimeException('Unable to check school assignment.');
+                }
+                if ($existing > 0) {
+                    throw new \DomainException('A selected school is already assigned.');
+                }
+            }
 
-        return [
-            'user_id'          => $userId,
-            'assigned_schools' => $assigned
-        ];
+            if ($this->db->query("SET @app_context = ?", ['cluster-user-create']) === false ||
+                $this->db->table('user_master')->insert($data) === false) {
+                throw new \RuntimeException('Unable to create cluster account.');
+            }
+            $userId = (int)$this->db->insertID();
+            if ($userId <= 0) {
+                throw new \RuntimeException('Cluster account ID was not created.');
+            }
+
+            foreach ($schoolCodes as $code) {
+                if ($this->db->table('sd_user_cluster')->insert([
+                    'user_id'           => $userId,
+                    'school_code'       => $code,
+                    'sub_district_code' => $sub_district_code
+                ]) === false) {
+                    throw new \RuntimeException('Unable to assign school.');
+                }
+            }
+
+            if (!$this->save_user_rights($userId) || $this->db->transStatus() === false) {
+                throw new \RuntimeException('Unable to assign account permissions.');
+            }
+            if ($this->db->transCommit() === false) {
+                throw new \RuntimeException('Unable to commit cluster account.');
+            }
+
+            return [
+                'user_id'          => $userId,
+                'assigned_schools' => $schoolCodes
+            ];
+        } catch (\Throwable $exception) {
+            $this->db->transRollback();
+            throw $exception;
+        }
     }
 
     /**

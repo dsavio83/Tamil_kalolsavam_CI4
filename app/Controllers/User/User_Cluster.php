@@ -185,7 +185,38 @@ class User_Cluster extends \App\Controllers\BaseController {
             ]);
         }
 
-        $result = $this->User_Cluster_Model->save_single_cluster_user_ajax($userName, $password, $selectedSchools);
+        try {
+            $result = $this->User_Cluster_Model->save_single_cluster_user_ajax($userName, $password, $selectedSchools);
+        } catch (\DomainException $exception) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'One or more selected schools are already assigned to another cluster user.',
+                'csrf_hash' => csrf_hash()
+            ]);
+        } catch (\Throwable $exception) {
+            $reference = bin2hex(random_bytes(8));
+            log_message('error', 'Cluster account creation failed [{reference}] ({exception}).', [
+                'reference' => $reference,
+                'exception' => get_class($exception)
+            ]);
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Cluster account could not be created. Please contact support with reference ' . $reference . '.',
+                'reference' => $reference,
+                'csrf_hash' => csrf_hash()
+            ]);
+        }
+
+        if (!is_array($result) || empty($result['user_id']) || empty($result['assigned_schools'])) {
+            $reference = bin2hex(random_bytes(8));
+            log_message('error', 'Cluster account creation returned an invalid result [{reference}].', ['reference' => $reference]);
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Cluster account could not be created. Please contact support with reference ' . $reference . '.',
+                'reference' => $reference,
+                'csrf_hash' => csrf_hash()
+            ]);
+        }
 
         return $this->response->setJSON([
             'success'          => true,
