@@ -266,6 +266,11 @@ class Registration_Model extends BaseModel {
             return ['status' => false, 'message' => 'Class 1 to 4 (LP) cannot be registered at District level. Minimum class is 5 (UP).'];
         }
 
+        $pinnanyError = $this->validatePinnanySelections();
+        if ($pinnanyError !== null) {
+            return ['status' => false, 'message' => $pinnanyError];
+        }
+
         $this->ensure_school_in_district($schoolCode, $distCode);
 
         // Resolve sub-district code
@@ -380,6 +385,28 @@ class Registration_Model extends BaseModel {
         return array_values(array_unique($codes));
     }
 
+    /** Reject Pinnany submissions when item_master.max_pinnani is zero. */
+    private function validatePinnanySelections(): ?string {
+        for ($i = 1; $i <= 5; $i++) {
+            $itemCode = trim((string)$this->input->post('txtPinnanyCode_' . $i));
+            if ($itemCode === '') {
+                continue;
+            }
+
+            $item = $this->db->table('item_master')
+                ->select('item_name, max_pinnani')
+                ->where('item_code', (int)$itemCode)
+                ->get()->getRowArray();
+            if (empty($item)) {
+                return 'Invalid Pinnany item code: ' . $itemCode . '.';
+            }
+            if ((int)($item['max_pinnani'] ?? 0) <= 0) {
+                return 'Item ' . $itemCode . ' (' . $item['item_name'] . ') does not allow Pinnany (background) participants.';
+            }
+        }
+        return null;
+    }
+
     /**
      * Update participant details in d_participant_details and d_participant_item_details
      */
@@ -407,6 +434,11 @@ class Registration_Model extends BaseModel {
         // Hard-exclude Lower Primary (class 1-4) at district
         if ($class < 5) {
             return ['status' => false, 'message' => 'Class 1 to 4 (LP) cannot be registered at District level. Minimum class is 5 (UP).'];
+        }
+
+        $pinnanyError = $this->validatePinnanySelections();
+        if ($pinnanyError !== null) {
+            return ['status' => false, 'message' => $pinnanyError];
         }
 
         $partData = [

@@ -1740,19 +1740,13 @@ class Registration_Model extends \App\Models\BaseModel {
         $item_master = $this->db->get('item_master');
         $item = $item_master->getResultArray();
         $itemRow = !empty($item[0]) ? $item[0] : [];
-        $itemName = !empty($itemRow['item_name']) ? $itemRow['item_name'] : '';
-
-        $is_drama = in_array((int)$item_code, [159, 361, 560, 760], true)
-            || (!empty($itemName) && stripos($itemName, 'DRAMA') !== false)
-            || (!empty($itemName) && mb_strpos($itemName, 'நாடகம்') !== false);
-
-        if ($is_drama) {
-            $max_no = ($item_type == 'P') ? 3 : 7;
+        if ($item_type == 'P') {
+            // The database value is authoritative: zero means Pinnany is forbidden.
+            $max_no = isset($itemRow['max_pinnani']) ? (int)$itemRow['max_pinnani'] : 0;
         } else {
-            if ($item_type == 'P') {
-                $max_no = isset($itemRow['max_pinnani']) ? (int)$itemRow['max_pinnani'] : 0;
-            } else {
-                $max_no = !empty($itemRow['max_participants']) ? (int)$itemRow['max_participants'] : 1;
+            $max_no = isset($itemRow['max_participants']) ? (int)$itemRow['max_participants'] : 0;
+            if ($max_no <= 0) {
+                $max_no = (($itemRow['item_type'] ?? 'S') === 'G') ? 7 : 1;
             }
         }
 

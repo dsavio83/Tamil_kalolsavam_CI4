@@ -875,14 +875,8 @@ if (Array.isArray(window.allFestivalItems)) {
 		item.gender = (item.gender || item.item_gender || 'C').toUpperCase();
 		item.item_gender = item.gender;
 		item.item_type = (item.item_type || 'S').toUpperCase();
-		var isDrama = [159, 361, 560, 760].indexOf(parseInt(item.item_code, 10)) !== -1 || (item.item_name && item.item_name.toUpperCase().indexOf('DRAMA') !== -1);
-		if (isDrama) {
-			item.max_participants = 7;
-			item.max_pinnani = 3;
-		} else {
-			item.max_participants = parseInt(item.max_participants, 10) || (item.item_type === 'G' ? 7 : 1);
-			item.max_pinnani = parseInt(item.max_pinnani || item.max_pinnany, 10) || 0;
-		}
+		item.max_participants = parseInt(item.max_participants, 10) || (item.item_type === 'G' ? 7 : 1);
+		item.max_pinnani = parseInt(item.max_pinnani || item.max_pinnany, 10) || 0;
 		item.fest_name = item.fest_name || 'General';
 		item.class_start = parseInt(item.class_start, 10) || 1;
 		item.class_end = parseInt(item.class_end, 10) || 12;
@@ -1233,10 +1227,8 @@ window.validateItemCodeFinal = function(index, isPinnany) {
 
 	// Check 5: Max participants limit check based on item_master.max_participants
 	var currentAdmnNo = (jQuery('#hidADNO').val() || '').trim();
-	var isDrama = [159, 361, 560, 760].indexOf(itemCodeNum) !== -1 || (found.item_name && found.item_name.toUpperCase().indexOf('DRAMA') !== -1);
-
 	if (isPinnany) {
-		var maxPinnani = isDrama ? 3 : (parseInt(found.max_pinnani || found.max_pinnany, 10) || 0);
+		var maxPinnani = parseInt(found.max_pinnani || found.max_pinnany, 10) || 0;
 		if (maxPinnani <= 0) {
 			inputEl.classList.add('is-invalid');
 			inputEl.style.borderColor = '#dc3545';
@@ -1282,7 +1274,7 @@ window.validateItemCodeFinal = function(index, isPinnany) {
 			return;
 		}
 	} else {
-		var maxParts = isDrama ? 7 : (parseInt(found.max_participants, 10) || (found.item_type === 'G' ? 7 : 1));
+		var maxParts = parseInt(found.max_participants, 10) || (found.item_type === 'G' ? 7 : 1);
 		var schoolMainCount = typeof window.getItemSchoolCount === 'function' ? window.getItemSchoolCount(val, currentAdmnNo, false) : 0;
 
 		if (schoolMainCount >= maxParts) {
@@ -1466,9 +1458,8 @@ window.loadItemsByClass = function() {
 				return;
 			}
 
-			var isDrama = [159, 361, 560, 760].indexOf(parseInt(it.item_code, 10)) !== -1 || (it.item_name && it.item_name.toUpperCase().indexOf('DRAMA') !== -1);
-			var maxParts = isDrama ? 7 : (parseInt(it.max_participants, 10) || (it.item_type === 'G' ? 7 : 1));
-			var maxPinnani = isDrama ? 3 : (parseInt(it.max_pinnani || it.max_pinnany, 10) || 0);
+			var maxParts = parseInt(it.max_participants, 10) || (it.item_type === 'G' ? 7 : 1);
+			var maxPinnani = parseInt(it.max_pinnani || it.max_pinnany, 10) || 0;
 
 			var fest = it.fest_name || 'Category Items';
 			if (!groupedItems[fest]) groupedItems[fest] = [];
