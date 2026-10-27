@@ -1304,7 +1304,7 @@ class Registration extends \App\Controllers\BaseController {
             return $this->response->setJSON(array('error' => 'Permission denied'));
         }
 
-        $items = $this->Registration_Model->get_items_by_class($class, $gender);
+        $items = $this->Registration_Model->get_items_by_class($class, $gender, $school_code);
 
         // Resolve participant_id from admn_no if editing to exclude them properly
         $real_participant_id = null;

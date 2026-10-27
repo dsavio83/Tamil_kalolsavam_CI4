@@ -9,6 +9,34 @@ class Registration_Model extends \App\Models\BaseModel {
         parent::__construct ();
     }
 
+    private function school_district_code($schoolCode = null) {
+        if (!empty($schoolCode)) {
+            $school = $this->db->table('sd_school_master')
+                ->select('rev_district_code')
+                ->where('school_code', (int)$schoolCode)
+                ->get()->getRowArray();
+            if (!empty($school['rev_district_code'])) {
+                return (int)$school['rev_district_code'];
+            }
+        }
+        return (int)session('DISTRICT');
+    }
+
+    /** Class bands that override festival_master for selected special items. */
+    private function special_item_class_ranges($revDistrictCode = null) {
+        $ranges = [
+            160 => [3, 4], // Thirukkural Present
+            166 => [1, 2],
+            360 => [5, 7],
+            560 => [8, 10],
+            760 => [11, 12]
+        ];
+        if ((int)$revDistrictCode === 9) {
+            $ranges[151] = [1, 2]; // Palakkad Hand Writing
+        }
+        return $ranges;
+    }
+
     public function get_all_festival_items($schoolCode = null, $sub_district_code = null) {
         $db = \Config\Database::connect();
         $builder = $db->table('item_master IM')
@@ -50,8 +78,8 @@ class Registration_Model extends \App\Models\BaseModel {
         $items = $builder->orderBy('IM.item_code', 'ASC')
             ->get()->getResultArray();
 
-        // Items whose eligible class band differs from their festival's default range.
-        $class_overrides = [166 => [1, 2]];
+        // Use the same special-item class bands for the browser list and save validation.
+        $class_overrides = $this->special_item_class_ranges($this->school_district_code($schoolCode));
         foreach ($items as &$item) {
             $code = (int) ($item['item_code'] ?? 0);
             if (isset($class_overrides[$code])) {
@@ -1054,7 +1082,7 @@ class Registration_Model extends \App\Models\BaseModel {
                 $item_code = trim($_POST['txtItemCode_' . $i]);
                 if (in_array((string)$item_code, $pre_main_items, true)) {
                     // Code not changed - already registered for this participant
-                    $not_valid_item_fest = $this->is_not_valid_item_fest($item_code, $class);
+                    $not_valid_item_fest = $this->is_not_valid_item_fest($item_code, $class, $schoolCode);
                     $not_valid_gender = $this->is_not_valid_gender($item_code, $hidADNO, $schoolCode);
                     if ($not_valid_item_fest) {
                         $error_array[] = $item_code . " " . $not_valid_item_fest;
@@ -1203,7 +1231,7 @@ class Registration_Model extends \App\Models\BaseModel {
                  * * Checking whether the item code is valid for this student
                  */
                 if (in_array($item_code, $exist_item_array)) {
-                    $not_valid_item_fest = $this->is_not_valid_item_fest($item_code, $class);
+                    $not_valid_item_fest = $this->is_not_valid_item_fest($item_code, $class, $schoolCode);
                     $not_valid_gender = $this->is_not_valid_gender($item_code, $admnNo, $schoolCode);
                     if ($not_valid_item_fest or $not_valid_gender) {
                         $this->db->where('school_code', $schoolCode);
@@ -1466,7 +1494,7 @@ class Registration_Model extends \App\Models\BaseModel {
             return $item_code . " " . $not_valid_item_code;
         }
 
-        $not_valid_item_fest = $this->is_not_valid_item_fest($item_code, $class);
+        $not_valid_item_fest = $this->is_not_valid_item_fest($item_code, $class, $school_code);
         if ($not_valid_item_fest) {
             return $item_code . " " . $not_valid_item_fest;
         }
@@ -1546,12 +1574,21 @@ class Registration_Model extends \App\Models\BaseModel {
         return false;
     }
 
-    function is_not_valid_item_fest($item_code, $class) {
-        $special_class_ranges = [160 => [3, 4], 360 => [5, 7], 560 => [8, 10], 760 => [11, 12]];
+    function is_not_valid_item_fest($item_code, $class, $schoolCode = null) {
+        $special_class_ranges = $this->special_item_class_ranges($this->school_district_code($schoolCode));
         $item_code_int = (int) $item_code;
         if (isset($special_class_ranges[$item_code_int])) {
             [$class_start, $class_end] = $special_class_ranges[$item_code_int];
             if ((int) $class < $class_start || (int) $class > $class_end) {
+                if ($item_code_int === 151) {
+                    return 'Hand Writing is available for Class 1 and 2 only.';
+                }
+                if ($item_code_int === 160) {
+                    return 'Thirukkural Present is available for Class 3 and 4 only.';
+                }
+                if ($item_code_int === 166) {
+                    return 'This item is available for Class 1 and 2 only.';
+                }
                 return "is not in his category";
             }
         } else {
@@ -1575,13 +1612,6 @@ class Registration_Model extends \App\Models\BaseModel {
             return "Class 3 and 4 only registration in his category";
         }
         
-        if (($item_code == '151') and ( $class < 1 or $class > 2)) {
-            return "Class 1 and 2 only registration in his category";
-        }
-
-        if (($item_code == '166') and ( $class < 1 or $class > 2)) {
-            return "Class 1 and 2 only registration in his category";
-        }
         return false;
     }
 
@@ -1595,11 +1625,13 @@ class Registration_Model extends \App\Models\BaseModel {
         if (!$item || $item->gender == 'C') {
             return false;
         }
+        $requiredGender = ($item->gender === 'B') ? 'Boy' : 'Girl';
+        $genderError = 'This item is available for ' . $requiredGender . ' participants only.';
 
         $post_gender = $this->input->post('txtGender');
         if (!empty($post_gender)) {
             if ($post_gender != $item->gender) {
-                return "Wrong Gender";
+                return $genderError;
             }
             return false;
         }
@@ -1609,7 +1641,7 @@ class Registration_Model extends \App\Models\BaseModel {
         $this->db->where('gender', $item->gender);
         $participant_details = $this->db->get('sd_participant_details');
         if ($participant_details->getNumRows() <= 0) {
-            return "Wrong Gender";
+            return $genderError;
         }
         return false;
     }
@@ -2553,12 +2585,12 @@ class Registration_Model extends \App\Models\BaseModel {
      * @param string $gender Gender (B/G)
      * @return array Array of items available for the class
      */
-    function get_items_by_class($class, $gender = '') {
+    function get_items_by_class($class, $gender = '', $schoolCode = null) {
         $this->db->select('IM.item_code, IM.item_name, IM.item_type, IM.gender, FM.fest_name, FM.fest_id');
         $this->db->from('item_master AS IM');
         $this->db->join('festival_master AS FM', 'IM.fest_id = FM.fest_id');
         // These items have fixed class bands independent of festival metadata.
-        $special_class_ranges = [160 => [3, 4], 166 => [1, 2], 360 => [5, 7], 560 => [8, 10], 760 => [11, 12]];
+        $special_class_ranges = $this->special_item_class_ranges($this->school_district_code($schoolCode));
         $special_codes = array_keys($special_class_ranges);
         $class = (int) $class;
         $matching_special_codes = [];
