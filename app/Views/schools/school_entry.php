@@ -241,7 +241,8 @@
 								<label for="txtStandardTo" class="form-label fw-bold text-muted small text-uppercase">Standard To <span class="text-danger">*</span></label>
 								<?php
 								$std_to_opts = array(0 => '-- Select Standard To --', 4 => '4th Standard', 5 => '5th Standard', 7 => '7th Standard', 10 => '10th Standard', 12 => '12th Standard');
-								echo form_dropdown("txtStandardTo", $std_to_opts, @$school_details[0]['class_end'], 'id="txtStandardTo" class="form-select" onChange="javascript:fncShowHideStd()"');
+				$selected_class_end = !empty($school_details[0]['class_end']) ? $school_details[0]['class_end'] : 4;
+				echo form_dropdown("txtStandardTo", $std_to_opts, $selected_class_end, 'id="txtStandardTo" class="form-select" onChange="javascript:fncShowHideStd()"');
 								?>
 							</div>
 						</div>
@@ -326,24 +327,32 @@
 					<!-- Total Number of Students -->
 					<div class="border-top pt-3 mb-4">
 						<h6 class="fw-bold text-dark mb-3"><i class="bi bi-people-fill text-primary me-2"></i>Student Strength Statistics</h6>
+						<?php
+						$class_start = (int) (@$school_details[0]['class_start'] ?? 0);
+						$class_end = (int) $selected_class_end;
+						$lp_display = ($class_start === 1) ? 'block' : 'none';
+						$up_display = ($class_end > 4 && $class_start > 0 && $class_start <= 5) ? 'block' : 'none';
+						$hs_display = ($class_end > 7 && $class_start > 0 && $class_start <= 8) ? 'block' : 'none';
+						$hss_display = ($class_end > 10) ? 'block' : 'none';
+						?>
 						<div class="row g-2 align-items-center">
-							<div class="col-6 col-md-2" id="divLP" style="display: <?php echo (!empty($school_details[0]['strength_lp']) || (isset($school_details[0]['class_start']) && @$school_details[0]['class_start'] <= 4)) ? 'block' : 'none'; ?>;">
+							<div class="col-6 col-md-2" id="divLP" style="display: <?php echo $lp_display; ?>;">
 								<label class="form-label small fw-bold text-muted mb-1">LP</label>
 								<input type="text" name="txtTotalLP" id="txtTotalLP" class="form-control form-control-sm" maxlength="5" value="<?php echo esc(@$school_details[0]['strength_lp'] ?? ''); ?>" onkeypress="return numbersonly(this, event, false);" onkeyup="addTotal();">
 							</div>
-							<div class="col-6 col-md-2" id="divUP" style="display: <?php echo (!empty($school_details[0]['strength_up']) || (isset($school_details[0]['class_start']) && @$school_details[0]['class_start'] <= 7 && @$school_details[0]['class_end'] >= 5)) ? 'block' : 'none'; ?>;">
+							<div class="col-6 col-md-2" id="divUP" style="display: <?php echo $up_display; ?>;">
 								<label class="form-label small fw-bold text-muted mb-1">UP</label>
 								<input type="text" name="txtTotalUP" id="txtTotalUP" class="form-control form-control-sm" maxlength="5" value="<?php echo esc(@$school_details[0]['strength_up'] ?? ''); ?>" onkeypress="return numbersonly(this, event, false);" onkeyup="addTotal();">
 							</div>
-							<div class="col-6 col-md-2" id="divHS" style="display: <?php echo (!empty($school_details[0]['strength_hs']) || (isset($school_details[0]['class_start']) && @$school_details[0]['class_start'] <= 10 && @$school_details[0]['class_end'] >= 8)) ? 'block' : 'none'; ?>;">
+							<div class="col-6 col-md-2" id="divHS" style="display: <?php echo $hs_display; ?>;">
 								<label class="form-label small fw-bold text-muted mb-1">HS</label>
 								<input type="text" name="txtTotalHS" id="txtTotalHS" class="form-control form-control-sm" maxlength="5" value="<?php echo esc(@$school_details[0]['strength_hs'] ?? ''); ?>" onkeypress="return numbersonly(this, event, false);" onkeyup="addTotal();">
 							</div>
-							<div class="col-6 col-md-2" id="divHSS" style="display: <?php echo (!empty($school_details[0]['strength_hss']) || (isset($school_details[0]['class_end']) && @$school_details[0]['class_end'] >= 11)) ? 'block' : 'none'; ?>;">
+							<div class="col-6 col-md-2" id="divHSS" style="display: <?php echo $hss_display; ?>;">
 								<label class="form-label small fw-bold text-muted mb-1">HSS</label>
 								<input type="text" name="txtTotalHSS" id="txtTotalHSS" class="form-control form-control-sm" maxlength="5" value="<?php echo esc(@$school_details[0]['strength_hss'] ?? ''); ?>" onkeypress="return numbersonly(this, event, false);" onkeyup="addTotal();">
 							</div>
-							<div class="col-6 col-md-2" id="divVHSC" style="display: <?php echo (!empty($school_details[0]['strength_vhss'])) ? 'block' : 'none'; ?>;">
+							<div class="col-6 col-md-2" id="divVHSC" style="display: <?php echo $hss_display; ?>;">
 								<label class="form-label small fw-bold text-muted mb-1">VHSE</label>
 								<input type="text" name="txtTotalVHSS" id="txtTotalVHSS" class="form-control form-control-sm" maxlength="5" value="<?php echo esc(@$school_details[0]['strength_vhss'] ?? ''); ?>" onkeypress="return numbersonly(this, event, false);" onkeyup="addTotal();">
 							</div>
@@ -2372,7 +2381,7 @@ window.loadItemsByClass = function() {
 			
 			var txtStandardTo = document.getElementById('txtStandardTo');
 			if (txtStandardTo) {
-				txtStandardTo.value = data.class_end || '10';
+				txtStandardTo.value = data.class_end || '4';
 			}
 			
 			var txtPrincipal = document.getElementById('txtPrincipal');
@@ -2539,6 +2548,8 @@ window.loadItemsByClass = function() {
 
 			var schoolProfileBtnElement = document.getElementById('schoolProfileBtn') ||
 				document.querySelector('button[id="schoolProfileBtn"]');
+			var standardFromElement = document.getElementById('txtStandardFrom');
+			var standardToElement = document.getElementById('txtStandardTo');
 
 
 
@@ -2555,10 +2566,18 @@ window.loadItemsByClass = function() {
 					schoolProfileBtnElement.addEventListener('click', toggleSchoolProfile);
 				} catch (e) {}
 			}
+			[standardFromElement, standardToElement].forEach(function (element) {
+				if (element) {
+					element.addEventListener('change', function () {
+						if (typeof fncShowHideStd === 'function') fncShowHideStd();
+					});
+				}
+			});
 
 			// Initialize visibility using the new unified function
 
 			initializeVisibility();
+			if (typeof fncShowHideStd === 'function') fncShowHideStd();
 
 			// Additional check after a short delay
 			setTimeout(function () {
