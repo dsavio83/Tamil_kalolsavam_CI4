@@ -154,7 +154,22 @@ class User_Cluster extends \App\Controllers\BaseController {
             ]);
         }
 
-        if ($this->User_Cluster_Model->check_username_exists('', $userName)) {
+        try {
+            $usernameExists = $this->User_Cluster_Model->check_username_exists('', $userName);
+        } catch (\Throwable $exception) {
+            $reference = bin2hex(random_bytes(8));
+            log_message('error', 'Cluster username check failed [{reference}] ({exception}).', [
+                'reference' => $reference,
+                'exception' => get_class($exception)
+            ]);
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Cluster account could not be created. Please contact support with reference ' . $reference . '.',
+                'reference' => $reference,
+                'csrf_hash' => csrf_hash()
+            ]);
+        }
+        if ($usernameExists) {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Username "' . $userName . '" already exists. Please choose a different username.'

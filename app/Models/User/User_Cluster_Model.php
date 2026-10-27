@@ -513,7 +513,9 @@ class User_Cluster_Model extends \App\Models\BaseModel {
             throw new \InvalidArgumentException('At least one school is required.');
         }
 
-        $this->db->transBegin();
+        if ($this->db->transBegin() === false) {
+            throw new \RuntimeException('Unable to begin cluster account transaction.');
+        }
         try {
             // Detect existing assignments before creating the account. The unique
             // sd_user_cluster.school_code constraint remains the final safeguard.
