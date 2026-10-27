@@ -339,7 +339,21 @@ function fncSaveSchoolProfile(btn) {
 	var form = document.getElementById('formSchool');
 	if (form) {
 		form.action = '<?php echo base_url(); ?>schools/profile/update';
-		form.submit();
+		var loaderHeartbeat = null;
+		if (typeof window.showGlobalLoader === 'function') {
+			window.showGlobalLoader('Saving school profile...', true);
+			// Keep the loader visible if the server takes longer than its safety timeout.
+			loaderHeartbeat = window.setInterval(function () {
+				window.showGlobalLoader('Saving school profile...', true);
+			}, 7000);
+			window.addEventListener('pagehide', function () {
+				if (loaderHeartbeat !== null) window.clearInterval(loaderHeartbeat);
+			}, { once: true });
+		}
+		// Let the spinner render before the synchronous full-page form navigation.
+		window.requestAnimationFrame(function () {
+			form.submit();
+		});
 	}
 }
 
