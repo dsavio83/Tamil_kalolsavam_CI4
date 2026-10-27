@@ -242,17 +242,22 @@ function addteacher() {
 function addTotal()
 {
     var total = 0;
-    if (trim($('txtTotalLP').value) != '')
-        total += parseInt($('txtTotalLP').value * 1);
-    if (trim($('txtTotalUP').value) != '')
-        total += parseInt($('txtTotalUP').value * 1);
-    if (trim($('txtTotalHS').value) != '')
-        total += parseInt($('txtTotalHS').value * 1);
-    if (trim($('txtTotalHSS').value) != '')
-        total += parseInt($('txtTotalHSS').value * 1);
-    if (trim($('txtTotalVHSS').value) != '')
-        total += parseInt($('txtTotalVHSS').value * 1);
-    $('txtTotal').value = total;
+    var categories = [
+        ['txtTotalLP', 'divLP'],
+        ['txtTotalUP', 'divUP'],
+        ['txtTotalHS', 'divHS'],
+        ['txtTotalHSS', 'divHSS'],
+        ['txtTotalVHSS', 'divVHSC']
+    ];
+    categories.forEach(function (category) {
+        var input = document.getElementById(category[0]);
+        var container = document.getElementById(category[1]);
+        if (input && container && container.style.display !== 'none' && trim(input.value) !== '') {
+            total += parseInt(input.value, 10) || 0;
+        }
+    });
+    var totalInput = document.getElementById('txtTotal');
+    if (totalInput) totalInput.value = total;
 }
 
 

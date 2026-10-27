@@ -233,11 +233,13 @@
 					<div class="border-top pt-3 mb-4">
 						<h6 class="fw-bold text-secondary mb-3"><i class="bi bi-graph-up-arrow me-2 text-primary"></i>Student Strength by Category</h6>
 						<?php
-						$LPDiv = (@$school_details[0]['strength_lp'] != 0 && @$school_details[0]['strength_lp'] != '') ? 'block' : 'none';
-						$UPDiv = (@$school_details[0]['strength_up'] != 0 && @$school_details[0]['strength_up'] != '') ? 'block' : 'none';
-						$HSDiv = (@$school_details[0]['strength_hs'] != 0 && @$school_details[0]['strength_hs'] != '') ? 'block' : 'none';
-						$HSSDiv = (@$school_details[0]['strength_hss'] || @$school_details[0]['strength_vhss']) ? 'block' : 'none';
-						$VHSCDiv = (@$school_details[0]['strength_vhss'] || @$school_details[0]['strength_hss']) ? 'block' : 'none';
+		$classStart = (int) (@$school_details[0]['class_start'] ?? 0);
+		$classEnd = (int) (@$school_details[0]['class_end'] ?? 0);
+		$LPDiv = ($classStart === 1) ? 'block' : 'none';
+		$UPDiv = ($classEnd > 4 && $classStart <= 5 && $classStart > 0) ? 'block' : 'none';
+		$HSDiv = ($classEnd > 7 && $classStart <= 8 && $classStart > 0) ? 'block' : 'none';
+		$HSSDiv = ($classEnd > 10) ? 'block' : 'none';
+		$VHSCDiv = ($classEnd > 10) ? 'block' : 'none';
 						?>
 
 						<div class="row g-3 align-items-end">
@@ -340,4 +342,10 @@ function fncSaveSchoolProfile(btn) {
 		form.submit();
 	}
 }
+
+<?php if (@$school_show != 'show'): ?>
+if (typeof fncShowHideStd === 'function') {
+	fncShowHideStd();
+}
+<?php endif; ?>
 </script>
